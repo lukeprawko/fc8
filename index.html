@@ -54,7 +54,7 @@
 <body>
 
 <h1>FC 28</h1>
-<div class="subtitle">Mini Piłka Nożna · Multiplayer + GK AI</div>
+<div class="subtitle">Mini Piłka Nożna · Multiplayer + Sprint + Fizyka Brzegów</div>
 
 <!-- MENU -->
 <div id="menu">
@@ -83,12 +83,12 @@
   </div>
   <canvas id="cv" width="960" height="540"></canvas>
   <div id="controlsInfo">
-    🕹 Ruch: <b>WASD / Strzałki</b> | 💥 Strzał: <b>SPACJA / J</b> | ⚽ Podanie: <b>K</b> | 🛡️️ Odbiór / Drybling: <b>E / Shift</b>
+    🕹 Ruch: <b>WASD / Strzałki</b> | ⚡ Sprint: <b>SHIFT</b> | 💥 Strzał: <b>SPACJA / J</b> | ⚽ Podanie: <b>K</b> | 🛡 Odbiór / Drybling: <b>E</b>
   </div>
 </div>
 
 <script>
-/* ================= FC 28 - Silnik gry ulepszony ================= */
+/* ================= FC 28 - Silnik z ulepszoną fizyką i sprintem ================= */
 const W = 960, H = 540;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -114,9 +114,9 @@ const GOAL_BOT = H/2 + GOAL_H/2;
 // --- Stan Gry ---
 const ME   = { x:200, y:H/2, vx:0, vy:0, r:18, faceX:1, faceY:0 };
 const OPP  = { x:760, y:H/2, vx:0, vy:0, r:18, faceX:-1, faceY:0 };
-const GK1  = { x:FIELD_MARGIN + 15, y:H/2, vx:0, vy:0, r:18, team:1 }; // Bramkarz Gospodarzy
-const GK2  = { x:W - FIELD_MARGIN - 15, y:H/2, vx:0, vy:0, r:18, team:2 }; // Bramkarz Gości
-const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:9, owner: null };
+const GK1  = { x:FIELD_MARGIN + 15, y:H/2, vx:0, vy:0, r:18, team:1 };
+const GK2  = { x:W - FIELD_MARGIN - 15, y:H/2, vx:0, vy:0, r:18, team:2 };
+const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:9 };
 
 let score1 = 0, score2 = 0;
 let goalFlash = 0, goalText = '';
@@ -213,9 +213,13 @@ function syncScore() {
   document.getElementById('s2').textContent = isHost ? score2 : score1;
 }
 
-/* ---------- Fizyka i Sterowanie ---------- */
+/* ---------- Fizyka i Sterowanie (z obsługą SPRINTU) ---------- */
 function stepPlayer(p, isMe, dt) {
-  const ACC = 0.65, MAXV = 5.5, FRICTION = 0.86;
+  // Sprint pod Shiftem przyspiesza gracza
+  const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+  const ACC = isSprinting ? 1.0 : 0.65;
+  const MAXV = isSprinting ? 8.2 : 5.5;
+  const FRICTION = 0.86;
 
   if (isMe) {
     let dx = 0, dy = 0;
@@ -249,23 +253,23 @@ function handleActions(p) {
   
   // 1. STRZAŁ (Spacja lub J)
   if ((keys['Space'] || keys['KeyJ']) && dist < p.r + BALL.r + 12) {
-    const power = 13;
-    BALL.vx = p.faceX * power + p.vx * 0.3;
-    BALL.vy = p.faceY * power + p.vy * 0.3;
+    const power = 14;
+    BALL.vx = p.faceX * power + p.vx * 0.4;
+    BALL.vy = p.faceY * power + p.vy * 0.4;
   }
   // 2. PODANIE (K)
   else if (keys['KeyK'] && dist < p.r + BALL.r + 14) {
-    const power = 8;
+    const power = 8.5;
     BALL.vx = p.faceX * power;
     BALL.vy = p.faceY * power;
   }
-  // 3. ODBIÓR / ODBIERANIE PIŁKI (E lub Shift)
-  else if ((keys['KeyE'] || keys['ShiftLeft'] || keys['ShiftRight']) && dist < p.r + BALL.r + 20) {
-    p.vx += p.faceX * 3; p.vy += p.faceY * 3; // krótki zryw
-    BALL.vx = p.faceX * 10 + (Math.random() - 0.5) * 2;
-    BALL.vy = p.faceY * 10 + (Math.random() - 0.5) * 2;
+  // 3. ODBIÓR / PRZEJĘCIE PIŁKI (E)
+  else if (keys['KeyE'] && dist < p.r + BALL.r + 22) {
+    p.vx += p.faceX * 3.5; p.vy += p.faceY * 3.5;
+    BALL.vx = p.faceX * 11 + (Math.random() - 0.5) * 2;
+    BALL.vy = p.faceY * 11 + (Math.random() - 0.5) * 2;
   }
-  // 4. DRYBLING / PROWADZENIE PIŁKI (Przyklejenie przy zbliżeniu)
+  // 4. DRYBLING / prowadzenie piłki przy graczu
   else if (dist < p.r + BALL.r + 6) {
     const targetX = p.x + p.faceX * (p.r + BALL.r + 2);
     const targetY = p.y + p.faceY * (p.r + BALL.r + 2);
@@ -281,7 +285,6 @@ function updateGK(gk, targetX, pAlly, dt) {
   let destX = targetX;
   let destY = defY;
 
-  // Wyjście bramkarza do piłki gdy jest blisko pola karnego
   const distToBall = Math.hypot(BALL.x - gk.x, BALL.y - gk.y);
   if (distToBall < 130) {
     destX = BALL.x;
@@ -293,7 +296,7 @@ function updateGK(gk, targetX, pAlly, dt) {
   const dist = Math.hypot(dx, dy);
 
   if (dist > 2) {
-    const speed = distToBall < 130 ? 3.8 : 2.5;
+    const speed = distToBall < 130 ? 4.0 : 2.6;
     gk.vx = (dx / dist) * speed;
     gk.vy = (dy / dist) * speed;
   } else {
@@ -303,55 +306,76 @@ function updateGK(gk, targetX, pAlly, dt) {
   gk.x += gk.vx * dt;
   gk.y += gk.vy * dt;
 
-  // Interwencja i Podanie Bramkarza
   if (distToBall < gk.r + BALL.r + 4) {
     const passTarget = pAlly || { x: W/2, y: H/2 };
     const pdx = passTarget.x - gk.x;
     const pdy = passTarget.y - gk.y;
     const plen = Math.hypot(pdx, pdy) || 1;
-    BALL.vx = (pdx / plen) * 9;
-    BALL.vy = (pdy / plen) * 9;
+    BALL.vx = (pdx / plen) * 9.5;
+    BALL.vy = (pdy / plen) * 9.5;
   }
 }
 
-/* ---------- Fizyka Piłki i Kolizje ---------- */
+/* ---------- Ulepszona Fizyka Odbijania Piłki od Band i Słupków ---------- */
 function stepBall(dt) {
   BALL.x += BALL.vx * dt; BALL.y += BALL.vy * dt;
-  BALL.vx *= 0.982; BALL.vy *= 0.982;
+  BALL.vx *= 0.985; BALL.vy *= 0.985; // Tarcie podłoża
 
-  // Górna i dolna banda
-  if (BALL.y < FIELD_MARGIN + BALL.r) { BALL.y = FIELD_MARGIN + BALL.r; BALL.vy *= -0.7; }
-  if (BALL.y > H - FIELD_MARGIN - BALL.r) { BALL.y = H - FIELD_MARGIN - BALL.r; BALL.vy *= -0.7; }
+  const BOUNCE = 0.8; // Współczynnik sprężystości odbicia
 
-  // Lewa i prawa linia końcowa (poza linią bramkową)
-  const inGoalY = BALL.y > GOAL_TOP && BALL.y < GOAL_BOT;
+  // Górna i Dolna Banda (Brak możliwości wylecenia poza boisko)
+  if (BALL.y < FIELD_MARGIN + BALL.r) {
+    BALL.y = FIELD_MARGIN + BALL.r;
+    BALL.vy = -BALL.vy * BOUNCE;
+  }
+  if (BALL.y > H - FIELD_MARGIN - BALL.r) {
+    BALL.y = H - FIELD_MARGIN - BALL.r;
+    BALL.vy = -BALL.vy * BOUNCE;
+  }
+
+  // Lewa i Prawa Ściana/Banda (Z wyjątkiem wpadnięcia do bramki)
+  const inGoalY = BALL.y > GOAL_TOP + BALL.r && BALL.y < GOAL_BOT - BALL.r;
 
   if (!inGoalY) {
-    if (BALL.x < FIELD_MARGIN + BALL.r) { BALL.x = FIELD_MARGIN + BALL.r; BALL.vx *= -0.7; }
-    if (BALL.x > W - FIELD_MARGIN - BALL.r) { BALL.x = W - FIELD_MARGIN - BALL.r; BALL.vx *= -0.7; }
+    // Lewa Linia Końcowa
+    if (BALL.x < FIELD_MARGIN + BALL.r) {
+      BALL.x = FIELD_MARGIN + BALL.r;
+      BALL.vx = -BALL.vx * BOUNCE;
+    }
+    // Prawa Linia Końcowa
+    if (BALL.x > W - FIELD_MARGIN - BALL.r) {
+      BALL.x = W - FIELD_MARGIN - BALL.r;
+      BALL.vx = -BALL.vx * BOUNCE;
+    }
   } else {
-    // Reakcja ze słupkami
+    // Słupki Bramek
     checkPostCollision(FIELD_MARGIN, GOAL_TOP);
     checkPostCollision(FIELD_MARGIN, GOAL_BOT);
     checkPostCollision(W - FIELD_MARGIN, GOAL_TOP);
     checkPostCollision(W - FIELD_MARGIN, GOAL_BOT);
 
-    // Odbicie od tyłu bramki
-    if (BALL.x < FIELD_MARGIN - GOAL_DEPTH + BALL.r) { BALL.x = FIELD_MARGIN - GOAL_DEPTH + BALL.r; BALL.vx *= -0.5; }
-    if (BALL.x > W - FIELD_MARGIN + GOAL_DEPTH - BALL.r) { BALL.x = W - FIELD_MARGIN + GOAL_DEPTH - BALL.r; BALL.vx *= -0.5; }
+    // Odbicie od tyłu i ścian siatki
+    if (BALL.x < FIELD_MARGIN - GOAL_DEPTH + BALL.r) {
+      BALL.x = FIELD_MARGIN - GOAL_DEPTH + BALL.r;
+      BALL.vx = -BALL.vx * 0.5;
+    }
+    if (BALL.x > W - FIELD_MARGIN + GOAL_DEPTH - BALL.r) {
+      BALL.x = W - FIELD_MARGIN + GOAL_DEPTH - BALL.r;
+      BALL.vx = -BALL.vx * 0.5;
+    }
   }
 }
 
 function checkPostCollision(px, py) {
   const dx = BALL.x - px, dy = BALL.y - py;
   const dist = Math.hypot(dx, dy);
-  if (dist < BALL.r + 5) {
+  if (dist < BALL.r + 6) {
     const nx = dx / dist, ny = dy / dist;
-    BALL.x = px + nx * (BALL.r + 5);
-    BALL.y = py + ny * (BALL.r + 5);
+    BALL.x = px + nx * (BALL.r + 6);
+    BALL.y = py + ny * (BALL.r + 6);
     const dot = BALL.vx * nx + BALL.vy * ny;
-    BALL.vx = (BALL.vx - 2 * dot * nx) * 0.75;
-    BALL.vy = (BALL.vy - 2 * dot * ny) * 0.75;
+    BALL.vx = (BALL.vx - 2 * dot * nx) * 0.8;
+    BALL.vy = (BALL.vy - 2 * dot * ny) * 0.8;
   }
 }
 
@@ -361,14 +385,13 @@ function collidePlayerBall(p) {
   if (dist < minD && dist > 0) {
     const nx = dx / dist, ny = dy / dist;
     BALL.x = p.x + nx * minD; BALL.y = p.y + ny * minD;
-    BALL.vx = nx * 3.5 + p.vx * 0.5;
-    BALL.vy = ny * 3.5 + p.vy * 0.5;
+    BALL.vx = nx * 4.0 + p.vx * 0.6;
+    BALL.vy = ny * 4.0 + p.vy * 0.6;
   }
 }
 
-/* ---------- Weryfikacja Gola ---------- */
+/* ---------- Detekcja Gola ---------- */
 function checkGoal() {
-  // Gol zaliczany TYLKO gdy piłka jest wewnątrz światła bramki i przekroczy linię
   if (BALL.y > GOAL_TOP && BALL.y < GOAL_BOT) {
     if (BALL.x < FIELD_MARGIN - BALL.r) {
       if (isHost) { score2++; syncScore(); conn && conn.send({t:'goal', who: oppName + ' STRZELA GOLA!', kickoff: 1}); }
@@ -453,13 +476,13 @@ function draw() {
     ctx.fillRect(FIELD_MARGIN + i * stripeW, FIELD_MARGIN, stripeW, H - 2 * FIELD_MARGIN);
   }
 
-  // 2. Linie Boiska
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-  ctx.lineWidth = 3;
+  // Bandy wokół boiska (oznaczające fizyczną barierę)
+  ctx.strokeStyle = '#e2b04c'; ctx.lineWidth = 6;
+  ctx.strokeRect(FIELD_MARGIN - 3, FIELD_MARGIN - 3, W - 2 * FIELD_MARGIN + 6, H - 2 * FIELD_MARGIN + 6);
 
-  // Linia zewnętrzna
+  // 2. Linie Boiska
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3;
   ctx.strokeRect(FIELD_MARGIN, FIELD_MARGIN, W - 2 * FIELD_MARGIN, H - 2 * FIELD_MARGIN);
-  // Środek
   ctx.beginPath(); ctx.moveTo(W/2, FIELD_MARGIN); ctx.lineTo(W/2, H - FIELD_MARGIN); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, H/2, 65, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
@@ -469,7 +492,7 @@ function draw() {
   ctx.strokeRect(FIELD_MARGIN, H/2 - boxH/2, boxW, boxH);
   ctx.strokeRect(W - FIELD_MARGIN - boxW, H/2 - boxH/2, boxW, boxH);
 
-  // 3. Bramki & Siatki
+  // 3. Bramki
   drawGoal(FIELD_MARGIN, true);
   drawGoal(W - FIELD_MARGIN, false);
 
@@ -495,7 +518,6 @@ function draw() {
 }
 
 function drawGoal(x, isLeft) {
-  const dir = isLeft ? -1 : 1;
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
   ctx.fillRect(isLeft ? x - GOAL_DEPTH : x, GOAL_TOP, GOAL_DEPTH, GOAL_H);
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
@@ -503,8 +525,8 @@ function drawGoal(x, isLeft) {
 
   // Słupki
   ctx.fillStyle = '#e67e22';
-  ctx.beginPath(); ctx.arc(x, GOAL_TOP, 5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x, GOAL_BOT, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x, GOAL_TOP, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x, GOAL_BOT, 6, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawPlayer(p, color, name) {
@@ -512,14 +534,14 @@ function drawPlayer(p, color, name) {
   ctx.fillStyle = color; ctx.fill();
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5; ctx.stroke();
 
-  // Wskaźnik kierunku patrzenia
+  // Wskaźnik kierunku
   if (p.faceX || p.faceY) {
     ctx.beginPath();
     ctx.arc(p.x + (p.faceX || 0) * 10, p.y + (p.faceY || 0) * 10, 4, 0, Math.PI * 2);
     ctx.fillStyle = '#222'; ctx.fill();
   }
 
-  // Etykieta z nazwą
+  // Etykieta
   ctx.font = 'bold 12px Segoe UI'; ctx.textAlign = 'center';
   ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 3;
   ctx.strokeText(name, p.x, p.y - p.r - 7);
