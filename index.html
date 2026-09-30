@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC 28 - Piłkarski Multiplayer</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(ellipse at top, #0b3d2e 0%, #06231a 60%, #041710 100%);
+    color:#fff; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:20px;
+  }
+  h1 {
+    font-size:52px; font-style:italic; letter-spacing:2px;
+    background:linear-gradient(180deg,#ffe98a,#e8b400);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 4px 20px rgba(0,0,0,.5); margin-bottom:4px;
+  }
+  .subtitle { color:#9fd8b9; font-size:14px; margin-bottom:20px; letter-spacing:4px; text-transform:uppercase; }
+  #menu { text-align:center; }
+  .panel {
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    border-radius:16px; padding:26px 30px; backdrop-filter:blur(6px);
+    box-shadow:0 10px 40px rgba(0,0,0,.4); min-width:340px;
+  }
+  input {
+    width:100%; padding:12px 14px; margin:8px 0; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+    background:rgba(0,0,0,.35); color:#fff; font-size:16px; outline:none;
+  }
+  input:focus { border-color:#ffd54d; }
+  button {
+    width:100%; padding:13px; margin:6px 0; border:none; border-radius:10px; cursor:pointer;
+    font-size:16px; font-weight:bold; transition:transform .1s, box-shadow .1s;
+  }
+  button:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.35); }
+  .btn-gold { background:linear-gradient(180deg,#ffd54d,#e8a900); color:#3a2a00; }
+  .btn-green { background:linear-gradient(180deg,#35d07f,#1d9d55); color:#fff; }
+  .btn-gray { background:rgba(255,255,255,.15); color:#fff; }
+  #roomCode { font-size:34px; letter-spacing:8px; font-weight:bold; color:#ffd54d; margin:10px 0; }
+  .status { color:#9fd8b9; font-size:14px; min-height:20px; margin-top:8px; }
+  #gameArea { display:none; text-align:center; }
+  canvas { border-radius:12px; box-shadow:0 15px 50px rgba(0,0,0,.6); max-width:95vw; }
+  #hud { display:flex; justify-content:space-between; align-items:center; width:960px; max-width:95vw; margin-bottom:8px; }
+  .score { font-size:30px; font-weight:bold; }
+  .score .p1 { color:#ffd54d; } .score .p2 { color:#6ec6ff; }
+  #timer { font-size:24px; background:rgba(0,0,0,.4); padding:4px 18px; border-radius:20px; }
+  #controlsInfo { color:#cfe9d8; font-size:13px; margin-top:10px; }
+  .hidden { display:none !important; }
+  code { background:rgba(0,0,0,.4); padding:2px 8px; border-radius:6px; color:#ffd54d; }
+</style>
+</head>
+<body>
+
+<h1>FC 28</h1>
+<div class="subtitle">Mini Piłka Nożna · Multiplayer</div>
+
+<!-- MENU -->
+<div id="menu">
+  <div class="panel" id="menuPanel">
+    <input id="nick" maxlength="14" placeholder="Twój pseudonim" value="">
+    <button class="btn-gold" onclick="createRoom()">⚽ Załóż pokój</button>
+    <div style="margin:12px 0 4px; color:#9fd8b9;">— lub dołącz —</div>
+    <input id="joinCode" maxlength="6" placeholder="Kod pokoju (np. K7Q2XA)" style="text-transform:uppercase;">
+    <button class="btn-green" onclick="joinRoom()">🎮 Dołącz do gry</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="panel hidden" id="roomPanel">
+    <div>Podaj znajomemu ten kod pokoju:</div>
+    <div id="roomCode">------</div>
+    <div class="status">Oczekiwanie na przeciwnika...</div>
+    <button class="btn-gray" onclick="location.reload()" style="margin-top:10px;">Anuluj</button>
+  </div>
+</div>
+
+<!-- GRA -->
+<div id="gameArea">
+  <div id="hud">
+    <div class="score"><span class="p1" id="name1">Ty</span> <span class="p1" id="s1">0</span> : <span class="p2" id="s2">0</span> <span class="p2" id="name2">Przeciwnik</span></div>
+    <div id="timer">3:00</div>
+  </div>
+  <canvas id="cv" width="960" height="540"></canvas>
+  <div id="controlsInfo">🕹 Ruch: <b>WASD</b> lub strzałki · Kopnięcie: <b>SPACJA</b> · Cel: strzel więcej goli w 3 minuty!</div>
+</div>
+
+<script>
+/* ================= FC 28 - silnik gry + multiplayer (PeerJS) ================= */
+const W = 960, H = 540;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+const statusEl = document.getElementById('status');
+const setStatus = t => statusEl.textContent = t;
+
+const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const genCode = () => Array.from({length:6}, () => CHARS[Math.floor(Math.random()*CHARS.length)]).join('');
+
+let peer = null, conn = null, isHost = false;
+let myName = 'Gracz', oppName = 'Przeciwnik';
+let started = false, startTime = 0;
+let keys = {};
+
+// --- stan gry ---
+const ME   = { x:200, y:H/2, vx:0, vy:0, r:20 };
+const OPP  = { x:760, y:H/2, vx:0, vy:0, r:20 };
+const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:11 };
+let score1 = 0, score2 = 0;
+let goalFlash = 0, goalText = '';
+const MATCH_LEN = 180; // 3 minuty
+
+const GOAL_W = 130, GOAL_X = 24; // głębokość bramki
+
+/* ---------- połączenia ---------- */
+function createRoom() {
+  myName = document.getElementById('nick').value.trim() || 'Gospodarz';
+  setStatus('Łączenie z serwerem...');
+  const code = genCode();
+  peer = new Peer('fc28-' + code);
+  isHost = true;
+
+  peer.on('open', () => {
+    document.getElementById('menuPanel').classList.add('hidden');
+    document.getElementById('roomPanel').classList.remove('hidden');
+    document.getElementById('roomCode').textContent = code;
+  });
+  peer.on('connection', c => {
+    conn = c;
+    setupConn();
+    c.on('open', () => {
+      c.send({ t:'hello', name: myName });
+    });
+  });
+  peer.on('error', e => setStatus('Błąd: ' + e.type + ' (spróbuj ponownie)'));
+}
+
+function joinRoom() {
+  myName = document.getElementById('nick').value.trim() || 'Gość';
+  const code = document.getElementById('joinCode').value.trim().toUpperCase();
+  if (code.length !== 6) { setStatus('Wpisz 6-znakowy kod!'); return; }
+  setStatus('Łączenie...');
+  peer = new Peer();
+  isHost = false;
+
+  peer.on('open', () => {
+    conn = peer.connect('fc28-' + code, { reliable:true });
+    setupConn();
+    conn.on('open', () => {
+      conn.send({ t:'hello', name: myName });
+      setStatus('Połączono! Czekam na start...');
+    });
+  });
+  peer.on('error', e => setStatus('Nie znaleziono pokoju (' + e.type + ')'));
+}
+
+function setupConn() {
+  conn.on('data', onData);
+  conn.on('close', () => { if (started) goalText = 'PRZECIWNIK WYSZEDŁ'; started = false; alert('Przeciwnik opuścił grę.'); location.reload(); });
+}
+
+function onData(d) {
+  if (d.t === 'hello') {
+    oppName = d.name;
+    if (isHost) {
+      conn.send({ t:'start', opp: myName, youAre: 2 });
+      beginGame(1, d.name);
+    }
+  }
+  else if (d.t === 'start') { beginGame(d.youAre, d.opp); }
+  else if (d.t === 's') { // stan przeciwnika
+    OPP.x = d.x; OPP.y = d.y;
+    if (!isHost) { BALL.x = d.bx; BALL.y = d.by; BALL.vx = d.bvx; BALL.vy = d.bvy; }
+    score1 = d.s1; score2 = d.s2; syncScore();
+  }
+  else if (d.t === 'goal') { goalText = d.who; goalFlash = 120; resetPositions(d.kickoff); }
+}
+
+/* ---------- start gry ---------- */
+function beginGame(myNum, opponentName) {
+  oppName = opponentName;
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
+  document.getElementById('name1').textContent = isHost ? myName : oppName;
+  document.getElementById('name2').textContent = isHost ? oppName : myName;
+  started = true;
+  startTime = Date.now();
+  resetPositions(0);
+  requestAnimationFrame(loop);
+}
+
+function resetPositions(kickoffDir) {
+  ME.x = 240; ME.y = H/2; ME.vx = 0; ME.vy = 0;
+  OPP.x = 720; OPP.y = H/2; OPP.vx = 0; OPP.vy = 0;
+  BALL.x = W/2; BALL.y = H/2;
+  BALL.vx = kickoffDir * 2; BALL.vy = 0;
+}
+
+function syncScore() {
+  const s1 = isHost ? score1 : score2;
+  const s2 = isHost ? score2 : score1;
+  document.getElementById('s1').textContent = s1;
+  document.getElementById('s2').textContent = s2;
+}
+
+/* ---------- fizyka ---------- */
+function stepPlayer(p, up, down, left, right, dt) {
+  const ACC = 0.55, MAXV = 5.2, FRICTION = 0.88;
+  if (keys[up])    p.vy -= ACC;
+  if (keys[down])  p.vy += ACC;
+  if (keys[left])  p.vx -= ACC;
+  if (keys[right]) p.vx += ACC;
+  p.vx *= FRICTION; p.vy *= FRICTION;
+  const sp = Math.hypot(p.vx, p.vy);
+  if (sp > MAXV) { p.vx = p.vx/sp*MAXV; p.vy = p.vy/sp*MAXV; }
+  p.x += p.vx * dt; p.y += p.vy * dt;
+  p.x = Math.max(p.r+GOAL_X, Math.min(W-p.r-GOAL_X, p.x));
+  p.y = Math.max(p.r, Math.min(H-p.r, p.y));
+}
+
+function stepBall(dt) {
+  BALL.x += BALL.vx * dt; BALL.y += BALL.vy * dt;
+  BALL.vx *= 0.985; BALL.vy *= 0.985;
+  if (Math.abs(BALL.vx) < 0.02) BALL.vx = 0;
+  if (Math.abs(BALL.vy) < 0.02) BALL.vy = 0;
+
+  // bandy (poza bramkami)
+  const inGoalMouth = BALL.y > H/2 - GOAL_W/2 && BALL.y < H/2 + GOAL_W/2;
+  if (BALL.y < BALL.r) { BALL.y = BALL.r; BALL.vy = -BALL.vy*0.7; }
+  if (BALL.y > H-BALL.r) { BALL.y = H-BALL.r; BALL.vy = -BALL.vy*0.7; }
+  if (!inGoalMouth) {
+    if (BALL.x < GOAL_X+BALL.r) { BALL.x = GOAL_X+BALL.r; BALL.vx = -BALL.vx*0.7; }
+    if (BALL.x > W-GOAL_X-BALL.r) { BALL.x = W-GOAL_X-BALL.r; BALL.vx = -BALL.vx*0.7; }
+  } else {
+    // słupki bramki
+    if (BALL.x < GOAL_X) BALL.x = GOAL_X, BALL.vx = -BALL.vx*0.5;
+    if (BALL.x > W-GOAL_X) BALL.x = W-GOAL_X, BALL.vx = -BALL.vx*0.5;
+  }
+}
+
+function collidePlayerBall(p) {
+  const dx = BALL.x - p.x, dy = BALL.y - p.y;
+  const dist = Math.hypot(dx, dy), minD = p.r + BALL.r;
+  if (dist < minD && dist > 0) {
+    const nx = dx/dist, ny = dy/dist;
+    BALL.x = p.x + nx*minD; BALL.y = p.y + ny*minD;
+    const power = keys[' '] ? 11 : 3.2;
+    BALL.vx = nx*power + p.vx*0.6;
+    BALL.vy = ny*power + p.vy*0.6;
+  }
+}
+
+function checkGoal() {
+  if (BALL.x <= GOAL_X + BALL.r) {
+    if (isHost) { score2++; syncScore(); conn && conn.send({t:'goal', who: oppName+' STRZELA GOLA!', kickoff: 1}); }
+    goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(1);
+  }
+  if (BALL.x >= W - GOAL_X - BALL.r) {
+    if (isHost) { score1++; syncScore(); conn && conn.send({t:'goal', who: myName+' STRZELA GOLA!', kickoff: -1}); }
+    goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(-1);
+  }
+}
+
+/* ---------- pętla gry ---------- */
+let lastT = 0, netTimer = 0;
+function loop(ts) {
+  if (!started) return;
+  const dt = Math.min((ts - lastT) / 16.6, 3) || 1;
+  lastT = ts;
+
+  // ruch mojego zawodnika
+  stepPlayer(ME, 'KeyW', 'KeyS', 'KeyA', 'KeyD', dt);
+  stepPlayer(ME, 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', dt);
+
+  if (isHost) {
+    stepBall(dt);
+    collidePlayerBall(ME);
+    collidePlayerBall(OPP);
+    checkGoal();
+  } else {
+    // piłka + gracz hosta przychodzą przez sieć; lokalnie lekko interpolujemy
+    BALL.x += BALL.vx * dt * 0.9; BALL.y += BALL.vy * dt * 0.9;
+    collidePlayerBall(ME);
+  }
+
+  // wyślij mój stan
+  netTimer++;
+  if (netTimer % 4 === 0 && conn && conn.open) {
+    if (isHost) {
+      conn.send({ t:'s', x:ME.x, y:ME.y, bx:BALL.x, by:BALL.y, bvx:BALL.vx, bvy:BALL.vy, s1:score1, s2:score2 });
+    } else {
+      conn.send({ t:'s', x:ME.x, y:ME.y });
+    }
+  }
+
+  // licznik czasu
+  const left = Math.max(0, MATCH_LEN - (Date.now() - startTime)/1000);
+  const m = Math.floor(left/60), s = Math.floor(left%60);
+  document.getElementById('timer').textContent = m + ':' + String(s).padStart(2,'0');
+  if (left <= 0) { endMatch(); return; }
+  if (goalFlash > 0) goalFlash--;
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function endMatch() {
+  started = false;
+  const mine = isHost ? score1 : score2, theirs = isHost ? score2 : score1;
+  draw();
+  ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(0,0,W,H);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffd54d'; ctx.font = 'bold 52px Segoe UI';
+  ctx.fillText(mine > theirs ? '🏆 WYGRAŁEŚ!' : mine < theirs ? '😢 PRZEGRAŁEŚ' : '🤝 REMIS', W/2, H/2 - 20);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 30px Segoe UI';
+  ctx.fillText(score1 + ' : ' + score2, W/2, H/2 + 35);
+  ctx.font = '18px Segoe UI'; ctx.fillStyle = '#9fd8b9';
+  ctx.fillText('Odśwież stronę, aby zagrać ponownie', W/2, H/2 + 75);
+}
+
+/* ---------- rysowanie ---------- */
+function draw() {
+  // murawa
+  for (let i = 0; i < 10; i++) {
+    ctx.fillStyle = i % 2 ? '#2e8b57' : '#33995f';
+    ctx.fillRect(i * W/10, 0, W/10, H);
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3;
+  ctx.strokeRect(GOAL_X, 4, W-2*GOAL_X, H-8);
+  ctx.beginPath(); ctx.moveTo(W/2, 4); ctx.lineTo(W/2, H-4); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 70, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+
+  // bramki
+  ctx.fillStyle = 'rgba(255,255,255,.25)';
+  ctx.fillRect(4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
+  ctx.fillRect(W-GOAL_X-4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
+  ctx.strokeStyle = '#fff';
+  ctx.strokeRect(4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
+  ctx.strokeRect(W-GOAL_X-4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
+
+  // piłka
+  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI*2);
+  ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, 4, 0, Math.PI*2); ctx.fillStyle = '#333'; ctx.fill();
+
+  // zawodnicy
+  drawPlayer(OPP, '#6ec6ff', isHost ? oppName : myName);
+  drawPlayer(ME, '#ffd54d', myName);
+
+  // komunikat gola
+  if (goalFlash > 0) {
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, H/2-50, W, 100);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd54d'; ctx.font = 'bold 44px Segoe UI';
+    ctx.fillText(goalText, W/2, H/2 + 15);
+  }
+}
+
+function drawPlayer(p, color, name) {
+  ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = 'rgba(0,0,0,.85)';
+  ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.fill();
+  ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 3;
+  ctx.strokeText(name, p.x, p.y - p.r - 8);
+  ctx.fillText(name, p.x, p.y - p.r - 8);
+}
+
+/* ---------- klawiatura ---------- */
+addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
+addEventListener('keyup',   e => { keys[e.code] = false; });
+</script>
+</body>
+</html>
