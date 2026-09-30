@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111416">
+  <meta name="description" content="Panoramy 360°, pięć rund i pojedynek ze znajomym. Darmowa gra geograficzna bez konta i kluczy API.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>GeoDuel — zgadnij, gdzie jesteś</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <svg class="svg-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16M13 5l7 7-7 7"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></symbol>
+  </svg>
+  <header class="site-header" id="header">
+    <a class="brand" href="./" aria-label="GeoDuel — strona główna"><span class="brand-icon"><svg><use href="#i-pin"/></svg></span>geo<span>duel</span><small>BETA</small></a>
+    <nav aria-label="Nawigacja"><button class="text-button" id="how-button">Jak grać <span>↗</span></button><span class="header-tag"><i class="status-dot"></i> Bez konta. Po prostu graj.</span></nav>
+  </header>
+
+  <main>
+    <section id="home-screen" class="screen home-screen">
+      <div class="intro"><div class="eyebrow"><span class="tiny-line"></span> TWOJA INTUICJA. CAŁY ŚWIAT.</div>
+        <h1>Gdzieś na świecie.<br><span>Bliżej niż myślisz.</span></h1>
+        <p>Rozejrzyj się. Połącz wskazówki. Postaw pinezkę.<br>Rzuć wyzwanie znajomemu i sprawdź, kto trafi bliżej.</p>
+      </div>
+      <div class="home-grid">
+        <div class="expedition-card">
+          <div class="photo-overlay"></div><span class="image-chip"><i class="status-dot"></i> ODKRYWAJ W 360°</span>
+          <div class="viewfinder"><span></span><svg><use href="#i-pin"/></svg><span></span></div>
+          <div class="photo-caption"><span class="eyebrow">MAŁY DETAL. WIELKA WSKAZÓWKA.</span><h2>Każde miejsce<br>ma swoją historię.</h2><div class="photo-bottom"><span>48 panoram · Europa, USA i Japonia</span><span class="circle-arrow">↗</span></div></div>
+        </div>
+        <section class="play-card" aria-labelledby="play-title">
+          <div class="card-heading"><span class="card-icon"><svg><use href="#i-users"/></svg></span><span class="pill">1 vs 1</span></div>
+          <h2 id="play-title">Świat czeka. Gramy?</h2><p>Zaproś znajomego. Resztę zostaw intuicji.</p>
+          <label for="player-name">TWÓJ PSEUDONIM</label><input id="player-name" maxlength="20" autocomplete="nickname" placeholder="Odkrywca" value="Odkrywca">
+          <button id="create-button" class="button primary full">Utwórz pokój <svg><use href="#i-arrow"/></svg></button>
+          <div class="divider"><span>masz już zaproszenie?</span></div>
+          <form id="join-form"><label class="sr-only" for="room-input">Sześcioliterowy kod pokoju</label><div class="join-row"><input id="room-input" maxlength="6" placeholder="KOD POKOJU" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="join-hint"><button class="button secondary" id="join-button" type="submit">Dołącz <span>↗</span></button></div></form>
+          <p id="join-hint" class="small">Wpisz 6 znaków udostępnionych przez hosta.</p>
+          <button class="text-button practice-button" id="practice-button">Najpierw spróbuj solo <span>→</span></button>
+        </section>
+      </div>
+      <div class="features"><div><span class="feature-number">01</span><svg><use href="#i-globe"/></svg><div><strong>Jedno miejsce. Dwie perspektywy.</strong><p>Ta sama panorama dla obu graczy.</p></div></div><div><span class="feature-number">02</span><svg><use href="#i-clock"/></svg><div><strong>5 rund. Po 60 sekund.</strong><p>Liczy się każda dobra wskazówka.</p></div></div><div><span class="feature-number">03</span><svg><use href="#i-pin"/></svg><div><strong>Im bliżej, tym więcej punktów.</strong><p>Zdobądź nawet 25 000 punktów.</p></div></div></div>
+      <footer><span>Podróżuj ciekawością.</span><button id="about-button" class="text-button">Źródła i informacje ↗</button></footer>
+    </section>
+
+    <section id="lobby-screen" class="screen centered" hidden>
+      <div class="lobby-card"><span class="eyebrow">PRZYSTANEK PRZED PODRÓŻĄ</span><h1>Twój pokój.</h1><p id="lobby-status" role="status">Łączenie…</p>
+        <div class="room-ticket"><span>KOD ZAPROSZENIA</span><strong id="room-code">······</strong><button id="copy-button" class="button secondary" disabled>Kopiuj link ↗</button></div>
+        <div class="lobby-players"><div><span class="avatar host-avatar">1</span><strong id="lobby-host">Host</strong><span class="pill">HOST</span></div><div><span class="avatar guest-avatar">2</span><strong id="lobby-guest">Czekamy na gracza…</strong><i id="guest-dot" class="status-dot inactive"></i></div></div>
+        <div class="rules-strip"><span>5 rund</span><span>60 s / rundę</span><span>Bez przemieszczania</span></div>
+        <button id="start-button" class="button primary full" disabled>Rozpocznij pojedynek <svg><use href="#i-arrow"/></svg></button>
+        <button class="text-button leave-button" data-leave>Wróć do strony głównej</button>
+      </div>
+    </section>
+
+    <section id="game-screen" class="screen game-screen" hidden aria-label="Rozgrywka">
+      <div id="panorama" aria-label="Panorama 360 stopni. Obracaj przeciągając lub strzałkami."></div>
+      <div class="game-top"><button class="game-brand" data-leave aria-label="Opuść grę"><svg><use href="#i-pin"/></svg><span>geoduel</span></button>
+        <div class="round-display"><span>RUNDA <strong id="round-number">1</strong> / 5</span><div id="round-dots" class="round-dots" aria-hidden="true"></div></div>
+        <div id="timer-box" class="timer-box"><svg><use href="#i-clock"/></svg><span id="timer" role="timer" aria-label="Pozostały czas">01:00</span></div>
+      </div>
+      <div class="scoreboard"><div><i class="player-dot host-color"></i><span id="host-name">Host</span><strong id="host-score">0</strong></div><div id="guest-score-row"><i class="player-dot guest-color"></i><span id="guest-name">Gość</span><strong id="guest-score">0</strong></div><small id="connection-quality"></small></div>
+      <div id="loading-panel" class="loading-panel"><div class="spinner"></div><h2 id="loading-title">Nowe miejsce. Nowe wskazówki.</h2><p id="loading-message" role="status">Ładowanie panoramy…</p><button id="retry-image" class="button secondary" hidden>Spróbuj ponownie</button><button class="text-button" data-leave>Opuść grę</button></div>
+      <div class="pano-controls"><button id="reset-view" title="Przywróć widok" aria-label="Przywróć początkowy widok">↺</button><button id="zoom-in" title="Przybliż" aria-label="Przybliż panoramę">+</button><button id="zoom-out" title="Oddal" aria-label="Oddal panoramę">−</button><button id="fullscreen" title="Pełny ekran" aria-label="Przełącz pełny ekran"><svg><use href="#i-expand"/></svg></button></div>
+
+      <div class="look-hint" id="look-hint">↔ Przeciągnij, aby się rozejrzeć</div>
+      <aside id="guess-panel" class="guess-panel" aria-label="Mapa zgadywania">
+        <div class="pano-credit" id="pano-credit"></div>
+        <div class="map-heading"><span><svg><use href="#i-pin"/></svg> GDZIE JESTEŚ?</span><button id="expand-map" aria-label="Powiększ mapę" aria-expanded="false"><svg><use href="#i-expand"/></svg></button></div>
+        <div id="guess-map" class="guess-map" aria-label="Kliknij mapę, aby ustawić pinezkę"></div>
+        <div class="map-status"><span id="guess-hint">Postaw pinezkę na mapie</span><button id="map-center" class="text-button" title="Wybierz środek mapy — także z klawiatury">Wybierz środek</button></div>
+        <button id="guess-button" class="button primary full" disabled>Zatwierdź <span>↗</span></button>
+      </aside>
+      <div id="submission-status" class="submission-status" role="status" hidden></div>
+    </section>
+
+    <section id="result-screen" class="screen result-screen" hidden>
+      <div class="result-heading"><div><span class="eyebrow" id="result-eyebrow">RUNDA 1 / 5</span><h1 id="result-title">Tak blisko!</h1><p id="location-name"></p></div><span class="result-tag"><svg><use href="#i-globe"/></svg> ODKRYTE MIEJSCE</span></div>
+      <div class="result-grid"><div class="result-map-card"><div id="result-map" aria-label="Mapa prawdziwej lokalizacji i odpowiedzi graczy"></div><div class="map-legend"><span><i class="player-dot actual-color"></i> Lokalizacja</span><span><i class="player-dot host-color"></i> Gracz 1</span><span id="legend-guest"><i class="player-dot guest-color"></i> Gracz 2</span></div></div>
+        <div class="round-details"><div id="round-cards"></div><div class="result-total"><span>TWÓJ WYNIK ŁĄCZNY</span><strong id="my-total">0 <small>pkt</small></strong></div><button id="next-button" class="button primary full">Następna runda <span>→</span></button><p id="next-status" class="small" role="status"></p><button class="text-button" data-leave>Opuść grę</button></div></div>
+      <p class="result-credit" id="result-credit"></p>
+    </section>
+
+    <section id="final-screen" class="screen final-screen" hidden>
+      <span class="eyebrow">PIĘĆ MIEJSC. JEDNA WSPÓLNA PODRÓŻ.</span><div class="trophy" aria-hidden="true">✦</div><h1 id="winner-title">Koniec wyprawy!</h1><p id="winner-subtitle"></p>
+      <div id="final-scores" class="final-scores"></div>
+      <div class="table-wrap"><table><caption class="sr-only">Wyniki każdej rundy</caption><thead><tr><th scope="col">Runda / miejsce</th><th scope="col" id="table-host">Gracz 1</th><th scope="col" id="table-guest">Gracz 2</th></tr></thead><tbody id="round-table"></tbody></table></div>
+      <div class="final-actions"><button id="rematch-button" class="button primary">Jeszcze jeden pojedynek <span>↗</span></button><button class="button secondary" data-leave>Strona główna</button></div><p id="rematch-status" role="status"></p>
+    </section>
+  </main>
+  <dialog id="info-dialog"><button class="dialog-close" aria-label="Zamknij okno" data-close>×</button><div id="dialog-content"></div></dialog>
+  <dialog id="leave-dialog"><h2>Kończysz podróż?</h2><p>Opuszczenie pokoju zakończy bieżący mecz dla obu graczy.</p><div class="dialog-actions"><button class="button secondary" id="cancel-leave">Zostań</button><button class="button primary" id="confirm-leave">Opuść pokój</button></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><div class="noscript">Włącz JavaScript, aby uruchomić grę.</div></noscript>
+</body>
+</html>
