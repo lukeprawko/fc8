@@ -42,20 +42,19 @@
   #roomCode { font-size:34px; letter-spacing:8px; font-weight:bold; color:#ffd54d; margin:10px 0; }
   .status { color:#9fd8b9; font-size:14px; min-height:20px; margin-top:8px; }
   #gameArea { display:none; text-align:center; }
-  canvas { border-radius:12px; box-shadow:0 15px 50px rgba(0,0,0,.6); max-width:95vw; }
+  canvas { border-radius:12px; box-shadow:0 15px 50px rgba(0,0,0,.6); max-width:95vw; background:#2a824e; }
   #hud { display:flex; justify-content:space-between; align-items:center; width:960px; max-width:95vw; margin-bottom:8px; }
   .score { font-size:30px; font-weight:bold; }
   .score .p1 { color:#ffd54d; } .score .p2 { color:#6ec6ff; }
   #timer { font-size:24px; background:rgba(0,0,0,.4); padding:4px 18px; border-radius:20px; }
-  #controlsInfo { color:#cfe9d8; font-size:13px; margin-top:10px; }
+  #controlsInfo { color:#cfe9d8; font-size:13px; margin-top:10px; line-height:1.6; }
   .hidden { display:none !important; }
-  code { background:rgba(0,0,0,.4); padding:2px 8px; border-radius:6px; color:#ffd54d; }
 </style>
 </head>
 <body>
 
 <h1>FC 28</h1>
-<div class="subtitle">Mini Piłka Nożna · Multiplayer</div>
+<div class="subtitle">Mini Piłka Nożna · Multiplayer + GK AI</div>
 
 <!-- MENU -->
 <div id="menu">
@@ -83,11 +82,13 @@
     <div id="timer">3:00</div>
   </div>
   <canvas id="cv" width="960" height="540"></canvas>
-  <div id="controlsInfo">🕹 Ruch: <b>WASD</b> lub strzałki · Kopnięcie: <b>SPACJA</b> · Cel: strzel więcej goli w 3 minuty!</div>
+  <div id="controlsInfo">
+    🕹 Ruch: <b>WASD / Strzałki</b> | 💥 Strzał: <b>SPACJA / J</b> | ⚽ Podanie: <b>K</b> | 🛡️️ Odbiór / Drybling: <b>E / Shift</b>
+  </div>
 </div>
 
 <script>
-/* ================= FC 28 - silnik gry + multiplayer (PeerJS) ================= */
+/* ================= FC 28 - Silnik gry ulepszony ================= */
 const W = 960, H = 540;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -103,17 +104,25 @@ let myName = 'Gracz', oppName = 'Przeciwnik';
 let started = false, startTime = 0;
 let keys = {};
 
-// --- stan gry ---
-const ME   = { x:200, y:H/2, vx:0, vy:0, r:20 };
-const OPP  = { x:760, y:H/2, vx:0, vy:0, r:20 };
-const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:11 };
+// --- Parametry Boiska i Bramek ---
+const FIELD_MARGIN = 40;
+const GOAL_DEPTH = 35;
+const GOAL_H = 140; // Wysokość światła bramki
+const GOAL_TOP = H/2 - GOAL_H/2;
+const GOAL_BOT = H/2 + GOAL_H/2;
+
+// --- Stan Gry ---
+const ME   = { x:200, y:H/2, vx:0, vy:0, r:18, faceX:1, faceY:0 };
+const OPP  = { x:760, y:H/2, vx:0, vy:0, r:18, faceX:-1, faceY:0 };
+const GK1  = { x:FIELD_MARGIN + 15, y:H/2, vx:0, vy:0, r:18, team:1 }; // Bramkarz Gospodarzy
+const GK2  = { x:W - FIELD_MARGIN - 15, y:H/2, vx:0, vy:0, r:18, team:2 }; // Bramkarz Gości
+const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:9, owner: null };
+
 let score1 = 0, score2 = 0;
 let goalFlash = 0, goalText = '';
-const MATCH_LEN = 180; // 3 minuty
+const MATCH_LEN = 180;
 
-const GOAL_W = 130, GOAL_X = 24; // głębokość bramki
-
-/* ---------- połączenia ---------- */
+/* ---------- Połączenia (PeerJS) ---------- */
 function createRoom() {
   myName = document.getElementById('nick').value.trim() || 'Gospodarz';
   setStatus('Łączenie z serwerem...');
@@ -129,11 +138,9 @@ function createRoom() {
   peer.on('connection', c => {
     conn = c;
     setupConn();
-    c.on('open', () => {
-      c.send({ t:'hello', name: myName });
-    });
+    c.on('open', () => conn.send({ t:'hello', name: myName }));
   });
-  peer.on('error', e => setStatus('Błąd: ' + e.type + ' (spróbuj ponownie)'));
+  peer.on('error', e => setStatus('Błąd: ' + e.type));
 }
 
 function joinRoom() {
@@ -149,7 +156,7 @@ function joinRoom() {
     setupConn();
     conn.on('open', () => {
       conn.send({ t:'hello', name: myName });
-      setStatus('Połączono! Czekam na start...');
+      setStatus('Połączono! Oczekiwanie na start...');
     });
   });
   peer.on('error', e => setStatus('Nie znaleziono pokoju (' + e.type + ')'));
@@ -157,7 +164,7 @@ function joinRoom() {
 
 function setupConn() {
   conn.on('data', onData);
-  conn.on('close', () => { if (started) goalText = 'PRZECIWNIK WYSZEDŁ'; started = false; alert('Przeciwnik opuścił grę.'); location.reload(); });
+  conn.on('close', () => { if (started) alert('Przeciwnik opuścił grę.'); location.reload(); });
 }
 
 function onData(d) {
@@ -169,15 +176,18 @@ function onData(d) {
     }
   }
   else if (d.t === 'start') { beginGame(d.youAre, d.opp); }
-  else if (d.t === 's') { // stan przeciwnika
-    OPP.x = d.x; OPP.y = d.y;
-    if (!isHost) { BALL.x = d.bx; BALL.y = d.by; BALL.vx = d.bvx; BALL.vy = d.bvy; }
+  else if (d.t === 's') {
+    OPP.x = d.x; OPP.y = d.y; OPP.vx = d.vx; OPP.vy = d.vy;
+    if (!isHost) {
+      BALL.x = d.bx; BALL.y = d.by; BALL.vx = d.bvx; BALL.vy = d.bvy;
+      GK1.x = d.gk1x; GK1.y = d.gk1y; GK2.x = d.gk2x; GK2.y = d.gk2y;
+    }
     score1 = d.s1; score2 = d.s2; syncScore();
   }
   else if (d.t === 'goal') { goalText = d.who; goalFlash = 120; resetPositions(d.kickoff); }
 }
 
-/* ---------- start gry ---------- */
+/* ---------- Start i Wynik ---------- */
 function beginGame(myNum, opponentName) {
   oppName = opponentName;
   document.getElementById('menu').style.display = 'none';
@@ -191,51 +201,157 @@ function beginGame(myNum, opponentName) {
 }
 
 function resetPositions(kickoffDir) {
-  ME.x = 240; ME.y = H/2; ME.vx = 0; ME.vy = 0;
-  OPP.x = 720; OPP.y = H/2; OPP.vx = 0; OPP.vy = 0;
-  BALL.x = W/2; BALL.y = H/2;
-  BALL.vx = kickoffDir * 2; BALL.vy = 0;
+  ME.x = isHost ? 260 : 700; ME.y = H/2; ME.vx = 0; ME.vy = 0;
+  OPP.x = isHost ? 700 : 260; OPP.y = H/2; OPP.vx = 0; OPP.vy = 0;
+  GK1.x = FIELD_MARGIN + 15; GK1.y = H/2; GK1.vx = 0; GK1.vy = 0;
+  GK2.x = W - FIELD_MARGIN - 15; GK2.y = H/2; GK2.vx = 0; GK2.vy = 0;
+  BALL.x = W/2; BALL.y = H/2; BALL.vx = kickoffDir * 3; BALL.vy = 0;
 }
 
 function syncScore() {
-  const s1 = isHost ? score1 : score2;
-  const s2 = isHost ? score2 : score1;
-  document.getElementById('s1').textContent = s1;
-  document.getElementById('s2').textContent = s2;
+  document.getElementById('s1').textContent = isHost ? score1 : score2;
+  document.getElementById('s2').textContent = isHost ? score2 : score1;
 }
 
-/* ---------- fizyka ---------- */
-function stepPlayer(p, up, down, left, right, dt) {
-  const ACC = 0.55, MAXV = 5.2, FRICTION = 0.88;
-  if (keys[up])    p.vy -= ACC;
-  if (keys[down])  p.vy += ACC;
-  if (keys[left])  p.vx -= ACC;
-  if (keys[right]) p.vx += ACC;
+/* ---------- Fizyka i Sterowanie ---------- */
+function stepPlayer(p, isMe, dt) {
+  const ACC = 0.65, MAXV = 5.5, FRICTION = 0.86;
+
+  if (isMe) {
+    let dx = 0, dy = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+    if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
+    if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+    if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+    if (dx !== 0 || dy !== 0) {
+      const len = Math.hypot(dx, dy);
+      p.vx += (dx / len) * ACC;
+      p.vy += (dy / len) * ACC;
+      p.faceX = dx / len;
+      p.faceY = dy / len;
+    }
+  }
+
   p.vx *= FRICTION; p.vy *= FRICTION;
   const sp = Math.hypot(p.vx, p.vy);
-  if (sp > MAXV) { p.vx = p.vx/sp*MAXV; p.vy = p.vy/sp*MAXV; }
+  if (sp > MAXV) { p.vx = (p.vx / sp) * MAXV; p.vy = (p.vy / sp) * MAXV; }
+
   p.x += p.vx * dt; p.y += p.vy * dt;
-  p.x = Math.max(p.r+GOAL_X, Math.min(W-p.r-GOAL_X, p.x));
-  p.y = Math.max(p.r, Math.min(H-p.r, p.y));
+
+  // Granice boiska dla gracza
+  p.x = Math.max(FIELD_MARGIN + p.r, Math.min(W - FIELD_MARGIN - p.r, p.x));
+  p.y = Math.max(FIELD_MARGIN + p.r, Math.min(H - FIELD_MARGIN - p.r, p.y));
 }
 
+function handleActions(p) {
+  const dist = Math.hypot(BALL.x - p.x, BALL.y - p.y);
+  
+  // 1. STRZAŁ (Spacja lub J)
+  if ((keys['Space'] || keys['KeyJ']) && dist < p.r + BALL.r + 12) {
+    const power = 13;
+    BALL.vx = p.faceX * power + p.vx * 0.3;
+    BALL.vy = p.faceY * power + p.vy * 0.3;
+  }
+  // 2. PODANIE (K)
+  else if (keys['KeyK'] && dist < p.r + BALL.r + 14) {
+    const power = 8;
+    BALL.vx = p.faceX * power;
+    BALL.vy = p.faceY * power;
+  }
+  // 3. ODBIÓR / ODBIERANIE PIŁKI (E lub Shift)
+  else if ((keys['KeyE'] || keys['ShiftLeft'] || keys['ShiftRight']) && dist < p.r + BALL.r + 20) {
+    p.vx += p.faceX * 3; p.vy += p.faceY * 3; // krótki zryw
+    BALL.vx = p.faceX * 10 + (Math.random() - 0.5) * 2;
+    BALL.vy = p.faceY * 10 + (Math.random() - 0.5) * 2;
+  }
+  // 4. DRYBLING / PROWADZENIE PIŁKI (Przyklejenie przy zbliżeniu)
+  else if (dist < p.r + BALL.r + 6) {
+    const targetX = p.x + p.faceX * (p.r + BALL.r + 2);
+    const targetY = p.y + p.faceY * (p.r + BALL.r + 2);
+    BALL.x += (targetX - BALL.x) * 0.35;
+    BALL.y += (targetY - BALL.y) * 0.35;
+    BALL.vx = p.vx; BALL.vy = p.vy;
+  }
+}
+
+/* ---------- AI Bramkarzy ---------- */
+function updateGK(gk, targetX, pAlly, dt) {
+  const defY = Math.max(GOAL_TOP + gk.r, Math.min(GOAL_BOT - gk.r, BALL.y));
+  let destX = targetX;
+  let destY = defY;
+
+  // Wyjście bramkarza do piłki gdy jest blisko pola karnego
+  const distToBall = Math.hypot(BALL.x - gk.x, BALL.y - gk.y);
+  if (distToBall < 130) {
+    destX = BALL.x;
+    destY = BALL.y;
+  }
+
+  const dx = destX - gk.x;
+  const dy = destY - gk.y;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist > 2) {
+    const speed = distToBall < 130 ? 3.8 : 2.5;
+    gk.vx = (dx / dist) * speed;
+    gk.vy = (dy / dist) * speed;
+  } else {
+    gk.vx *= 0.5; gk.vy *= 0.5;
+  }
+
+  gk.x += gk.vx * dt;
+  gk.y += gk.vy * dt;
+
+  // Interwencja i Podanie Bramkarza
+  if (distToBall < gk.r + BALL.r + 4) {
+    const passTarget = pAlly || { x: W/2, y: H/2 };
+    const pdx = passTarget.x - gk.x;
+    const pdy = passTarget.y - gk.y;
+    const plen = Math.hypot(pdx, pdy) || 1;
+    BALL.vx = (pdx / plen) * 9;
+    BALL.vy = (pdy / plen) * 9;
+  }
+}
+
+/* ---------- Fizyka Piłki i Kolizje ---------- */
 function stepBall(dt) {
   BALL.x += BALL.vx * dt; BALL.y += BALL.vy * dt;
-  BALL.vx *= 0.985; BALL.vy *= 0.985;
-  if (Math.abs(BALL.vx) < 0.02) BALL.vx = 0;
-  if (Math.abs(BALL.vy) < 0.02) BALL.vy = 0;
+  BALL.vx *= 0.982; BALL.vy *= 0.982;
 
-  // bandy (poza bramkami)
-  const inGoalMouth = BALL.y > H/2 - GOAL_W/2 && BALL.y < H/2 + GOAL_W/2;
-  if (BALL.y < BALL.r) { BALL.y = BALL.r; BALL.vy = -BALL.vy*0.7; }
-  if (BALL.y > H-BALL.r) { BALL.y = H-BALL.r; BALL.vy = -BALL.vy*0.7; }
-  if (!inGoalMouth) {
-    if (BALL.x < GOAL_X+BALL.r) { BALL.x = GOAL_X+BALL.r; BALL.vx = -BALL.vx*0.7; }
-    if (BALL.x > W-GOAL_X-BALL.r) { BALL.x = W-GOAL_X-BALL.r; BALL.vx = -BALL.vx*0.7; }
+  // Górna i dolna banda
+  if (BALL.y < FIELD_MARGIN + BALL.r) { BALL.y = FIELD_MARGIN + BALL.r; BALL.vy *= -0.7; }
+  if (BALL.y > H - FIELD_MARGIN - BALL.r) { BALL.y = H - FIELD_MARGIN - BALL.r; BALL.vy *= -0.7; }
+
+  // Lewa i prawa linia końcowa (poza linią bramkową)
+  const inGoalY = BALL.y > GOAL_TOP && BALL.y < GOAL_BOT;
+
+  if (!inGoalY) {
+    if (BALL.x < FIELD_MARGIN + BALL.r) { BALL.x = FIELD_MARGIN + BALL.r; BALL.vx *= -0.7; }
+    if (BALL.x > W - FIELD_MARGIN - BALL.r) { BALL.x = W - FIELD_MARGIN - BALL.r; BALL.vx *= -0.7; }
   } else {
-    // słupki bramki
-    if (BALL.x < GOAL_X) BALL.x = GOAL_X, BALL.vx = -BALL.vx*0.5;
-    if (BALL.x > W-GOAL_X) BALL.x = W-GOAL_X, BALL.vx = -BALL.vx*0.5;
+    // Reakcja ze słupkami
+    checkPostCollision(FIELD_MARGIN, GOAL_TOP);
+    checkPostCollision(FIELD_MARGIN, GOAL_BOT);
+    checkPostCollision(W - FIELD_MARGIN, GOAL_TOP);
+    checkPostCollision(W - FIELD_MARGIN, GOAL_BOT);
+
+    // Odbicie od tyłu bramki
+    if (BALL.x < FIELD_MARGIN - GOAL_DEPTH + BALL.r) { BALL.x = FIELD_MARGIN - GOAL_DEPTH + BALL.r; BALL.vx *= -0.5; }
+    if (BALL.x > W - FIELD_MARGIN + GOAL_DEPTH - BALL.r) { BALL.x = W - FIELD_MARGIN + GOAL_DEPTH - BALL.r; BALL.vx *= -0.5; }
+  }
+}
+
+function checkPostCollision(px, py) {
+  const dx = BALL.x - px, dy = BALL.y - py;
+  const dist = Math.hypot(dx, dy);
+  if (dist < BALL.r + 5) {
+    const nx = dx / dist, ny = dy / dist;
+    BALL.x = px + nx * (BALL.r + 5);
+    BALL.y = py + ny * (BALL.r + 5);
+    const dot = BALL.vx * nx + BALL.vy * ny;
+    BALL.vx = (BALL.vx - 2 * dot * nx) * 0.75;
+    BALL.vy = (BALL.vy - 2 * dot * ny) * 0.75;
   }
 }
 
@@ -243,58 +359,66 @@ function collidePlayerBall(p) {
   const dx = BALL.x - p.x, dy = BALL.y - p.y;
   const dist = Math.hypot(dx, dy), minD = p.r + BALL.r;
   if (dist < minD && dist > 0) {
-    const nx = dx/dist, ny = dy/dist;
-    BALL.x = p.x + nx*minD; BALL.y = p.y + ny*minD;
-    const power = keys[' '] ? 11 : 3.2;
-    BALL.vx = nx*power + p.vx*0.6;
-    BALL.vy = ny*power + p.vy*0.6;
+    const nx = dx / dist, ny = dy / dist;
+    BALL.x = p.x + nx * minD; BALL.y = p.y + ny * minD;
+    BALL.vx = nx * 3.5 + p.vx * 0.5;
+    BALL.vy = ny * 3.5 + p.vy * 0.5;
   }
 }
 
+/* ---------- Weryfikacja Gola ---------- */
 function checkGoal() {
-  if (BALL.x <= GOAL_X + BALL.r) {
-    if (isHost) { score2++; syncScore(); conn && conn.send({t:'goal', who: oppName+' STRZELA GOLA!', kickoff: 1}); }
-    goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(1);
-  }
-  if (BALL.x >= W - GOAL_X - BALL.r) {
-    if (isHost) { score1++; syncScore(); conn && conn.send({t:'goal', who: myName+' STRZELA GOLA!', kickoff: -1}); }
-    goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(-1);
+  // Gol zaliczany TYLKO gdy piłka jest wewnątrz światła bramki i przekroczy linię
+  if (BALL.y > GOAL_TOP && BALL.y < GOAL_BOT) {
+    if (BALL.x < FIELD_MARGIN - BALL.r) {
+      if (isHost) { score2++; syncScore(); conn && conn.send({t:'goal', who: oppName + ' STRZELA GOLA!', kickoff: 1}); }
+      goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(1);
+    }
+    else if (BALL.x > W - FIELD_MARGIN + BALL.r) {
+      if (isHost) { score1++; syncScore(); conn && conn.send({t:'goal', who: myName + ' STRZELA GOLA!', kickoff: -1}); }
+      goalText = '⚽ GOL!'; goalFlash = 120; resetPositions(-1);
+    }
   }
 }
 
-/* ---------- pętla gry ---------- */
+/* ---------- Główna Pętla Gry ---------- */
 let lastT = 0, netTimer = 0;
 function loop(ts) {
   if (!started) return;
   const dt = Math.min((ts - lastT) / 16.6, 3) || 1;
   lastT = ts;
 
-  // ruch mojego zawodnika
-  stepPlayer(ME, 'KeyW', 'KeyS', 'KeyA', 'KeyD', dt);
-  stepPlayer(ME, 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', dt);
+  stepPlayer(ME, true, dt);
+  handleActions(ME);
 
   if (isHost) {
     stepBall(dt);
+    updateGK(GK1, FIELD_MARGIN + 15, ME, dt);
+    updateGK(GK2, W - FIELD_MARGIN - 15, OPP, dt);
     collidePlayerBall(ME);
     collidePlayerBall(OPP);
     checkGoal();
   } else {
-    // piłka + gracz hosta przychodzą przez sieć; lokalnie lekko interpolujemy
     BALL.x += BALL.vx * dt * 0.9; BALL.y += BALL.vy * dt * 0.9;
     collidePlayerBall(ME);
   }
 
-  // wyślij mój stan
+  // Synchronizacja sieciowa
   netTimer++;
-  if (netTimer % 4 === 0 && conn && conn.open) {
+  if (netTimer % 3 === 0 && conn && conn.open) {
     if (isHost) {
-      conn.send({ t:'s', x:ME.x, y:ME.y, bx:BALL.x, by:BALL.y, bvx:BALL.vx, bvy:BALL.vy, s1:score1, s2:score2 });
+      conn.send({
+        t:'s', x:ME.x, y:ME.y, vx:ME.vx, vy:ME.vy,
+        bx:BALL.x, by:BALL.y, bvx:BALL.vx, bvy:BALL.vy,
+        gk1x:GK1.x, gk1y:GK1.y, gk2x:GK2.x, gk2y:GK2.y,
+        s1:score1, s2:score2
+      });
     } else {
-      conn.send({ t:'s', x:ME.x, y:ME.y });
+      conn.send({ t:'s', x:ME.x, y:ME.y, vx:ME.vx, vy:ME.vy });
     }
   }
 
-  // licznik czasu
+  // Czas gry
   const left = Math.max(0, MATCH_LEN - (Date.now() - startTime)/1000);
   const m = Math.floor(left/60), s = Math.floor(left%60);
   document.getElementById('timer').textContent = m + ':' + String(s).padStart(2,'0');
@@ -319,62 +443,92 @@ function endMatch() {
   ctx.fillText('Odśwież stronę, aby zagrać ponownie', W/2, H/2 + 75);
 }
 
-/* ---------- rysowanie ---------- */
+/* ---------- Renderowanie Grafiki ---------- */
 function draw() {
-  // murawa
-  for (let i = 0; i < 10; i++) {
-    ctx.fillStyle = i % 2 ? '#2e8b57' : '#33995f';
-    ctx.fillRect(i * W/10, 0, W/10, H);
+  // 1. Trawa w pasy
+  const numStripes = 12;
+  const stripeW = (W - 2 * FIELD_MARGIN) / numStripes;
+  for (let i = 0; i < numStripes; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#2a8b4e' : '#319957';
+    ctx.fillRect(FIELD_MARGIN + i * stripeW, FIELD_MARGIN, stripeW, H - 2 * FIELD_MARGIN);
   }
-  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3;
-  ctx.strokeRect(GOAL_X, 4, W-2*GOAL_X, H-8);
-  ctx.beginPath(); ctx.moveTo(W/2, 4); ctx.lineTo(W/2, H-4); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2, H/2, 70, 0, Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
 
-  // bramki
-  ctx.fillStyle = 'rgba(255,255,255,.25)';
-  ctx.fillRect(4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
-  ctx.fillRect(W-GOAL_X-4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
-  ctx.strokeStyle = '#fff';
-  ctx.strokeRect(4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
-  ctx.strokeRect(W-GOAL_X-4, H/2-GOAL_W/2, GOAL_X, GOAL_W);
+  // 2. Linie Boiska
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 3;
 
-  // piłka
-  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI*2);
-  ctx.fillStyle = '#fff'; ctx.fill();
-  ctx.strokeStyle = '#222'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, 4, 0, Math.PI*2); ctx.fillStyle = '#333'; ctx.fill();
+  // Linia zewnętrzna
+  ctx.strokeRect(FIELD_MARGIN, FIELD_MARGIN, W - 2 * FIELD_MARGIN, H - 2 * FIELD_MARGIN);
+  // Środek
+  ctx.beginPath(); ctx.moveTo(W/2, FIELD_MARGIN); ctx.lineTo(W/2, H - FIELD_MARGIN); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 65, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
 
-  // zawodnicy
+  // Pola karne
+  const boxW = 120, boxH = 220;
+  ctx.strokeRect(FIELD_MARGIN, H/2 - boxH/2, boxW, boxH);
+  ctx.strokeRect(W - FIELD_MARGIN - boxW, H/2 - boxH/2, boxW, boxH);
+
+  // 3. Bramki & Siatki
+  drawGoal(FIELD_MARGIN, true);
+  drawGoal(W - FIELD_MARGIN, false);
+
+  // 4. Zawodnicy & AI Bramkarze
+  drawPlayer(GK1, '#e74c3c', 'GK (Host)');
+  drawPlayer(GK2, '#e74c3c', 'GK (Gość)');
   drawPlayer(OPP, '#6ec6ff', isHost ? oppName : myName);
   drawPlayer(ME, '#ffd54d', myName);
 
-  // komunikat gola
+  // 5. Piłka
+  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, 3, 0, Math.PI * 2); ctx.fillStyle = '#222'; ctx.fill();
+
+  // 6. Baner Gola
   if (goalFlash > 0) {
-    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, H/2-50, W, 100);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, H/2 - 50, W, 100);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffd54d'; ctx.font = 'bold 44px Segoe UI';
+    ctx.fillStyle = '#ffd54d'; ctx.font = 'bold 46px Segoe UI';
     ctx.fillText(goalText, W/2, H/2 + 15);
   }
 }
 
-function drawPlayer(p, color, name) {
-  ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-  ctx.fillStyle = color; ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 3; ctx.stroke();
-  ctx.fillStyle = 'rgba(0,0,0,.85)';
-  ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.fill();
-  ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 3;
-  ctx.strokeText(name, p.x, p.y - p.r - 8);
-  ctx.fillText(name, p.x, p.y - p.r - 8);
+function drawGoal(x, isLeft) {
+  const dir = isLeft ? -1 : 1;
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillRect(isLeft ? x - GOAL_DEPTH : x, GOAL_TOP, GOAL_DEPTH, GOAL_H);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+  ctx.strokeRect(isLeft ? x - GOAL_DEPTH : x, GOAL_TOP, GOAL_DEPTH, GOAL_H);
+
+  // Słupki
+  ctx.fillStyle = '#e67e22';
+  ctx.beginPath(); ctx.arc(x, GOAL_TOP, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x, GOAL_BOT, 5, 0, Math.PI * 2); ctx.fill();
 }
 
-/* ---------- klawiatura ---------- */
+function drawPlayer(p, color, name) {
+  ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5; ctx.stroke();
+
+  // Wskaźnik kierunku patrzenia
+  if (p.faceX || p.faceY) {
+    ctx.beginPath();
+    ctx.arc(p.x + (p.faceX || 0) * 10, p.y + (p.faceY || 0) * 10, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#222'; ctx.fill();
+  }
+
+  // Etykieta z nazwą
+  ctx.font = 'bold 12px Segoe UI'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 3;
+  ctx.strokeText(name, p.x, p.y - p.r - 7);
+  ctx.fillText(name, p.x, p.y - p.r - 7);
+}
+
+/* ---------- Obsługa Klawiatury ---------- */
 addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
-addEventListener('keyup',   e => { keys[e.code] = false; });
+addEventListener('keyup', e => { keys[e.code] = false; });
 </script>
 </body>
 </html>
