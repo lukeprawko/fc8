@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC 28 - Piłka Nożna 2D</title>
+<title>Pong Multiplayer 2D</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
@@ -27,8 +27,8 @@
     font-size: 42px;
     font-weight: 800;
     letter-spacing: 2px;
-    color: #2ea44f;
-    text-shadow: 0 0 10px rgba(46, 164, 79, 0.4);
+    color: #58a6ff;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
   }
   .header p {
     color: #8b949e;
@@ -128,39 +128,31 @@
   #gameWrapper { display: none; text-align: center; }
 
   #hud {
-    width: 960px;
+    width: 800px;
     max-width: 100%;
     background: #161b22;
     border: 1px solid #30363d;
     border-bottom: none;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    padding: 10px 20px;
+    padding: 12px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .score-board {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
   }
-  .team-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .team-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .p1-color { color: #58a6ff; }
   .p2-color { color: #f85149; }
-  #timerBox {
-    background: #0d1117;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 18px;
-    border: 1px solid #21262d;
-  }
 
   canvas {
-    background: #1e532b;
+    background: #111827;
     border: 1px solid #30363d;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -187,8 +179,8 @@
 <body>
 
 <div class="header">
-  <h1>FC 28</h1>
-  <p>Stabilny Mecz Piłkarski Multiplayer</p>
+  <h1>PONG MULTIPLAYER</h1>
+  <p>Odbijaj piłkę platformą i zdobądź punkty!</p>
 </div>
 
 <!-- MENU POKOJU -->
@@ -199,7 +191,7 @@
       <input id="nickInput" maxlength="12" placeholder="Gracz 1" value="Gracz">
     </div>
     
-    <button class="btn-primary" onclick="createRoom()">Stwórz Nowy Pokój</button>
+    <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Lewa strona)</button>
     
     <div class="divider"><span>LUB</span></div>
     
@@ -207,7 +199,7 @@
       <label>KOD POKOJU</label>
       <input id="joinInput" maxlength="6" placeholder="np. ABC123" style="text-transform:uppercase;">
     </div>
-    <button class="btn-secondary" onclick="joinRoom()">Dołącz do Gry</button>
+    <button class="btn-secondary" onclick="joinRoom()">Dołącz (Prawa strona)</button>
     
     <div class="status-msg" id="statusMsg"></div>
   </div>
@@ -215,7 +207,7 @@
   <div class="panel hidden" id="waitPanel">
     <div style="font-size:14px; color:#8b949e;">Twój kod pokoju:</div>
     <div id="roomCodeDisplay">------</div>
-    <div class="status-msg">Oczekiwanie na połączenie przeciwnika...</div>
+    <div class="status-msg">Oczekiwanie na drugiego gracza...</div>
     <button class="btn-cancel" onclick="location.reload()">Anuluj</button>
   </div>
 </div>
@@ -223,59 +215,47 @@
 <!-- OBSZAR GRY -->
 <div id="gameWrapper">
   <div id="hud">
-    <div class="score-board">
+    <div class="score-board" style="width: 100%; justify-content: space-between;">
       <span class="team-name p1-color" id="hudP1">Gracz 1</span>
-      <span id="hudScore" style="background:#0d1117; padding:2px 10px; border-radius:4px;">0 : 0</span>
+      <span id="hudScore" style="background:#0d1117; padding:4px 16px; border-radius:6px; border: 1px solid #30363d;">0 : 0</span>
       <span class="team-name p2-color" id="hudP2">Gracz 2</span>
     </div>
-    <div id="timerBox">03:00</div>
   </div>
 
-  <canvas id="stage" width="960" height="540"></canvas>
+  <canvas id="stage" width="800" height="500"></canvas>
 
   <div class="controls-bar">
-    Ruch: <span>W A S D</span> / <span>Strzałki</span> | Sprint: <span>SHIFT</span> | Strzał: <span>SPACJA</span> / <span>J</span> | Podanie: <span>K</span>
+    Sterowanie platformą: <span>W</span> / <span>S</span> lub <span>Strzałka w górę</span> / <span>Strzałka w dół</span>
   </div>
 </div>
 
 <script>
-/* --- KONFIGURACJA BOISKA I MECHANIKI --- */
-const W = 960, H = 540;
+const W = 800, H = 500;
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 
-const MARGIN = 40;
-const GOAL_H = 130;
-const GOAL_TOP = H/2 - GOAL_H/2;
-const GOAL_BOT = H/2 + GOAL_H/2;
-const GOAL_DEPTH = 30;
-
-// Stan Gry
 let peer = null, conn = null, isHost = false;
 let myName = 'Gracz', oppName = 'Przeciwnik';
-let gameActive = false, startTime = 0;
+let gameActive = false;
 let keys = {};
 
-// Obiekty
-const ME = { x: 200, y: H/2, vx: 0, vy: 0, r: 16, color: '#58a6ff', faceX: 1, faceY: 0 };
-const OPP = { x: 760, y: H/2, vx: 0, vy: 0, r: 16, color: '#f85149', faceX: -1, faceY: 0 };
-const GK1 = { x: MARGIN + 15, y: H/2, vx: 0, vy: 0, r: 16, color: '#e3b341' };
-const GK2 = { x: W - MARGIN - 15, y: H/2, vx: 0, vy: 0, r: 16, color: '#e3b341' };
-const BALL = { x: W/2, y: H/2, vx: 0, vy: 0, r: 8 };
+// Paletki graczy
+const PADDLE_W = 14, PADDLE_H = 90;
+const P1 = { x: 20, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
+const P2 = { x: W - 20 - PADDLE_W, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
 
-let score1 = 0, score2 = 0;
-let goalBannerTimer = 0, goalText = '';
+// Piłka
+const BALL = { x: W/2, y: H/2, r: 8, vx: 5, vy: 3, speed: 5.5 };
 
-/* --- MULTIPLAYER (PEERJS) --- */
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
-
 function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
 
+/* --- SIEC MULTIPLAYER --- */
 function createRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gospodarz';
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
   setStatus('Tworzenie pokoju...');
   const code = genCode();
-  peer = new Peer('fc28-' + code);
+  peer = new Peer('pong-' + code);
   isHost = true;
 
   peer.on('open', () => {
@@ -290,24 +270,22 @@ function createRoom() {
     c.on('open', () => conn.send({ t: 'hello', name: myName }));
   });
 
-  peer.on('error', err => setStatus('Błąd połączenia: ' + err.type));
+  peer.on('error', err => setStatus('Błąd: ' + err.type));
 }
 
 function joinRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gość';
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 2';
   const code = document.getElementById('joinInput').value.trim().toUpperCase();
-  if (code.length !== 6) { setStatus('Wpisz poprawny 6-cyfrowy kod!'); return; }
+  if (code.length !== 6) { setStatus('Wpisz kod!'); return; }
   
-  setStatus('Łączenie z pokojem...');
+  setStatus('Łączenie...');
   peer = new Peer();
   isHost = false;
 
   peer.on('open', () => {
-    conn = peer.connect('fc28-' + code);
+    conn = peer.connect('pong-' + code);
     bindConnEvents();
-    conn.on('open', () => {
-      conn.send({ t: 'hello', name: myName });
-    });
+    conn.on('open', () => conn.send({ t: 'hello', name: myName }));
   });
 
   peer.on('error', () => setStatus('Nie odnaleziono pokoju!'));
@@ -331,17 +309,14 @@ function handleData(d) {
     startGame();
   }
   else if (d.t === 'sync') {
-    OPP.x = d.px; OPP.y = d.py; OPP.vx = d.pvx; OPP.vy = d.pvy;
-    if (!isHost) {
-      BALL.x = d.bx; BALL.y = d.by; BALL.vx = d.bvx; BALL.vy = d.bvy;
-      GK1.x = d.gk1x; GK1.y = d.gk1y; GK2.x = d.gk2x; GK2.y = d.gk2y;
-      score1 = d.s1; score2 = d.s2; updateHudScore();
+    if (isHost) {
+      P2.y = d.py;
+    } else {
+      P1.y = d.py;
+      BALL.x = d.bx; BALL.y = d.by;
+      P1.score = d.s1; P2.score = d.s2;
+      updateHudScore();
     }
-  }
-  else if (d.t === 'goal') {
-    goalText = d.who + ' STRZELA GOLA!';
-    goalBannerTimer = 90;
-    resetPositions(d.dir);
   }
 }
 
@@ -351,255 +326,133 @@ function startGame() {
 
   document.getElementById('hudP1').textContent = isHost ? myName : oppName;
   document.getElementById('hudP2').textContent = isHost ? oppName : myName;
-  
-  ME.color = isHost ? '#58a6ff' : '#f85149';
-  OPP.color = isHost ? '#f85149' : '#58a6ff';
 
   gameActive = true;
-  startTime = Date.now();
-  resetPositions(0);
+  resetBall();
   requestAnimationFrame(gameLoop);
 }
 
-function resetPositions(kickoffDir) {
-  ME.x = isHost ? 260 : 700; ME.y = H/2; ME.vx = 0; ME.vy = 0;
-  OPP.x = isHost ? 700 : 260; OPP.y = H/2; OPP.vx = 0; OPP.vy = 0;
-  GK1.x = MARGIN + 15; GK1.y = H/2;
-  GK2.x = W - MARGIN - 15; GK2.y = H/2;
-  BALL.x = W/2; BALL.y = H/2; BALL.vx = kickoffDir * 2; BALL.vy = 0;
+function resetBall() {
+  BALL.x = W / 2;
+  BALL.y = H / 2;
+  BALL.speed = 5.5;
+  const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  BALL.vx = dir * BALL.speed * Math.cos(angle);
+  BALL.vy = BALL.speed * Math.sin(angle);
 }
 
 function updateHudScore() {
-  document.getElementById('hudScore').textContent = (isHost ? score1 : score2) + ' : ' + (isHost ? score2 : score1);
+  document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
 }
 
-/* --- LOGIKA ROZGRYWKI (OPTYMALIZOWANA DLA STABILNOŚCI) --- */
-function updatePlayer(p, isMe) {
-  if (isMe) {
-    let dx = 0, dy = 0;
-    if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
-    if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
-    if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
-    if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+/* --- FIZYKA GRY --- */
+function update() {
+  // Poruszanie własną paletką
+  const myPaddle = isHost ? P1 : P2;
+  if (keys['KeyW'] || keys['ArrowUp']) myPaddle.y -= myPaddle.speed;
+  if (keys['KeyS'] || keys['ArrowDown']) myPaddle.y += myPaddle.speed;
 
-    const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
-    const maxSpeed = isSprinting ? 4.2 : 2.8;
-    const accel = 0.4;
+  // Granice dla paletek
+  P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
+  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
 
-    if (dx !== 0 || dy !== 0) {
-      const len = Math.hypot(dx, dy);
-      p.vx += (dx / len) * accel;
-      p.vy += (dy / len) * accel;
-      p.faceX = dx / len; p.faceY = dy / len;
+  // Logika pilki na hoście (Gospodarzu)
+  if (isHost) {
+    BALL.x += BALL.vx;
+    BALL.y += BALL.vy;
+
+    // Odbicie od góry i dołu
+    if (BALL.y - BALL.r <= 0) { BALL.y = BALL.r; BALL.vy *= -1; }
+    if (BALL.y + BALL.r >= H) { BALL.y = H - BALL.r; BALL.vy *= -1; }
+
+    // Kolizja z paletką Lewą (P1)
+    if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
+      if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
+        BALL.x = P1.x + P1.w + BALL.r;
+        let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
+        let angle = collidePoint * (Math.PI / 3);
+        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        BALL.vx = BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+      }
+    }
+
+    // Kolizja z paletką Prawą (P2)
+    if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
+      if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
+        BALL.x = P2.x - BALL.r;
+        let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
+        let angle = collidePoint * (Math.PI / 3);
+        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        BALL.vx = -BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+      }
+    }
+
+    // Punkty
+    if (BALL.x < 0) {
+      P2.score++;
+      updateHudScore();
+      resetBall();
+    } else if (BALL.x > W) {
+      P1.score++;
+      updateHudScore();
+      resetBall();
     }
   }
 
-  p.vx *= 0.82; p.vy *= 0.82; // Tarcie zawodnika
-  const speed = Math.hypot(p.vx, p.vy);
-  if (speed > 4.5) { p.vx = (p.vx / speed) * 4.5; p.vy = (p.vy / speed) * 4.5; }
-
-  p.x += p.vx; p.y += p.vy;
-
-  // Granice boiska dla gracza
-  p.x = Math.max(MARGIN + p.r, Math.min(W - MARGIN - p.r, p.x));
-  p.y = Math.max(MARGIN + p.r, Math.min(H - MARGIN - p.r, p.y));
-}
-
-function handleKick(p) {
-  const dist = Math.hypot(BALL.x - p.x, BALL.y - p.y);
-  
-  // STRZAŁ
-  if ((keys['Space'] || keys['KeyJ']) && dist < p.r + BALL.r + 8) {
-    BALL.vx = p.faceX * 9 + p.vx * 0.3;
-    BALL.vy = p.faceY * 9 + p.vy * 0.3;
-  }
-  // PODANIE
-  else if (keys['KeyK'] && dist < p.r + BALL.r + 8) {
-    BALL.vx = p.faceX * 5.5;
-    BALL.vy = p.faceY * 5.5;
-  }
-  // PROWADZENIE
-  else if (dist < p.r + BALL.r + 2) {
-    BALL.vx = p.vx * 0.9;
-    BALL.vy = p.vy * 0.9;
-    BALL.x = p.x + p.faceX * (p.r + BALL.r);
-    BALL.y = p.y + p.faceY * (p.r + BALL.r);
-  }
-}
-
-function updateAI() {
-  [ {gk: GK1, targetX: MARGIN + 15}, {gk: GK2, targetX: W - MARGIN - 15} ].forEach(item => {
-    const gk = item.gk;
-    const targetY = Math.max(GOAL_TOP + gk.r, Math.min(GOAL_BOT - gk.r, BALL.y));
-    gk.y += (targetY - gk.y) * 0.08;
-    gk.x += (item.targetX - gk.x) * 0.08;
-
-    // Odbicie piłki od bramkarza
-    const dist = Math.hypot(BALL.x - gk.x, BALL.y - gk.y);
-    if (dist < gk.r + BALL.r) {
-      BALL.vx = (BALL.x - gk.x) * 0.3;
-      BALL.vy = (BALL.y - gk.y) * 0.3;
-    }
-  });
-}
-
-function updateBall() {
-  BALL.x += BALL.vx; BALL.y += BALL.vy;
-  BALL.vx *= 0.975; BALL.vy *= 0.975; // Zmniejszona prędkość toczenia
-
-  const BOUNCE = -0.65;
-
-  // Ściany górne i dolne
-  if (BALL.y - BALL.r < MARGIN) { BALL.y = MARGIN + BALL.r; BALL.vy *= BOUNCE; }
-  if (BALL.y + BALL.r > H - MARGIN) { BALL.y = H - MARGIN - BALL.r; BALL.vy *= BOUNCE; }
-
-  // Sprawdzanie czy piłka mieści się w bramce
-  const insideGoalY = (BALL.y - BALL.r >= GOAL_TOP) && (BALL.y + BALL.r <= GOAL_BOT);
-
-  if (!insideGoalY) {
-    if (BALL.x - BALL.r < MARGIN) { BALL.x = MARGIN + BALL.r; BALL.vx *= BOUNCE; }
-    if (BALL.x + BALL.r > W - MARGIN) { BALL.x = W - MARGIN - BALL.r; BALL.vx *= BOUNCE; }
-  } else {
-    // Siatki bramkowe (z tyłu)
-    if (BALL.x < MARGIN - GOAL_DEPTH) { BALL.x = MARGIN - GOAL_DEPTH; BALL.vx *= -0.3; }
-    if (BALL.x > W - MARGIN + GOAL_DEPTH) { BALL.x = W - MARGIN + GOAL_DEPTH; BALL.vx *= -0.3; }
-  }
-
-  // AWARYJNE ZABEZPIECZENIE: Piłka NIGDY nie zniknie poza ekranem
-  BALL.x = Math.max(10, Math.min(W - 10, BALL.x));
-  BALL.y = Math.max(10, Math.min(H - 10, BALL.y));
-}
-
-function checkGoals() {
-  const inGoalY = (BALL.y >= GOAL_TOP) && (BALL.y <= GOAL_BOT);
-
-  if (inGoalY) {
-    if (BALL.x < MARGIN - 10) {
-      score2++; updateHudScore();
-      if (isHost) conn.send({ t: 'goal', who: oppName, dir: 1 });
-      goalText = oppName + ' STRZELA GOLA!'; goalBannerTimer = 90; resetPositions(1);
-    }
-    else if (BALL.x > W - MARGIN + 10) {
-      score1++; updateHudScore();
-      if (isHost) conn.send({ t: 'goal', who: myName, dir: -1 });
-      goalText = myName + ' STRZELA GOLA!'; goalBannerTimer = 90; resetPositions(-1);
+  // Wysłanie danych do drugiego gracza
+  if (conn && conn.open) {
+    if (isHost) {
+      conn.send({ t: 'sync', py: P1.y, bx: BALL.x, by: BALL.y, s1: P1.score, s2: P2.score });
+    } else {
+      conn.send({ t: 'sync', py: P2.y });
     }
   }
 }
 
-/* --- MAIN LOOP --- */
-let netTick = 0;
+/* --- RENDEROWANIE --- */
+function render() {
+  // Tło
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0, 0, W, H);
+
+  // Linia środkowa
+  ctx.setLineDash([8, 8]);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0);
+  ctx.lineTo(W / 2, H);
+  ctx.strokeStyle = '#374151';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Paletki
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
+
+  ctx.fillStyle = '#f85149';
+  ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
+
+  // Piłka
+  ctx.beginPath();
+  ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowColor = '#ffffff';
+  ctx.shadowBlur = 8;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
 function gameLoop() {
   if (!gameActive) return;
-
-  updatePlayer(ME, true);
-  handleKick(ME);
-
-  if (isHost) {
-    updateBall();
-    updateAI();
-    checkGoals();
-  }
-
-  // Synchronizacja sieciowa
-  netTick++;
-  if (netTick % 2 === 0 && conn && conn.open) {
-    if (isHost) {
-      conn.send({
-        t: 'sync', px: ME.x, py: ME.y, pvx: ME.vx, pvy: ME.vy,
-        bx: BALL.x, by: BALL.y, bvx: BALL.vx, bvy: BALL.vy,
-        gk1x: GK1.x, gk1y: GK1.y, gk2x: GK2.x, gk2y: GK2.y,
-        s1: score1, s2: score2
-      });
-    } else {
-      conn.send({ t: 'sync', px: ME.x, py: ME.y, pvx: ME.vx, pvy: ME.vy });
-    }
-  }
-
-  // Czas meczu
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
-  const remaining = Math.max(0, 180 - elapsed);
-  const m = Math.floor(remaining / 60), s = remaining % 60;
-  document.getElementById('timerBox').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  if (goalBannerTimer > 0) goalBannerTimer--;
-
+  update();
   render();
   requestAnimationFrame(gameLoop);
 }
 
-/* --- RENDEROWANIE (GRAFIKA BOISKA I OBIEKTÓW) --- */
-function render() {
-  // Murawa
-  ctx.fillStyle = '#1e532b';
-  ctx.fillRect(0, 0, W, H);
-
-  // Pasy na murawie
-  ctx.fillStyle = 'rgba(255,255,255,0.03)';
-  for (let i = MARGIN; i < W - MARGIN; i += 80) {
-    ctx.fillRect(i, MARGIN, 40, H - 2 * MARGIN);
-  }
-
-  // Linie
-  ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN);
-
-  // Środek
-  ctx.beginPath(); ctx.moveTo(W/2, MARGIN); ctx.lineTo(W/2, H - MARGIN); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI * 2); ctx.stroke();
-
-  // Pola karne
-  ctx.strokeRect(MARGIN, H/2 - 90, 100, 180);
-  ctx.strokeRect(W - MARGIN - 100, H/2 - 90, 100, 180);
-
-  // Bramki
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
-  ctx.strokeRect(MARGIN - GOAL_DEPTH, GOAL_TOP, GOAL_DEPTH, GOAL_H);
-  ctx.strokeRect(W - MARGIN, GOAL_TOP, GOAL_DEPTH, GOAL_H);
-
-  // Postacie
-  drawEntity(GK1); drawEntity(GK2);
-  drawEntity(OPP); drawEntity(ME);
-
-  // Cień i Piłka
-  ctx.beginPath(); ctx.arc(BALL.x + 2, BALL.y + 2, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fill();
-
-  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff'; ctx.fill();
-  ctx.strokeStyle = '#000000'; ctx.lineWidth = 1.5; ctx.stroke();
-
-  // Baner Gola
-  if (goalBannerTimer > 0) {
-    ctx.fillStyle = 'rgba(13, 17, 23, 0.85)';
-    ctx.fillRect(0, H/2 - 40, W, 80);
-    ctx.fillStyle = '#e3b341';
-    ctx.font = 'bold 32px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.fillText(goalText, W/2, H/2 + 10);
-  }
-}
-
-function drawEntity(e) {
-  // Cień
-  ctx.beginPath(); ctx.arc(e.x + 2, e.y + 2, e.r, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill();
-
-  // Ciało
-  ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-  ctx.fillStyle = e.color; ctx.fill();
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
-
-  // Wskaźnik obrotu
-  if (e.faceX !== undefined) {
-    ctx.beginPath();
-    ctx.arc(e.x + e.faceX * 9, e.y + e.faceY * 9, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff'; ctx.fill();
-  }
-}
-
-/* --- KONTROLA KLAWIATURY --- */
 addEventListener('keydown', e => { keys[e.code] = true; });
 addEventListener('keyup', e => { keys[e.code] = false; });
 </script>
