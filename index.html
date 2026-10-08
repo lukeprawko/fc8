@@ -1,420 +1,709 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Chaos Tanks Online</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body { background: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-    #ui-container { position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; gap: 20px; align-items: flex-start; }
-    .panel { background: rgba(0,0,0,0.85); border: 2px solid #444; border-radius: 8px; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-    h2 { font-size: 16px; margin-bottom: 8px; color: #00ffcc; text-transform: uppercase; }
-    input, button { padding: 8px 12px; margin: 4px 0; border: 1px solid #555; background: #222; color: #fff; border-radius: 4px; font-weight: bold; }
-    button { cursor: pointer; background: #0088cc; border: none; transition: 0.2s; }
-    button:hover { background: #00aaff; }
-    .upgrade-btn { background: #28a745; width: 100%; margin-top: 5px; }
-    .upgrade-btn:hover { background: #34ce57; }
-    #stats-panel { min-width: 200px; }
-    #net-panel { min-width: 250px; }
-    canvas { display: block; background: #1a1a1a; cursor: crosshair; }
-    #chat-box { position: absolute; bottom: 10px; left: 10px; width: 300px; height: 120px; background: rgba(0,0,0,0.6); pointer-events: none; padding: 10px; overflow-y: auto; font-size: 12px; font-family: monospace; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EA FC 26 - Ultimate Arcade Multiplayer</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fc-gold: #e5c158;
+    --fc-gold-glow: rgba(229, 193, 88, 0.4);
+    --fc-silver: #a0aab5;
+    --fc-cyan: #00f0ff;
+    --fc-dark: #090d16;
+    --fc-card: #121928;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; user-select: none; }
+
+  body {
+    background: radial-gradient(circle at center, #131d31 0%, #070a12 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    overflow-x: hidden;
+  }
+
+  .logo-header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .logo-header h1 {
+    font-family: 'Teko', sans-serif;
+    font-size: 56px;
+    line-height: 0.9;
+    letter-spacing: 3px;
+    background: linear-gradient(180deg, #ffffff 20%, var(--fc-gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px var(--fc-gold-glow);
+  }
+  .logo-header p {
+    color: var(--fc-cyan);
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* KARTY / PANANEL KONFIGURACJI */
+  .panel {
+    background: rgba(18, 25, 40, 0.85);
+    border: 1px solid rgba(229, 193, 88, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    width: 480px;
+    max-width: 95vw;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+    text-align: center;
+  }
+
+  .input-group { margin-bottom: 12px; text-align: left; }
+  .input-group label { display: block; font-size: 12px; color: var(--fc-silver); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
+  input, select {
+    width: 100%; padding: 10px 14px; background: rgba(5, 8, 15, 0.8); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: #fff; font-size: 15px; font-weight: 600; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--fc-gold); }
+
+  /* PLAYSTYLES SEKCJA */
+  .playstyles-title {
+    font-size: 14px; font-weight: 700; color: var(--fc-gold); text-transform: uppercase;
+    margin: 14px 0 8px; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
+  }
+  .ps-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; margin-bottom: 15px;
+  }
+  .ps-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; font-weight: 600;
+  }
+  .ps-badge {
+    font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-weight: 800;
+  }
+  .badge-none { background: rgba(255,255,255,0.1); color: #888; }
+  .badge-silver { background: linear-gradient(135deg, #c0c0c0, #707070); color: #000; }
+  .badge-gold { background: linear-gradient(135deg, #ffe066, #d49b00); color: #000; box-shadow: 0 0 8px var(--fc-gold-glow); }
+
+  button {
+    width: 100%; padding: 12px; margin-top: 8px; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  button:active { transform: scale(0.98); }
+  .btn-gold { background: linear-gradient(135deg, #ffe066, #d49b00); color: #000; }
+  .btn-green { background: linear-gradient(135deg, #00ff88, #00b359); color: #000; }
+  .btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
+
+  #roomCodeDisplay {
+    font-family: 'Teko', sans-serif; font-size: 40px; letter-spacing: 6px; color: var(--fc-gold);
+    margin: 8px 0; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 8px; border: 1px dashed var(--fc-gold);
+  }
+
+  /* OBSZAR GRY */
+  #gameWrapper { display: none; text-align: center; }
+
+  #hud {
+    width: 960px; max-width: 95vw; background: rgba(9, 13, 22, 0.9);
+    border: 1px solid rgba(229, 193, 88, 0.25); border-bottom: none;
+    border-top-left-radius: 12px; border-top-right-radius: 12px;
+    padding: 8px 20px; display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .score-board {
+    font-family: 'Teko', sans-serif; font-size: 36px; line-height: 1;
+    display: flex; align-items: center; gap: 15px;
+  }
+  .p1-color { color: var(--fc-gold); }
+  .p2-color { color: var(--fc-cyan); }
+
+  #timer {
+    font-family: 'Teko', sans-serif; font-size: 28px; background: rgba(0,0,0,0.5);
+    padding: 2px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  canvas {
+    background: #1b4d2e; border: 1px solid rgba(255,255,255,0.2);
+    border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8); display: block; max-width: 95vw;
+  }
+
+  .controls-bar {
+    margin-top: 10px; color: var(--fc-silver); font-size: 13px; font-weight: 600;
+  }
+  .controls-bar b { color: #fff; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; }
+
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
 
-  <div id="ui-container">
-    <div class="panel" id="net-panel">
-      <h2>Multiplayer (WebRTC)</h2>
-      <div id="my-id-display">Twój ID: <b style="color:#00ffcc;">Łączenie...</b></div>
-      <hr style="border-color:#444; margin:8px 0;">
-      <input type="text" id="join-id" placeholder="Wklej ID Hosta...">
-      <button id="btn-join">Dołącz do gry</button>
-      <div id="status-text" style="font-size:12px; color:#aaa; margin-top:5px;">Połączono jako Host. Przekaż swoje ID znajomemu!</div>
+<div class="logo-header">
+  <h1>EA FC 26</h1>
+  <p>PLAYSTYLES & MULTIPLAYER ARCADE</p>
+</div>
+
+<!-- MENU KONFIGURACJI -->
+<div id="menu">
+  <div class="panel" id="mainPanel">
+    <div class="input-group">
+      <label>TWÓJ NICK</label>
+      <input id="nickInput" maxlength="12" value="Gracz">
     </div>
 
-    <div class="panel" id="stats-panel">
-      <h2>Czołg (Poziom <span id="lvl-val">1</span>)</h2>
-      <div>XP: <span id="xp-val">0</span> / <span id="max-xp-val">100</span></div>
-      <div>Punkty Ulepszeń: <b id="pts-val" style="color:#ffcc00;">0</b></div>
-      <button class="upgrade-btn" onclick="upgrade('speed')">+ Prędkość Ruchu</button>
-      <button class="upgrade-btn" onclick="upgrade('reload')">+ Szybciej Strzelaj</button>
-      <button class="upgrade-btn" onclick="upgrade('damage')">+ Obrażenia Pocisków</button>
-      <button class="upgrade-btn" onclick="upgrade('hp')">+ Max HP</button>
+    <div class="input-group">
+      <label>WYBÓR ZAWODNIKA</label>
+      <select id="playerSelect" onchange="onPlayerChange()">
+        <option value="custom">Twój Własny Piłkarz</option>
+        <option value="mbappe">K. Mbappé (Szybkość & Rapid+)</option>
+        <option value="haaland">E. Haaland (Power Shot+)</option>
+        <option value="messi">L. Messi (Finesse Shot+)</option>
+        <option value="bellingham">J. Bellingham (Relentless+)</option>
+      </select>
     </div>
+
+    <!-- KONFIGURACJA PLAYSTYLES -->
+    <div class="playstyles-title">Rozdaj PlayStyles (Kliknij aby zmienić)</div>
+    <div class="ps-grid">
+      <div class="ps-item">
+        <span>Finesse Shot</span>
+        <span class="ps-badge badge-none" id="ps-finesse" onclick="togglePS('finesse')">OFF</span>
+      </div>
+      <div class="ps-item">
+        <span>Rapid (Sprint)</span>
+        <span class="ps-badge badge-none" id="ps-rapid" onclick="togglePS('rapid')">OFF</span>
+      </div>
+      <div class="ps-item">
+        <span>Power Shot</span>
+        <span class="ps-badge badge-none" id="ps-powershot" onclick="togglePS('powershot')">OFF</span>
+      </div>
+      <div class="ps-item">
+        <span>Relentless (Stamina)</span>
+        <span class="ps-badge badge-none" id="ps-relentless" onclick="togglePS('relentless')">OFF</span>
+      </div>
+    </div>
+
+    <button class="btn-gold" onclick="createRoom()">⚽ Stwórz Pokój (Host)</button>
+    <div style="margin: 10px 0 4px; color: #666; font-size: 11px; font-weight: 700;">— LUB DOŁĄCZ —</div>
+    <input id="joinInput" maxlength="6" placeholder="KOD POKOJU (NP. K7Q2XA)" style="text-transform:uppercase; margin-bottom: 6px;">
+    <button class="btn-green" onclick="joinRoom()">🎮 Dołącz do Meczu</button>
+
+    <div id="statusMsg" style="margin-top: 8px; font-size: 13px; color: var(--fc-cyan);"></div>
   </div>
 
-  <div id="chat-box"></div>
-  <canvas id="gameCanvas"></canvas>
+  <div class="panel hidden" id="waitPanel">
+    <div style="font-size:14px; color:var(--fc-silver);">Podaj znajomemu kod pokoju:</div>
+    <div id="roomCodeDisplay">------</div>
+    <div style="font-size:13px; color:var(--fc-cyan); margin-top:6px;">Oczekiwanie na rywala...</div>
+    <button class="btn-cancel" onclick="location.reload()" style="margin-top:12px;">Anuluj</button>
+  </div>
+</div>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+<!-- DANE MECZU -->
+<div id="gameWrapper">
+  <div id="hud">
+    <div class="score-board">
+      <span class="p1-color" id="hudP1">Gospodarz</span>
+      <span id="hudScore" style="background:rgba(0,0,0,0.5); padding:2px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.1)">0 : 0</span>
+      <span class="p2-color" id="hudP2">Gość</span>
+    </div>
+    <div id="timer">03:00</div>
+  </div>
 
-    // --- Świat Gry ---
-    const WORLD_SIZE = 3000;
-    const keys = {};
-    const mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
-    
-    // PeerJS Networking
-    let peer = new Peer();
-    let myId = "";
-    let connections = [];
-    let isHost = true;
+  <canvas id="cv" width="960" height="540"></canvas>
 
-    // Lokalne Dane Gracza
-    let player = {
-      id: null,
-      x: 500, y: 500, size: 30, angle: 0,
-      speed: 4, hp: 100, maxHp: 100,
-      lvl: 1, xp: 0, maxXp: 100, upgradePts: 0,
-      reloadTime: 250, lastShot: 0, damage: 20,
-      color: '#' + Math.floor(Math.random()*16777215).toString(16),
-      stats: { speedLvl: 0, reloadLvl: 0, dmgLvl: 0, hpLvl: 0 }
-    };
+  <div class="controls-bar">
+    🕹 Ruch: <b>WASD / Strzałki</b> | ⚡ Rapid/Sprint: <b>SHIFT</b> | 💥 Strzał / Power Shot: <b>SPACJA / J</b> | 🎯 Finesse Shot: <b>K</b>
+  </div>
+</div>
 
-    let otherPlayers = {};
-    let bullets = [];
-    let powerups = [];
-    let obstacles = [];
-    let blackHoles = [];
+<script>
+/* ================= EA FC 26 ENGINE ================= */
+const W = 960, H = 540;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
 
-    // Generowanie Mapy Przeszkód
-    function initMap() {
-      obstacles = [];
-      for (let i = 0; i < 80; i++) {
-        obstacles.push({
-          x: Math.random() * (WORLD_SIZE - 200) + 100,
-          y: Math.random() * (WORLD_SIZE - 200) + 100,
-          w: 80 + Math.random() * 100,
-          h: 80 + Math.random() * 100,
-          type: Math.random() > 0.3 ? 'wall' : 'crystal' // Crystal daje XP
-        });
-      }
+const MARGIN = 40;
+const GOAL_DEPTH = 35;
+const GOAL_H = 140;
+const GOAL_TOP = H/2 - GOAL_H/2;
+const GOAL_BOT = H/2 + GOAL_H/2;
+
+let peer = null, conn = null, isHost = false;
+let myName = 'Gracz', oppName = 'Przeciwnik';
+let started = false, startTime = 0;
+let keys = {};
+
+// STAN PLAYSTYLES GRACZA (0: OFF, 1: GREY, 2: GOLD+)
+const myPlayStyles = {
+  finesse: 0,
+  rapid: 0,
+  powershot: 0,
+  relentless: 0
+};
+
+// GOTOWE PRESETY ZAWODNIKÓW
+const PRESETS = {
+  mbappe: { name: 'K. Mbappé', ps: { rapid: 2, powershot: 1, finesse: 0, relentless: 1 } },
+  haaland: { name: 'E. Haaland', ps: { powershot: 2, rapid: 1, finesse: 0, relentless: 1 } },
+  messi: { name: 'L. Messi', ps: { finesse: 2, rapid: 1, powershot: 0, relentless: 0 } },
+  bellingham: { name: 'J. Bellingham', ps: { relentless: 2, finesse: 1, rapid: 1, powershot: 0 } }
+};
+
+// ZAWODNICY & BOISKO
+const ME   = { x:200, y:H/2, vx:0, vy:0, r:18, faceX:1, faceY:0, ps: myPlayStyles };
+const OPP  = { x:760, y:H/2, vx:0, vy:0, r:18, faceX:-1, faceY:0, ps: { finesse:0, rapid:0, powershot:0, relentless:0 } };
+const GK1  = { x:MARGIN + 15, y:H/2, vx:0, vy:0, r:18 };
+const GK2  = { x:W - MARGIN - 15, y:H/2, vx:0, vy:0, r:18 };
+const BALL = { x:W/2, y:H/2, vx:0, vy:0, r:9 };
+
+let score1 = 0, score2 = 0;
+let goalFlash = 0, goalText = '';
+const MATCH_LEN = 180;
+
+/* ---------- PLAYSTYLES UI TOGGLE ---------- */
+function togglePS(type) {
+  myPlayStyles[type] = (myPlayStyles[type] + 1) % 3;
+  updatePSBadges();
+}
+
+function updatePSBadges() {
+  for (let key in myPlayStyles) {
+    const el = document.getElementById('ps-' + key);
+    const val = myPlayStyles[key];
+    if (val === 0) { el.className = 'ps-badge badge-none'; el.textContent = 'OFF'; }
+    else if (val === 1) { el.className = 'ps-badge badge-silver'; el.textContent = 'PS'; }
+    else if (val === 2) { el.className = 'ps-badge badge-gold'; el.textContent = 'PS+'; }
+  }
+}
+
+function onPlayerChange() {
+  const val = document.getElementById('playerSelect').value;
+  if (val !== 'custom' && PRESETS[val]) {
+    const preset = PRESETS[val];
+    document.getElementById('nickInput').value = preset.name;
+    Object.assign(myPlayStyles, preset.ps);
+    updatePSBadges();
+  }
+}
+
+/* ---------- PEERJS MULTIPLAYER ---------- */
+const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
+
+function setStatus(t) { document.getElementById('statusMsg').textContent = t; }
+
+function createRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gospodarz';
+  setStatus('Łączenie z serwerami EA FC...');
+  const code = genCode();
+  peer = new Peer('eafc26-' + code);
+  isHost = true;
+
+  peer.on('open', () => {
+    document.getElementById('mainPanel').classList.add('hidden');
+    document.getElementById('waitPanel').classList.remove('hidden');
+    document.getElementById('roomCodeDisplay').textContent = code;
+  });
+  peer.on('connection', c => {
+    conn = c; setupConn();
+    c.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
+  });
+  peer.on('error', e => setStatus('Błąd połączenia: ' + e.type));
+}
+
+function joinRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gość';
+  const code = document.getElementById('joinInput').value.trim().toUpperCase();
+  if (code.length !== 6) { setStatus('Wpisz poprawny 6-cyfrowy kod!'); return; }
+  setStatus('Łączenie z pokojem...');
+  peer = new Peer();
+  isHost = false;
+
+  peer.on('open', () => {
+    conn = peer.connect('eafc26-' + code, { reliable:true });
+    setupConn();
+    conn.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
+  });
+  peer.on('error', () => setStatus('Nie znaleziono pokoju meczowego!'));
+}
+
+function setupConn() {
+  conn.on('data', onData);
+  conn.on('close', () => { if (started) alert('Przeciwnik wyszedł z meczu.'); location.reload(); });
+}
+
+function onData(d) {
+  if (d.t === 'hello') {
+    oppName = d.name;
+    OPP.ps = d.ps;
+    if (isHost) {
+      conn.send({ t:'start', opp: myName, ps: myPlayStyles });
+      beginGame();
     }
-    initMap();
+  }
+  else if (d.t === 'start') {
+    oppName = d.opp;
+    OPP.ps = d.ps;
+    beginGame();
+  }
+  else if (d.t === 's') {
+    OPP.x = d.x; OPP.y = d.y; OPP.vx = d.vx; OPP.vy = d.vy;
+    if (!isHost) {
+      BALL.x = d.bx; BALL.y = d.by; BALL.vx = d.bvx; BALL.vy = d.bvy;
+      GK1.x = d.gk1x; GK1.y = d.gk1y; GK2.x = d.gk2x; GK2.y = d.gk2y;
+      score1 = d.s1; score2 = d.s2; syncScore();
+    }
+  }
+  else if (d.t === 'goal') {
+    goalText = d.who; goalFlash = 120; resetPositions(d.kickoff);
+  }
+}
 
-    // --- Obsługa PeerJS ---
-    peer.on('open', (id) => {
-      myId = id;
-      player.id = id;
-      document.getElementById('my-id-display').innerHTML = `Twój ID: <b style="color:#00ffcc;">${id}</b>`;
-    });
+function beginGame() {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('gameWrapper').style.display = 'block';
+  document.getElementById('hudP1').textContent = isHost ? myName : oppName;
+  document.getElementById('hudP2').textContent = isHost ? oppName : myName;
 
-    peer.on('connection', (conn) => {
-      setupConnection(conn);
-    });
+  started = true;
+  startTime = Date.now();
+  resetPositions(0);
+  requestAnimationFrame(loop);
+}
 
-    document.getElementById('btn-join').addEventListener('click', () => {
-      const targetId = document.getElementById('join-id').value.trim();
-      if (targetId) {
-        isHost = false;
-        document.getElementById('status-text').innerText = "Łączenie z hostem...";
-        const conn = peer.connect(targetId);
-        setupConnection(conn);
-      }
-    });
+function resetPositions(kickoffDir) {
+  ME.x = isHost ? 260 : 700; ME.y = H/2; ME.vx = 0; ME.vy = 0;
+  OPP.x = isHost ? 700 : 260; OPP.y = H/2; OPP.vx = 0; OPP.vy = 0;
+  GK1.x = MARGIN + 15; GK1.y = H/2; GK1.vx = 0; GK1.vy = 0;
+  GK2.x = W - MARGIN - 15; GK2.y = H/2; GK2.vx = 0; GK2.vy = 0;
+  BALL.x = W/2; BALL.y = H/2; BALL.vx = kickoffDir * 3; BALL.vy = 0;
+}
 
-    function setupConnection(conn) {
-      connections.push(conn);
-      conn.on('open', () => {
-        document.getElementById('status-text').innerText = "Połączono Pomyślnie!";
+function syncScore() {
+  document.getElementById('hudScore').textContent = (isHost ? score1 : score2) + ' : ' + (isHost ? score2 : score1);
+}
+
+/* ---------- MECHANIKA Z PRZELICZANIEM PLAYSTYLES ---------- */
+function stepPlayer(p, isMe, dt) {
+  const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+
+  // RAPID PLAYSTYLE (BONUS DO SPRINTU)
+  let sprintBonus = 0;
+  if (p.ps.rapid === 1) sprintBonus = 0.8;
+  if (p.ps.rapid === 2) sprintBonus = 1.8; // RAPID+
+
+  // RELENTLESS PLAYSTYLE (TYLKO MNIEJSZE ZMĘCZENIE/STABILNE PRZYSPIESZENIE)
+  const ACC = isSprinting ? (0.8 + sprintBonus * 0.1) : 0.65;
+  const MAXV = isSprinting ? (5.5 + sprintBonus) : 5.2;
+  const FRICTION = 0.86;
+
+  if (isMe) {
+    let dx = 0, dy = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+    if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
+    if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+    if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+    if (dx !== 0 || dy !== 0) {
+      const len = Math.hypot(dx, dy);
+      p.vx += (dx / len) * ACC;
+      p.vy += (dy / len) * ACC;
+      p.faceX = dx / len;
+      p.faceY = dy / len;
+    }
+  }
+
+  p.vx *= FRICTION; p.vy *= FRICTION;
+  const sp = Math.hypot(p.vx, p.vy);
+  if (sp > MAXV) { p.vx = (p.vx / sp) * MAXV; p.vy = (p.vy / sp) * MAXV; }
+
+  p.x += p.vx * dt; p.y += p.vy * dt;
+  p.x = Math.max(MARGIN + p.r, Math.min(W - MARGIN - p.r, p.x));
+  p.y = Math.max(MARGIN + p.r, Math.min(H - MARGIN - p.r, p.y));
+}
+
+function handleActions(p) {
+  const dist = Math.hypot(BALL.x - p.x, BALL.y - p.y);
+  
+  // 1. POWER SHOT (Spacja lub J)
+  if ((keys['Space'] || keys['KeyJ']) && dist < p.r + BALL.r + 12) {
+    let powerBonus = 0;
+    if (p.ps.powershot === 1) powerBonus = 3;
+    if (p.ps.powershot === 2) powerBonus = 6.5; // POWER SHOT+
+
+    const power = 13.5 + powerBonus;
+    BALL.vx = p.faceX * power + p.vx * 0.4;
+    BALL.vy = p.faceY * power + p.vy * 0.4;
+  }
+  // 2. FINESSE SHOT (K) - Podkręcony strzał z dokładnością
+  else if (keys['KeyK'] && dist < p.r + BALL.r + 14) {
+    let curveMult = 1.0;
+    if (p.ps.finesse === 1) curveMult = 1.4;
+    if (p.ps.finesse === 2) curveMult = 2.0; // FINESSE SHOT+
+
+    const power = 10;
+    BALL.vx = p.faceX * power;
+    BALL.vy = (p.faceY + (p.faceX > 0 ? -0.4 : 0.4) * curveMult) * power;
+  }
+  // 3. DRYBLING / ZBLIŻENIE DO PIŁKI
+  else if (dist < p.r + BALL.r + 6) {
+    const targetX = p.x + p.faceX * (p.r + BALL.r + 2);
+    const targetY = p.y + p.faceY * (p.r + BALL.r + 2);
+    BALL.x += (targetX - BALL.x) * 0.35;
+    BALL.y += (targetY - BALL.y) * 0.35;
+    BALL.vx = p.vx; BALL.vy = p.vy;
+  }
+}
+
+/* ---------- GK AI ---------- */
+function updateGK(gk, targetX, pAlly, dt) {
+  const defY = Math.max(GOAL_TOP + gk.r, Math.min(GOAL_BOT - gk.r, BALL.y));
+  let destX = targetX, destY = defY;
+
+  const distToBall = Math.hypot(BALL.x - gk.x, BALL.y - gk.y);
+  if (distToBall < 125) { destX = BALL.x; destY = BALL.y; }
+
+  const dx = destX - gk.x, dy = destY - gk.y;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist > 2) {
+    const speed = distToBall < 125 ? 3.8 : 2.5;
+    gk.vx = (dx / dist) * speed; gk.vy = (dy / dist) * speed;
+  } else { gk.vx *= 0.5; gk.vy *= 0.5; }
+
+  gk.x += gk.vx * dt; gk.y += gk.vy * dt;
+
+  if (distToBall < gk.r + BALL.r + 4) {
+    const passTarget = pAlly || { x: W/2, y: H/2 };
+    const pdx = passTarget.x - gk.x, pdy = passTarget.y - gk.y;
+    const plen = Math.hypot(pdx, pdy) || 1;
+    BALL.vx = (pdx / plen) * 9.5; BALL.vy = (pdy / plen) * 9.5;
+  }
+}
+
+/* ---------- PIŁKA I KONTROLA BRAMKI ---------- */
+function stepBall(dt) {
+  BALL.x += BALL.vx * dt; BALL.y += BALL.vy * dt;
+  BALL.vx *= 0.985; BALL.vy *= 0.985;
+  const BOUNCE = 0.8;
+
+  if (BALL.y < MARGIN + BALL.r) { BALL.y = MARGIN + BALL.r; BALL.vy = -BALL.vy * BOUNCE; }
+  if (BALL.y > H - MARGIN - BALL.r) { BALL.y = H - MARGIN - BALL.r; BALL.vy = -BALL.vy * BOUNCE; }
+
+  const insideGoalY = (BALL.y - BALL.r >= GOAL_TOP) && (BALL.y + BALL.r <= GOAL_BOT);
+
+  if (!insideGoalY) {
+    if (BALL.x < MARGIN + BALL.r) { BALL.x = MARGIN + BALL.r; BALL.vx = -BALL.vx * BOUNCE; }
+    if (BALL.x > W - MARGIN - BALL.r) { BALL.x = W - MARGIN - BALL.r; BALL.vx = -BALL.vx * BOUNCE; }
+  }
+
+  checkPostCollision(MARGIN, GOAL_TOP);
+  checkPostCollision(MARGIN, GOAL_BOT);
+  checkPostCollision(W - MARGIN, GOAL_TOP);
+  checkPostCollision(W - MARGIN, GOAL_BOT);
+
+  if (BALL.x < MARGIN - GOAL_DEPTH + BALL.r) { BALL.x = MARGIN - GOAL_DEPTH + BALL.r; BALL.vx = -BALL.vx * 0.5; }
+  if (BALL.x > W - MARGIN + GOAL_DEPTH - BALL.r) { BALL.x = W - MARGIN + GOAL_DEPTH - BALL.r; BALL.vx = -BALL.vx * 0.5; }
+}
+
+function checkPostCollision(px, py) {
+  const dx = BALL.x - px, dy = BALL.y - py;
+  const dist = Math.hypot(dx, dy);
+  if (dist < BALL.r + 6) {
+    const nx = dx / dist, ny = dy / dist;
+    BALL.x = px + nx * (BALL.r + 6); BALL.y = py + ny * (BALL.r + 6);
+    const dot = BALL.vx * nx + BALL.vy * ny;
+    BALL.vx = (BALL.vx - 2 * dot * nx) * 0.8;
+    BALL.vy = (BALL.vy - 2 * dot * ny) * 0.8;
+  }
+}
+
+function collidePlayerBall(p) {
+  const dx = BALL.x - p.x, dy = BALL.y - p.y;
+  const dist = Math.hypot(dx, dy), minD = p.r + BALL.r;
+  if (dist < minD && dist > 0) {
+    const nx = dx / dist, ny = dy / dist;
+    BALL.x = p.x + nx * minD; BALL.y = p.y + ny * minD;
+    BALL.vx = nx * 4.0 + p.vx * 0.6; BALL.vy = ny * 4.0 + p.vy * 0.6;
+  }
+}
+
+function checkGoal() {
+  const strictlyInsideGoalY = (BALL.y - BALL.r >= GOAL_TOP) && (BALL.y + BALL.r <= GOAL_BOT);
+
+  if (strictlyInsideGoalY) {
+    if (BALL.x + BALL.r < MARGIN) {
+      if (isHost) { score2++; syncScore(); conn && conn.send({t:'goal', who: oppName + ' STRZELA GOLA!', kickoff: 1}); }
+      goalText = '⚽ GOOOAL!'; goalFlash = 120; resetPositions(1);
+    }
+    else if (BALL.x - BALL.r > W - MARGIN) {
+      if (isHost) { score1++; syncScore(); conn && conn.send({t:'goal', who: myName + ' STRZELA GOLA!', kickoff: -1}); }
+      goalText = '⚽ GOOOAL!'; goalFlash = 120; resetPositions(-1);
+    }
+  }
+}
+
+/* ---------- PETLA MECZU ---------- */
+let lastT = 0, netTimer = 0;
+function loop(ts) {
+  if (!started) return;
+  const dt = Math.min((ts - lastT) / 16.6, 3) || 1;
+  lastT = ts;
+
+  stepPlayer(ME, true, dt);
+  handleActions(ME);
+
+  if (isHost) {
+    stepBall(dt);
+    updateGK(GK1, MARGIN + 15, ME, dt);
+    updateGK(GK2, W - MARGIN - 15, OPP, dt);
+    collidePlayerBall(ME);
+    collidePlayerBall(OPP);
+    checkGoal();
+  } else {
+    BALL.x += BALL.vx * dt * 0.9; BALL.y += BALL.vy * dt * 0.9;
+    collidePlayerBall(ME);
+  }
+
+  // Sieć
+  netTimer++;
+  if (netTimer % 3 === 0 && conn && conn.open) {
+    if (isHost) {
+      conn.send({
+        t:'s', x:ME.x, y:ME.y, vx:ME.vx, vy:ME.vy,
+        bx:BALL.x, by:BALL.y, bvx:BALL.vx, bvy:BALL.vy,
+        gk1x:GK1.x, gk1y:GK1.y, gk2x:GK2.x, gk2y:GK2.y,
+        s1:score1, s2:score2
       });
-
-      conn.on('data', (data) => {
-        handleNetworkData(data);
-      });
-
-      conn.on('close', () => {
-        delete otherPlayers[conn.peer];
-      });
+    } else {
+      conn.send({ t:'s', x:ME.x, y:ME.y, vx:ME.vx, vy:ME.vy });
     }
+  }
 
-    function broadcast(data) {
-      connections.forEach(c => {
-        if (c.open) c.send(data);
-      });
-    }
+  // Timer
+  const left = Math.max(0, MATCH_LEN - (Date.now() - startTime)/1000);
+  const m = Math.floor(left/60), s = Math.floor(left%60);
+  document.getElementById('timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  if (left <= 0) { endMatch(); return; }
+  if (goalFlash > 0) goalFlash--;
 
-    function handleNetworkData(data) {
-      if (data.type === 'sync_player') {
-        otherPlayers[data.player.id] = data.player;
-      } else if (data.type === 'spawn_bullet') {
-        bullets.push(data.bullet);
-      } else if (data.type === 'spawn_powerup') {
-        powerups.push(data.powerup);
-      } else if (data.type === 'spawn_blackhole') {
-        blackHoles.push(data.blackhole);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function endMatch() {
+  started = false;
+  const mine = isHost ? score1 : score2, theirs = isHost ? score2 : score1;
+  draw();
+  ctx.fillStyle = 'rgba(9, 13, 22, 0.9)'; ctx.fillRect(0,0,W,H);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#e5c158'; ctx.font = '700 64px Teko';
+  ctx.fillText(mine > theirs ? '🏆 ZWYCIĘSTWO!' : mine < theirs ? 'PORAŻKA' : 'REMIS', W/2, H/2 - 20);
+  ctx.fillStyle = '#fff'; ctx.font = '700 36px Teko';
+  ctx.fillText(score1 + ' : ' + score2, W/2, H/2 + 30);
+}
+
+/* ---------- GRAFIKA Z ZŁOTYMI I SZARYMI PLAYSTYLES ---------- */
+function draw() {
+  // Murawa
+  ctx.fillStyle = '#18472a'; ctx.fillRect(0, 0, W, H);
+
+  const numStripes = 12;
+  const stripeW = (W - 2 * MARGIN) / numStripes;
+  for (let i = 0; i < numStripes; i++) {
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)';
+    ctx.fillRect(MARGIN + i * stripeW, MARGIN, stripeW, H - 2 * MARGIN);
+  }
+
+  // Banderze i Linie
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 3;
+  ctx.strokeRect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN);
+  ctx.beginPath(); ctx.moveTo(W/2, MARGIN); ctx.lineTo(W/2, H - MARGIN); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 65, 0, Math.PI * 2); ctx.stroke();
+
+  // Pola Karne
+  const boxW = 110, boxH = 200;
+  ctx.strokeRect(MARGIN, H/2 - boxH/2, boxW, boxH);
+  ctx.strokeRect(W - MARGIN - boxW, H/2 - boxH/2, boxW, boxH);
+
+  // Bramki
+  drawGoal(MARGIN, true);
+  drawGoal(W - MARGIN, false);
+
+  // Zawodnicy
+  drawPlayer(GK1, '#ff3366', 'GK');
+  drawPlayer(GK2, '#ff3366', 'GK');
+  drawPlayer(OPP, '#00f0ff', isHost ? oppName : myName);
+  drawPlayer(ME, '#e5c158', myName, true);
+
+  // Piłka
+  ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Baner Gola
+  if (goalFlash > 0) {
+    ctx.fillStyle = 'rgba(9, 13, 22, 0.85)'; ctx.fillRect(0, H/2 - 50, W, 100);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#e5c158'; ctx.font = '700 52px Teko';
+    ctx.fillText(goalText, W/2, H/2 + 15);
+  }
+}
+
+function drawGoal(x, isLeft) {
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(isLeft ? x - GOAL_DEPTH : x, GOAL_TOP, GOAL_DEPTH, GOAL_H);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+  ctx.strokeRect(isLeft ? x - GOAL_DEPTH : x, GOAL_TOP, GOAL_DEPTH, GOAL_H);
+}
+
+function drawPlayer(p, color, name, isLocal = false) {
+  // Cień
+  ctx.beginPath(); ctx.ellipse(p.x, p.y + p.r - 2, p.r * 0.8, p.r * 0.4, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fill();
+
+  // Zawodnik
+  ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Kierunek
+  if (p.faceX || p.faceY) {
+    ctx.beginPath(); ctx.arc(p.x + (p.faceX || 0) * 10, p.y + (p.faceY || 0) * 10, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#111'; ctx.fill();
+  }
+
+  // IKONKI PLAYSTYLES NAD GLOWĄ
+  let psOffsetY = p.y - p.r - 18;
+  if (p.ps) {
+    let iconX = p.x - 22;
+    for (let key in p.ps) {
+      const val = p.ps[key];
+      if (val > 0) {
+        ctx.fillStyle = val === 2 ? '#ffe066' : '#a0aab5'; // Złoty vs Szary
+        ctx.beginPath(); ctx.arc(iconX, psOffsetY, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
+        iconX += 12;
       }
     }
+  }
 
-    // --- Sterowanie i Input ---
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-    window.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
+  // Nick
+  ctx.font = '700 13px Rajdhani'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.fillText(name, p.x, p.y - p.r - 6);
+}
 
-    window.addEventListener('mousedown', e => {
-      if (e.button === 0) shoot();
-    });
-
-    function shoot() {
-      const now = Date.now();
-      if (now - player.lastShot < player.reloadTime) return;
-      player.lastShot = now;
-
-      const bullet = {
-        id: Math.random(),
-        ownerId: player.id,
-        x: player.x + Math.cos(player.angle) * 40,
-        y: player.y + Math.sin(player.angle) * 40,
-        vx: Math.cos(player.angle) * 12,
-        vy: Math.sin(player.angle) * 12,
-        damage: player.damage,
-        life: 180
-      };
-
-      bullets.push(bullet);
-      broadcast({ type: 'spawn_bullet', bullet });
-    }
-
-    // --- Mechanika Gry & Fizyka ---
-    function update() {
-      // Ruch Gracza
-      let dx = 0, dy = 0;
-      if (keys['w'] || keys['arrowup']) dy -= 1;
-      if (keys['s'] || keys['arrowdown']) dy += 1;
-      if (keys['a'] || keys['arrowleft']) dx -= 1;
-      if (keys['d'] || keys['arrowright']) dx += 1;
-
-      if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
-
-      let newX = player.x + dx * player.speed;
-      let newY = player.y + dy * player.speed;
-
-      // Kolizje z Przeszkodami
-      if (!checkObstacleCollision(newX, player.y, player.size)) player.x = Math.max(player.size, Math.min(WORLD_SIZE - player.size, newX));
-      if (!checkObstacleCollision(player.x, newY, player.size)) player.y = Math.max(player.size, Math.min(WORLD_SIZE - player.size, newY));
-
-      // Celowanie myszką (Kąt)
-      const screenCenterX = canvas.width / 2;
-      const screenCenterY = canvas.height / 2;
-      player.angle = Math.atan2(mouse.y - screenCenterY, mouse.x - screenCenterX);
-
-      // Aktualizacja Pocisków
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        let b = bullets[i];
-        b.x += b.vx;
-        b.y += b.vy;
-        b.life--;
-
-        // Wciąganie pocisków przez Czarne Dziury
-        blackHoles.forEach(bh => {
-          let dist = Math.hypot(bh.x - b.x, bh.y - b.y);
-          if (dist < bh.radius) {
-            b.vx += (bh.x - b.x) * 0.05;
-            b.vy += (bh.y - b.y) * 0.05;
-          }
-        });
-
-        // Trafienie lokalnego gracza z wrogiego pocisku
-        if (b.ownerId !== player.id) {
-          let dist = Math.hypot(player.x - b.x, player.y - b.y);
-          if (dist < player.size) {
-            player.hp -= b.damage;
-            bullets.splice(i, 1);
-            if (player.hp <= 0) respawn();
-            continue;
-          }
-        }
-
-        if (b.life <= 0 || checkObstacleCollision(b.x, b.y, 4)) {
-          bullets.splice(i, 1);
-        }
-      }
-
-      // Generowanie Powerupów i Czarnych Dziur (Host)
-      if (isHost) {
-        if (Math.random() < 0.005 && powerups.length < 10) {
-          let p = { id: Math.random(), x: Math.random()*WORLD_SIZE, y: Math.random()*WORLD_SIZE, type: ['blackhole', 'heal', 'xp'][Math.floor(Math.random()*3)] };
-          powerups.push(p);
-          broadcast({ type: 'spawn_powerup', powerup: p });
-        }
-      }
-
-      // Podnoszenie Powerupów
-      for (let i = powerups.length - 1; i >= 0; i--) {
-        let p = powerups[i];
-        if (Math.hypot(player.x - p.x, player.y - p.y) < player.size + 15) {
-          if (p.type === 'heal') player.hp = Math.min(player.maxHp, player.hp + 40);
-          if (p.type === 'xp') addXP(50);
-          if (p.type === 'blackhole') {
-            let bh = { x: player.x + Math.cos(player.angle)*150, y: player.y + Math.sin(player.angle)*150, radius: 300, life: 300 };
-            blackHoles.push(bh);
-            broadcast({ type: 'spawn_blackhole', blackhole: bh });
-          }
-          powerups.splice(i, 1);
-        }
-      }
-
-      // Aktualizacja Czarnych Dziur
-      for (let i = blackHoles.length - 1; i >= 0; i--) {
-        let bh = blackHoles[i];
-        bh.life--;
-        let dist = Math.hypot(bh.x - player.x, bh.y - player.y);
-        if (dist < bh.radius) {
-          player.x += (bh.x - player.x) * 0.02;
-          player.y += (bh.y - player.y) * 0.02;
-        }
-        if (bh.life <= 0) blackHoles.splice(i, 1);
-      }
-
-      // Wysyłanie współrzędnych gracza do sieci
-      broadcast({ type: 'sync_player', player: player });
-
-      // Odświeżenie UI Stats
-      document.getElementById('lvl-val').innerText = player.lvl;
-      document.getElementById('xp-val').innerText = Math.floor(player.xp);
-      document.getElementById('max-xp-val').innerText = player.maxXp;
-      document.getElementById('pts-val').innerText = player.upgradePts;
-    }
-
-    function checkObstacleCollision(x, y, radius) {
-      return obstacles.some(o => x + radius > o.x && x - radius < o.x + o.w && y + radius > o.y && y - radius < o.y + o.h);
-    }
-
-    function addXP(amount) {
-      player.xp += amount;
-      if (player.xp >= player.maxXp) {
-        player.xp -= player.maxXp;
-        player.lvl++;
-        player.upgradePts++;
-        player.maxXp = Math.floor(player.maxXp * 1.5);
-      }
-    }
-
-    function upgrade(stat) {
-      if (player.upgradePts <= 0) return;
-      if (stat === 'speed') { player.speed += 0.8; player.stats.speedLvl++; }
-      if (stat === 'reload') { player.reloadTime = Math.max(80, player.reloadTime - 35); player.stats.reloadLvl++; }
-      if (stat === 'damage') { player.damage += 10; player.stats.dmgLvl++; }
-      if (stat === 'hp') { player.maxHp += 25; player.hp += 25; player.stats.hpLvl++; }
-      player.upgradePts--;
-    }
-
-    function respawn() {
-      player.hp = player.maxHp;
-      player.x = Math.random() * WORLD_SIZE;
-      player.y = Math.random() * WORLD_SIZE;
-    }
-
-    // --- Renderowanie (Rysowanie Gry) ---
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Kamera śledząca gracza
-      ctx.save();
-      ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
-
-      // Rysowanie Tła (Kratka)
-      ctx.strokeStyle = '#252525';
-      ctx.lineWidth = 2;
-      for (let x = 0; x < WORLD_SIZE; x += 100) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke();
-      }
-      for (let y = 0; y < WORLD_SIZE; y += 100) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke();
-      }
-
-      // Rysowanie Przeszkód
-      obstacles.forEach(o => {
-        ctx.fillStyle = o.type === 'wall' ? '#444' : '#00bfff';
-        ctx.fillRect(o.x, o.y, o.w, o.h);
-        ctx.strokeStyle = '#666';
-        ctx.strokeRect(o.x, o.y, o.w, o.h);
-      });
-
-      // Czarnych Dziur
-      blackHoles.forEach(bh => {
-        ctx.beginPath();
-        ctx.arc(bh.x, bh.y, bh.radius * (bh.life/300), 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(138, 43, 226, 0.2)';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(bh.x, bh.y, 20, 0, Math.PI * 2);
-        ctx.fillStyle = '#000';
-        ctx.fill();
-      });
-
-      // Powerupy
-      powerups.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
-        ctx.fillStyle = p.type === 'heal' ? '#00ff00' : p.type === 'xp' ? '#ffcc00' : '#8a2be2';
-        ctx.fill();
-      });
-
-      // Pociski
-      bullets.forEach(b => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff3300';
-        ctx.fill();
-      });
-
-      // Rysowanie Innych Graczy
-      Object.values(otherPlayers).forEach(p => drawTank(p));
-
-      // Rysowanie Lokalnego Gracza
-      drawTank(player);
-
-      ctx.restore();
-    }
-
-    function drawTank(t) {
-      ctx.save();
-      ctx.translate(t.x, t.y);
-
-      // Pasek HP nad czołgiem
-      ctx.fillStyle = 'red';
-      ctx.fillRect(-25, -t.size - 15, 50, 6);
-      ctx.fillStyle = '#00ff00';
-      ctx.fillRect(-25, -t.size - 15, (t.hp / t.maxHp) * 50, 6);
-
-      // Lufa
-      ctx.rotate(t.angle);
-      ctx.fillStyle = '#888';
-      ctx.fillRect(0, -6, t.size + 15, 12);
-
-      // Kadłub Czołgu
-      ctx.beginPath();
-      ctx.arc(0, 0, t.size, 0, Math.PI * 2);
-      ctx.fillStyle = t.color || '#00ffcc';
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#fff';
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    // Główna pętla gry
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
-    loop();
-
-    // RWD Canvas
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
-  </script>
+/* ---------- KLAWIATURA ---------- */
+addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
+addEventListener('keyup', e => { keys[e.code] = false; });
+</script>
 </body>
 </html>
