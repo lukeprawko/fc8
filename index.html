@@ -1,768 +1,420 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tenis Stołowy Multiplayer 2D</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-
-  body {
-    background-color: #0b0f19;
-    color: #f0f6fc;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  .header h1 {
-    font-size: 42px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #2ea44f, #00f0ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(46, 164, 79, 0.4);
-  }
-  .header p {
-    color: #8b949e;
-    font-size: 14px;
-    margin-top: 4px;
-  }
-
-  /* PANEL MENU */
-  .panel {
-    background: #121722;
-    border: 1px solid #283044;
-    border-radius: 14px;
-    padding: 28px;
-    width: 380px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-    text-align: center;
-  }
-
-  .input-group {
-    margin-bottom: 14px;
-    text-align: left;
-  }
-  .input-group label {
-    display: block;
-    font-size: 12px;
-    color: #8b949e;
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  input {
-    width: 100%;
-    padding: 11px 14px;
-    background: #0b0f19;
-    border: 1px solid #283044;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: #00f0ff; }
-
-  .divider {
-    margin: 16px 0;
-    border-bottom: 1px solid #21262d;
-    position: relative;
-  }
-  .divider span {
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #121722;
-    padding: 0 10px;
-    color: #484f58;
-    font-size: 12px;
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-  button:active { transform: scale(0.98); }
-  .btn-primary { background: #238636; color: #fff; }
-  .btn-primary:hover { background: #2ea44f; }
-  .btn-secondary { background: #1f6feb; color: #fff; }
-  .btn-secondary:hover { background: #388bfd; }
-  .btn-cancel { background: #21262d; color: #c9d1d9; margin-top: 10px; }
-  .btn-cancel:hover { background: #30363d; }
-
-  #roomCodeDisplay {
-    font-size: 34px;
-    font-weight: 800;
-    letter-spacing: 6px;
-    color: #00f0ff;
-    margin: 14px 0;
-    background: #0b0f19;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px dashed #283044;
-  }
-
-  .status-msg {
-    margin-top: 12px;
-    font-size: 13px;
-    color: #e3b341;
-    min-height: 18px;
-  }
-
-  /* GAME & HUD */
-  #gameWrapper { display: none; text-align: center; position: relative; }
-
-  #hud {
-    width: 900px;
-    max-width: 100%;
-    background: #121722;
-    border: 1px solid #283044;
-    border-bottom: none;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    padding: 12px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .score-board {
-    font-size: 26px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-  .team-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .p1-color { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
-  .p2-color { color: #ff0055; text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
-
-  /* PANEL ULEPSZEŃ */
-  #upgradesPanel {
-    width: 900px;
-    max-width: 100%;
-    background: #0d111a;
-    border: 1px solid #283044;
-    border-bottom: none;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    font-size: 13px;
-  }
-  .stat-btn {
-    width: auto;
-    padding: 4px 10px;
-    margin: 0 0 0 6px;
-    font-size: 12px;
-    background: #238636;
-    color: #fff;
-    display: inline-block;
-  }
-  .stat-btn:hover { background: #2ea44f; }
-  .stat-btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-  .upgrade-points {
-    color: #e3b341;
-    font-weight: bold;
-  }
-
-  .canvas-container {
-    position: relative;
-    width: 900px;
-    max-width: 100%;
-  }
-
-  canvas {
-    background: #0f172a;
-    border: 1px solid #283044;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.85);
-    display: block;
-  }
-
-  .version-watermark {
-    position: absolute;
-    bottom: 10px;
-    right: 16px;
-    font-size: 11px;
-    font-family: monospace;
-    color: rgba(255, 255, 255, 0.2);
-    pointer-events: none;
-    letter-spacing: 0.5px;
-  }
-
-  .controls-bar {
-    margin-top: 12px;
-    color: #8b949e;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  .controls-bar span {
-    background: #121722;
-    border: 1px solid #283044;
-    padding: 2px 7px;
-    border-radius: 4px;
-    color: #c9d1d9;
-    font-weight: 600;
-  }
-
-  .hidden { display: none !important; }
-</style>
+  <meta charset="UTF-8">
+  <title>Chaos Tanks Online</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { background: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+    #ui-container { position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; gap: 20px; align-items: flex-start; }
+    .panel { background: rgba(0,0,0,0.85); border: 2px solid #444; border-radius: 8px; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    h2 { font-size: 16px; margin-bottom: 8px; color: #00ffcc; text-transform: uppercase; }
+    input, button { padding: 8px 12px; margin: 4px 0; border: 1px solid #555; background: #222; color: #fff; border-radius: 4px; font-weight: bold; }
+    button { cursor: pointer; background: #0088cc; border: none; transition: 0.2s; }
+    button:hover { background: #00aaff; }
+    .upgrade-btn { background: #28a745; width: 100%; margin-top: 5px; }
+    .upgrade-btn:hover { background: #34ce57; }
+    #stats-panel { min-width: 200px; }
+    #net-panel { min-width: 250px; }
+    canvas { display: block; background: #1a1a1a; cursor: crosshair; }
+    #chat-box { position: absolute; bottom: 10px; left: 10px; width: 300px; height: 120px; background: rgba(0,0,0,0.6); pointer-events: none; padding: 10px; overflow-y: auto; font-size: 12px; font-family: monospace; }
+  </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>TENIS STOŁOWY 2D</h1>
-  <p>Rozgrywka Tenisa Stołowego z Rotacją i Ulepszeniami Rakiety</p>
-</div>
-
-<!-- MENU POKOJU -->
-<div id="menu">
-  <div class="panel" id="mainPanel">
-    <div class="input-group">
-      <label>TWÓJ NICK</label>
-      <input id="nickInput" maxlength="12" placeholder="Gracz 1" value="Gracz">
+  <div id="ui-container">
+    <div class="panel" id="net-panel">
+      <h2>Multiplayer (WebRTC)</h2>
+      <div id="my-id-display">Twój ID: <b style="color:#00ffcc;">Łączenie...</b></div>
+      <hr style="border-color:#444; margin:8px 0;">
+      <input type="text" id="join-id" placeholder="Wklej ID Hosta...">
+      <button id="btn-join">Dołącz do gry</button>
+      <div id="status-text" style="font-size:12px; color:#aaa; margin-top:5px;">Połączono jako Host. Przekaż swoje ID znajomemu!</div>
     </div>
-    
-    <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Lewa Strona)</button>
-    
-    <div class="divider"><span>LUB</span></div>
-    
-    <div class="input-group">
-      <label>KOD POKOJU</label>
-      <input id="joinInput" maxlength="6" placeholder="np. ABC123" style="text-transform:uppercase;">
-    </div>
-    <button class="btn-secondary" onclick="joinRoom()">Dołącz do Gry (Prawa Strona)</button>
-    
-    <div class="status-msg" id="statusMsg"></div>
-  </div>
 
-  <div class="panel hidden" id="waitPanel">
-    <div style="font-size:14px; color:#8b949e;">Podaj ten kod drugiemu graczowi:</div>
-    <div id="roomCodeDisplay">------</div>
-    <div class="status-msg">Oczekiwanie na połączenie...</div>
-    <button class="btn-cancel" onclick="location.reload()">Anuluj</button>
-  </div>
-</div>
-
-<!-- OBSZAR GRY -->
-<div id="gameWrapper">
-  <div id="hud">
-    <div class="score-board" style="width: 100%; justify-content: space-between;">
-      <span class="team-name p1-color" id="hudP1">Gracz 1</span>
-      <span id="hudScore" style="background:#080b12; padding:4px 20px; border-radius:8px; border: 1px solid #283044;">0 : 0</span>
-      <span class="team-name p2-color" id="hudP2">Gracz 2</span>
+    <div class="panel" id="stats-panel">
+      <h2>Czołg (Poziom <span id="lvl-val">1</span>)</h2>
+      <div>XP: <span id="xp-val">0</span> / <span id="max-xp-val">100</span></div>
+      <div>Punkty Ulepszeń: <b id="pts-val" style="color:#ffcc00;">0</b></div>
+      <button class="upgrade-btn" onclick="upgrade('speed')">+ Prędkość Ruchu</button>
+      <button class="upgrade-btn" onclick="upgrade('reload')">+ Szybciej Strzelaj</button>
+      <button class="upgrade-btn" onclick="upgrade('damage')">+ Obrażenia Pocisków</button>
+      <button class="upgrade-btn" onclick="upgrade('hp')">+ Max HP</button>
     </div>
   </div>
 
-  <!-- PANEL ULEPSZEŃ STATYSTYK -->
-  <div id="upgradesPanel">
-    <div>Punkty UP: <span class="upgrade-points" id="ptsDisplay">0</span></div>
-    <div>🌀 Podkręcenie: <b id="statSpin">Lvl 1</b> <button class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+ (1 UP)</button></div>
-    <div>⚡ Szybkość Rakiety: <b id="statSpeed">Lvl 1</b> <button class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+ (1 UP)</button></div>
-    <div>💥 Moc Ścinania: <b id="statSmash">Lvl 1</b> <button class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+ (1 UP)</button></div>
-  </div>
+  <div id="chat-box"></div>
+  <canvas id="gameCanvas"></canvas>
 
-  <div class="canvas-container">
-    <canvas id="stage" width="900" height="500"></canvas>
-    <div class="version-watermark">v2.0.0 - Table Tennis Edition</div>
-  </div>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  <div class="controls-bar">
-    Ruch Rakiety: <span>W / S</span> | Zryw: <span>SHIFT</span> | Ścięcie (Smash): <span>SPACJA</span><br>
-    <i>Uderzaj w ruchu, by nadać piłce **Topspin / Underspin**. Przebijaj nad siatką!</i>
-  </div>
-</div>
+    // --- Świat Gry ---
+    const WORLD_SIZE = 3000;
+    const keys = {};
+    const mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
+    
+    // PeerJS Networking
+    let peer = new Peer();
+    let myId = "";
+    let connections = [];
+    let isHost = true;
 
-<script>
-const W = 900, H = 500;
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
+    // Lokalne Dane Gracza
+    let player = {
+      id: null,
+      x: 500, y: 500, size: 30, angle: 0,
+      speed: 4, hp: 100, maxHp: 100,
+      lvl: 1, xp: 0, maxXp: 100, upgradePts: 0,
+      reloadTime: 250, lastShot: 0, damage: 20,
+      color: '#' + Math.floor(Math.random()*16777215).toString(16),
+      stats: { speedLvl: 0, reloadLvl: 0, dmgLvl: 0, hpLvl: 0 }
+    };
 
-let peer = null, conn = null, isHost = false;
-let myName = 'Gracz', oppName = 'Przeciwnik';
-let gameActive = false;
-let keys = {};
+    let otherPlayers = {};
+    let bullets = [];
+    let powerups = [];
+    let obstacles = [];
+    let blackHoles = [];
 
-// STATYSTYKI ROZWOJU
-let upgradePoints = 0;
-const stats = { spin: 1, speed: 1, smash: 1 };
-let rallyHits = 0;
-
-// Rakiety Tenisa Stołowego
-const RACKET_W = 14, RACKET_H = 75;
-const P1 = { x: 30, y: H/2 - RACKET_H/2, w: RACKET_W, h: RACKET_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#00f0ff', spinMult: 1, smashMult: 1 };
-const P2 = { x: W - 30 - RACKET_W, y: H/2 - RACKET_H/2, w: RACKET_W, h: RACKET_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#ff0055', spinMult: 1, smashMult: 1 };
-
-// Piłeczka Tenisowa
-const BALL = { x: W/2, y: H/2, r: 6.5, vx: 3.2, vy: 1.5, spin: 0, speed: 3.8, trail: [] };
-
-// Siatka na środku stołu
-const NET_W = 8;
-const NET_X = W/2 - NET_W/2;
-
-// Przeszkoda
-let obstacle = null;
-
-// Cząsteczki
-let particles = [];
-
-const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
-function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
-
-/* --- SYSTMEM ULEPSZEŃ --- */
-function getUpgradeCost(currentLvl) { return currentLvl; }
-
-function upgradeStat(type) {
-  const currentLvl = stats[type];
-  const cost = getUpgradeCost(currentLvl);
-
-  if (upgradePoints < cost || currentLvl >= 5) return;
-
-  upgradePoints -= cost;
-  stats[type]++;
-  
-  updateStatDisplay();
-  applyStatsToLocalPlayer();
-}
-
-function updateStatDisplay() {
-  document.getElementById('ptsDisplay').textContent = upgradePoints;
-  
-  const setupBtn = (id, lvl) => {
-    const btn = document.getElementById(id);
-    if (lvl >= 5) {
-      btn.textContent = 'MAX';
-      btn.disabled = true;
-    } else {
-      const cost = getUpgradeCost(lvl);
-      btn.textContent = `+ (${cost} UP)`;
-      btn.disabled = upgradePoints < cost;
-    }
-  };
-
-  document.getElementById('statSpin').textContent = 'Lvl ' + stats.spin;
-  document.getElementById('statSpeed').textContent = 'Lvl ' + stats.speed;
-  document.getElementById('statSmash').textContent = 'Lvl ' + stats.smash;
-
-  setupBtn('btnSpin', stats.spin);
-  setupBtn('btnSpeed', stats.speed);
-  setupBtn('btnSmash', stats.smash);
-}
-
-function applyStatsToLocalPlayer() {
-  const p = isHost ? P1 : P2;
-  p.speed = 4.5 + (stats.speed * 0.4);
-  p.spinMult = 1 + (stats.spin * 0.25);
-  p.smashMult = 1 + (stats.smash * 0.2);
-}
-
-/* --- MULTIPLAYER --- */
-function createRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
-  setStatus('Tworzenie pokoju...');
-  const code = genCode();
-  peer = new Peer('ttennis-' + code);
-  isHost = true;
-
-  peer.on('open', () => {
-    document.getElementById('mainPanel').classList.add('hidden');
-    document.getElementById('waitPanel').classList.remove('hidden');
-    document.getElementById('roomCodeDisplay').textContent = code;
-  });
-
-  peer.on('connection', c => {
-    conn = c;
-    bindConnEvents();
-    c.on('open', () => conn.send({ t: 'hello', name: myName }));
-  });
-
-  peer.on('error', err => setStatus('Błąd: ' + err.type));
-}
-
-function joinRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gracz 2';
-  const code = document.getElementById('joinInput').value.trim().toUpperCase();
-  if (code.length !== 6) { setStatus('Wpisz kod!'); return; }
-  
-  setStatus('Łączenie...');
-  peer = new Peer();
-  isHost = false;
-
-  peer.on('open', () => {
-    conn = peer.connect('ttennis-' + code);
-    bindConnEvents();
-    conn.on('open', () => conn.send({ t: 'hello', name: myName }));
-  });
-
-  peer.on('error', () => setStatus('Nie odnaleziono pokoju!'));
-}
-
-function bindConnEvents() {
-  conn.on('data', handleData);
-  conn.on('close', () => { if (gameActive) alert('Przeciwnik rozłączył się.'); location.reload(); });
-}
-
-function handleData(d) {
-  if (d.t === 'hello') {
-    oppName = d.name;
-    if (isHost) {
-      conn.send({ t: 'start', opp: myName });
-      startGame();
-    }
-  }
-  else if (d.t === 'start') {
-    oppName = d.opp;
-    startGame();
-  }
-  else if (d.t === 'sync') {
-    if (isHost) {
-      P2.y = d.py;
-      P2.vy = d.pvy;
-      P2.spinMult = d.spinMult;
-      P2.smashMult = d.smashMult;
-    } else {
-      P1.y = d.py;
-      P1.vy = d.pvy;
-      BALL.x = d.bx; BALL.y = d.by;
-      BALL.spin = d.spin;
-      obstacle = d.obs;
-      if (P1.score !== d.s1 || P2.score !== d.s2) {
-        checkUPAward(d.s2, P2.score);
-        P1.score = d.s1; P2.score = d.s2;
-        updateHudScore();
+    // Generowanie Mapy Przeszkód
+    function initMap() {
+      obstacles = [];
+      for (let i = 0; i < 80; i++) {
+        obstacles.push({
+          x: Math.random() * (WORLD_SIZE - 200) + 100,
+          y: Math.random() * (WORLD_SIZE - 200) + 100,
+          w: 80 + Math.random() * 100,
+          h: 80 + Math.random() * 100,
+          type: Math.random() > 0.3 ? 'wall' : 'crystal' // Crystal daje XP
+        });
       }
     }
-  }
-}
+    initMap();
 
-function checkUPAward(newScore, oldScore) {
-  if (newScore > oldScore) {
-    if (newScore % 3 === 0 || rallyHits >= 10) {
-      upgradePoints++;
-      updateStatDisplay();
-    }
-  }
-}
-
-function startGame() {
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('gameWrapper').style.display = 'block';
-
-  document.getElementById('hudP1').textContent = isHost ? myName : oppName;
-  document.getElementById('hudP2').textContent = isHost ? oppName : myName;
-
-  gameActive = true;
-  applyStatsToLocalPlayer();
-  resetBall();
-  requestAnimationFrame(gameLoop);
-}
-
-function resetBall() {
-  BALL.x = W / 2;
-  BALL.y = H / 2;
-  BALL.speed = 3.8;
-  BALL.spin = 0;
-  BALL.trail = [];
-  rallyHits = 0;
-  const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
-  const dir = Math.random() < 0.5 ? 1 : -1;
-  BALL.vx = dir * BALL.speed * Math.cos(angle);
-  BALL.vy = BALL.speed * Math.sin(angle);
-}
-
-function addParticles(x, y, color, count = 6) {
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x, y,
-      vx: (Math.random() - 0.5) * 5,
-      vy: (Math.random() - 0.5) * 5,
-      life: 1.0,
-      color
+    // --- Obsługa PeerJS ---
+    peer.on('open', (id) => {
+      myId = id;
+      player.id = id;
+      document.getElementById('my-id-display').innerHTML = `Twój ID: <b style="color:#00ffcc;">${id}</b>`;
     });
-  }
-}
 
-function updateHudScore() {
-  document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
-}
+    peer.on('connection', (conn) => {
+      setupConnection(conn);
+    });
 
-/* --- LOGIKA I FIZYKA --- */
-function update() {
-  const myPaddle = isHost ? P1 : P2;
-  
-  let moveDir = 0;
-  if (keys['KeyW'] || keys['ArrowUp']) moveDir -= 1;
-  if (keys['KeyS'] || keys['ArrowDown']) moveDir += 1;
+    document.getElementById('btn-join').addEventListener('click', () => {
+      const targetId = document.getElementById('join-id').value.trim();
+      if (targetId) {
+        isHost = false;
+        document.getElementById('status-text').innerText = "Łączenie z hostem...";
+        const conn = peer.connect(targetId);
+        setupConnection(conn);
+      }
+    });
 
-  if (myPaddle.dashCooldown > 0) myPaddle.dashCooldown--;
+    function setupConnection(conn) {
+      connections.push(conn);
+      conn.on('open', () => {
+        document.getElementById('status-text').innerText = "Połączono Pomyślnie!";
+      });
 
-  let currentSpeed = myPaddle.speed;
-  if ((keys['ShiftLeft'] || keys['ShiftRight']) && myPaddle.dashCooldown === 0 && moveDir !== 0) {
-    currentSpeed *= 2.2;
-    myPaddle.dashCooldown = 50;
-    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 8);
-  }
+      conn.on('data', (data) => {
+        handleNetworkData(data);
+      });
 
-  myPaddle.vy = moveDir * currentSpeed;
-  myPaddle.y += myPaddle.vy;
+      conn.on('close', () => {
+        delete otherPlayers[conn.peer];
+      });
+    }
 
-  P1.y = Math.max(15, Math.min(H - P1.h - 15, P1.y));
-  P2.y = Math.max(15, Math.min(H - P2.h - 15, P2.y));
+    function broadcast(data) {
+      connections.forEach(c => {
+        if (c.open) c.send(data);
+      });
+    }
 
-  // Logika Gry (Obliczana u Hosta)
-  if (isHost) {
-    if (!obstacle && Math.random() < 0.001) {
-      obstacle = {
-        x: W / 2 - 10,
-        y: 80 + Math.random() * (H - 220),
-        w: 20,
-        h: 85,
-        timer: 180
+    function handleNetworkData(data) {
+      if (data.type === 'sync_player') {
+        otherPlayers[data.player.id] = data.player;
+      } else if (data.type === 'spawn_bullet') {
+        bullets.push(data.bullet);
+      } else if (data.type === 'spawn_powerup') {
+        powerups.push(data.powerup);
+      } else if (data.type === 'spawn_blackhole') {
+        blackHoles.push(data.blackhole);
+      }
+    }
+
+    // --- Sterowanie i Input ---
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mousedown', e => {
+      if (e.button === 0) shoot();
+    });
+
+    function shoot() {
+      const now = Date.now();
+      if (now - player.lastShot < player.reloadTime) return;
+      player.lastShot = now;
+
+      const bullet = {
+        id: Math.random(),
+        ownerId: player.id,
+        x: player.x + Math.cos(player.angle) * 40,
+        y: player.y + Math.sin(player.angle) * 40,
+        vx: Math.cos(player.angle) * 12,
+        vy: Math.sin(player.angle) * 12,
+        damage: player.damage,
+        life: 180
       };
+
+      bullets.push(bullet);
+      broadcast({ type: 'spawn_bullet', bullet });
     }
 
-    if (obstacle) {
-      obstacle.timer--;
-      if (obstacle.timer <= 0) obstacle = null;
+    // --- Mechanika Gry & Fizyka ---
+    function update() {
+      // Ruch Gracza
+      let dx = 0, dy = 0;
+      if (keys['w'] || keys['arrowup']) dy -= 1;
+      if (keys['s'] || keys['arrowdown']) dy += 1;
+      if (keys['a'] || keys['arrowleft']) dx -= 1;
+      if (keys['d'] || keys['arrowright']) dx += 1;
+
+      if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
+
+      let newX = player.x + dx * player.speed;
+      let newY = player.y + dy * player.speed;
+
+      // Kolizje z Przeszkodami
+      if (!checkObstacleCollision(newX, player.y, player.size)) player.x = Math.max(player.size, Math.min(WORLD_SIZE - player.size, newX));
+      if (!checkObstacleCollision(player.x, newY, player.size)) player.y = Math.max(player.size, Math.min(WORLD_SIZE - player.size, newY));
+
+      // Celowanie myszką (Kąt)
+      const screenCenterX = canvas.width / 2;
+      const screenCenterY = canvas.height / 2;
+      player.angle = Math.atan2(mouse.y - screenCenterY, mouse.x - screenCenterX);
+
+      // Aktualizacja Pocisków
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life--;
+
+        // Wciąganie pocisków przez Czarne Dziury
+        blackHoles.forEach(bh => {
+          let dist = Math.hypot(bh.x - b.x, bh.y - b.y);
+          if (dist < bh.radius) {
+            b.vx += (bh.x - b.x) * 0.05;
+            b.vy += (bh.y - b.y) * 0.05;
+          }
+        });
+
+        // Trafienie lokalnego gracza z wrogiego pocisku
+        if (b.ownerId !== player.id) {
+          let dist = Math.hypot(player.x - b.x, player.y - b.y);
+          if (dist < player.size) {
+            player.hp -= b.damage;
+            bullets.splice(i, 1);
+            if (player.hp <= 0) respawn();
+            continue;
+          }
+        }
+
+        if (b.life <= 0 || checkObstacleCollision(b.x, b.y, 4)) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Generowanie Powerupów i Czarnych Dziur (Host)
+      if (isHost) {
+        if (Math.random() < 0.005 && powerups.length < 10) {
+          let p = { id: Math.random(), x: Math.random()*WORLD_SIZE, y: Math.random()*WORLD_SIZE, type: ['blackhole', 'heal', 'xp'][Math.floor(Math.random()*3)] };
+          powerups.push(p);
+          broadcast({ type: 'spawn_powerup', powerup: p });
+        }
+      }
+
+      // Podnoszenie Powerupów
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        let p = powerups[i];
+        if (Math.hypot(player.x - p.x, player.y - p.y) < player.size + 15) {
+          if (p.type === 'heal') player.hp = Math.min(player.maxHp, player.hp + 40);
+          if (p.type === 'xp') addXP(50);
+          if (p.type === 'blackhole') {
+            let bh = { x: player.x + Math.cos(player.angle)*150, y: player.y + Math.sin(player.angle)*150, radius: 300, life: 300 };
+            blackHoles.push(bh);
+            broadcast({ type: 'spawn_blackhole', blackhole: bh });
+          }
+          powerups.splice(i, 1);
+        }
+      }
+
+      // Aktualizacja Czarnych Dziur
+      for (let i = blackHoles.length - 1; i >= 0; i--) {
+        let bh = blackHoles[i];
+        bh.life--;
+        let dist = Math.hypot(bh.x - player.x, bh.y - player.y);
+        if (dist < bh.radius) {
+          player.x += (bh.x - player.x) * 0.02;
+          player.y += (bh.y - player.y) * 0.02;
+        }
+        if (bh.life <= 0) blackHoles.splice(i, 1);
+      }
+
+      // Wysyłanie współrzędnych gracza do sieci
+      broadcast({ type: 'sync_player', player: player });
+
+      // Odświeżenie UI Stats
+      document.getElementById('lvl-val').innerText = player.lvl;
+      document.getElementById('xp-val').innerText = Math.floor(player.xp);
+      document.getElementById('max-xp-val').innerText = player.maxXp;
+      document.getElementById('pts-val').innerText = player.upgradePts;
     }
 
-    // Rotacja i Efekt Magnusa w Tenisie Stołowym
-    BALL.vy += BALL.spin * 0.06;
-    BALL.spin *= 0.97;
+    function checkObstacleCollision(x, y, radius) {
+      return obstacles.some(o => x + radius > o.x && x - radius < o.x + o.w && y + radius > o.y && y - radius < o.y + o.h);
+    }
 
-    BALL.x += BALL.vx;
-    BALL.y += BALL.vy;
-
-    BALL.trail.push({ x: BALL.x, y: BALL.y });
-    if (BALL.trail.length > 7) BALL.trail.shift();
-
-    // Odbicie od krawędzi stołu (Top / Bottom) z 3% Rykoszetem
-    if (BALL.y - BALL.r <= 15 || BALL.y + BALL.r >= H - 15) {
-      BALL.y = BALL.y - BALL.r <= 15 ? 15 + BALL.r : H - 15 - BALL.r;
-      BALL.vy *= -1;
-
-      if (Math.random() < 0.03) {
-        BALL.vx *= -1;
-        addParticles(BALL.x, BALL.y, '#e3b341', 15);
-      } else {
-        addParticles(BALL.x, BALL.y, '#ffffff', 4);
+    function addXP(amount) {
+      player.xp += amount;
+      if (player.xp >= player.maxXp) {
+        player.xp -= player.maxXp;
+        player.lvl++;
+        player.upgradePts++;
+        player.maxXp = Math.floor(player.maxXp * 1.5);
       }
     }
 
-    // Kolizja z Przeszkodą
-    if (obstacle) {
-      if (BALL.x + BALL.r >= obstacle.x && BALL.x - BALL.r <= obstacle.x + obstacle.w &&
-          BALL.y + BALL.r >= obstacle.y && BALL.y - BALL.r <= obstacle.y + obstacle.h) {
-        BALL.vx *= -1;
-        addParticles(BALL.x, BALL.y, '#a371f7', 8);
+    function upgrade(stat) {
+      if (player.upgradePts <= 0) return;
+      if (stat === 'speed') { player.speed += 0.8; player.stats.speedLvl++; }
+      if (stat === 'reload') { player.reloadTime = Math.max(80, player.reloadTime - 35); player.stats.reloadLvl++; }
+      if (stat === 'damage') { player.damage += 10; player.stats.dmgLvl++; }
+      if (stat === 'hp') { player.maxHp += 25; player.hp += 25; player.stats.hpLvl++; }
+      player.upgradePts--;
+    }
+
+    function respawn() {
+      player.hp = player.maxHp;
+      player.x = Math.random() * WORLD_SIZE;
+      player.y = Math.random() * WORLD_SIZE;
+    }
+
+    // --- Renderowanie (Rysowanie Gry) ---
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Kamera śledząca gracza
+      ctx.save();
+      ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
+
+      // Rysowanie Tła (Kratka)
+      ctx.strokeStyle = '#252525';
+      ctx.lineWidth = 2;
+      for (let x = 0; x < WORLD_SIZE; x += 100) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke();
       }
-    }
-
-    // Odbicie od Rakiety P1 (Lewa)
-    if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
-      if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
-        BALL.x = P1.x + P1.w + BALL.r;
-        rallyHits++;
-
-        let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
-        let angle = collidePoint * (Math.PI / 3.4);
-
-        let isSmash = keys['Space'];
-        let speedBoost = isSmash ? (0.45 * P1.smashMult) : 0.15;
-
-        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5);
-        BALL.spin = P1.vy * 0.45 * P1.spinMult;
-
-        BALL.vx = BALL.speed * Math.cos(angle);
-        BALL.vy = BALL.speed * Math.sin(angle);
-
-        addParticles(BALL.x, BALL.y, P1.color, isSmash ? 12 : 6);
+      for (let y = 0; y < WORLD_SIZE; y += 100) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke();
       }
-    }
 
-    // Odbicie od Rakiety P2 (Prawa)
-    if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
-      if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
-        BALL.x = P2.x - BALL.r;
-        rallyHits++;
-
-        let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
-        let angle = collidePoint * (Math.PI / 3.4);
-
-        let isSmash = keys['Space'];
-        let speedBoost = isSmash ? (0.45 * P2.smashMult) : 0.15;
-
-        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5);
-        BALL.spin = P2.vy * 0.45 * P2.spinMult;
-
-        BALL.vx = -BALL.speed * Math.cos(angle);
-        BALL.vy = BALL.speed * Math.sin(angle);
-
-        addParticles(BALL.x, BALL.y, P2.color, isSmash ? 12 : 6);
-      }
-    }
-
-    // Punkty
-    if (BALL.x < -15) {
-      P2.score++;
-      checkUPAward(P2.score, P2.score - 1);
-      updateHudScore();
-      resetBall();
-    } else if (BALL.x > W + 15) {
-      P1.score++;
-      checkUPAward(P1.score, P1.score - 1);
-      updateHudScore();
-      resetBall();
-    }
-  }
-
-  // Cząsteczki
-  particles.forEach((p, idx) => {
-    p.x += p.vx; p.y += p.vy; p.life -= 0.04;
-    if (p.life <= 0) particles.splice(idx, 1);
-  });
-
-  // Komunikacja P2P
-  if (conn && conn.open) {
-    if (isHost) {
-      conn.send({
-        t: 'sync', py: P1.y, pvy: P1.vy,
-        spinMult: P1.spinMult, smashMult: P1.smashMult,
-        bx: BALL.x, by: BALL.y, spin: BALL.spin,
-        obs: obstacle,
-        s1: P1.score, s2: P2.score
+      // Rysowanie Przeszkód
+      obstacles.forEach(o => {
+        ctx.fillStyle = o.type === 'wall' ? '#444' : '#00bfff';
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.strokeStyle = '#666';
+        ctx.strokeRect(o.x, o.y, o.w, o.h);
       });
-    } else {
-      conn.send({
-        t: 'sync', py: P2.y, pvy: P2.vy,
-        spinMult: P2.spinMult, smashMult: P2.smashMult
+
+      // Czarnych Dziur
+      blackHoles.forEach(bh => {
+        ctx.beginPath();
+        ctx.arc(bh.x, bh.y, bh.radius * (bh.life/300), 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(138, 43, 226, 0.2)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bh.x, bh.y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#000';
+        ctx.fill();
       });
+
+      // Powerupy
+      powerups.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = p.type === 'heal' ? '#00ff00' : p.type === 'xp' ? '#ffcc00' : '#8a2be2';
+        ctx.fill();
+      });
+
+      // Pociski
+      bullets.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff3300';
+        ctx.fill();
+      });
+
+      // Rysowanie Innych Graczy
+      Object.values(otherPlayers).forEach(p => drawTank(p));
+
+      // Rysowanie Lokalnego Gracza
+      drawTank(player);
+
+      ctx.restore();
     }
-  }
-}
 
-/* --- RENDEROWANIE STOŁU I RAKIET --- */
-function render() {
-  // 1. Tło wokół stołu
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(0, 0, W, H);
+    function drawTank(t) {
+      ctx.save();
+      ctx.translate(t.x, t.y);
 
-  // 2. Blat Stołu do Tenisa Stołowego (Ciemnoniebieski)
-  ctx.fillStyle = '#1e3a8a';
-  ctx.fillRect(15, 15, W - 30, H - 30);
+      // Pasek HP nad czołgiem
+      ctx.fillStyle = 'red';
+      ctx.fillRect(-25, -t.size - 15, 50, 6);
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(-25, -t.size - 15, (t.hp / t.maxHp) * 50, 6);
 
-  // 3. Linie Stołu (Biała ramka i linia środkowa)
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(15, 15, W - 30, H - 30);
+      // Lufa
+      ctx.rotate(t.angle);
+      ctx.fillStyle = '#888';
+      ctx.fillRect(0, -6, t.size + 15, 12);
 
-  // Linia podziału pola
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(15, H / 2);
-  ctx.lineTo(W - 15, H / 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.setLineDash([]);
+      // Kadłub Czołgu
+      ctx.beginPath();
+      ctx.arc(0, 0, t.size, 0, Math.PI * 2);
+      ctx.fillStyle = t.color || '#00ffcc';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
 
-  // 4. Siatka na Środku
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillRect(NET_X, 10, NET_W, H - 20);
+      ctx.restore();
+    }
 
-  // Słupki siatki
-  ctx.fillStyle = '#94a3b8';
-  ctx.fillRect(NET_X - 2, 8, NET_W + 4, 6);
-  ctx.fillRect(NET_X - 2, H - 14, NET_W + 4, 6);
+    // Główna pętla gry
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
 
-  // Przeszkoda
-  if (obstacle) {
-    ctx.fillStyle = '#a371f7';
-    ctx.shadowColor = '#a371f7'; ctx.shadowBlur = 10;
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
-    ctx.shadowBlur = 0;
-  }
-
-  // Cząsteczki
-  particles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill();
-    ctx.globalAlpha = 1.0;
-  });
-
-  // Ślad Piłeczki
-  BALL.trail.forEach((t, i) => {
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, BALL.r * (i / BALL.trail.length), 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.fill();
-  });
-
-  // 5. Rakiety Tenisowe (Guma czerwona/niebieska + Rączka)
-  drawRacket(P1);
-  drawRacket(P2);
-
-  // Pasek Cooldown Dash
-  const myPaddle = isHost ? P1 : P2;
-  if (myPaddle.dashCooldown > 0) {
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillRect(myPaddle.x, myPaddle.y + myPaddle.h + 6, (myPaddle.dashCooldown / 50) * myPaddle.w, 3);
-  }
-
-  // 6. Piłeczka Tenisowa (Pomarańczowo-Biała)
-  ctx.beginPath();
-  ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = '#ff9800'; ctx.shadowColor = '#ff9800'; ctx.shadowBlur = 12;
-  ctx.fill();
-
-  ctx.shadowBlur = 0;
-}
-
-function drawRacket(p) {
-  ctx.shadowBlur = 8;
-  ctx.shadowColor = p.color;
-
-  // Czerwona Guma Okładziny Rakiety
-  ctx.fillStyle = p.color;
-  ctx.fillRect(p.x, p.y, p.w, p.h);
-
-  // Drewniany Uchwyt
-  ctx.fillStyle = '#b45309';
-  const handleX = p.x < W/2 ? p.x - 4 : p.x + p.w;
-  ctx.fillRect(handleX, p.y + p.h/2 - 6, 4, 12);
-
-  ctx.shadowBlur = 0;
-}
-
-function gameLoop() {
-  if (!gameActive) return;
-  update();
-  render();
-  requestAnimationFrame(gameLoop);
-}
-
-addEventListener('keydown', e => { keys[e.code] = true; });
-addEventListener('keyup', e => { keys[e.code] = false; });
-</script>
+    // RWD Canvas
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
 </body>
 </html>
