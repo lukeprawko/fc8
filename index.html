@@ -106,7 +106,8 @@
     margin: 8px 0; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 8px; border: 1px dashed var(--fc-gold);
   }
 
-  #gameWrapper { display: none; text-align: center; }
+  /* OBSZAR GRY */
+  #gameWrapper { display: none; text-align: center; position: relative; }
 
   #hud {
     width: 960px; max-width: 95vw; background: rgba(9, 13, 22, 0.9);
@@ -127,10 +128,27 @@
     padding: 2px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
   }
 
+  .canvas-container {
+    position: relative;
+    display: inline-block;
+  }
+
   canvas {
     background: #1b4d2e; border: 1px solid rgba(255,255,255,0.2);
     border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.8); display: block; max-width: 95vw;
+  }
+
+  .version-watermark {
+    position: absolute;
+    bottom: 8px;
+    right: 14px;
+    font-size: 11px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
   }
 
   .controls-bar {
@@ -159,10 +177,14 @@
       <label>WYBÓR ZAWODNIKA</label>
       <select id="playerSelect" onchange="onPlayerChange()">
         <option value="custom">Twój Własny Piłkarz</option>
-        <option value="mbappe">K. Mbappé (Szybkość & Rapid+)</option>
-        <option value="haaland">E. Haaland (Power Shot+)</option>
-        <option value="messi">L. Messi (Finesse Shot+)</option>
-        <option value="bellingham">J. Bellingham (Relentless+)</option>
+        <option value="mbappe">K. Mbappé (Rapid+ & Power Shot)</option>
+        <option value="haaland">E. Haaland (Power Shot+ & Rapid)</option>
+        <option value="messi">L. Messi (Finesse Shot+ & Relentless)</option>
+        <option value="bellingham">J. Bellingham (Relentless+ & Finesse)</option>
+        <option value="vinicius">Vinícius Jr. (Rapid+ & Finesse)</option>
+        <option value="debruyne">K. De Bruyne (Finesse Shot+ & Power Shot)</option>
+        <option value="salah">M. Salah (Finesse Shot+ & Rapid)</option>
+        <option value="vandijk">V. van Dijk (Power Shot+ & Relentless)</option>
       </select>
     </div>
 
@@ -197,7 +219,7 @@
   <div class="panel hidden" id="waitPanel">
     <div style="font-size:14px; color:var(--fc-silver);">Podaj znajomemu kod pokoju:</div>
     <div id="roomCodeDisplay">------</div>
-    <div style="font-size:13px; color:var(--fc-cyan); margin-top:6px;">Oczekiwanie na rywala...</div>
+    <div style="font-size:13px; color:var(--fc-cyan); margin-top:6px;">Oczekiwanie na drugiego gracza...</div>
     <button class="btn-cancel" onclick="location.reload()" style="margin-top:12px;">Anuluj</button>
   </div>
 </div>
@@ -212,7 +234,10 @@
     <div id="timer">03:00</div>
   </div>
 
-  <canvas id="cv" width="960" height="540"></canvas>
+  <div class="canvas-container">
+    <canvas id="cv" width="960" height="540"></canvas>
+    <div class="version-watermark">v2.2.0 - GitHub Pages P2P Ready</div>
+  </div>
 
   <div class="controls-bar">
     🕹 Ruch: <b>WASD / Strzałki</b> | ⚡ Rapid/Sprint: <b>SHIFT</b> | 💥 Strzał / Power Shot: <b>SPACJA / J</b> | 🎯 Finesse Shot: <b>K</b>
@@ -240,8 +265,12 @@ const myPlayStyles = { finesse: 0, rapid: 0, powershot: 0, relentless: 0 };
 const PRESETS = {
   mbappe: { name: 'K. Mbappé', ps: { rapid: 2, powershot: 1, finesse: 0, relentless: 1 } },
   haaland: { name: 'E. Haaland', ps: { powershot: 2, rapid: 1, finesse: 0, relentless: 1 } },
-  messi: { name: 'L. Messi', ps: { finesse: 2, rapid: 1, powershot: 0, relentless: 0 } },
-  bellingham: { name: 'J. Bellingham', ps: { relentless: 2, finesse: 1, rapid: 1, powershot: 0 } }
+  messi: { name: 'L. Messi', ps: { finesse: 2, rapid: 1, powershot: 0, relentless: 1 } },
+  bellingham: { name: 'J. Bellingham', ps: { relentless: 2, finesse: 1, rapid: 1, powershot: 0 } },
+  vinicius: { name: 'Vinícius Jr.', ps: { rapid: 2, finesse: 1, powershot: 0, relentless: 1 } },
+  debruyne: { name: 'K. De Bruyne', ps: { finesse: 2, powershot: 1, rapid: 0, relentless: 1 } },
+  salah: { name: 'M. Salah', ps: { finesse: 2, rapid: 1, powershot: 1, relentless: 0 } },
+  vandijk: { name: 'V. van Dijk', ps: { powershot: 2, relentless: 1, rapid: 0, finesse: 0 } }
 };
 
 const ME   = { x:200, y:H/2, vx:0, vy:0, r:18, faceX:1, faceY:0, ps: myPlayStyles };
@@ -279,78 +308,87 @@ function onPlayerChange() {
   }
 }
 
-// DARMOWE SERWERY STUN/TURN DLA PEERJS (UŁATWIAJĄ POŁĄCZENIE SIECIOWE)
-const PEER_CONFIG = {
-  config: {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' }
-    ]
-  }
-};
-
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
-
 function setStatus(t) { document.getElementById('statusMsg').textContent = t; }
 
+/* OPTYMALNA KONFIGURACJA PEERJS POD GITHUB PAGES (HTTPS) */
 function createRoom() {
   myName = document.getElementById('nickInput').value.trim() || 'Gospodarz';
-  setStatus('Łączenie z serwerami EA FC...');
+  setStatus('Inicjalizacja pokoju...');
   const code = genCode();
   
   if (peer) peer.destroy();
-  peer = new Peer('eafc26-' + code, PEER_CONFIG);
+  
+  // Zewnętrzny bezpłatny serwer połączeń STUN dla GitHub Pages
+  peer = new Peer('eafc' + code, {
+    debug: 1,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    }
+  });
+  
   isHost = true;
 
-  peer.on('open', () => {
+  peer.on('open', (id) => {
     document.getElementById('mainPanel').classList.add('hidden');
     document.getElementById('waitPanel').classList.remove('hidden');
     document.getElementById('roomCodeDisplay').textContent = code;
   });
+
   peer.on('connection', c => {
-    conn = c; setupConn();
-    c.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
+    conn = c; 
+    setupConn();
   });
+
   peer.on('error', e => {
-    if (e.type === 'network') {
-      setStatus('Uruchom plik przez lokalny serwer (np. Live Server) lub wyłącz VPN!');
+    setStatus('Błąd serwera PeerJS: ' + e.type + '. Spróbuj ponownie.');
+  });
+}
+
+function joinRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gość';
+  const rawCode = document.getElementById('joinInput').value.trim().toUpperCase();
+  if (rawCode.length !== 6) { setStatus('Wpisz poprawny 6-cyfrowy kod!'); return; }
+  
+  setStatus('Łączenie z Gospodarzem...');
+  
+  if (peer) peer.destroy();
+  peer = new Peer({
+    debug: 1,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    }
+  });
+  
+  isHost = false;
+
+  peer.on('open', () => {
+    conn = peer.connect('eafc' + rawCode, { reliable: true });
+    setupConn();
+  });
+
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable') {
+      setStatus('Błędny kod pokoju lub Host jeszcze nie dołączył!');
     } else {
       setStatus('Błąd połączenia: ' + e.type);
     }
   });
 }
 
-function joinRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gość';
-  const code = document.getElementById('joinInput').value.trim().toUpperCase();
-  if (code.length !== 6) { setStatus('Wpisz poprawny 6-cyfrowy kod!'); return; }
-  setStatus('Łączenie z pokojem...');
-  
-  if (peer) peer.destroy();
-  peer = new Peer(PEER_CONFIG);
-  isHost = false;
-
-  peer.on('open', () => {
-    conn = peer.connect('eafc26-' + code, { reliable: true });
-    setupConn();
-    conn.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
-  });
-
-  peer.on('error', e => {
-    if (e.type === 'peer-unavailable') {
-      setStatus('Błędny kod lub Gospodarz jeszcze nie stworzył pokoju!');
-    } else if (e.type === 'network') {
-      setStatus('Błąd sieci! Jeśli odpalasz plik z dysku, uruchom go przez serwer lokalny.');
-    } else {
-      setStatus('Błąd: ' + e.type);
-    }
-  });
-}
-
 function setupConn() {
+  conn.on('open', () => {
+    conn.send({ t:'hello', name: myName, ps: myPlayStyles });
+  });
+
   conn.on('data', onData);
-  conn.on('close', () => { if (started) alert('Przeciwnik wyszedł z meczu.'); location.reload(); });
+  conn.on('close', () => { if (started) alert('Przeciwnik opuścił mecz.'); location.reload(); });
 }
 
 function onData(d) {
@@ -578,7 +616,7 @@ function loop(ts) {
   }
 
   netTimer++;
-  if (netTimer % 3 === 0 && conn && conn.open) {
+  if (netTimer % 2 === 0 && conn && conn.open) {
     if (isHost) {
       conn.send({
         t:'s', x:ME.x, y:ME.y, vx:ME.vx, vy:ME.vy,
