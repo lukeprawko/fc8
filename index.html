@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Ping Pong - Hardcore Physics & RPG Edition</title>
+<title>Tenis Stołowy Multiplayer 2D</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
 
   body {
-    background-color: #080b12;
+    background-color: #0b0f19;
     color: #f0f6fc;
     min-height: 100vh;
     display: flex;
@@ -27,10 +27,10 @@
     font-size: 42px;
     font-weight: 900;
     letter-spacing: 3px;
-    background: linear-gradient(135deg, #00f0ff, #7000ff);
+    background: linear-gradient(135deg, #2ea44f, #00f0ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    text-shadow: 0 0 20px rgba(46, 164, 79, 0.4);
   }
   .header p {
     color: #8b949e;
@@ -63,7 +63,7 @@
   input {
     width: 100%;
     padding: 11px 14px;
-    background: #080b12;
+    background: #0b0f19;
     border: 1px solid #283044;
     border-radius: 8px;
     color: #fff;
@@ -114,7 +114,7 @@
     letter-spacing: 6px;
     color: #00f0ff;
     margin: 14px 0;
-    background: #080b12;
+    background: #0b0f19;
     padding: 12px;
     border-radius: 8px;
     border: 1px dashed #283044;
@@ -154,7 +154,7 @@
   .p1-color { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
   .p2-color { color: #ff0055; text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
 
-  /* PANEL ULEPSZEŃ STATYSTYK */
+  /* PANEL ULEPSZEŃ */
   #upgradesPanel {
     width: 900px;
     max-width: 100%;
@@ -190,7 +190,7 @@
   }
 
   canvas {
-    background: #0a0d16;
+    background: #0f172a;
     border: 1px solid #283044;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
@@ -230,8 +230,8 @@
 <body>
 
 <div class="header">
-  <h1>ULTIMATE PING PONG</h1>
-  <p>Realistyczne Tempo, Trudniejszy Rozwój i Zaawansowana Fizyka</p>
+  <h1>TENIS STOŁOWY 2D</h1>
+  <p>Rozgrywka Tenisa Stołowego z Rotacją i Ulepszeniami Rakiety</p>
 </div>
 
 <!-- MENU POKOJU -->
@@ -273,22 +273,22 @@
     </div>
   </div>
 
-  <!-- ULEPSZENIA GRACZA -->
+  <!-- PANEL ULEPSZEŃ STATYSTYK -->
   <div id="upgradesPanel">
     <div>Punkty UP: <span class="upgrade-points" id="ptsDisplay">0</span></div>
-    <div>🌀 Podkręcanie: <b id="statSpin">Lvl 1</b> <button class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+ (1 UP)</button></div>
-    <div>⚡ Szybkość: <b id="statSpeed">Lvl 1</b> <button class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+ (1 UP)</button></div>
-    <div>💥 Smash: <b id="statSmash">Lvl 1</b> <button class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+ (1 UP)</button></div>
+    <div>🌀 Podkręcenie: <b id="statSpin">Lvl 1</b> <button class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+ (1 UP)</button></div>
+    <div>⚡ Szybkość Rakiety: <b id="statSpeed">Lvl 1</b> <button class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+ (1 UP)</button></div>
+    <div>💥 Moc Ścinania: <b id="statSmash">Lvl 1</b> <button class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+ (1 UP)</button></div>
   </div>
 
   <div class="canvas-container">
     <canvas id="stage" width="900" height="500"></canvas>
-    <div class="version-watermark">v1.5.0 - Hardcore Balance Update</div>
+    <div class="version-watermark">v2.0.0 - Table Tennis Edition</div>
   </div>
 
   <div class="controls-bar">
-    Ruch: <span>W / S</span> | Zryw: <span>SHIFT</span> | Smash: <span>SPACJA</span><br>
-    <i>UP dostajesz co <b>3 zdobytym punkcie</b> lub za <b>długą wymianę (10+ odbić)</b>. Koszt kolejnych poziomów rośnie!</i>
+    Ruch Rakiety: <span>W / S</span> | Zryw: <span>SHIFT</span> | Ścięcie (Smash): <span>SPACJA</span><br>
+    <i>Uderzaj w ruchu, by nadać piłce **Topspin / Underspin**. Przebijaj nad siatką!</i>
   </div>
 </div>
 
@@ -302,18 +302,22 @@ let myName = 'Gracz', oppName = 'Przeciwnik';
 let gameActive = false;
 let keys = {};
 
-// TRUDNIEJSZY SYSTEM ROZWOJU (KOSZT ROŚNIE Z KAŻDYM LVL)
+// STATYSTYKI ROZWOJU
 let upgradePoints = 0;
 const stats = { spin: 1, speed: 1, smash: 1 };
-let rallyHits = 0; // Licznik odbić w obecnej wymianie
+let rallyHits = 0;
 
-// Statystyki Paletek (Zbalansowane prędkości)
-const BASE_H = 85;
-const P1 = { x: 25, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#00f0ff', spinMult: 1, smashMult: 1 };
-const P2 = { x: W - 25 - 12, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#ff0055', spinMult: 1, smashMult: 1 };
+// Rakiety Tenisa Stołowego
+const RACKET_W = 14, RACKET_H = 75;
+const P1 = { x: 30, y: H/2 - RACKET_H/2, w: RACKET_W, h: RACKET_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#00f0ff', spinMult: 1, smashMult: 1 };
+const P2 = { x: W - 30 - RACKET_W, y: H/2 - RACKET_H/2, w: RACKET_W, h: RACKET_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#ff0055', spinMult: 1, smashMult: 1 };
 
-// Piłka (Zwolniona, płynna)
-const BALL = { x: W/2, y: H/2, r: 7.5, vx: 3.2, vy: 1.5, spin: 0, speed: 3.8, trail: [] };
+// Piłeczka Tenisowa
+const BALL = { x: W/2, y: H/2, r: 6.5, vx: 3.2, vy: 1.5, spin: 0, speed: 3.8, trail: [] };
+
+// Siatka na środku stołu
+const NET_W = 8;
+const NET_X = W/2 - NET_W/2;
 
 // Przeszkoda
 let obstacle = null;
@@ -324,10 +328,8 @@ let particles = [];
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
 function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
 
-/* --- ULEPSZENIA I TRUDNY SYSTEM UP --- */
-function getUpgradeCost(currentLvl) {
-  return currentLvl; // Koszt: Lvl 1->2 kosztuje 1 UP, Lvl 2->3 kosztuje 2 UP itd.
-}
+/* --- SYSTMEM ULEPSZEŃ --- */
+function getUpgradeCost(currentLvl) { return currentLvl; }
 
 function upgradeStat(type) {
   const currentLvl = stats[type];
@@ -373,12 +375,12 @@ function applyStatsToLocalPlayer() {
   p.smashMult = 1 + (stats.smash * 0.2);
 }
 
-/* --- MULTIPLAYER (PEERJS) --- */
+/* --- MULTIPLAYER --- */
 function createRoom() {
   myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
   setStatus('Tworzenie pokoju...');
   const code = genCode();
-  peer = new Peer('pingpong-' + code);
+  peer = new Peer('ttennis-' + code);
   isHost = true;
 
   peer.on('open', () => {
@@ -406,7 +408,7 @@ function joinRoom() {
   isHost = false;
 
   peer.on('open', () => {
-    conn = peer.connect('pingpong-' + code);
+    conn = peer.connect('ttennis-' + code);
     bindConnEvents();
     conn.on('open', () => conn.send({ t: 'hello', name: myName }));
   });
@@ -453,7 +455,6 @@ function handleData(d) {
 }
 
 function checkUPAward(newScore, oldScore) {
-  // Punkty UP dostaje się rzadko: Co 3 zdobyte punkty LUB przy długiej wymianie
   if (newScore > oldScore) {
     if (newScore % 3 === 0 || rallyHits >= 10) {
       upgradePoints++;
@@ -478,7 +479,7 @@ function startGame() {
 function resetBall() {
   BALL.x = W / 2;
   BALL.y = H / 2;
-  BALL.speed = 3.8; // Zmniejszona prędkość startowa
+  BALL.speed = 3.8;
   BALL.spin = 0;
   BALL.trail = [];
   rallyHits = 0;
@@ -504,7 +505,7 @@ function updateHudScore() {
   document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
 }
 
-/* --- LOGIKA I FIZYKA GRY --- */
+/* --- LOGIKA I FIZYKA --- */
 function update() {
   const myPaddle = isHost ? P1 : P2;
   
@@ -524,10 +525,10 @@ function update() {
   myPaddle.vy = moveDir * currentSpeed;
   myPaddle.y += myPaddle.vy;
 
-  P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
-  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
+  P1.y = Math.max(15, Math.min(H - P1.h - 15, P1.y));
+  P2.y = Math.max(15, Math.min(H - P2.h - 15, P2.y));
 
-  // Logika Przetwarzana u Hosta
+  // Logika Gry (Obliczana u Hosta)
   if (isHost) {
     if (!obstacle && Math.random() < 0.001) {
       obstacle = {
@@ -544,7 +545,7 @@ function update() {
       if (obstacle.timer <= 0) obstacle = null;
     }
 
-    // Wygladzona fizyka rotacji (Efekt Magnusa z oporem powietrza)
+    // Rotacja i Efekt Magnusa w Tenisie Stołowym
     BALL.vy += BALL.spin * 0.06;
     BALL.spin *= 0.97;
 
@@ -554,9 +555,9 @@ function update() {
     BALL.trail.push({ x: BALL.x, y: BALL.y });
     if (BALL.trail.length > 7) BALL.trail.shift();
 
-    // Ściana góra/dół (z 3% rykoszetem)
-    if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
-      BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
+    // Odbicie od krawędzi stołu (Top / Bottom) z 3% Rykoszetem
+    if (BALL.y - BALL.r <= 15 || BALL.y + BALL.r >= H - 15) {
+      BALL.y = BALL.y - BALL.r <= 15 ? 15 + BALL.r : H - 15 - BALL.r;
       BALL.vy *= -1;
 
       if (Math.random() < 0.03) {
@@ -567,7 +568,7 @@ function update() {
       }
     }
 
-    // Kolizja z przeszkodą
+    // Kolizja z Przeszkodą
     if (obstacle) {
       if (BALL.x + BALL.r >= obstacle.x && BALL.x - BALL.r <= obstacle.x + obstacle.w &&
           BALL.y + BALL.r >= obstacle.y && BALL.y - BALL.r <= obstacle.y + obstacle.h) {
@@ -576,7 +577,7 @@ function update() {
       }
     }
 
-    // Odbicie Lewa Paletka (P1)
+    // Odbicie od Rakiety P1 (Lewa)
     if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
       if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
         BALL.x = P1.x + P1.w + BALL.r;
@@ -588,7 +589,7 @@ function update() {
         let isSmash = keys['Space'];
         let speedBoost = isSmash ? (0.45 * P1.smashMult) : 0.15;
 
-        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5); // Ściśle ograniczona max prędkość!
+        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5);
         BALL.spin = P1.vy * 0.45 * P1.spinMult;
 
         BALL.vx = BALL.speed * Math.cos(angle);
@@ -598,7 +599,7 @@ function update() {
       }
     }
 
-    // Odbicie Prawa Paletka (P2)
+    // Odbicie od Rakiety P2 (Prawa)
     if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
       if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
         BALL.x = P2.x - BALL.r;
@@ -659,17 +660,39 @@ function update() {
   }
 }
 
-/* --- RENDEROWANIE --- */
+/* --- RENDEROWANIE STOŁU I RAKIET --- */
 function render() {
-  ctx.fillStyle = '#0a0d16';
+  // 1. Tło wokół stołu
+  ctx.fillStyle = '#0f172a';
   ctx.fillRect(0, 0, W, H);
 
-  // Siatka
-  ctx.setLineDash([8, 8]);
+  // 2. Blat Stołu do Tenisa Stołowego (Ciemnoniebieski)
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(15, 15, W - 30, H - 30);
+
+  // 3. Linie Stołu (Biała ramka i linia środkowa)
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(15, 15, W - 30, H - 30);
+
+  // Linia podziału pola
+  ctx.setLineDash([4, 4]);
   ctx.beginPath();
-  ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H);
-  ctx.strokeStyle = '#1e2638'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.moveTo(15, H / 2);
+  ctx.lineTo(W - 15, H / 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.setLineDash([]);
+
+  // 4. Siatka na Środku
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillRect(NET_X, 10, NET_W, H - 20);
+
+  // Słupki siatki
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillRect(NET_X - 2, 8, NET_W + 4, 6);
+  ctx.fillRect(NET_X - 2, H - 14, NET_W + 4, 6);
 
   // Przeszkoda
   if (obstacle) {
@@ -687,34 +710,46 @@ function render() {
     ctx.globalAlpha = 1.0;
   });
 
-  // Ślad Piłki
+  // Ślad Piłeczki
   BALL.trail.forEach((t, i) => {
     ctx.beginPath();
     ctx.arc(t.x, t.y, BALL.r * (i / BALL.trail.length), 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.fill();
   });
 
-  // Paletki
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = P1.color; ctx.shadowColor = P1.color;
-  ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
-
-  ctx.fillStyle = P2.color; ctx.shadowColor = P2.color;
-  ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
+  // 5. Rakiety Tenisowe (Guma czerwona/niebieska + Rączka)
+  drawRacket(P1);
+  drawRacket(P2);
 
   // Pasek Cooldown Dash
   const myPaddle = isHost ? P1 : P2;
   if (myPaddle.dashCooldown > 0) {
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.fillRect(myPaddle.x, myPaddle.y + myPaddle.h + 6, (myPaddle.dashCooldown / 50) * myPaddle.w, 3);
   }
 
-  // Piłka
+  // 6. Piłeczka Tenisowa (Pomarańczowo-Biała)
   ctx.beginPath();
   ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 12;
+  ctx.fillStyle = '#ff9800'; ctx.shadowColor = '#ff9800'; ctx.shadowBlur = 12;
   ctx.fill();
+
+  ctx.shadowBlur = 0;
+}
+
+function drawRacket(p) {
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = p.color;
+
+  // Czerwona Guma Okładziny Rakiety
+  ctx.fillStyle = p.color;
+  ctx.fillRect(p.x, p.y, p.w, p.h);
+
+  // Drewniany Uchwyt
+  ctx.fillStyle = '#b45309';
+  const handleX = p.x < W/2 ? p.x - 4 : p.x + p.w;
+  ctx.fillRect(handleX, p.y + p.h/2 - 6, 4, 12);
 
   ctx.shadowBlur = 0;
 }
