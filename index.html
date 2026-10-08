@@ -241,11 +241,11 @@ let keys = {};
 
 // Paletki graczy
 const PADDLE_W = 14, PADDLE_H = 90;
-const P1 = { x: 20, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
-const P2 = { x: W - 20 - PADDLE_W, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
+const P1 = { x: 20, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 7, score: 0 };
+const P2 = { x: W - 20 - PADDLE_W, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 7, score: 0 };
 
 // Piłka
-const BALL = { x: W/2, y: H/2, r: 8, vx: 5, vy: 3, speed: 5.5 };
+const BALL = { x: W/2, y: H/2, r: 8, vx: 5, vy: 3, speed: 6 };
 
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
 function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
@@ -335,7 +335,7 @@ function startGame() {
 function resetBall() {
   BALL.x = W / 2;
   BALL.y = H / 2;
-  BALL.speed = 5.5;
+  BALL.speed = 6; // Początkowa prędkość
   const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
   const dir = Math.random() < 0.5 ? 1 : -1;
   BALL.vx = dir * BALL.speed * Math.cos(angle);
@@ -357,7 +357,7 @@ function update() {
   P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
   P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
 
-  // Logika pilki na hoście (Gospodarzu)
+  // Logika piłki na hoście (Gospodarzu)
   if (isHost) {
     BALL.x += BALL.vx;
     BALL.y += BALL.vy;
@@ -372,7 +372,9 @@ function update() {
         BALL.x = P1.x + P1.w + BALL.r;
         let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
         let angle = collidePoint * (Math.PI / 3);
-        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        
+        // Wyraźniejsze przyspieszenie przy każdym odbiciu
+        BALL.speed = Math.min(BALL.speed + 0.85, 20);
         BALL.vx = BALL.speed * Math.cos(angle);
         BALL.vy = BALL.speed * Math.sin(angle);
       }
@@ -384,7 +386,9 @@ function update() {
         BALL.x = P2.x - BALL.r;
         let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
         let angle = collidePoint * (Math.PI / 3);
-        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        
+        // Wyraźniejsze przyspieszenie przy każdym odbiciu
+        BALL.speed = Math.min(BALL.speed + 0.85, 20);
         BALL.vx = -BALL.speed * Math.cos(angle);
         BALL.vy = BALL.speed * Math.sin(angle);
       }
