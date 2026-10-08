@@ -52,7 +52,6 @@
     font-weight: 700;
   }
 
-  /* KARTY / PANANEL KONFIGURACJI */
   .panel {
     background: rgba(18, 25, 40, 0.85);
     border: 1px solid rgba(229, 193, 88, 0.3);
@@ -73,7 +72,6 @@
   }
   input:focus, select:focus { border-color: var(--fc-gold); }
 
-  /* PLAYSTYLES SEKCJA */
   .playstyles-title {
     font-size: 14px; font-weight: 700; color: var(--fc-gold); text-transform: uppercase;
     margin: 14px 0 8px; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
@@ -108,7 +106,6 @@
     margin: 8px 0; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 8px; border: 1px dashed var(--fc-gold);
   }
 
-  /* OBSZAR GRY */
   #gameWrapper { display: none; text-align: center; }
 
   #hud {
@@ -151,7 +148,6 @@
   <p>PLAYSTYLES & MULTIPLAYER ARCADE</p>
 </div>
 
-<!-- MENU KONFIGURACJI -->
 <div id="menu">
   <div class="panel" id="mainPanel">
     <div class="input-group">
@@ -170,7 +166,6 @@
       </select>
     </div>
 
-    <!-- KONFIGURACJA PLAYSTYLES -->
     <div class="playstyles-title">Rozdaj PlayStyles (Kliknij aby zmienić)</div>
     <div class="ps-grid">
       <div class="ps-item">
@@ -207,7 +202,6 @@
   </div>
 </div>
 
-<!-- DANE MECZU -->
 <div id="gameWrapper">
   <div id="hud">
     <div class="score-board">
@@ -226,7 +220,6 @@
 </div>
 
 <script>
-/* ================= EA FC 26 ENGINE ================= */
 const W = 960, H = 540;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -242,15 +235,8 @@ let myName = 'Gracz', oppName = 'Przeciwnik';
 let started = false, startTime = 0;
 let keys = {};
 
-// STAN PLAYSTYLES GRACZA (0: OFF, 1: GREY, 2: GOLD+)
-const myPlayStyles = {
-  finesse: 0,
-  rapid: 0,
-  powershot: 0,
-  relentless: 0
-};
+const myPlayStyles = { finesse: 0, rapid: 0, powershot: 0, relentless: 0 };
 
-// GOTOWE PRESETY ZAWODNIKÓW
 const PRESETS = {
   mbappe: { name: 'K. Mbappé', ps: { rapid: 2, powershot: 1, finesse: 0, relentless: 1 } },
   haaland: { name: 'E. Haaland', ps: { powershot: 2, rapid: 1, finesse: 0, relentless: 1 } },
@@ -258,7 +244,6 @@ const PRESETS = {
   bellingham: { name: 'J. Bellingham', ps: { relentless: 2, finesse: 1, rapid: 1, powershot: 0 } }
 };
 
-// ZAWODNICY & BOISKO
 const ME   = { x:200, y:H/2, vx:0, vy:0, r:18, faceX:1, faceY:0, ps: myPlayStyles };
 const OPP  = { x:760, y:H/2, vx:0, vy:0, r:18, faceX:-1, faceY:0, ps: { finesse:0, rapid:0, powershot:0, relentless:0 } };
 const GK1  = { x:MARGIN + 15, y:H/2, vx:0, vy:0, r:18 };
@@ -269,7 +254,6 @@ let score1 = 0, score2 = 0;
 let goalFlash = 0, goalText = '';
 const MATCH_LEN = 180;
 
-/* ---------- PLAYSTYLES UI TOGGLE ---------- */
 function togglePS(type) {
   myPlayStyles[type] = (myPlayStyles[type] + 1) % 3;
   updatePSBadges();
@@ -295,7 +279,17 @@ function onPlayerChange() {
   }
 }
 
-/* ---------- PEERJS MULTIPLAYER ---------- */
+// DARMOWE SERWERY STUN/TURN DLA PEERJS (UŁATWIAJĄ POŁĄCZENIE SIECIOWE)
+const PEER_CONFIG = {
+  config: {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' }
+    ]
+  }
+};
+
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
 
 function setStatus(t) { document.getElementById('statusMsg').textContent = t; }
@@ -304,7 +298,9 @@ function createRoom() {
   myName = document.getElementById('nickInput').value.trim() || 'Gospodarz';
   setStatus('Łączenie z serwerami EA FC...');
   const code = genCode();
-  peer = new Peer('eafc26-' + code);
+  
+  if (peer) peer.destroy();
+  peer = new Peer('eafc26-' + code, PEER_CONFIG);
   isHost = true;
 
   peer.on('open', () => {
@@ -316,7 +312,13 @@ function createRoom() {
     conn = c; setupConn();
     c.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
   });
-  peer.on('error', e => setStatus('Błąd połączenia: ' + e.type));
+  peer.on('error', e => {
+    if (e.type === 'network') {
+      setStatus('Uruchom plik przez lokalny serwer (np. Live Server) lub wyłącz VPN!');
+    } else {
+      setStatus('Błąd połączenia: ' + e.type);
+    }
+  });
 }
 
 function joinRoom() {
@@ -324,15 +326,26 @@ function joinRoom() {
   const code = document.getElementById('joinInput').value.trim().toUpperCase();
   if (code.length !== 6) { setStatus('Wpisz poprawny 6-cyfrowy kod!'); return; }
   setStatus('Łączenie z pokojem...');
-  peer = new Peer();
+  
+  if (peer) peer.destroy();
+  peer = new Peer(PEER_CONFIG);
   isHost = false;
 
   peer.on('open', () => {
-    conn = peer.connect('eafc26-' + code, { reliable:true });
+    conn = peer.connect('eafc26-' + code, { reliable: true });
     setupConn();
     conn.on('open', () => conn.send({ t:'hello', name: myName, ps: myPlayStyles }));
   });
-  peer.on('error', () => setStatus('Nie znaleziono pokoju meczowego!'));
+
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable') {
+      setStatus('Błędny kod lub Gospodarz jeszcze nie stworzył pokoju!');
+    } else if (e.type === 'network') {
+      setStatus('Błąd sieci! Jeśli odpalasz plik z dysku, uruchom go przez serwer lokalny.');
+    } else {
+      setStatus('Błąd: ' + e.type);
+    }
+  });
 }
 
 function setupConn() {
@@ -391,16 +404,13 @@ function syncScore() {
   document.getElementById('hudScore').textContent = (isHost ? score1 : score2) + ' : ' + (isHost ? score2 : score1);
 }
 
-/* ---------- MECHANIKA Z PRZELICZANIEM PLAYSTYLES ---------- */
 function stepPlayer(p, isMe, dt) {
   const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
 
-  // RAPID PLAYSTYLE (BONUS DO SPRINTU)
   let sprintBonus = 0;
   if (p.ps.rapid === 1) sprintBonus = 0.8;
-  if (p.ps.rapid === 2) sprintBonus = 1.8; // RAPID+
+  if (p.ps.rapid === 2) sprintBonus = 1.8;
 
-  // RELENTLESS PLAYSTYLE (TYLKO MNIEJSZE ZMĘCZENIE/STABILNE PRZYSPIESZENIE)
   const ACC = isSprinting ? (0.8 + sprintBonus * 0.1) : 0.65;
   const MAXV = isSprinting ? (5.5 + sprintBonus) : 5.2;
   const FRICTION = 0.86;
@@ -433,27 +443,24 @@ function stepPlayer(p, isMe, dt) {
 function handleActions(p) {
   const dist = Math.hypot(BALL.x - p.x, BALL.y - p.y);
   
-  // 1. POWER SHOT (Spacja lub J)
   if ((keys['Space'] || keys['KeyJ']) && dist < p.r + BALL.r + 12) {
     let powerBonus = 0;
     if (p.ps.powershot === 1) powerBonus = 3;
-    if (p.ps.powershot === 2) powerBonus = 6.5; // POWER SHOT+
+    if (p.ps.powershot === 2) powerBonus = 6.5;
 
     const power = 13.5 + powerBonus;
     BALL.vx = p.faceX * power + p.vx * 0.4;
     BALL.vy = p.faceY * power + p.vy * 0.4;
   }
-  // 2. FINESSE SHOT (K) - Podkręcony strzał z dokładnością
   else if (keys['KeyK'] && dist < p.r + BALL.r + 14) {
     let curveMult = 1.0;
     if (p.ps.finesse === 1) curveMult = 1.4;
-    if (p.ps.finesse === 2) curveMult = 2.0; // FINESSE SHOT+
+    if (p.ps.finesse === 2) curveMult = 2.0;
 
     const power = 10;
     BALL.vx = p.faceX * power;
     BALL.vy = (p.faceY + (p.faceX > 0 ? -0.4 : 0.4) * curveMult) * power;
   }
-  // 3. DRYBLING / ZBLIŻENIE DO PIŁKI
   else if (dist < p.r + BALL.r + 6) {
     const targetX = p.x + p.faceX * (p.r + BALL.r + 2);
     const targetY = p.y + p.faceY * (p.r + BALL.r + 2);
@@ -463,7 +470,6 @@ function handleActions(p) {
   }
 }
 
-/* ---------- GK AI ---------- */
 function updateGK(gk, targetX, pAlly, dt) {
   const defY = Math.max(GOAL_TOP + gk.r, Math.min(GOAL_BOT - gk.r, BALL.y));
   let destX = targetX, destY = defY;
@@ -489,7 +495,6 @@ function updateGK(gk, targetX, pAlly, dt) {
   }
 }
 
-/* ---------- PIŁKA I KONTROLA BRAMKI ---------- */
 function stepBall(dt) {
   BALL.x += BALL.vx * dt; BALL.y += BALL.vy * dt;
   BALL.vx *= 0.985; BALL.vy *= 0.985;
@@ -551,7 +556,6 @@ function checkGoal() {
   }
 }
 
-/* ---------- PETLA MECZU ---------- */
 let lastT = 0, netTimer = 0;
 function loop(ts) {
   if (!started) return;
@@ -573,7 +577,6 @@ function loop(ts) {
     collidePlayerBall(ME);
   }
 
-  // Sieć
   netTimer++;
   if (netTimer % 3 === 0 && conn && conn.open) {
     if (isHost) {
@@ -588,7 +591,6 @@ function loop(ts) {
     }
   }
 
-  // Timer
   const left = Math.max(0, MATCH_LEN - (Date.now() - startTime)/1000);
   const m = Math.floor(left/60), s = Math.floor(left%60);
   document.getElementById('timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
@@ -611,9 +613,7 @@ function endMatch() {
   ctx.fillText(score1 + ' : ' + score2, W/2, H/2 + 30);
 }
 
-/* ---------- GRAFIKA Z ZŁOTYMI I SZARYMI PLAYSTYLES ---------- */
 function draw() {
-  // Murawa
   ctx.fillStyle = '#18472a'; ctx.fillRect(0, 0, W, H);
 
   const numStripes = 12;
@@ -623,33 +623,27 @@ function draw() {
     ctx.fillRect(MARGIN + i * stripeW, MARGIN, stripeW, H - 2 * MARGIN);
   }
 
-  // Banderze i Linie
   ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 3;
   ctx.strokeRect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN);
   ctx.beginPath(); ctx.moveTo(W/2, MARGIN); ctx.lineTo(W/2, H - MARGIN); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, H/2, 65, 0, Math.PI * 2); ctx.stroke();
 
-  // Pola Karne
   const boxW = 110, boxH = 200;
   ctx.strokeRect(MARGIN, H/2 - boxH/2, boxW, boxH);
   ctx.strokeRect(W - MARGIN - boxW, H/2 - boxH/2, boxW, boxH);
 
-  // Bramki
   drawGoal(MARGIN, true);
   drawGoal(W - MARGIN, false);
 
-  // Zawodnicy
   drawPlayer(GK1, '#ff3366', 'GK');
   drawPlayer(GK2, '#ff3366', 'GK');
   drawPlayer(OPP, '#00f0ff', isHost ? oppName : myName);
   drawPlayer(ME, '#e5c158', myName, true);
 
-  // Piłka
   ctx.beginPath(); ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
   ctx.fillStyle = '#ffffff'; ctx.fill();
   ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
 
-  // Baner Gola
   if (goalFlash > 0) {
     ctx.fillStyle = 'rgba(9, 13, 22, 0.85)'; ctx.fillRect(0, H/2 - 50, W, 100);
     ctx.textAlign = 'center'; ctx.fillStyle = '#e5c158'; ctx.font = '700 52px Teko';
@@ -665,29 +659,25 @@ function drawGoal(x, isLeft) {
 }
 
 function drawPlayer(p, color, name, isLocal = false) {
-  // Cień
   ctx.beginPath(); ctx.ellipse(p.x, p.y + p.r - 2, p.r * 0.8, p.r * 0.4, 0, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fill();
 
-  // Zawodnik
   ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
   ctx.fillStyle = color; ctx.fill();
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.stroke();
 
-  // Kierunek
   if (p.faceX || p.faceY) {
     ctx.beginPath(); ctx.arc(p.x + (p.faceX || 0) * 10, p.y + (p.faceY || 0) * 10, 4, 0, Math.PI * 2);
     ctx.fillStyle = '#111'; ctx.fill();
   }
 
-  // IKONKI PLAYSTYLES NAD GLOWĄ
   let psOffsetY = p.y - p.r - 18;
   if (p.ps) {
     let iconX = p.x - 22;
     for (let key in p.ps) {
       const val = p.ps[key];
       if (val > 0) {
-        ctx.fillStyle = val === 2 ? '#ffe066' : '#a0aab5'; // Złoty vs Szary
+        ctx.fillStyle = val === 2 ? '#ffe066' : '#a0aab5';
         ctx.beginPath(); ctx.arc(iconX, psOffsetY, 5, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
         iconX += 12;
@@ -695,13 +685,11 @@ function drawPlayer(p, color, name, isLocal = false) {
     }
   }
 
-  // Nick
   ctx.font = '700 13px Rajdhani'; ctx.textAlign = 'center';
   ctx.fillStyle = '#fff';
   ctx.fillText(name, p.x, p.y - p.r - 6);
 }
 
-/* ---------- KLAWIATURA ---------- */
 addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
 addEventListener('keyup', e => { keys[e.code] = false; });
 </script>
