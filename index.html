@@ -1,109 +1,460 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111416">
-  <meta name="description" content="Panoramy 360°, pięć rund i pojedynek ze znajomym. Darmowa gra geograficzna bez konta i kluczy API.">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>GeoDuel — zgadnij, gdzie jesteś</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
-  <link rel="stylesheet" href="./style.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-  <script defer src="./app.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pong Multiplayer 2D</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+
+  body {
+    background-color: #0d1117;
+    color: #f0f6fc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #58a6ff;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+  }
+  .header p {
+    color: #8b949e;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* PANEL MENU */
+  .panel {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 28px;
+    width: 360px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+
+  .input-group {
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: #8b949e;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+  }
+  input:focus { border-color: #58a6ff; }
+
+  .divider {
+    margin: 16px 0;
+    border-bottom: 1px solid #21262d;
+    position: relative;
+  }
+  .divider span {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #161b22;
+    padding: 0 8px;
+    color: #484f58;
+    font-size: 12px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-primary:hover { background: #2ea44f; }
+  .btn-secondary { background: #1f6feb; color: #fff; }
+  .btn-secondary:hover { background: #388bfd; }
+  .btn-cancel { background: #21262d; color: #c9d1d9; margin-top: 10px; }
+  .btn-cancel:hover { background: #30363d; }
+
+  #roomCodeDisplay {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    color: #58a6ff;
+    margin: 12px 0;
+    background: #0d1117;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px dashed #30363d;
+  }
+
+  .status-msg {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #e3b341;
+    min-height: 18px;
+  }
+
+  /* GRA & HUD */
+  #gameWrapper { display: none; text-align: center; }
+
+  #hud {
+    width: 800px;
+    max-width: 100%;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-bottom: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .score-board {
+    font-size: 22px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .team-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p1-color { color: #58a6ff; }
+  .p2-color { color: #f85149; }
+
+  canvas {
+    background: #111827;
+    border: 1px solid #30363d;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    display: block;
+  }
+
+  .controls-bar {
+    margin-top: 12px;
+    color: #8b949e;
+    font-size: 13px;
+  }
+  .controls-bar span {
+    background: #161b22;
+    border: 1px solid #30363d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #c9d1d9;
+  }
+
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
-  <svg class="svg-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16M13 5l7 7-7 7"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
-    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
-    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></symbol>
-  </svg>
-  <header class="site-header" id="header">
-    <a class="brand" href="./" aria-label="GeoDuel — strona główna"><span class="brand-icon"><svg><use href="#i-pin"/></svg></span>geo<span>duel</span><small>BETA</small></a>
-    <nav aria-label="Nawigacja"><button class="text-button" id="how-button">Jak grać <span>↗</span></button><span class="header-tag"><i class="status-dot"></i> Bez konta. Po prostu graj.</span></nav>
-  </header>
 
-  <main>
-    <section id="home-screen" class="screen home-screen">
-      <div class="intro"><div class="eyebrow"><span class="tiny-line"></span> TWOJA INTUICJA. CAŁY ŚWIAT.</div>
-        <h1>Gdzieś na świecie.<br><span>Bliżej niż myślisz.</span></h1>
-        <p>Rozejrzyj się. Połącz wskazówki. Postaw pinezkę.<br>Rzuć wyzwanie znajomemu i sprawdź, kto trafi bliżej.</p>
-      </div>
-      <div class="home-grid">
-        <div class="expedition-card">
-          <div class="photo-overlay"></div><span class="image-chip"><i class="status-dot"></i> ODKRYWAJ W 360°</span>
-          <div class="viewfinder"><span></span><svg><use href="#i-pin"/></svg><span></span></div>
-          <div class="photo-caption"><span class="eyebrow">MAŁY DETAL. WIELKA WSKAZÓWKA.</span><h2>Każde miejsce<br>ma swoją historię.</h2><div class="photo-bottom"><span>48 panoram · Europa, USA i Japonia</span><span class="circle-arrow">↗</span></div></div>
-        </div>
-        <section class="play-card" aria-labelledby="play-title">
-          <div class="card-heading"><span class="card-icon"><svg><use href="#i-users"/></svg></span><span class="pill">1 vs 1</span></div>
-          <h2 id="play-title">Świat czeka. Gramy?</h2><p>Zaproś znajomego. Resztę zostaw intuicji.</p>
-          <label for="player-name">TWÓJ PSEUDONIM</label><input id="player-name" maxlength="20" autocomplete="nickname" placeholder="Odkrywca" value="Odkrywca">
-          <button id="create-button" class="button primary full">Utwórz pokój <svg><use href="#i-arrow"/></svg></button>
-          <div class="divider"><span>masz już zaproszenie?</span></div>
-          <form id="join-form"><label class="sr-only" for="room-input">Sześcioliterowy kod pokoju</label><div class="join-row"><input id="room-input" maxlength="6" placeholder="KOD POKOJU" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="join-hint"><button class="button secondary" id="join-button" type="submit">Dołącz <span>↗</span></button></div></form>
-          <p id="join-hint" class="small">Wpisz 6 znaków udostępnionych przez hosta.</p>
-          <button class="text-button practice-button" id="practice-button">Najpierw spróbuj solo <span>→</span></button>
-        </section>
-      </div>
-      <div class="features"><div><span class="feature-number">01</span><svg><use href="#i-globe"/></svg><div><strong>Jedno miejsce. Dwie perspektywy.</strong><p>Ta sama panorama dla obu graczy.</p></div></div><div><span class="feature-number">02</span><svg><use href="#i-clock"/></svg><div><strong>5 rund. Po 60 sekund.</strong><p>Liczy się każda dobra wskazówka.</p></div></div><div><span class="feature-number">03</span><svg><use href="#i-pin"/></svg><div><strong>Im bliżej, tym więcej punktów.</strong><p>Zdobądź nawet 25 000 punktów.</p></div></div></div>
-      <footer><span>Podróżuj ciekawością.</span><button id="about-button" class="text-button">Źródła i informacje ↗</button></footer>
-    </section>
+<div class="header">
+  <h1>PONG MULTIPLAYER</h1>
+  <p>Odbijaj piłkę platformą i zdobądź punkty!</p>
+</div>
 
-    <section id="lobby-screen" class="screen centered" hidden>
-      <div class="lobby-card"><span class="eyebrow">PRZYSTANEK PRZED PODRÓŻĄ</span><h1>Twój pokój.</h1><p id="lobby-status" role="status">Łączenie…</p>
-        <div class="room-ticket"><span>KOD ZAPROSZENIA</span><strong id="room-code">······</strong><button id="copy-button" class="button secondary" disabled>Kopiuj link ↗</button></div>
-        <div class="lobby-players"><div><span class="avatar host-avatar">1</span><strong id="lobby-host">Host</strong><span class="pill">HOST</span></div><div><span class="avatar guest-avatar">2</span><strong id="lobby-guest">Czekamy na gracza…</strong><i id="guest-dot" class="status-dot inactive"></i></div></div>
-        <div class="rules-strip"><span>5 rund</span><span>60 s / rundę</span><span>Bez przemieszczania</span></div>
-        <button id="start-button" class="button primary full" disabled>Rozpocznij pojedynek <svg><use href="#i-arrow"/></svg></button>
-        <button class="text-button leave-button" data-leave>Wróć do strony głównej</button>
-      </div>
-    </section>
+<!-- MENU POKOJU -->
+<div id="menu">
+  <div class="panel" id="mainPanel">
+    <div class="input-group">
+      <label>TWÓJ NICK</label>
+      <input id="nickInput" maxlength="12" placeholder="Gracz 1" value="Gracz">
+    </div>
+    
+    <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Lewa strona)</button>
+    
+    <div class="divider"><span>LUB</span></div>
+    
+    <div class="input-group">
+      <label>KOD POKOJU</label>
+      <input id="joinInput" maxlength="6" placeholder="np. ABC123" style="text-transform:uppercase;">
+    </div>
+    <button class="btn-secondary" onclick="joinRoom()">Dołącz (Prawa strona)</button>
+    
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
 
-    <section id="game-screen" class="screen game-screen" hidden aria-label="Rozgrywka">
-      <div id="panorama" aria-label="Panorama 360 stopni. Obracaj przeciągając lub strzałkami."></div>
-      <div class="game-top"><button class="game-brand" data-leave aria-label="Opuść grę"><svg><use href="#i-pin"/></svg><span>geoduel</span></button>
-        <div class="round-display"><span>RUNDA <strong id="round-number">1</strong> / 5</span><div id="round-dots" class="round-dots" aria-hidden="true"></div></div>
-        <div id="timer-box" class="timer-box"><svg><use href="#i-clock"/></svg><span id="timer" role="timer" aria-label="Pozostały czas">01:00</span></div>
-      </div>
-      <div class="scoreboard"><div><i class="player-dot host-color"></i><span id="host-name">Host</span><strong id="host-score">0</strong></div><div id="guest-score-row"><i class="player-dot guest-color"></i><span id="guest-name">Gość</span><strong id="guest-score">0</strong></div><small id="connection-quality"></small></div>
-      <div id="loading-panel" class="loading-panel"><div class="spinner"></div><h2 id="loading-title">Nowe miejsce. Nowe wskazówki.</h2><p id="loading-message" role="status">Ładowanie panoramy…</p><button id="retry-image" class="button secondary" hidden>Spróbuj ponownie</button><button class="text-button" data-leave>Opuść grę</button></div>
-      <div class="pano-controls"><button id="reset-view" title="Przywróć widok" aria-label="Przywróć początkowy widok">↺</button><button id="zoom-in" title="Przybliż" aria-label="Przybliż panoramę">+</button><button id="zoom-out" title="Oddal" aria-label="Oddal panoramę">−</button><button id="fullscreen" title="Pełny ekran" aria-label="Przełącz pełny ekran"><svg><use href="#i-expand"/></svg></button></div>
+  <div class="panel hidden" id="waitPanel">
+    <div style="font-size:14px; color:#8b949e;">Twój kod pokoju:</div>
+    <div id="roomCodeDisplay">------</div>
+    <div class="status-msg">Oczekiwanie na drugiego gracza...</div>
+    <button class="btn-cancel" onclick="location.reload()">Anuluj</button>
+  </div>
+</div>
 
-      <div class="look-hint" id="look-hint">↔ Przeciągnij, aby się rozejrzeć</div>
-      <aside id="guess-panel" class="guess-panel" aria-label="Mapa zgadywania">
-        <div class="pano-credit" id="pano-credit"></div>
-        <div class="map-heading"><span><svg><use href="#i-pin"/></svg> GDZIE JESTEŚ?</span><button id="expand-map" aria-label="Powiększ mapę" aria-expanded="false"><svg><use href="#i-expand"/></svg></button></div>
-        <div id="guess-map" class="guess-map" aria-label="Kliknij mapę, aby ustawić pinezkę"></div>
-        <div class="map-status"><span id="guess-hint">Postaw pinezkę na mapie</span><button id="map-center" class="text-button" title="Wybierz środek mapy — także z klawiatury">Wybierz środek</button></div>
-        <button id="guess-button" class="button primary full" disabled>Zatwierdź <span>↗</span></button>
-      </aside>
-      <div id="submission-status" class="submission-status" role="status" hidden></div>
-    </section>
+<!-- OBSZAR GRY -->
+<div id="gameWrapper">
+  <div id="hud">
+    <div class="score-board" style="width: 100%; justify-content: space-between;">
+      <span class="team-name p1-color" id="hudP1">Gracz 1</span>
+      <span id="hudScore" style="background:#0d1117; padding:4px 16px; border-radius:6px; border: 1px solid #30363d;">0 : 0</span>
+      <span class="team-name p2-color" id="hudP2">Gracz 2</span>
+    </div>
+  </div>
 
-    <section id="result-screen" class="screen result-screen" hidden>
-      <div class="result-heading"><div><span class="eyebrow" id="result-eyebrow">RUNDA 1 / 5</span><h1 id="result-title">Tak blisko!</h1><p id="location-name"></p></div><span class="result-tag"><svg><use href="#i-globe"/></svg> ODKRYTE MIEJSCE</span></div>
-      <div class="result-grid"><div class="result-map-card"><div id="result-map" aria-label="Mapa prawdziwej lokalizacji i odpowiedzi graczy"></div><div class="map-legend"><span><i class="player-dot actual-color"></i> Lokalizacja</span><span><i class="player-dot host-color"></i> Gracz 1</span><span id="legend-guest"><i class="player-dot guest-color"></i> Gracz 2</span></div></div>
-        <div class="round-details"><div id="round-cards"></div><div class="result-total"><span>TWÓJ WYNIK ŁĄCZNY</span><strong id="my-total">0 <small>pkt</small></strong></div><button id="next-button" class="button primary full">Następna runda <span>→</span></button><p id="next-status" class="small" role="status"></p><button class="text-button" data-leave>Opuść grę</button></div></div>
-      <p class="result-credit" id="result-credit"></p>
-    </section>
+  <canvas id="stage" width="800" height="500"></canvas>
 
-    <section id="final-screen" class="screen final-screen" hidden>
-      <span class="eyebrow">PIĘĆ MIEJSC. JEDNA WSPÓLNA PODRÓŻ.</span><div class="trophy" aria-hidden="true">✦</div><h1 id="winner-title">Koniec wyprawy!</h1><p id="winner-subtitle"></p>
-      <div id="final-scores" class="final-scores"></div>
-      <div class="table-wrap"><table><caption class="sr-only">Wyniki każdej rundy</caption><thead><tr><th scope="col">Runda / miejsce</th><th scope="col" id="table-host">Gracz 1</th><th scope="col" id="table-guest">Gracz 2</th></tr></thead><tbody id="round-table"></tbody></table></div>
-      <div class="final-actions"><button id="rematch-button" class="button primary">Jeszcze jeden pojedynek <span>↗</span></button><button class="button secondary" data-leave>Strona główna</button></div><p id="rematch-status" role="status"></p>
-    </section>
-  </main>
-  <dialog id="info-dialog"><button class="dialog-close" aria-label="Zamknij okno" data-close>×</button><div id="dialog-content"></div></dialog>
-  <dialog id="leave-dialog"><h2>Kończysz podróż?</h2><p>Opuszczenie pokoju zakończy bieżący mecz dla obu graczy.</p><div class="dialog-actions"><button class="button secondary" id="cancel-leave">Zostań</button><button class="button primary" id="confirm-leave">Opuść pokój</button></div></dialog>
-  <div id="toast" class="toast" role="status" hidden></div>
-  <noscript><div class="noscript">Włącz JavaScript, aby uruchomić grę.</div></noscript>
+  <div class="controls-bar">
+    Sterowanie platformą: <span>W</span> / <span>S</span> lub <span>Strzałka w górę</span> / <span>Strzałka w dół</span>
+  </div>
+</div>
+
+<script>
+const W = 800, H = 500;
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+let peer = null, conn = null, isHost = false;
+let myName = 'Gracz', oppName = 'Przeciwnik';
+let gameActive = false;
+let keys = {};
+
+// Paletki graczy
+const PADDLE_W = 14, PADDLE_H = 90;
+const P1 = { x: 20, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
+const P2 = { x: W - 20 - PADDLE_W, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, speed: 6, score: 0 };
+
+// Piłka
+const BALL = { x: W/2, y: H/2, r: 8, vx: 5, vy: 3, speed: 5.5 };
+
+const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
+function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
+
+/* --- SIEC MULTIPLAYER --- */
+function createRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
+  setStatus('Tworzenie pokoju...');
+  const code = genCode();
+  peer = new Peer('pong-' + code);
+  isHost = true;
+
+  peer.on('open', () => {
+    document.getElementById('mainPanel').classList.add('hidden');
+    document.getElementById('waitPanel').classList.remove('hidden');
+    document.getElementById('roomCodeDisplay').textContent = code;
+  });
+
+  peer.on('connection', c => {
+    conn = c;
+    bindConnEvents();
+    c.on('open', () => conn.send({ t: 'hello', name: myName }));
+  });
+
+  peer.on('error', err => setStatus('Błąd: ' + err.type));
+}
+
+function joinRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 2';
+  const code = document.getElementById('joinInput').value.trim().toUpperCase();
+  if (code.length !== 6) { setStatus('Wpisz kod!'); return; }
+  
+  setStatus('Łączenie...');
+  peer = new Peer();
+  isHost = false;
+
+  peer.on('open', () => {
+    conn = peer.connect('pong-' + code);
+    bindConnEvents();
+    conn.on('open', () => conn.send({ t: 'hello', name: myName }));
+  });
+
+  peer.on('error', () => setStatus('Nie odnaleziono pokoju!'));
+}
+
+function bindConnEvents() {
+  conn.on('data', handleData);
+  conn.on('close', () => { if (gameActive) alert('Przeciwnik rozłączył się.'); location.reload(); });
+}
+
+function handleData(d) {
+  if (d.t === 'hello') {
+    oppName = d.name;
+    if (isHost) {
+      conn.send({ t: 'start', opp: myName });
+      startGame();
+    }
+  }
+  else if (d.t === 'start') {
+    oppName = d.opp;
+    startGame();
+  }
+  else if (d.t === 'sync') {
+    if (isHost) {
+      P2.y = d.py;
+    } else {
+      P1.y = d.py;
+      BALL.x = d.bx; BALL.y = d.by;
+      P1.score = d.s1; P2.score = d.s2;
+      updateHudScore();
+    }
+  }
+}
+
+function startGame() {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('gameWrapper').style.display = 'block';
+
+  document.getElementById('hudP1').textContent = isHost ? myName : oppName;
+  document.getElementById('hudP2').textContent = isHost ? oppName : myName;
+
+  gameActive = true;
+  resetBall();
+  requestAnimationFrame(gameLoop);
+}
+
+function resetBall() {
+  BALL.x = W / 2;
+  BALL.y = H / 2;
+  BALL.speed = 5.5;
+  const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  BALL.vx = dir * BALL.speed * Math.cos(angle);
+  BALL.vy = BALL.speed * Math.sin(angle);
+}
+
+function updateHudScore() {
+  document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
+}
+
+/* --- FIZYKA GRY --- */
+function update() {
+  // Poruszanie własną paletką
+  const myPaddle = isHost ? P1 : P2;
+  if (keys['KeyW'] || keys['ArrowUp']) myPaddle.y -= myPaddle.speed;
+  if (keys['KeyS'] || keys['ArrowDown']) myPaddle.y += myPaddle.speed;
+
+  // Granice dla paletek
+  P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
+  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
+
+  // Logika pilki na hoście (Gospodarzu)
+  if (isHost) {
+    BALL.x += BALL.vx;
+    BALL.y += BALL.vy;
+
+    // Odbicie od góry i dołu
+    if (BALL.y - BALL.r <= 0) { BALL.y = BALL.r; BALL.vy *= -1; }
+    if (BALL.y + BALL.r >= H) { BALL.y = H - BALL.r; BALL.vy *= -1; }
+
+    // Kolizja z paletką Lewą (P1)
+    if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
+      if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
+        BALL.x = P1.x + P1.w + BALL.r;
+        let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
+        let angle = collidePoint * (Math.PI / 3);
+        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        BALL.vx = BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+      }
+    }
+
+    // Kolizja z paletką Prawą (P2)
+    if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
+      if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
+        BALL.x = P2.x - BALL.r;
+        let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
+        let angle = collidePoint * (Math.PI / 3);
+        BALL.speed = Math.min(BALL.speed + 0.3, 12);
+        BALL.vx = -BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+      }
+    }
+
+    // Punkty
+    if (BALL.x < 0) {
+      P2.score++;
+      updateHudScore();
+      resetBall();
+    } else if (BALL.x > W) {
+      P1.score++;
+      updateHudScore();
+      resetBall();
+    }
+  }
+
+  // Wysłanie danych do drugiego gracza
+  if (conn && conn.open) {
+    if (isHost) {
+      conn.send({ t: 'sync', py: P1.y, bx: BALL.x, by: BALL.y, s1: P1.score, s2: P2.score });
+    } else {
+      conn.send({ t: 'sync', py: P2.y });
+    }
+  }
+}
+
+/* --- RENDEROWANIE --- */
+function render() {
+  // Tło
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0, 0, W, H);
+
+  // Linia środkowa
+  ctx.setLineDash([8, 8]);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0);
+  ctx.lineTo(W / 2, H);
+  ctx.strokeStyle = '#374151';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Paletki
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
+
+  ctx.fillStyle = '#f85149';
+  ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
+
+  // Piłka
+  ctx.beginPath();
+  ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowColor = '#ffffff';
+  ctx.shadowBlur = 8;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function gameLoop() {
+  if (!gameActive) return;
+  update();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+addEventListener('keydown', e => { keys[e.code] = true; });
+addEventListener('keyup', e => { keys[e.code] = false; });
+</script>
 </body>
 </html>
