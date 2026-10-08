@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Ping Pong - RPG & Physics Edition</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+
+  body {
+    background-color: #080b12;
+    color: #f0f6fc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #00f0ff, #7000ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+  .header p {
+    color: #8b949e;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* PANEL MENU */
+  .panel {
+    background: #121722;
+    border: 1px solid #283044;
+    border-radius: 14px;
+    padding: 28px;
+    width: 380px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+    text-align: center;
+  }
+
+  .input-group {
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: #8b949e;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input {
+    width: 100%;
+    padding: 11px 14px;
+    background: #080b12;
+    border: 1px solid #283044;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: #00f0ff; }
+
+  .divider {
+    margin: 16px 0;
+    border-bottom: 1px solid #21262d;
+    position: relative;
+  }
+  .divider span {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #121722;
+    padding: 0 10px;
+    color: #484f58;
+    font-size: 12px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-primary:hover { background: #2ea44f; }
+  .btn-secondary { background: #1f6feb; color: #fff; }
+  .btn-secondary:hover { background: #388bfd; }
+  .btn-cancel { background: #21262d; color: #c9d1d9; margin-top: 10px; }
+  .btn-cancel:hover { background: #30363d; }
+
+  #roomCodeDisplay {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    color: #00f0ff;
+    margin: 14px 0;
+    background: #080b12;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px dashed #283044;
+  }
+
+  .status-msg {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #e3b341;
+    min-height: 18px;
+  }
+
+  /* GAME & HUD */
+  #gameWrapper { display: none; text-align: center; position: relative; }
+
+  #hud {
+    width: 900px;
+    max-width: 100%;
+    background: #121722;
+    border: 1px solid #283044;
+    border-bottom: none;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .score-board {
+    font-size: 26px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .team-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p1-color { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
+  .p2-color { color: #ff0055; text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
+
+  /* PANEL ULEPSZEŃ STATYSTYK */
+  #upgradesPanel {
+    width: 900px;
+    max-width: 100%;
+    background: #0d111a;
+    border: 1px solid #283044;
+    border-bottom: none;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 13px;
+  }
+  .stat-btn {
+    width: auto;
+    padding: 4px 10px;
+    margin: 0 0 0 6px;
+    font-size: 12px;
+    background: #238636;
+    color: #fff;
+    display: inline-block;
+  }
+  .stat-btn:hover { background: #2ea44f; }
+  .upgrade-points {
+    color: #e3b341;
+    font-weight: bold;
+  }
+
+  .canvas-container {
+    position: relative;
+    width: 900px;
+    max-width: 100%;
+  }
+
+  canvas {
+    background: #0a0d16;
+    border: 1px solid #283044;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    display: block;
+  }
+
+  .version-watermark {
+    position: absolute;
+    bottom: 10px;
+    right: 16px;
+    font-size: 11px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    letter-spacing: 0.5px;
+  }
+
+  .controls-bar {
+    margin-top: 12px;
+    color: #8b949e;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .controls-bar span {
+    background: #121722;
+    border: 1px solid #283044;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: #c9d1d9;
+    font-weight: 600;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ULTIMATE PING PONG</h1>
+  <p>Rozwój Statystyk, Super Podkręcanie i Przeszkody</p>
+</div>
+
+<!-- MENU POKOJU -->
+<div id="menu">
+  <div class="panel" id="mainPanel">
+    <div class="input-group">
+      <label>TWÓJ NICK</label>
+      <input id="nickInput" maxlength="12" placeholder="Gracz 1" value="Gracz">
+    </div>
+    
+    <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Lewa Strona)</button>
+    
+    <div class="divider"><span>LUB</span></div>
+    
+    <div class="input-group">
+      <label>KOD POKOJU</label>
+      <input id="joinInput" maxlength="6" placeholder="np. ABC123" style="text-transform:uppercase;">
+    </div>
+    <button class="btn-secondary" onclick="joinRoom()">Dołącz do Gry (Prawa Strona)</button>
+    
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <div class="panel hidden" id="waitPanel">
+    <div style="font-size:14px; color:#8b949e;">Podaj ten kod drugiemu graczowi:</div>
+    <div id="roomCodeDisplay">------</div>
+    <div class="status-msg">Oczekiwanie na połączenie...</div>
+    <button class="btn-cancel" onclick="location.reload()">Anuluj</button>
+  </div>
+</div>
+
+<!-- OBSZAR GRY -->
+<div id="gameWrapper">
+  <div id="hud">
+    <div class="score-board" style="width: 100%; justify-content: space-between;">
+      <span class="team-name p1-color" id="hudP1">Gracz 1</span>
+      <span id="hudScore" style="background:#080b12; padding:4px 20px; border-radius:8px; border: 1px solid #283044;">0 : 0</span>
+      <span class="team-name p2-color" id="hudP2">Gracz 2</span>
+    </div>
+  </div>
+
+  <!-- ULEPSZENIA GRACZA -->
+  <div id="upgradesPanel">
+    <div>Punkty rozwoju: <span class="upgrade-points" id="ptsDisplay">0</span> UP</div>
+    <div>🌀 Podkręcenie: <b id="statSpin">Lvl 1</b> <button class="stat-btn" onclick="upgradeStat('spin')">+</button></div>
+    <div>⚡ Szybkość: <b id="statSpeed">Lvl 1</b> <button class="stat-btn" onclick="upgradeStat('speed')">+</button></div>
+    <div>💥 Smash: <b id="statSmash">Lvl 1</b> <button class="stat-btn" onclick="upgradeStat('smash')">+</button></div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="stage" width="900" height="500"></canvas>
+    <div class="version-watermark">v1.4.0 - RPG Stats & Obstacles Update</div>
+  </div>
+
+  <div class="controls-bar">
+    Ruch: <span>W / S</span> | Zryw: <span>SHIFT</span> | Smash: <span>SPACJA</span><br>
+    <i>Górna/Dolna ściana ma <b>3% szans</b> na odbicie piłki wstecz! Na mapie pojawiają się <b>3-sekundowe przeszkody</b>.</i>
+  </div>
+</div>
+
+<script>
+const W = 900, H = 500;
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+let peer = null, conn = null, isHost = false;
+let myName = 'Gracz', oppName = 'Przeciwnik';
+let gameActive = false;
+let keys = {};
+
+// STATYSTYKI ROZWOJU LOCAL
+let upgradePoints = 0;
+const stats = {
+  spin: 1,  // Podkręcanie
+  speed: 1, // Szybkość paletki
+  smash: 1  // Siła Smasha
+};
+
+// Statystyki Paletek
+const BASE_H = 85;
+const P1 = { x: 25, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 5.5, score: 0, dashCooldown: 0, color: '#00f0ff', spinMult: 1, smashMult: 1 };
+const P2 = { x: W - 25 - 12, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 5.5, score: 0, dashCooldown: 0, color: '#ff0055', spinMult: 1, smashMult: 1 };
+
+// Piłka
+const BALL = { x: W/2, y: H/2, r: 7.5, vx: 4, vy: 2, spin: 0, speed: 5, trail: [] };
+
+// Przeszkoda (Obliczany Czas i Kolizje)
+let obstacle = null; // { x, y, w, h, timer }
+
+// Cząsteczki
+let particles = [];
+
+const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
+function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
+
+/* --- SYSTMEM ULEPSZEŃ --- */
+function upgradeStat(type) {
+  if (upgradePoints <= 0) return;
+  if (type === 'spin' && stats.spin < 5) { stats.spin++; upgradePoints--; }
+  else if (type === 'speed' && stats.speed < 5) { stats.speed++; upgradePoints--; }
+  else if (type === 'smash' && stats.smash < 5) { stats.smash++; upgradePoints--; }
+  
+  updateStatDisplay();
+  applyStatsToLocalPlayer();
+}
+
+function updateStatDisplay() {
+  document.getElementById('ptsDisplay').textContent = upgradePoints;
+  document.getElementById('statSpin').textContent = 'Lvl ' + stats.spin;
+  document.getElementById('statSpeed').textContent = 'Lvl ' + stats.speed;
+  document.getElementById('statSmash').textContent = 'Lvl ' + stats.smash;
+}
+
+function applyStatsToLocalPlayer() {
+  const p = isHost ? P1 : P2;
+  p.speed = 5.2 + (stats.speed * 0.7);
+  p.spinMult = 1 + (stats.spin * 0.35); // Mocniejsze podkręcanie z każdym poziomem
+  p.smashMult = 1 + (stats.smash * 0.3);
+}
+
+/* --- MULTIPLAYER (PEERJS) --- */
+function createRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
+  setStatus('Tworzenie pokoju...');
+  const code = genCode();
+  peer = new Peer('pingpong-' + code);
+  isHost = true;
+
+  peer.on('open', () => {
+    document.getElementById('mainPanel').classList.add('hidden');
+    document.getElementById('waitPanel').classList.remove('hidden');
+    document.getElementById('roomCodeDisplay').textContent = code;
+  });
+
+  peer.on('connection', c => {
+    conn = c;
+    bindConnEvents();
+    c.on('open', () => conn.send({ t: 'hello', name: myName }));
+  });
+
+  peer.on('error', err => setStatus('Błąd: ' + err.type));
+}
+
+function joinRoom() {
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 2';
+  const code = document.getElementById('joinInput').value.trim().toUpperCase();
+  if (code.length !== 6) { setStatus('Wpisz kod!'); return; }
+  
+  setStatus('Łączenie...');
+  peer = new Peer();
+  isHost = false;
+
+  peer.on('open', () => {
+    conn = peer.connect('pingpong-' + code);
+    bindConnEvents();
+    conn.on('open', () => conn.send({ t: 'hello', name: myName }));
+  });
+
+  peer.on('error', () => setStatus('Nie odnaleziono pokoju!'));
+}
+
+function bindConnEvents() {
+  conn.on('data', handleData);
+  conn.on('close', () => { if (gameActive) alert('Przeciwnik rozłączył się.'); location.reload(); });
+}
+
+function handleData(d) {
+  if (d.t === 'hello') {
+    oppName = d.name;
+    if (isHost) {
+      conn.send({ t: 'start', opp: myName });
+      startGame();
+    }
+  }
+  else if (d.t === 'start') {
+    oppName = d.opp;
+    startGame();
+  }
+  else if (d.t === 'sync') {
+    if (isHost) {
+      P2.y = d.py;
+      P2.vy = d.pvy;
+      P2.spinMult = d.spinMult;
+      P2.smashMult = d.smashMult;
+    } else {
+      P1.y = d.py;
+      P1.vy = d.pvy;
+      BALL.x = d.bx; BALL.y = d.by;
+      BALL.spin = d.spin;
+      obstacle = d.obs;
+      if (P1.score !== d.s1 || P2.score !== d.s2) {
+        // Przyznawanie punktu rozwoju przy zdobytym punkcie
+        if (d.s2 > P2.score) { upgradePoints++; updateStatDisplay(); }
+        P1.score = d.s1; P2.score = d.s2;
+        updateHudScore();
+      }
+    }
+  }
+}
+
+function startGame() {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('gameWrapper').style.display = 'block';
+
+  document.getElementById('hudP1').textContent = isHost ? myName : oppName;
+  document.getElementById('hudP2').textContent = isHost ? oppName : myName;
+
+  gameActive = true;
+  applyStatsToLocalPlayer();
+  resetBall();
+  requestAnimationFrame(gameLoop);
+}
+
+function resetBall() {
+  BALL.x = W / 2;
+  BALL.y = H / 2;
+  BALL.speed = 5;
+  BALL.spin = 0;
+  BALL.trail = [];
+  const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  BALL.vx = dir * BALL.speed * Math.cos(angle);
+  BALL.vy = BALL.speed * Math.sin(angle);
+}
+
+function addParticles(x, y, color, count = 8) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 7,
+      vy: (Math.random() - 0.5) * 7,
+      life: 1.0,
+      color
+    });
+  }
+}
+
+function updateHudScore() {
+  document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
+}
+
+/* --- LOGIKA I FIZYKA GRY --- */
+function update() {
+  const myPaddle = isHost ? P1 : P2;
+  
+  let moveDir = 0;
+  if (keys['KeyW'] || keys['ArrowUp']) moveDir -= 1;
+  if (keys['KeyS'] || keys['ArrowDown']) moveDir += 1;
+
+  if (myPaddle.dashCooldown > 0) myPaddle.dashCooldown--;
+
+  let currentSpeed = myPaddle.speed;
+  if ((keys['ShiftLeft'] || keys['ShiftRight']) && myPaddle.dashCooldown === 0 && moveDir !== 0) {
+    currentSpeed *= 2.6;
+    myPaddle.dashCooldown = 40;
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 12);
+  }
+
+  myPaddle.vy = moveDir * currentSpeed;
+  myPaddle.y += myPaddle.vy;
+
+  P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
+  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
+
+  // Logika Przetwarzana u Hosta
+  if (isHost) {
+    // 1% szans na wygenerowanie przeszkody na 3 sekundy (180 klatek)
+    if (!obstacle && Math.random() < 0.001) {
+      obstacle = {
+        x: W / 2 - 12,
+        y: 80 + Math.random() * (H - 220),
+        w: 24,
+        h: 90,
+        timer: 180
+      };
+    }
+
+    if (obstacle) {
+      obstacle.timer--;
+      if (obstacle.timer <= 0) obstacle = null;
+    }
+
+    // Bardzo silny Efekt Magnusa (Zakrzywianie toru lotu piłki)
+    BALL.vy += BALL.spin * 0.09;
+    BALL.spin *= 0.965;
+
+    BALL.x += BALL.vx;
+    BALL.y += BALL.vy;
+
+    BALL.trail.push({ x: BALL.x, y: BALL.y });
+    if (BALL.trail.length > 9) BALL.trail.shift();
+
+    // Kolizja ze ścianą górną i dolną z 3% SZANSĄ NA RYKOSZET W DRUGĄ STRONĘ
+    if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
+      BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
+      BALL.vy *= -1;
+
+      // 3% Szans na odwrócenie zwrotu poziomego piłki!
+      if (Math.random() < 0.03) {
+        BALL.vx *= -1;
+        addParticles(BALL.x, BALL.y, '#e3b341', 20); // Błysk przy niespodziewanym odbiciu
+      } else {
+        addParticles(BALL.x, BALL.y, '#ffffff', 5);
+      }
+    }
+
+    // Kolizja z Przeszkodą (jeśli istnieje)
+    if (obstacle) {
+      if (BALL.x + BALL.r >= obstacle.x && BALL.x - BALL.r <= obstacle.x + obstacle.w &&
+          BALL.y + BALL.r >= obstacle.y && BALL.y - BALL.r <= obstacle.y + obstacle.h) {
+        BALL.vx *= -1;
+        addParticles(BALL.x, BALL.y, '#a371f7', 10);
+      }
+    }
+
+    // Odbicie od Lewej Paletki (P1)
+    if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
+      if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
+        BALL.x = P1.x + P1.w + BALL.r;
+
+        let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
+        let angle = collidePoint * (Math.PI / 3.2);
+
+        let isSmash = keys['Space'];
+        let speedBoost = isSmash ? (0.8 * P1.smashMult) : 0.25;
+
+        BALL.speed = Math.min(BALL.speed + speedBoost, 14);
+        BALL.spin = P1.vy * 0.6 * P1.spinMult; // Ekstremalne podkręcenie
+
+        BALL.vx = BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+
+        addParticles(BALL.x, BALL.y, P1.color, isSmash ? 16 : 8);
+      }
+    }
+
+    // Odbicie od Prawej Paletki (P2)
+    if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
+      if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
+        BALL.x = P2.x - BALL.r;
+
+        let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
+        let angle = collidePoint * (Math.PI / 3.2);
+
+        let isSmash = keys['Space'];
+        let speedBoost = isSmash ? (0.8 * P2.smashMult) : 0.25;
+
+        BALL.speed = Math.min(BALL.speed + speedBoost, 14);
+        BALL.spin = P2.vy * 0.6 * P2.spinMult;
+
+        BALL.vx = -BALL.speed * Math.cos(angle);
+        BALL.vy = BALL.speed * Math.sin(angle);
+
+        addParticles(BALL.x, BALL.y, P2.color, isSmash ? 16 : 8);
+      }
+    }
+
+    // Punkty
+    if (BALL.x < -15) {
+      P2.score++;
+      upgradePoints++; // Punkt za zdobycie punktu!
+      updateStatDisplay();
+      updateHudScore();
+      resetBall();
+    } else if (BALL.x > W + 15) {
+      P1.score++;
+      if (isHost) { upgradePoints++; updateStatDisplay(); }
+      updateHudScore();
+      resetBall();
+    }
+  }
+
+  // Cząsteczki
+  particles.forEach((p, idx) => {
+    p.x += p.vx; p.y += p.vy; p.life -= 0.04;
+    if (p.life <= 0) particles.splice(idx, 1);
+  });
+
+  // Komunikacja P2P
+  if (conn && conn.open) {
+    if (isHost) {
+      conn.send({
+        t: 'sync', py: P1.y, pvy: P1.vy,
+        spinMult: P1.spinMult, smashMult: P1.smashMult,
+        bx: BALL.x, by: BALL.y, spin: BALL.spin,
+        obs: obstacle,
+        s1: P1.score, s2: P2.score
+      });
+    } else {
+      conn.send({
+        t: 'sync', py: P2.y, pvy: P2.vy,
+        spinMult: P2.spinMult, smashMult: P2.smashMult
+      });
+    }
+  }
+}
+
+/* --- RENDEROWANIE --- */
+function render() {
+  ctx.fillStyle = '#0a0d16';
+  ctx.fillRect(0, 0, W, H);
+
+  // Linia Środkowa
+  ctx.setLineDash([8, 8]);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H);
+  ctx.strokeStyle = '#1e2638'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Rysowanie tymczasowej przeszkody
+  if (obstacle) {
+    ctx.fillStyle = '#a371f7';
+    ctx.shadowColor = '#a371f7';
+    ctx.shadowBlur = 10;
+    ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
+    ctx.shadowBlur = 0;
+  }
+
+  // Cząsteczki
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // Ślad Piłki
+  BALL.trail.forEach((t, i) => {
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, BALL.r * (i / BALL.trail.length), 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fill();
+  });
+
+  // Paletki
+  ctx.shadowBlur = 12;
+
+  ctx.fillStyle = P1.color; ctx.shadowColor = P1.color;
+  ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
+
+  ctx.fillStyle = P2.color; ctx.shadowColor = P2.color;
+  ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
+
+  // Pasek Odnawiania Dash'a
+  const myPaddle = isHost ? P1 : P2;
+  if (myPaddle.dashCooldown > 0) {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillRect(myPaddle.x, myPaddle.y + myPaddle.h + 6, (myPaddle.dashCooldown / 40) * myPaddle.w, 3);
+  }
+
+  // Piłka
+  ctx.beginPath();
+  ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 14;
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+}
+
+function gameLoop() {
+  if (!gameActive) return;
+  update();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+addEventListener('keydown', e => { keys[e.code] = true; });
+addEventListener('keyup', e => { keys[e.code] = false; });
+</script>
+</body>
+</html>
