@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pong Multiplayer 2D + Boostery</title>
+<title>Pong Multiplayer 2D - Enhanced Edition</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
 
   body {
-    background-color: #0d1117;
+    background-color: #0b0f19;
     color: #f0f6fc;
     min-height: 100vh;
     display: flex;
@@ -27,8 +27,8 @@
     font-size: 42px;
     font-weight: 800;
     letter-spacing: 2px;
-    color: #58a6ff;
-    text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+    color: #00f0ff;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
   }
   .header p {
     color: #8b949e;
@@ -37,12 +37,12 @@
   }
 
   .panel {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #161b26;
+    border: 1px solid #2d3548;
     border-radius: 12px;
     padding: 28px;
-    width: 360px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    width: 380px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     text-align: center;
   }
 
@@ -60,14 +60,15 @@
   input {
     width: 100%;
     padding: 10px 14px;
-    background: #0d1117;
-    border: 1px solid #30363d;
+    background: #0b0f19;
+    border: 1px solid #2d3548;
     border-radius: 6px;
     color: #fff;
     font-size: 15px;
     outline: none;
+    transition: border-color 0.2s;
   }
-  input:focus { border-color: #58a6ff; }
+  input:focus { border-color: #00f0ff; }
 
   .divider {
     margin: 16px 0;
@@ -79,7 +80,7 @@
     top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    background: #161b22;
+    background: #161b26;
     padding: 0 8px;
     color: #484f58;
     font-size: 12px;
@@ -108,12 +109,12 @@
     font-size: 32px;
     font-weight: 800;
     letter-spacing: 6px;
-    color: #58a6ff;
+    color: #00f0ff;
     margin: 12px 0;
-    background: #0d1117;
+    background: #0b0f19;
     padding: 10px;
     border-radius: 6px;
-    border: 1px dashed #30363d;
+    border: 1px dashed #2d3548;
   }
 
   .status-msg {
@@ -123,39 +124,57 @@
     min-height: 18px;
   }
 
-  #gameWrapper { display: none; text-align: center; }
+  #gameWrapper { display: none; text-align: center; position: relative; }
 
   #hud {
-    width: 800px;
+    width: 850px;
     max-width: 100%;
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #161b26;
+    border: 1px solid #2d3548;
     border-bottom: none;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
     padding: 12px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .score-board {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
     display: flex;
     align-items: center;
     gap: 20px;
   }
   .team-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .p1-color { color: #58a6ff; }
-  .p2-color { color: #f85149; }
+  .p1-color { color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+  .p2-color { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
+
+  .canvas-container {
+    position: relative;
+    width: 850px;
+    max-width: 100%;
+  }
 
   canvas {
-    background: #111827;
-    border: 1px solid #30363d;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    background: #0d121d;
+    border: 1px solid #2d3548;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
     display: block;
+  }
+
+  /* Znak wodny z numerem wersji */
+  .version-watermark {
+    position: absolute;
+    bottom: 8px;
+    right: 14px;
+    font-size: 11px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.18);
+    pointer-events: none;
+    letter-spacing: 0.5px;
   }
 
   .controls-bar {
@@ -164,8 +183,8 @@
     font-size: 13px;
   }
   .controls-bar span {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #161b26;
+    border: 1px solid #2d3548;
     padding: 2px 6px;
     border-radius: 4px;
     color: #c9d1d9;
@@ -177,8 +196,8 @@
 <body>
 
 <div class="header">
-  <h1>PONG MULTIPLAYER + BOOSTERY</h1>
-  <p>Zbieraj boostery i zaskocz przeciwnika!</p>
+  <h1>PONG MULTIPLAYER</h1>
+  <p>Płynna fizyka, podkręcenia i mechanika Dash</p>
 </div>
 
 <!-- MENU POKOJU -->
@@ -215,20 +234,23 @@
   <div id="hud">
     <div class="score-board" style="width: 100%; justify-content: space-between;">
       <span class="team-name p1-color" id="hudP1">Gracz 1</span>
-      <span id="hudScore" style="background:#0d1117; padding:4px 16px; border-radius:6px; border: 1px solid #30363d;">0 : 0</span>
+      <span id="hudScore" style="background:#0b0f19; padding:4px 18px; border-radius:6px; border: 1px solid #2d3548;">0 : 0</span>
       <span class="team-name p2-color" id="hudP2">Gracz 2</span>
     </div>
   </div>
 
-  <canvas id="stage" width="800" height="500"></canvas>
+  <div class="canvas-container">
+    <canvas id="stage" width="850" height="500"></canvas>
+    <div class="version-watermark">v1.2.0 - Fluid Performance & Physics Update</div>
+  </div>
 
   <div class="controls-bar">
-    Sterowanie: <span>W</span> / <span>S</span> lub <span>Strzałki</span> | 🟡 <b>Brak żółtego koła</b> = Speed | 🟢 <b>Zielone</b> = Powiększenie | 🟣 <b>Fioletowe</b> = Super Odbicie
+    Ruch: <span>W / S</span> | Zryw (Dash): <span>SHIFT</span> | Mocny Strzał: <span>SPACJA</span> | <i>Ruch paletką w trakcie odbicia podkręca piłkę!</i>
   </div>
 </div>
 
 <script>
-const W = 800, H = 500;
+const W = 850, H = 500;
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 
@@ -238,26 +260,20 @@ let gameActive = false;
 let keys = {};
 
 // Paletki
-const BASE_H = 90;
-const P1 = { x: 20, y: H/2 - BASE_H/2, w: 14, h: BASE_H, speed: 7, score: 0 };
-const P2 = { x: W - 20 - 14, y: H/2 - BASE_H/2, w: 14, h: BASE_H, speed: 7, score: 0 };
+const BASE_H = 85;
+const P1 = { x: 25, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 5.5, score: 0, dashCooldown: 0, color: '#00f0ff' };
+const P2 = { x: W - 25 - 12, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 5.5, score: 0, dashCooldown: 0, color: '#ff0055' };
 
-// Piłka
-const BALL = { x: W/2, y: H/2, r: 8, vx: 5, vy: 3, speed: 6, lastHit: null };
+// Piłka (Zbalansowana prędkość)
+const BALL = { x: W/2, y: H/2, r: 7, vx: 4, vy: 2, spin: 0, speed: 4.5, lastHit: null };
 
-// Booster
-const BOOSTER_TYPES = [
-  { type: 'SPEED', color: '#e3b341', label: '⚡' },
-  { type: 'GROW', color: '#2ea44f', label: '📏' },
-  { type: 'BOUNCE', color: '#a371f7', label: '🔥' }
-];
-let activeBooster = null; // { x, y, r: 18, type, color, label }
-let boosterSpawnTimer = 0;
+// Cząsteczki
+let particles = [];
 
 const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
 function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
 
-/* --- NETWORK --- */
+/* --- SIEC MULTIPLAYER --- */
 function createRoom() {
   myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
   setStatus('Tworzenie pokoju...');
@@ -318,12 +334,12 @@ function handleData(d) {
   else if (d.t === 'sync') {
     if (isHost) {
       P2.y = d.py;
+      P2.vy = d.pvy;
     } else {
       P1.y = d.py;
+      P1.vy = d.pvy;
       BALL.x = d.bx; BALL.y = d.by;
       P1.score = d.s1; P2.score = d.s2;
-      P1.h = d.p1h; P2.h = d.p2h;
-      activeBooster = d.booster;
       updateHudScore();
     }
   }
@@ -344,176 +360,198 @@ function startGame() {
 function resetBall() {
   BALL.x = W / 2;
   BALL.y = H / 2;
-  BALL.speed = 6;
+  BALL.speed = 4.8;
+  BALL.spin = 0;
   BALL.lastHit = null;
-  P1.h = BASE_H;
-  P2.h = BASE_H;
   const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
   const dir = Math.random() < 0.5 ? 1 : -1;
   BALL.vx = dir * BALL.speed * Math.cos(angle);
   BALL.vy = BALL.speed * Math.sin(angle);
 }
 
-function spawnBooster() {
-  const b = BOOSTER_TYPES[Math.floor(Math.random() * BOOSTER_TYPES.length)];
-  activeBooster = {
-    x: W / 4 + Math.random() * (W / 2),
-    y: 60 + Math.random() * (H - 120),
-    r: 16,
-    ...b
-  };
+function createImpactParticles(x, y, color) {
+  for (let i = 0; i < 8; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      life: 1.0,
+      color
+    });
+  }
 }
 
 function updateHudScore() {
   document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
 }
 
-/* --- UPDATE --- */
+/* --- FIZYKA & UPDATE --- */
 function update() {
   const myPaddle = isHost ? P1 : P2;
-  if (keys['KeyW'] || keys['ArrowUp']) myPaddle.y -= myPaddle.speed;
-  if (keys['KeyS'] || keys['ArrowDown']) myPaddle.y += myPaddle.speed;
+  
+  // Ruch Paletki
+  let moveDir = 0;
+  if (keys['KeyW'] || keys['ArrowUp']) moveDir -= 1;
+  if (keys['KeyS'] || keys['ArrowDown']) moveDir += 1;
+
+  // Dash Mechanika
+  if (myPaddle.dashCooldown > 0) myPaddle.dashCooldown--;
+  let currentSpeed = myPaddle.speed;
+  if ((keys['ShiftLeft'] || keys['ShiftRight']) && myPaddle.dashCooldown === 0 && moveDir !== 0) {
+    currentSpeed *= 2.8;
+    myPaddle.dashCooldown = 45;
+    createImpactParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color);
+  }
+
+  myPaddle.vy = moveDir * currentSpeed;
+  myPaddle.y += myPaddle.vy;
 
   P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
   P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
 
+  // Główna logika (Host)
   if (isHost) {
+    // Podkręcenie wpływa na tor lotu piłki
+    BALL.vy += BALL.spin * 0.05;
+    BALL.spin *= 0.96;
+
     BALL.x += BALL.vx;
     BALL.y += BALL.vy;
 
-    // Generowanie boostera co jakiś czas
-    boosterSpawnTimer++;
-    if (!activeBooster && boosterSpawnTimer > 300) {
-      if (Math.random() < 0.02) {
-        spawnBooster();
-        boosterSpawnTimer = 0;
-      }
+    // Odbicia góra/dół
+    if (BALL.y - BALL.r <= 0) {
+      BALL.y = BALL.r; BALL.vy *= -1;
+      createImpactParticles(BALL.x, BALL.y, '#ffffff');
+    }
+    if (BALL.y + BALL.r >= H) {
+      BALL.y = H - BALL.r; BALL.vy *= -1;
+      createImpactParticles(BALL.x, BALL.y, '#ffffff');
     }
 
-    // Odbicie od góry i dołu
-    if (BALL.y - BALL.r <= 0) { BALL.y = BALL.r; BALL.vy *= -1; }
-    if (BALL.y + BALL.r >= H) { BALL.y = H - BALL.r; BALL.vy *= -1; }
-
-    // Odbicie P1 (Lewy)
+    // Odbicie od Lewej Paletki (P1)
     if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
       if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
         BALL.x = P1.x + P1.w + BALL.r;
         BALL.lastHit = P1;
+
         let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
-        let angle = collidePoint * (Math.PI / 3);
-        BALL.speed = Math.min(BALL.speed + 0.8, 22);
+        let angle = collidePoint * (Math.PI / 3.5);
+
+        // Mechanika Mocnego Uderzenia (Spacja)
+        let isPowerHit = keys['Space'];
+        let boost = isPowerHit ? 0.6 : 0.25;
+
+        BALL.speed = Math.min(BALL.speed + boost, 11);
+        BALL.spin = P1.vy * 0.4; // Przekazanie rotacji z paletki
+
         BALL.vx = BALL.speed * Math.cos(angle);
         BALL.vy = BALL.speed * Math.sin(angle);
+
+        createImpactParticles(BALL.x, BALL.y, P1.color);
       }
     }
 
-    // Odbicie P2 (Prawy)
+    // Odbicie od Prawej Paletki (P2)
     if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
       if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
         BALL.x = P2.x - BALL.r;
         BALL.lastHit = P2;
+
         let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
-        let angle = collidePoint * (Math.PI / 3);
-        BALL.speed = Math.min(BALL.speed + 0.8, 22);
+        let angle = collidePoint * (Math.PI / 3.5);
+
+        let isPowerHit = keys['Space'];
+        let boost = isPowerHit ? 0.6 : 0.25;
+
+        BALL.speed = Math.min(BALL.speed + boost, 11);
+        BALL.spin = P2.vy * 0.4;
+
         BALL.vx = -BALL.speed * Math.cos(angle);
         BALL.vy = BALL.speed * Math.sin(angle);
-      }
-    }
 
-    // Trafienie w Booster
-    if (activeBooster) {
-      const dist = Math.hypot(BALL.x - activeBooster.x, BALL.y - activeBooster.y);
-      if (dist < BALL.r + activeBooster.r) {
-        // Aktywacja Efektu
-        if (activeBooster.type === 'SPEED') {
-          BALL.speed = Math.min(BALL.speed + 5, 24);
-          BALL.vx *= 1.4;
-          BALL.vy *= 1.4;
-        } else if (activeBooster.type === 'GROW') {
-          if (BALL.lastHit) BALL.lastHit.h = 140; // Powiększa paletkę gracza
-        } else if (activeBooster.type === 'BOUNCE') {
-          BALL.vy *= 1.8;
-        }
-        activeBooster = null;
+        createImpactParticles(BALL.x, BALL.y, P2.color);
       }
     }
 
     // Punkty
-    if (BALL.x < 0) {
+    if (BALL.x < -10) {
       P2.score++;
       updateHudScore();
       resetBall();
-    } else if (BALL.x > W) {
+    } else if (BALL.x > W + 10) {
       P1.score++;
       updateHudScore();
       resetBall();
     }
   }
 
-  // Wysłanie danych do drugiego gracza
+  // Aktulizacja Cząsteczek
+  particles.forEach((p, index) => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.04;
+    if (p.life <= 0) particles.splice(index, 1);
+  });
+
+  // Komunikacja P2P
   if (conn && conn.open) {
     if (isHost) {
       conn.send({
-        t: 'sync', py: P1.y, bx: BALL.x, by: BALL.y,
-        s1: P1.score, s2: P2.score,
-        p1h: P1.h, p2h: P2.h,
-        booster: activeBooster
+        t: 'sync', py: P1.y, pvy: P1.vy,
+        bx: BALL.x, by: BALL.y,
+        s1: P1.score, s2: P2.score
       });
     } else {
-      conn.send({ t: 'sync', py: P2.y });
+      conn.send({ t: 'sync', py: P2.y, pvy: P2.vy });
     }
   }
 }
 
 /* --- RENDER --- */
 function render() {
-  ctx.fillStyle = '#111827';
+  ctx.fillStyle = '#0d121d';
   ctx.fillRect(0, 0, W, H);
 
-  // Siatka
-  ctx.setLineDash([8, 8]);
+  // Linia Środkowa
+  ctx.setLineDash([6, 6]);
   ctx.beginPath();
   ctx.moveTo(W / 2, 0);
   ctx.lineTo(W / 2, H);
-  ctx.strokeStyle = '#374151';
+  ctx.strokeStyle = '#2d3548';
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Rysowanie Booster'a
-  if (activeBooster) {
+  // Cząsteczki
+  particles.forEach(p => {
     ctx.beginPath();
-    ctx.arc(activeBooster.x, activeBooster.y, activeBooster.r, 0, Math.PI * 2);
-    ctx.fillStyle = activeBooster.color;
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life;
     ctx.fill();
-    ctx.shadowColor = activeBooster.color;
-    ctx.shadowBlur = 12;
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1.0;
+  });
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(activeBooster.label, activeBooster.x, activeBooster.y);
-  }
+  // Paletki z Poświatą (Glow)
+  ctx.shadowBlur = 10;
 
-  // Paletki
-  ctx.fillStyle = '#58a6ff';
+  ctx.fillStyle = P1.color;
+  ctx.shadowColor = P1.color;
   ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
 
-  ctx.fillStyle = '#f85149';
+  ctx.fillStyle = P2.color;
+  ctx.shadowColor = P2.color;
   ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
 
   // Piłka
   ctx.beginPath();
   ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
   ctx.fillStyle = '#ffffff';
-  ctx.fill();
   ctx.shadowColor = '#ffffff';
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 12;
   ctx.fill();
-  ctx.shadowBlur = 0;
+
+  ctx.shadowBlur = 0; // Wyłączenie poświaty
 }
 
 function gameLoop() {
