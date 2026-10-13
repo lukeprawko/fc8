@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Chaos Basket 2-Player - Online Edition</title>
+    <!-- Biblioteka PeerJS do połączenia P2P bez własnego serwera -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #2c3e50; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+        #gameContainer {
+            position: relative;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.6);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        canvas { 
+            background-color: #eef7f9; 
+            display: block;
+        }
+        /* Style Menu Startowego */
+        #menuOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 30, 48, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        h1 { margin: 0 0 10px 0; color: #f39c12; font-size: 38px; text-shadow: 2px 2px 4px #000; }
+        .menu-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 30px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary { background: #27ae60; color: white; }
+        .btn-primary:hover { background: #2ed573; }
+        .btn-secondary { background: #2980b9; color: white; }
+        .btn-secondary:hover { background: #3498db; }
+        .btn-local { background: #e67e22; color: white; }
+        .btn-local:hover { background: #f39c12; }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-sizing: border-box;
+        }
+        #statusText { font-size: 14px; color: #f1c40f; min-height: 20px; text-align: center; }
+        .room-code { font-size: 24px; color: #00d2d3; font-weight: bold; user-select: all; }
+        .controls-info {
+            margin-top: 15px;
+            display: flex;
+            gap: 40px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .p1-c { color: #1E90FF; }
+        .p2-c { color: #DC143C; }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+        <!-- MENU OVERLAY -->
+        <div id="menuOverlay">
+            <h1>🏀 Chaos Basket Online</h1>
+            
+            <div class="menu-box">
+                <button class="btn-primary" onclick="createLobby()">Stwórz Pokój (Gracz 1)</button>
+                <div id="roomCodeDisplay" style="display:none;">
+                    Kod Pokoju: <span id="codeText" class="room-code">...</span>
+                </div>
+            </div>
+
+            <div class="menu-box">
+                <input type="text" id="joinCodeInput" placeholder="KOD POKOJU (np. KOSZ-1234)" />
+                <button class="btn-secondary" onclick="joinLobby()">Dołącz do Pokoju (Gracz 2)</button>
+            </div>
+
+            <button class="btn-local" style="width: 320px;" onclick="startLocalGame()">Graj Lokalnie (1 Klawiatura)</button>
+
+            <div id="statusText">Wybierz tryb gry, aby rozpocząć!</div>
+        </div>
+    </div>
+
+    <div class="controls-info">
+        <div class="p1-c">Gracz 1 (Niebieski): A / D - Chodzenie | S - Skok | W - Rzut</div>
+        <div class="p2-c">Gracz 2 (Czerwony): Lewo / Prawo - Chodzenie | Dół - Skok | Górę - Rzut</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const menuOverlay = document.getElementById("menuOverlay");
+        const statusText = document.getElementById("statusText");
+
+        const groundY = 450;
+        let keys = {};
+        let isScoring = false;
+
+        // Tryb Gry & Połączenie Sieciowe
+        let gameMode = "local"; // "local", "host", "client"
+        let peer = null;
+        let conn = null;
+        let myRole = 1; // 1 = P1, 2 = P2
+
+        let ballStatusText = "";
+        let hoopStatusText = "";
+        let envStatusText = "";
+        let envEvent = "none";
+
+        let wall1 = { x: 130, y: 220, w: 14, h: 110, dy: 1.5, minY: 160, maxY: 290 };
+        let wall2 = { x: 656, y: 220, w: 14, h: 110, dy: -1.5, minY: 160, maxY: 290 };
+
+        let rainDrops = [];
+        let bird = { x: -50, y: 100, dx: 3, r: 12, active: false };
+        let ufo = { x: -60, y: 60, dx: 2, r: 20, active: false };
+        let meteors = [];
+        let windForce = 0;
+
+        for (let i = 0; i < 40; i++) {
+            rainDrops.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, length: 12, speed: 9 });
+        }
+
+        function createPlayer(x, color, facing) {
+            return {
+                x: x, y: 370, w: 40, h: 80, dx: 0, dy: 0, angle: 0, vRot: 0,
+                color: color, facing: facing, score: 0, cooldown: 0, charge: 0, isCharging: false
+            };
+        }
+
+        let p1 = createPlayer(180, "#1E90FF", 1);
+        let p2 = createPlayer(580, "#DC143C", -1);
+        let ball = { x: 400, y: 200, r: 15, dx: 0, dy: 0, holder: null, bounce: 0.6, grav: 1, color: "#FF8C00" };
+        let hoop1 = { x: 50, y: 220, w: 42, baseY: 220, dy: 0 }; 
+        let hoop2 = { x: 708, y: 220, w: 42, baseY: 220, dy: 0 };
+
+        // Obsługa sterowania
+        window.addEventListener("keydown", (e) => {
+            keys[e.code] = true;
+            keys[e.key.toLowerCase()] = true;
+            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+            sendInputsIfClient();
+        });
+        
+        window.addEventListener("keyup", (e) => {
+            keys[e.code] = false;
+            keys[e.key.toLowerCase()] = false;
+            sendInputsIfClient();
+        });
+
+        // ---------------- PEERJS LOBBY LOGIC ----------------
+
+        function createLobby() {
+            let randomCode = "KOSZ-" + Math.floor(1000 + Math.random() * 9000);
+            statusText.innerText = "Łączenie z serwerem lobby...";
+
+            peer = new Peer(randomCode);
+
+            peer.on('open', (id) => {
+                document.getElementById("roomCodeDisplay").style.display = "block";
+                document.getElementById("codeText").innerText = id;
+                statusText.innerText = "Oczekiwanie na dołączenie Gracza 2...";
+                gameMode = "host";
+                myRole = 1;
+            });
+
+            peer.on('connection', (c) => {
+                conn = c;
+                setupConnection();
+                statusText.innerText = "Gracz 2 dołączył! Uruchamianie...";
+                setTimeout(startGame, 1000);
+            });
+
+            peer.on('error', (err) => {
+                statusText.innerText = "Błąd połączenia: " + err.type;
+            });
+        }
+
+        function joinLobby() {
+            let code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
+            if (!code) { statusText.innerText = "Wpisz kod pokoju!"; return; }
+
+            statusText.innerText = "Łączenie z pokojem " + code + "...";
+            peer = new Peer();
+
+            peer.on('open', () => {
+                conn = peer.connect(code);
+                setupConnection();
+                gameMode = "client";
+                myRole = 2;
+            });
+
+            peer.on('error', (err) => {
+                statusText.innerText = "Nie znaleziono pokoju lub błąd połączenia.";
+            });
+        }
+
+        function setupConnection() {
+            conn.on('open', () => {
+                if (gameMode === "client") {
+                    statusText.innerText = "Połączono! Oczekiwanie na start...";
+                    setTimeout(startGame, 1000);
+                }
+            });
+
+            conn.on('data', (data) => {
+                if (gameMode === "host" && data.type === "clientKeys") {
+                    // Host odbiera klawisze od Klienta (Gracza 2)
+                    clientKeys = data.keys;
+                } else if (gameMode === "client" && data.type === "gameState") {
+                    // Klient odbiera kompletny stan gry od Hosta
+                    applyGameState(data.state);
+                }
+            });
+        }
+
+        let clientKeys = {};
+
+        function sendInputsIfClient() {
+            if (gameMode === "client" && conn && conn.open) {
+                conn.send({ type: "clientKeys", keys: keys });
+            }
+        }
+
+        function sendStateToClient() {
+            if (gameMode === "host" && conn && conn.open) {
+                conn.send({
+                    type: "gameState",
+                    state: {
+                        p1: p1, p2: p2, ball: ball, hoop1: hoop1, hoop2: hoop2,
+                        wall1: wall1, wall2: wall2, bird: bird, ufo: ufo, meteors: meteors,
+                        ballStatusText, hoopStatusText, envStatusText, envEvent, isScoring
+                    }
+                });
+            }
+        }
+
+        function applyGameState(state) {
+            Object.assign(p1, state.p1);
+            Object.assign(p2, state.p2);
+            Object.assign(ball, state.ball);
+            Object.assign(hoop1, state.hoop1);
+            Object.assign(hoop2, state.hoop2);
+            Object.assign(wall1, state.wall1);
+            Object.assign(wall2, state.wall2);
+            Object.assign(bird, state.bird);
+            Object.assign(ufo, state.ufo);
+            meteors = state.meteors;
+            ballStatusText = state.ballStatusText;
+            hoopStatusText = state.hoopStatusText;
+            envStatusText = state.envStatusText;
+            envEvent = state.envEvent;
+            isScoring = state.isScoring;
+        }
+
+        function startLocalGame() {
+            gameMode = "local";
+            myRole = 1;
+            startGame();
+        }
+
+        function startGame() {
+            menuOverlay.style.display = "none";
+            if (gameMode !== "client") {
+                triggerNewRound(false);
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ---------------- FIZYKA I LOGIKA RUNDY ----------------
+
+        function triggerNewRound(keepHolder = false) {
+            const ballEffects = [
+                () => { ball.r = 15; ball.bounce = 0.6; ball.grav = 1; ball.color = "#FF8C00"; ballStatusText = "Standardowa"; },
+                () => { ball.r = 12; ball.bounce = 0.25; ball.grav = 1.8; ball.color = "#333333"; ballStatusText = "Ciężka kula"; },
+                () => { ball.r = 26; ball.bounce = 0.95; ball.grav = 0.35; ball.color = "#FF69B4"; ballStatusText = "Plażowa"; },
+                () => { ball.r = 14; ball.bounce = 1.1; ball.grav = 1.1; ball.color = "#00FF7F"; ballStatusText = "Super sprężysta"; }
+            ];
+
+            const hoopEffects = [
+                () => { hoop1.w = 42; hoop2.w = 42; hoop1.dy = 0; hoop2.dy = 0; hoopStatusText = "Standardowe"; },
+                () => { hoop1.w = 28; hoop2.w = 28; hoop1.dy = 0; hoop2.dy = 0; hoopStatusText = "Mini kosze"; },
+                () => { hoop1.w = 60; hoop2.w = 60; hoop1.dy = 0; hoop2.dy = 0; hoopStatusText = "Szerokie kosze"; },
+                () => { hoop1.w = 42; hoop2.w = 42; hoop1.dy = 1.5; hoop2.dy = -1.5; hoopStatusText = "Ruchome kosze"; }
+            ];
+
+            const envEvents = [
+                () => { envEvent = "none"; envStatusText = "Brak"; },
+                () => { envEvent = "rain"; envStatusText = "🌧️ Deszcz"; },
+                () => { envEvent = "wind"; windForce = (Math.random() < 0.5 ? -1 : 1) * 0.18; envStatusText = "💨 Wiatr (" + (windForce > 0 ? "->" : "<-") + ")"; },
+                () => { envEvent = "bird"; bird.active = true; bird.x = -50; bird.y = 80 + Math.random() * 120; envStatusText = "🐦 Ptak"; },
+                () => { envEvent = "ufo"; ufo.active = true; ufo.x = -60; envStatusText = "🛸 UFO"; },
+                () => { envEvent = "meteors"; envStatusText = "☄️ Meteoryty"; }
+            ];
+
+            hoop1.y = hoop1.baseY; hoop2.y = hoop2.baseY;
+            hoop2.x = 750 - hoop2.w;
+            bird.active = false; ufo.active = false; meteors = [];
+
+            ballEffects[Math.floor(Math.random() * ballEffects.length)]();
+            hoopEffects[Math.floor(Math.random() * hoopEffects.length)]();
+            envEvents[Math.floor(Math.random() * envEvents.length)]();
+
+            if (!keepHolder) {
+                p1.x = 180; p1.y = groundY - p1.h; p1.dx = 0; p1.dy = 0; p1.angle = 0; p1.vRot = 0;
+                p2.x = 620 - p2.w; p2.y = groundY - p2.h; p2.dx = 0; p2.dy = 0; p2.angle = 0; p2.vRot = 0;
+                ball.holder = null;
+                ball.x = 400; ball.y = 100; ball.dx = 0; ball.dy = 0;
+            }
+        }
+
+        function handlePlayerControls(p, keyLeft, keyRight, keyJump, keyShoot) {
+            const isGrounded = p.y >= groundY - p.h;
+
+            if (keyLeft) { p.dx -= 0.7; p.vRot -= 0.05; }
+            if (keyRight) { p.dx += 0.7; p.vRot += 0.05; }
+
+            if (keyJump && isGrounded) {
+                p.dy = -12;
+                p.vRot += 0.1 * p.facing;
+            }
+
+            if (keyShoot) {
+                p.isCharging = true;
+                if (p.charge < 100) p.charge += 3.5;
+                p.vRot += 0.04 * p.facing;
+            } else {
+                if (p.isCharging) {
+                    if (ball.holder === p) {
+                        ball.holder = null;
+                        let powerFactor = (0.8 + (p.charge / 100) * 1.8) * 0.5; 
+                        let basePowerX = 12 * powerFactor;
+                        let basePowerY = -13 * powerFactor;
+
+                        ball.dx = (basePowerX + Math.sin(p.angle) * 4) * p.facing;
+                        ball.dy = basePowerY - Math.cos(p.angle) * 3;
+                        
+                        p.cooldown = 20;
+                        p.vRot -= (0.2 + (p.charge / 150)) * p.facing;
+                    }
+                    p.charge = 0;
+                    p.isCharging = false;
+                }
+            }
+        }
+
+        function updateEnvironment() {
+            [wall1, wall2].forEach(w => {
+                w.y += w.dy;
+                if (w.y < w.minY || w.y > w.maxY) w.dy *= -1;
+            });
+
+            if (hoop1.dy !== 0) {
+                hoop1.y += hoop1.dy; hoop2.y += hoop2.dy;
+                if (hoop1.y < 150 || hoop1.y > 290) hoop1.dy *= -1;
+                if (hoop2.y < 150 || hoop2.y > 290) hoop2.dy *= -1;
+            }
+
+            if (envEvent === "wind") {
+                ball.dx += windForce;
+                p1.dx += windForce * 0.2; p2.dx += windForce * 0.2;
+            }
+
+            if (envEvent === "rain") {
+                rainDrops.forEach(drop => {
+                    drop.y += drop.speed;
+                    if (drop.y > groundY) { drop.y = -10; drop.x = Math.random() * canvas.width; }
+                });
+            }
+
+            if (envEvent === "bird" || bird.active) {
+                bird.x += bird.dx;
+                bird.y += Math.sin(bird.x * 0.05) * 1.5;
+                if (bird.x > canvas.width + 50) { bird.x = -50; bird.y = 80 + Math.random() * 120; }
+
+                let distBall = Math.hypot(ball.x - bird.x, ball.y - bird.y);
+                if (distBall < ball.r + bird.r) {
+                    ball.dx = (ball.x - bird.x) * 0.4; ball.dy = -6;
+                    if (ball.holder) ball.holder = null;
+                }
+            }
+
+            if (envEvent === "ufo" || ufo.active) {
+                ufo.x += ufo.dx;
+                if (ufo.x > canvas.width + 60) ufo.x = -60;
+                if (Math.abs(ball.x - ufo.x) < 35 && ball.y > ufo.y) {
+                    ball.dy -= 0.8;
+                    if (ball.holder) ball.holder = null;
+                }
+            }
+
+            if (envEvent === "meteors") {
+                if (Math.random() < 0.03 && meteors.length < 3) {
+                    meteors.push({ x: Math.random() * canvas.width, y: -20, r: 14, dx: (Math.random() - 0.5) * 4, dy: 6 + Math.random() * 4 });
+                }
+
+                for (let i = meteors.length - 1; i >= 0; i--) {
+                    let m = meteors[i];
+                    m.x += m.dx; m.y += m.dy;
+                    if (m.y >= groundY - m.r) { meteors.splice(i, 1); continue; }
+
+                    let distB = Math.hypot(ball.x - m.x, ball.y - m.y);
+                    if (distB < ball.r + m.r) {
+                        ball.dx = m.dx * 2; ball.dy = -8;
+                        if (ball.holder) ball.holder = null;
+                        meteors.splice(i, 1); continue;
+                    }
+                }
+            }
+        }
+
+        function checkWallCollision(wall) {
+            if (ball.x + ball.r > wall.x && ball.x - ball.r < wall.x + wall.w &&
+                ball.y + ball.r > wall.y && ball.y - ball.r < wall.y + wall.h) {
+                ball.dx *= -0.75;
+                if (ball.x < wall.x) ball.x = wall.x - ball.r;
+                else ball.x = wall.x + wall.w + ball.r;
+            }
+        }
+
+        function updatePhysics() {
+            if (gameMode === "client") return; // Tylko Host lub Gra Lokalna oblicza fizykę!
+
+            let p2Keys = (gameMode === "host") ? clientKeys : keys;
+
+            handlePlayerControls(p1, keys['KeyA'] || keys['a'], keys['KeyD'] || keys['d'], keys['KeyS'] || keys['s'], keys['KeyW'] || keys['w']);
+            handlePlayerControls(p2, p2Keys['ArrowLeft'], p2Keys['ArrowRight'], p2Keys['ArrowDown'], p2Keys['ArrowUp']);
+
+            updateEnvironment();
+
+            let friction = (envEvent === "rain") ? 0.96 : 0.88;
+
+            [p1, p2].forEach(p => {
+                let springForce = -p.angle * 0.12; 
+                p.vRot += springForce; p.vRot *= 0.82; p.angle += p.vRot;
+                p.dy += 0.6; p.y += p.dy; p.x += p.dx; p.dx *= friction;
+
+                if (p.cooldown > 0) p.cooldown--;
+                if (p.y >= groundY - p.h) { p.y = groundY - p.h; p.dy = 0; }
+                if (p.x < 10) { p.x = 10; p.dx = 0; }
+                if (p.x > canvas.width - p.w - 10) { p.x = canvas.width - p.w - 10; p.dx = 0; }
+            });
+
+            // Colision players
+            let center1 = p1.x + p1.w / 2;
+            let center2 = p2.x + p2.w / 2;
+            let minDist = (p1.w + p2.w) / 2;
+            let dist = Math.abs(center1 - center2);
+
+            if (dist < minDist && Math.abs(p1.y - p2.y) < p1.h) {
+                let overlap = minDist - dist;
+                if (center1 < center2) { p1.x -= overlap / 2; p2.x += overlap / 2; p1.dx -= 1.3; p2.dx += 1.3; } 
+                else { p1.x += overlap / 2; p2.x -= overlap / 2; p1.dx += 1.3; p2.dx -= 1.3; }
+            }
+
+            if (ball.holder) {
+                let h = (ball.holder === p1 || ball.holder.color === p1.color) ? p1 : p2;
+                let handOffsetX = Math.cos(h.angle) * (h.w / 2 + ball.r) * h.facing;
+                let handOffsetY = Math.sin(h.angle) * (h.w / 2);
+                ball.x = h.x + h.w / 2 + handOffsetX;
+                ball.y = h.y + h.h / 3 + handOffsetY;
+                ball.dx = 0; ball.dy = 0;
+            } else {
+                ball.dy += 0.6 * ball.grav;
+                ball.x += ball.dx; ball.y += ball.dy;
+
+                if (ball.y >= groundY - ball.r) {
+                    ball.y = groundY - ball.r; ball.dy *= -ball.bounce; ball.dx *= friction;
+                }
+
+                if (ball.x <= ball.r) { ball.x = ball.r; ball.dx *= -0.8; }
+                if (ball.x >= canvas.width - ball.r) { ball.x = canvas.width - ball.r; ball.dx *= -0.8; }
+
+                checkWallCollision(wall1);
+                checkWallCollision(wall2);
+
+                let bb1x = hoop1.x - 12;
+                if (ball.x - ball.r < bb1x + 12 && ball.x + ball.r > bb1x && ball.y < hoop1.y + 90 && ball.y > hoop1.y - 70) {
+                    ball.dx *= -0.7; ball.x = bb1x + 12 + ball.r;
+                }
+                
+                let bb2x = hoop2.x + hoop2.w;
+                if (ball.x + ball.r > bb2x && ball.x - ball.r < bb2x + 12 && ball.y < hoop2.y + 90 && ball.y > hoop2.y - 70) {
+                    ball.dx *= -0.7; ball.x = bb2x - ball.r;
+                }
+
+                [p1, p2].forEach(p => {
+                    if (!ball.holder && p.cooldown === 0) {
+                        if (ball.x > p.x - ball.r && ball.x < p.x + p.w + ball.r &&
+                            ball.y > p.y - ball.r && ball.y < p.y + p.h + ball.r) {
+                            ball.holder = p;
+                        }
+                    }
+                });
+
+                checkScore(hoop2, p1);
+                checkScore(hoop1, p2);
+            }
+
+            sendStateToClient();
+        }
+
+        function checkScore(hoop, scorer) {
+            if (!isScoring && ball.x > hoop.x && ball.x < hoop.x + hoop.w &&
+                ball.y > hoop.y && ball.y < hoop.y + 25 && ball.dy > 0) {
+                
+                isScoring = true;
+                scorer.score++;
+                
+                setTimeout(() => {
+                    triggerNewRound(false); 
+                    isScoring = false;
+                }, 1400);
+            }
+        }
+
+        // ---------------- RYSOWANIE ----------------
+
+        function drawPlayer(p) {
+            ctx.save();
+            ctx.translate(p.x + p.w / 2, p.y + p.h);
+            ctx.rotate(p.angle);
+            
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h, p.w, p.h);
+            ctx.strokeStyle = "#1A252F"; ctx.lineWidth = 2;
+            ctx.strokeRect(-p.w / 2, -p.h, p.w, p.h);
+            
+            ctx.fillStyle = "white";
+            let eyeX = (p.facing === 1) ? p.w / 2 - 14 : -p.w / 2 + 4;
+            ctx.fillRect(eyeX, -p.h + 10, 10, 10);
+            ctx.fillStyle = "black";
+            ctx.fillRect(eyeX + (p.facing === 1 ? 5 : 0), -p.h + 12, 5, 5);
+
+            ctx.fillStyle = p.color;
+            ctx.fillRect((p.facing === 1 ? 0 : -p.w/2), -p.h / 2, p.w / 2 + 5, 10);
+
+            if (p.isCharging && ball.holder === p) {
+                let barW = p.w + 24; let barH = 8;
+                let barX = -barW / 2; let barY = -p.h - 22;
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(barX, barY, barW, barH);
+                let fillW = (p.charge / 100) * barW;
+                let hue = 120 - (p.charge / 100) * 120;
+                ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.fillRect(barX, barY, fillW, barH);
+            }
+            ctx.restore();
+        }
+
+        function drawHoop(hoop, isLeft) {
+            let bbX = isLeft ? hoop.x - 12 : hoop.x + hoop.w;
+            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(bbX, hoop.y - 70, 12, 90);
+            ctx.fillStyle = "#7F8C8D"; ctx.fillRect(bbX, hoop.y, 12, groundY - hoop.y);
+            ctx.fillStyle = "#FF4500"; ctx.fillRect(hoop.x, hoop.y, hoop.w, 10);
+        }
+
+        function drawWalls() {
+            [wall1, wall2].forEach(w => {
+                ctx.fillStyle = "#7F8C8D"; ctx.fillRect(w.x, w.y, w.w, w.h);
+                ctx.strokeStyle = "#2C3E50"; ctx.lineWidth = 2; ctx.strokeRect(w.x, w.y, w.w, w.h);
+            });
+        }
+
+        function drawEnvironment() {
+            if (envEvent === "rain") {
+                ctx.strokeStyle = "rgba(174, 194, 224, 0.7)"; ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                rainDrops.forEach(drop => { ctx.moveTo(drop.x, drop.y); ctx.lineTo(drop.x - 2, drop.y + drop.length); });
+                ctx.stroke();
+            }
+
+            if (envEvent === "bird" || bird.active) {
+                ctx.fillStyle = "#2c3e50";
+                ctx.beginPath(); ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2); ctx.fill();
+            }
+
+            if (envEvent === "ufo" || ufo.active) {
+                ctx.fillStyle = "#9B59B6";
+                ctx.beginPath(); ctx.ellipse(ufo.x, ufo.y, ufo.r, ufo.r / 2, 0, 0, Math.PI * 2); ctx.fill();
+            }
+
+            if (envEvent === "meteors") {
+                meteors.forEach(m => {
+                    ctx.fillStyle = "#FF4500";
+                    ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = (envEvent === "rain") ? "#1e8449" : "#27ae60";
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            ctx.fillStyle = "#FFF";
+            ctx.fillRect(0, groundY, canvas.width, 5);
+
+            drawEnvironment();
+            drawHoop(hoop1, true); drawHoop(hoop2, false);
+            drawWalls();
+
+            drawPlayer(p1); drawPlayer(p2);
+
+            ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color; ctx.fill();
+            ctx.strokeStyle = "#2C3E50"; ctx.stroke();
+
+            // Wynik
+            ctx.fillStyle = "#2C3E50"; ctx.font = "bold 42px Arial"; ctx.textAlign = "center";
+            ctx.fillText(`${p1.score} - ${p2.score}`, canvas.width / 2, 45);
+
+            // Informacja o twojej roli w grze online
+            if (gameMode !== "local") {
+                ctx.font = "bold 12px Arial";
+                ctx.fillStyle = myRole === 1 ? "#1E90FF" : "#DC143C";
+                ctx.fillText(`Jesteś: Gracz ${myRole} (${myRole === 1 ? "Niebieski" : "Czerwony"})`, 80, 25);
+            }
+
+            // Modyfikatory
+            ctx.font = "bold 15px Arial"; ctx.fillStyle = "#2C3E50";
+            ctx.fillText(`Piłka: ${ballStatusText}  |  Kosz: ${hoopStatusText}  |  Środowisko: ${envStatusText}`, canvas.width / 2, 75);
+            
+            if (isScoring) {
+                ctx.fillStyle = "#F39C12"; ctx.font = "bold 60px Arial";
+                ctx.fillText("PUNKT!", canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
