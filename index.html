@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON DUEL — multiplayer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+  --bg: #070b14;
+  --panel: #111827;
+  --muted: #8b99b0;
+  --cyan: #54f5df;
+  --pink: #ff5b91;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 0%, #15304788, transparent 48%),
+    radial-gradient(ellipse at 90% 90%, #3b173f77, transparent 45%),
+    var(--bg);
+  color: #eef5ff;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .45; cursor: wait; }
+button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+.shell { max-width: 1220px; margin: auto; padding: 24px; }
+header {
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 18px; margin-bottom: 22px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  display: grid; place-items: center;
+  width: 42px; height: 42px; border-radius: 13px;
+  background: var(--cyan); color: #071615;
+  font-size: 25px; font-weight: 700;
+  box-shadow: 0 0 30px #54f5df25;
+}
+.brand strong { display: block; letter-spacing: 3px; font-size: 18px; }
+.brand small { color: var(--muted); font-size: 11px; letter-spacing: 2px; }
+.connection {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--muted); font-size: 12px;
+}
+.dot { width: 7px; height: 7px; background: #63718b; border-radius: 50%; }
+.dot.live { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 20px; border: 1px solid #ffffff10;
+  border-bottom: 0; border-radius: 18px 18px 0 0;
+  background: #101827bb; gap: 12px;
+}
+.tag { color: var(--muted); font-size: 11px; letter-spacing: 2px; }
+.score { font-size: 25px; font-weight: 700; letter-spacing: 8px; }
+.cyan { color: var(--cyan); }
+.pink { color: var(--pink); }
+.room-button {
+  background: #ffffff06; border: 1px solid #ffffff15;
+  border-radius: 9px; padding: 9px 12px; color: #bfcde0;
+  font-size: 12px;
+}
+.arena {
+  position: relative; overflow: hidden;
+  border: 1px solid #ffffff15;
+  border-radius: 0 0 18px 18px;
+  background: #090f1b;
+  box-shadow: 0 30px 90px #0005;
+}
+canvas {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 11 / 7; cursor: crosshair;
+  touch-action: none;
+}
+.overlay {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center; padding: 22px;
+  background: #060b15a6; backdrop-filter: blur(7px);
+}
+.hidden { display: none !important; }
+.card {
+  width: 430px; max-width: 100%;
+  padding: 32px; border: 1px solid #ffffff16;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #192337f5, #0e1524fa);
+  box-shadow: 0 25px 90px #0007;
+}
+.eyebrow {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--cyan); font-size: 10px;
+  letter-spacing: 2px; font-weight: 700;
+}
+h1 {
+  margin: 17px 0 12px; font-size: clamp(32px, 5vw, 49px);
+  line-height: 1.02; letter-spacing: -2px;
+}
+p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.primary, .secondary {
+  width: 100%; border: 0; padding: 14px;
+  border-radius: 11px; font-size: 13px; font-weight: 700;
+}
+.primary {
+  background: var(--cyan); color: #08211e;
+  box-shadow: 0 6px 25px #54f5df16;
+}
+.primary:hover { background: #8cffee; }
+.secondary {
+  background: #ffffff09; border: 1px solid #ffffff16; color: #e3edff;
+}
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; font-size: 10px; color: #78869e;
+  letter-spacing: 2px;
+}
+.divider::before, .divider::after {
+  content: ""; height: 1px; background: #ffffff12; flex: 1;
+}
+.join { display: flex; gap: 8px; }
+input {
+  min-width: 0; width: 100%; background: #070e1b;
+  border: 1px solid #ffffff1c; border-radius: 10px;
+  padding: 12px; color: white; text-transform: uppercase;
+  letter-spacing: 3px;
+}
+.join button { width: auto; white-space: nowrap; }
+#message { min-height: 22px; margin: 15px 0 0; font-size: 12px; }
+.bottom {
+  display: flex; flex-wrap: wrap; justify-content: space-between;
+  gap: 15px; margin-top: 18px; color: var(--muted); font-size: 11px;
+}
+.keys { display: flex; flex-wrap: wrap; gap: 17px; }
+kbd {
+  display: inline-block; padding: 3px 6px; margin-right: 4px;
+  border: 1px solid #ffffff20; border-bottom-width: 2px;
+  border-radius: 5px; font: 10px inherit; color: #d1dced;
+}
+#toast {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  background: #111b2bef; border: 1px solid #ffffff20;
+  border-radius: 9px; padding: 10px 18px;
+  font-size: 12px; pointer-events: none; text-align: center;
+}
+#result { text-align: center; }
+#result h1 { font-size: 40px; }
+#result .secondary { margin-top: 10px; }
+@media (max-width: 650px) {
+  .shell { padding: 12px; }
+  .brand strong { font-size: 14px; }
+  .connection { font-size: 10px; }
+  .topbar { padding: 11px; }
+  .tag { font-size: 9px; letter-spacing: 1px; }
+  .score { font-size: 21px; }
+  .card { padding: 22px; }
+  h1 { font-size: 32px; margin-top: 12px; }
+  .overlay { padding: 12px; }
+  .arena { min-height: 470px; }
+  canvas { min-height: 470px; object-fit: contain; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="logo">ϟ</div>
+      <div><strong>NEON DUEL</strong><small>MULTIPLAYER ARENA</small></div>
+    </div>
+    <div class="connection"><span id="dot" class="dot"></span><span id="status">OFFLINE</span></div>
+  </header>
+
+  <div class="topbar">
+    <div class="tag">DEATHMATCH <span class="cyan">/ 1 VS 1</span></div>
+    <div class="score"><span id="score0" class="cyan">0</span><span style="color:#465269">:</span><span id="score1" class="pink">0</span></div>
+    <button class="room-button" id="copy">POKÓJ: <b id="roomLabel">—</b></button>
+  </div>
+
+  <div class="arena">
+    <canvas id="game" width="1100" height="700"></canvas>
+    <div id="toast" class="hidden"></div>
+
+    <div class="overlay" id="menu">
+      <div class="card">
+        <div class="eyebrow">● ONLINE MULTIPLAYER</div>
+        <h1>Mała arena.<br><span class="cyan">Wielkie ego.</span></h1>
+        <p>Rzuć wyzwanie znajomemu. Unikaj pocisków, wykorzystuj osłony i zgarnij 7 fragów jako pierwszy.</p>
+        <button class="primary" id="create">Utwórz pokój ↗</button>
+        <div class="divider">LUB DOŁĄCZ</div>
+        <form class="join" id="joinForm">
+          <input id="roomInput" maxlength="6" placeholder="ID POKOJU"
+                 aria-label="ID pokoju" autocomplete="off" required>
+          <button class="secondary" id="joinButton">Dołącz →</button>
+        </form>
+        <p id="message">Najlepiej gra się na komputerze, z myszą i klawiaturą.</p>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="result">
+      <div class="card">
+        <div class="eyebrow" style="justify-content:center">KONIEC MECZU</div>
+        <h1 id="resultTitle">WYGRANA</h1>
+        <p id="resultText"></p>
+        <button class="primary" id="restart">Rewanż ↗</button>
+        <button class="secondary" onclick="location.reload()">Wróć do menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="keys">
+      <span><kbd>W A S D</kbd> ruch</span>
+      <span><kbd>MYSZ</kbd> celowanie + strzał</span>
+      <span><kbd>SHIFT</kbd> dash</span>
+    </div>
+    <span>PIERWSZY DO 7 FRAGÓW WYGRYWA</span>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const canvas = $("game");
+const ctx = canvas.getContext("2d");
+const W = 1100, H = 700, R = 17;
+const colors = ["#54f5df", "#ff5b91"];
+const PREFIX = "neon-duel-room-v3-";
+const obstacles = [
+  {x:230,y:130,w:100,h:145},
+  {x:230,y:425,w:100,h:145},
+  {x:770,y:130,w:100,h:145},
+  {x:770,y:425,w:100,h:145},
+  {x:470,y:285,w:160,h:130}
+];
+
+let peer, conn, host = false, myId = 0, room = "";
+let state = null, connected = false, started = false;
+let particles = [], shake = 0, lastFrame = performance.now();
+let sendClock = 0, pickupClock = 0, toastTimer, connectTimer;
+let previousWinner = -1;
+let remoteInput = emptyInput();
+let localInput = emptyInput();
+let keys = new Set();
+let lastRemoteInput = 0;
+
+function emptyInput() {
+  return {x:0,y:0,aimX:550,aimY:350,fire:false,dash:false};
+}
+function status(text, live = false) {
+  $("status").textContent = text;
+  $("dot").classList.toggle("live", live);
+}
+function toast(text, duration = 2500) {
+  clearTimeout(toastTimer);
+  $("toast").textContent = text;
+  $("toast").classList.remove("hidden");
+  toastTimer = setTimeout(() => $("toast").classList.add("hidden"), duration);
+}
+function busy(value) {
+  $("create").disabled = value;
+  $("joinButton").disabled = value;
+}
+function player(id) {
+  return {
+    x:id ? 990 : 110, y:350, angle:id ? Math.PI : 0,
+    hp:100, score:0, cooldown:0, dashCd:0, dashTime:0,
+    dx:0, dy:0, dead:0, shield:1.5
+  };
+}
+function newGame() {
+  state = {players:[player(0),player(1)],bullets:[],packs:[],winner:-1};
+  particles = [];
+  pickupClock = 5;
+  previousWinner = -1;
+  $("result").classList.add("hidden");
+}
+function send(data) {
+  if (conn && conn.open) conn.send(data);
+}
+function effect(x,y,color,count=12) {
+  for(let i=0;i<count;i++) {
+    const a = Math.random()*Math.PI*2;
+    const v = 40+Math.random()*220;
+    particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,
+      life:.2+Math.random()*.35,color});
+  }
+  if(particles.length>450) particles.splice(0,particles.length-450);
+}
+function eventFx(x,y,color,count=12) {
+  effect(x,y,color,count);
+  send({type:"fx",x,y,color,count});
+}
+function closeConnection() {
+  connected = false;
+  started = false;
+  clearTimeout(connectTimer);
+  if(conn) conn.close();
+  if(peer) peer.destroy();
+  conn = null;
+  peer = null;
+}
+function fail(text) {
+  closeConnection();
+  $("menu").classList.remove("hidden");
+  $("result").classList.add("hidden");
+  $("message").textContent = text;
+  busy(false);
+  status("OFFLINE");
+}
+function bindConnection(c) {
+  conn = c;
+  c.on("open", () => {
+    clearTimeout(connectTimer);
+    connected = true;
+    lastRemoteInput = performance.now();
+    busy(false);
+    status("POŁĄCZONO",true);
+    $("menu").classList.add("hidden");
+    if(host) {
+      newGame();
+      started = true;
+      send({type:"start"});
+      toast("Rywal dołączył. Grasz na turkusowo!");
+    } else {
+      toast("Połączono! Grasz na różowo.");
+    }
+  });
+  c.on("data", data => {
+    if(!data || typeof data !== "object") return;
+    if(host && data.type === "input") {
+      const v = data.input;
+      if(!v || ![v.x,v.y,v.aimX,v.aimY].every(Number.isFinite)) return;
+      remoteInput = {
+        x:Math.max(-1,Math.min(1,v.x)),
+        y:Math.max(-1,Math.min(1,v.y)),
+        aimX:Math.max(0,Math.min(W,v.aimX)),
+        aimY:Math.max(0,Math.min(H,v.aimY)),
+        fire:!!v.fire,dash:!!v.dash
+      };
+      lastRemoteInput = performance.now();
+    } else if(!host && data.type === "state") {
+      state = data.state;
+      started = true;
+    } else if(!host && data.type === "start") {
+      previousWinner = -1;
+      $("result").classList.add("hidden");
+    } else if(!host && data.type === "fx") {
+      effect(data.x,data.y,data.color,data.count);
+    }
+  });
+  c.on("close", () => {
+    if(connected) fail("Rywal się rozłączył. Utwórz nowy pokój lub dołącz ponownie.");
+  });
+  c.on("error", () => fail("Połączenie zostało przerwane. Spróbuj ponownie."));
+}
+function setupPeer(isHost, code) {
+  closeConnection();
+  host = isHost;
+  myId = isHost ? 0 : 1;
+  room = code;
+  state = null;
+  previousWinner = -1;
+  remoteInput = emptyInput();
+  busy(true);
+  status("ŁĄCZENIE...");
+  $("message").textContent = isHost ? "Tworzenie pokoju..." : "Łączenie z pokojem...";
+  if(typeof Peer === "undefined") {
+    fail("Nie udało się pobrać PeerJS. Sprawdź internet i odśwież stronę.");
+    return;
+  }
+  peer = isHost ? new Peer(PREFIX+code) : new Peer();
+  connectTimer = setTimeout(() => fail("Przekroczono czas łączenia. Sprawdź ID i połączenie."),20000);
+
+  peer.on("open", () => {
+    $("roomLabel").textContent = room;
+    if(isHost) {
+      clearTimeout(connectTimer);
+      $("menu").classList.add("hidden");
+      newGame();
+      status("OCZEKIWANIE",true);
+      toast("Pokój "+room+" — wyślij ID znajomemu.",10000);
+    } else {
+      bindConnection(peer.connect(PREFIX+code,{reliable:true}));
+    }
+  });
+  peer.on("connection", c => {
+    if(!host || conn) { c.close(); return; }
+    bindConnection(c);
+  });
+  peer.on("error", e => {
+    const messages = {
+      "peer-unavailable":"Nie znaleziono pokoju. Sprawdź ID.",
+      "unavailable-id":"To ID jest zajęte. Kliknij utworzenie pokoju ponownie.",
+      "network":"Problem z siecią. Sprawdź połączenie z internetem."
+    };
+    fail(messages[e.type] || "Nie udało się połączyć. Spróbuj ponownie.");
+  });
+  peer.on("disconnected", () => {
+    if(peer && !peer.destroyed) peer.reconnect();
+  });
+}
+
+$("create").onclick = () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  setupPeer(true,Array.from(bytes,b=>alphabet[b%alphabet.length]).join(""));
+};
+$("joinForm").onsubmit = e => {
+  e.preventDefault();
+  const code = $("roomInput").value.trim().toUpperCase();
+  if(!/^[A-Z0-9]{6}$/.test(code)) {
+    $("message").textContent = "ID pokoju powinno mieć 6 liter lub cyfr.";
+    return;
+  }
+  setupPeer(false,code);
+};
+$("copy").onclick = async () => {
+  if(!room) return;
+  try {
+    await navigator.clipboard.writeText(room);
+    toast("Skopiowano ID pokoju: "+room);
+  } catch {
+    toast("ID pokoju: "+room,7000);
+  }
+};
+$("restart").onclick = () => {
+  if(host && connected) {
+    newGame();
+    send({type:"start"});
+    toast("Rewanż! Powodzenia.");
+  }
+};
+
+window.addEventListener("keydown", e => {
+  if(e.target instanceof HTMLInputElement) return;
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))
+    e.preventDefault();
+  keys.add(e.code);
+});
+window.addEventListener("keyup", e => keys.delete(e.code));
+function releaseInput() {
+  keys.clear();
+  localInput.fire = false;
+  localInput.dash = false;
+}
+window.addEventListener("blur",releaseInput);
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden) releaseInput();
+});
+canvas.addEventListener("pointermove", e => {
+  // object-fit: contain can add letterboxing on narrow screens.
+  const box = canvas.getBoundingClientRect();
+  const scale = Math.min(box.width/W,box.height/H);
+  const left = box.left+(box.width-W*scale)/2;
+  const top = box.top+(box.height-H*scale)/2;
+  localInput.aimX = Math.max(0,Math.min(W,(e.clientX-left)/scale));
+  localInput.aimY = Math.max(0,Math.min(H,(e.clientY-top)/scale));
+});
+canvas.addEventListener("pointerdown", e => {
+  if(e.button === 0) localInput.fire = true;
+});
+window.addEventListener("pointerup", () => localInput.fire = false);
+canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+function readInput() {
+  localInput.x = Number(keys.has("KeyD")||keys.has("ArrowRight"))
+               - Number(keys.has("KeyA")||keys.has("ArrowLeft"));
+  localInput.y = Number(keys.has("KeyS")||keys.has("ArrowDown"))
+               - Number(keys.has("KeyW")||keys.has("ArrowUp"));
+  localInput.dash = keys.has("ShiftLeft")||keys.has("ShiftRight")||keys.has("Space");
+}
+function circleRect(x,y,r,o) {
+  const cx = Math.max(o.x,Math.min(x,o.x+o.w));
+  const cy = Math.max(o.y,Math.min(y,o.y+o.h));
+  return (x-cx)**2+(y-cy)**2 < r*r;
+}
+function movePlayer(p,dx,dy) {
+  p.x = Math.max(R+12,Math.min(W-R-12,p.x+dx));
+  for(const o of obstacles) {
+    if(circleRect(p.x,p.y,R,o)) {
+      p.x = dx>0 ? o.x-R : dx<0 ? o.x+o.w+R : p.x;
+    }
+  }
+  p.y = Math.max(R+12,Math.min(H-R-12,p.y+dy));
+  for(const o of obstacles) {
+    if(circleRect(p.x,p.y,R,o)) {
+      p.y = dy>0 ? o.y-R : dy<0 ? o.y+o.h+R : p.y;
+    }
+  }
+}
+function update(dt) {
+  if(!state || !connected || state.winner>=0) return;
+  if(performance.now()-lastRemoteInput>400) remoteInput = emptyInput();
+  const inputs = [localInput,remoteInput];
+
+  state.players.forEach((p,id) => {
+    const input = inputs[id];
+    p.cooldown = Math.max(0,p.cooldown-dt);
+    p.dashCd = Math.max(0,p.dashCd-dt);
+    p.shield = Math.max(0,p.shield-dt);
+    if(p.dead>0) {
+      p.dead -= dt;
+      if(p.dead<=0) {
+        const score = p.score;
+        Object.assign(p,player(id),{score});
+      }
+      return;
+    }
+    p.angle = Math.atan2(input.aimY-p.y,input.aimX-p.x);
+    let dx = input.x, dy = input.y;
+    const length = Math.hypot(dx,dy);
+    if(length) { dx/=length; dy/=length; }
+
+    if(input.dash && p.dashCd<=0) {
+      p.dx = length ? dx : Math.cos(p.angle);
+      p.dy = length ? dy : Math.sin(p.angle);
+      p.dashTime = .14;
+      p.dashCd = 2.1;
+      eventFx(p.x,p.y,colors[id],16);
+    }
+    if(p.dashTime>0) {
+      p.dashTime -= dt;
+      movePlayer(p,p.dx*850*dt,p.dy*850*dt);
+    } else movePlayer(p,dx*255*dt,dy*255*dt);
+
+    if(input.fire && p.cooldown<=0) {
+      p.cooldown = .155;
+      p.shield = 0;
+      const a = p.angle+(Math.random()-.5)*.035;
+      state.bullets.push({
+        x:p.x+Math.cos(a)*25,y:p.y+Math.sin(a)*25,
+        vx:Math.cos(a)*790,vy:Math.sin(a)*790,owner:id,life:1.4
+      });
+      eventFx(p.x+Math.cos(a)*28,p.y+Math.sin(a)*28,colors[id],3);
+    }
+  });
+
+  // Small physics steps keep fast bullets from passing through cover.
+  for(let i=state.bullets.length-1;i>=0;i--) {
+    const b = state.bullets[i];
+    b.life-=dt;
+    let hit = b.life<=0;
+    const steps = Math.max(1,Math.ceil(Math.hypot(b.vx,b.vy)*dt/7));
+    for(let step=0;step<steps && !hit;step++) {
+      b.x+=b.vx*dt/steps;
+      b.y+=b.vy*dt/steps;
+      if(b.x<12||b.x>W-12||b.y<12||b.y>H-12 ||
+         obstacles.some(o=>circleRect(b.x,b.y,4,o))) {
+        hit=true;
+        eventFx(b.x,b.y,colors[b.owner],5);
+        break;
+      }
+      const target = state.players[1-b.owner];
+      if(target.dead<=0 && Math.hypot(b.x-target.x,b.y-target.y)<R+4) {
+        hit=true;
+        if(target.shield<=0 && target.dashTime<=0) {
+          target.hp-=20;
+          eventFx(target.x,target.y,colors[1-b.owner],13);
+          if(target.hp<=0) {
+            target.hp=0;
+            target.dead=1.8;
+            const shooter=state.players[b.owner];
+            shooter.score++;
+            eventFx(target.x,target.y,"#ffffff",28);
+            if(shooter.score>=7) state.winner=b.owner;
+          }
+        } else eventFx(b.x,b.y,"#ffffff",6);
+      }
+    }
+    if(hit) state.bullets.splice(i,1);
+  }
+
+  pickupClock-=dt;
+  if(pickupClock<=0) {
+    pickupClock=11;
+    if(state.packs.length<2) {
+      const places=[{x:550,y:155},{x:550,y:545},{x:130,y:350},{x:970,y:350}];
+      const available=places.filter(a=>!state.packs.some(b=>a.x===b.x&&a.y===b.y));
+      if(available.length)
+        state.packs.push(available[Math.floor(Math.random()*available.length)]);
+    }
+  }
+  for(let i=state.packs.length-1;i>=0;i--) {
+    const pack=state.packs[i];
+    for(const p of state.players) {
+      if(p.dead<=0 && p.hp<100 && Math.hypot(p.x-pack.x,p.y-pack.y)<30) {
+        p.hp=Math.min(100,p.hp+35);
+        eventFx(pack.x,pack.y,"#9cff9a",15);
+        state.packs.splice(i,1);
+        break;
+      }
+    }
+  }
+}
+
+function rounded(x,y,w,h,r,fill,stroke) {
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  if(fill) { ctx.fillStyle=fill; ctx.fill(); }
+  if(stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=1; ctx.stroke(); }
+}
+function text(str,x,y,size,color,align="center") {
+  ctx.font=`700 ${size}px "Space Grotesk",sans-serif`;
+  ctx.fillStyle=color;
+  ctx.textAlign=align;
+  ctx.fillText(str,x,y);
+}
+function draw(dt,time) {
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  if(shake>0) {
+    ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+    shake=Math.max(0,shake-dt*30);
+  }
+  ctx.fillStyle="#090f1b"; ctx.fillRect(0,0,W,H);
+  const gradient=ctx.createRadialGradient(550,350,50,550,350,650);
+  gradient.addColorStop(0,"#17243b66");
+  gradient.addColorStop(1,"#090f1b00");
+  ctx.fillStyle=gradient; ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle="#a0c7ff08"; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let x=10;x<W;x+=40) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
+  for(let y=10;y<H;y+=40) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
+  ctx.stroke();
+
+  ctx.save();
+  ctx.setLineDash([5,12]);
+  ctx.strokeStyle="#a0c7ff10";
+  ctx.beginPath();ctx.arc(550,350,210,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+  text("NEON / DUEL",550,355,48,"#a0c7ff07");
+
+  rounded(10,10,W-20,H-20,16,null,"#a8d4ff22");
+  rounded(14,285,5,130,2,"#54f5df");
+  rounded(W-19,285,5,130,2,"#ff5b91");
+
+  for(const o of obstacles) {
+    rounded(o.x,o.y+8,o.w,o.h,9,"#00000050");
+    rounded(o.x,o.y,o.w,o.h,8,"#182439","#324560");
+    rounded(o.x+8,o.y+8,o.w-16,3,1,"#536b8c55");
+    ctx.strokeStyle="#8fb5e00b";
+    ctx.beginPath();
+    ctx.moveTo(o.x+15,o.y+o.h-15);
+    ctx.lineTo(o.x+o.w-15,o.y+15);
+    ctx.stroke();
+  }
+
+  if(state) {
+    for(const pack of state.packs) {
+      const pulse=Math.sin(time*.004)*3;
+      ctx.save();ctx.shadowBlur=18;ctx.shadowColor="#9cff9a";
+      rounded(pack.x-13,pack.y-13+pulse,26,26,7,"#15352e","#9cff9a88");
+      ctx.fillStyle="#9cff9a";
+      ctx.fillRect(pack.x-7,pack.y-2+pulse,14,4);
+      ctx.fillRect(pack.x-2,pack.y-7+pulse,4,14);
+      ctx.restore();
+    }
+
+    for(const b of state.bullets) {
+      ctx.save();
+      ctx.strokeStyle=colors[b.owner];ctx.lineWidth=4;
+      ctx.shadowBlur=16;ctx.shadowColor=colors[b.owner];
+      ctx.beginPath();ctx.moveTo(b.x,b.y);
+      ctx.lineTo(b.x-b.vx*.014,b.y-b.vy*.014);ctx.stroke();
+      ctx.fillStyle="#fff";
+      ctx.beginPath();ctx.arc(b.x,b.y,2,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+
+    state.players.forEach((p,id) => {
+      if(p.dead>0) {
+        text("POWRÓT "+Math.ceil(p.dead),id?990:110,350,13,colors[id]);
+        return;
+      }
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.shadowBlur=p.dashTime>0?35:18;
+      ctx.shadowColor=colors[id];
+      ctx.fillStyle=colors[id]+"20";
+      ctx.beginPath();ctx.arc(0,0,R+5,0,Math.PI*2);ctx.fill();
+      ctx.rotate(p.angle);
+      rounded(5,-5,26,10,4,colors[id]);
+      ctx.fillStyle="#0e1b2c";ctx.strokeStyle=colors[id];ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(0,0,R,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.fillStyle="#fff";
+      ctx.beginPath();ctx.arc(6,0,4,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+
+      if(p.shield>0) {
+        ctx.strokeStyle=colors[id]+"88";ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(p.x,p.y,27,0,Math.PI*2);ctx.stroke();
+      }
+      rounded(p.x-23,p.y-34,46,4,2,"#ffffff15");
+      if(p.hp>0) rounded(p.x-23,p.y-34,46*p.hp/100,4,2,colors[id]);
+      text(id===myId?"TY":"RYWAL",p.x,p.y-44,9,id===myId?"#ffffff":"#9baac1");
+      if(p.dashCd>0) {
+        ctx.strokeStyle=colors[id]+"55";ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,R+10,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-p.dashCd/2.1));
+        ctx.stroke();
+      }
+    });
+
+    const me=state.players[myId];
+    rounded(24,H-60,174,35,9,"#0d1726ee","#ffffff12");
+    text("HP "+me.hp,40,H-37,12,colors[myId],"left");
+    text(me.dashCd<=0?"DASH GOTOWY":"DASH "+me.dashCd.toFixed(1)+"s",
+      107,H-37,10,me.dashCd<=0?"#d4fff7":"#8290a7","left");
+
+    $("score0").textContent=state.players[0].score;
+    $("score1").textContent=state.players[1].score;
+    if(state.winner>=0 && previousWinner!==state.winner) {
+      previousWinner=state.winner;
+      const won=state.winner===myId;
+      $("resultTitle").textContent=won?"WYGRANA. GG!":"JESZCZE REWANŻ?";
+      $("resultTitle").style.color=won?"#54f5df":"#ff5b91";
+      $("resultText").textContent=
+        `${state.players[0].score} : ${state.players[1].score} · `+
+        (host?"Gotowy na kolejny pojedynek?":"Czekaj, aż gospodarz rozpocznie rewanż.");
+      $("restart").classList.toggle("hidden",!host);
+      $("result").classList.remove("hidden");
+    }
+  }
+
+  for(let i=particles.length-1;i>=0;i--) {
+    const p=particles[i];
+    p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    p.vx*=Math.exp(-5*dt);p.vy*=Math.exp(-5*dt);
+    if(p.life<=0) { particles.splice(i,1);continue; }
+    ctx.globalAlpha=Math.min(1,p.life*3);
+    ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);
+  }
+  ctx.globalAlpha=1;
+  ctx.restore();
+
+  if(host && !connected && state) {
+    text("OCZEKIWANIE NA RYWALA",550,70,16,"#d5e4f5");
+    text("ID POKOJU: "+room,550,98,13,"#54f5df");
+  }
+}
+
+function loop(now) {
+  const dt=Math.min((now-lastFrame)/1000,.035);
+  lastFrame=now;
+  readInput();
+  if(host && started) update(dt);
+  sendClock+=dt;
+  if(connected && sendClock>=1/30) {
+    sendClock=0;
+    if(host && state) send({type:"state",state});
+    else send({type:"input",input:localInput});
+  }
+  draw(dt,now);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
