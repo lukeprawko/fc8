@@ -3,54 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Ping Pong - Hardcore Physics & RPG Edition</title>
+<title>CYBERPONG: Pro Arena Edition</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+  :root {
+    --bg-dark: #04060a;
+    --panel-bg: rgba(11, 15, 25, 0.86);
+    --card-bg: rgba(18, 25, 40, 0.75);
+    --border-color: rgba(0, 240, 255, 0.22);
+    --p1-neon: #00f0ff;
+    --p2-neon: #ff0055;
+    --spin-neon: #b845ff;
+    --gold: #f5b041;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
   body {
-    background-color: #080b12;
+    background-color: var(--bg-dark);
     color: #f0f6fc;
+    font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 12px;
+    overflow: hidden;
+    position: relative;
   }
 
+  /* ANIMOWANE TŁO MENU */
+  #bgCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  .app-layer {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* NAGŁÓWEK */
   .header {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 18px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    color: var(--p1-neon);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
   }
   .header h1 {
-    font-size: 32px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 4.2vw, 46px);
     font-weight: 900;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #00f0ff, #7000ff);
+    letter-spacing: 6px;
+    background: linear-gradient(90deg, var(--p1-neon), #ffffff, var(--p2-neon));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    filter: drop-shadow(0 0 22px rgba(0, 240, 255, 0.35));
   }
   .header p {
     color: #8b949e;
-    font-size: 12px;
+    font-size: 14px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
     margin-top: 2px;
   }
 
-  /* PANEL MENU */
-  .panel {
-    background: #121722;
-    border: 1px solid #283044;
-    border-radius: 14px;
+  /* NOWE MENU GŁÓWNE (2 KOLUMNY) */
+  .menu-container {
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
     padding: 28px;
-    width: 380px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-    text-align: center;
+    width: 820px;
+    max-width: 96vw;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 240, 255, 0.07);
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 24px;
   }
 
-  .input-group {
+  @media (max-width: 720px) {
+    .menu-container { grid-template-columns: 1fr; padding: 20px; }
+  }
+
+  .menu-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .col-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #c9d1d9;
+    text-transform: uppercase;
     margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding-bottom: 8px;
+  }
+  .col-title span { color: var(--p1-neon); }
+
+  .input-group {
+    margin-bottom: 16px;
     text-align: left;
   }
   .input-group label {
@@ -58,175 +144,369 @@
     font-size: 12px;
     color: #8b949e;
     margin-bottom: 6px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
   }
-  input {
+  input, select {
     width: 100%;
     padding: 11px 14px;
-    background: #080b12;
-    border: 1px solid #283044;
-    border-radius: 8px;
+    background: rgba(5, 7, 12, 0.9);
+    border: 1px solid #28334a;
+    border-radius: 10px;
     color: #fff;
-    font-size: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
   }
-  input:focus { border-color: #00f0ff; }
+  input:focus, select:focus {
+    border-color: var(--p1-neon);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  }
+
+  /* KARTY WYBORU STEROWANIA */
+  .control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .ctrl-card {
+    background: rgba(6, 9, 15, 0.85);
+    border: 2px solid #222c40;
+    border-radius: 12px;
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .ctrl-card:hover {
+    border-color: rgba(0, 240, 255, 0.45);
+  }
+  .ctrl-card.active {
+    border-color: var(--p1-neon);
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
+  }
+  .ctrl-icon { font-size: 24px; margin-bottom: 4px; }
+  .ctrl-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+  .ctrl-desc {
+    font-size: 11px;
+    color: #8b949e;
+    line-height: 1.3;
+  }
+
+  .physics-info {
+    background: rgba(184, 69, 255, 0.07);
+    border: 1px solid rgba(184, 69, 255, 0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #d2a8ff;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  /* PRZYCISKI */
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  button:active { transform: scale(0.98); }
+
+  .btn-ai {
+    background: linear-gradient(135deg, #6e00ff, #b800ff);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(110, 0, 255, 0.35);
+  }
+  .btn-ai:hover { filter: brightness(1.15); box-shadow: 0 0 22px rgba(184, 0, 255, 0.55); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #00b4db, #0077b6);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+  }
+  .btn-primary:hover { filter: brightness(1.15); box-shadow: 0 0 22px rgba(0, 240, 255, 0.5); }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #ff0055, #b8003d);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+  }
+  .btn-secondary:hover { filter: brightness(1.15); box-shadow: 0 0 22px rgba(255, 0, 85, 0.5); }
+
+  .btn-cancel { background: #21262d; color: #c9d1d9; margin-top: 10px; }
+  .btn-cancel:hover { background: #30363d; }
+
+  .row-split {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .row-split select, .row-split input { width: 46%; }
+  .row-split button { width: 54%; }
 
   .divider {
     margin: 16px 0;
-    border-bottom: 1px solid #21262d;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     position: relative;
   }
   .divider span {
     position: absolute;
-    top: -10px;
+    top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: #121722;
+    background: #121928;
     padding: 0 10px;
-    color: #484f58;
-    font-size: 12px;
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
+    color: #6e7681;
+    font-size: 11px;
     font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 1px;
   }
-  button:active { transform: scale(0.98); }
-  .btn-primary { background: #238636; color: #fff; }
-  .btn-primary:hover { background: #2ea44f; }
-  .btn-secondary { background: #1f6feb; color: #fff; }
-  .btn-secondary:hover { background: #388bfd; }
-  .btn-cancel { background: #21262d; color: #c9d1d9; margin-top: 10px; }
-  .btn-cancel:hover { background: #30363d; }
 
+  /* PANEL OCZEKIWANIA */
+  .wait-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 32px;
+    width: 420px;
+    max-width: 95vw;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+  }
   #roomCodeDisplay {
+    font-family: 'Orbitron', sans-serif;
     font-size: 34px;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 6px;
-    color: #00f0ff;
-    margin: 14px 0;
-    background: #080b12;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px dashed #283044;
+    color: var(--p1-neon);
+    margin: 16px 0;
+    background: #05070b;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--p1-neon);
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
   }
-
   .status-msg {
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: 13px;
-    color: #e3b341;
+    font-weight: 600;
+    color: var(--gold);
     min-height: 18px;
+    text-align: center;
   }
 
-  /* GAME & HUD - powiększone na większość ekranu */
-  #gameWrapper { display: none; text-align: center; position: relative; width: 96vw; max-width: 1400px; }
+  /* OBSZAR GRY I HUD */
+  #gameWrapper {
+    display: none;
+    text-align: center;
+    position: relative;
+    width: 96vw;
+    max-width: 1260px;
+  }
 
   #hud {
     width: 100%;
-    background: #121722;
+    background: var(--panel-bg);
     border: 1px solid #283044;
     border-bottom: none;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    padding: 10px 20px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    padding: 10px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .score-board {
-    font-size: 24px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-  .team-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .p1-color { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
-  .p2-color { color: #ff0055; text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
 
-  /* PANEL ULEPSZEŃ STATYSTYK */
+  .player-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 240px;
+  }
+  .player-box.right { align-items: flex-end; }
+
+  .team-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .p1-color { color: var(--p1-neon); text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
+  .p2-color { color: var(--p2-neon); text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
+
+  .stamina-bar-wrap {
+    width: 160px;
+    height: 7px;
+    background: #080b12;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+    border: 1px solid #283044;
+  }
+  .stamina-fill {
+    height: 100%;
+    width: 100%;
+    transition: width 0.08s linear;
+  }
+
+  .score-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #hudScore {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    background: #05070b;
+    padding: 4px 26px;
+    border-radius: 10px;
+    border: 1px solid #283044;
+    letter-spacing: 3px;
+  }
+  .goal-limit {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 2px;
+  }
+
+  /* PANEL ULEPSZEŃ RPG */
   #upgradesPanel {
     width: 100%;
-    background: #0d111a;
+    background: #0a0e17;
     border: 1px solid #283044;
     border-bottom: none;
-    padding: 8px 20px;
+    padding: 8px 16px;
     display: flex;
-    justify-content: space-around;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .up-badge {
+    background: rgba(245, 176, 65, 0.12);
+    border: 1px solid var(--gold);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: var(--gold);
+    font-family: 'Orbitron', sans-serif;
     font-size: 13px;
+  }
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #121826;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #1f293d;
+  }
+  .stat-dots { display: flex; gap: 3px; }
+  .dot {
+    width: 8px;
+    height: 12px;
+    background: #21262d;
+    border-radius: 2px;
+  }
+  .dot.active {
+    background: var(--p1-neon);
+    box-shadow: 0 0 6px var(--p1-neon);
   }
   .stat-btn {
     width: auto;
     padding: 4px 10px;
-    margin: 0 0 0 6px;
-    font-size: 12px;
+    margin: 0 0 0 4px;
+    font-size: 11px;
     background: #238636;
     color: #fff;
-    display: inline-block;
+    border-radius: 5px;
   }
-  .stat-btn:hover { background: #2ea44f; }
-  .stat-btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-  .upgrade-points {
-    color: #e3b341;
-    font-weight: bold;
+  .stat-btn:hover:not(:disabled) { background: #2ea44f; }
+  .stat-btn:disabled { background: #1c2128; color: #484f58; cursor: not-allowed; }
+
+  .util-btns { display: flex; gap: 6px; }
+  .icon-btn {
+    width: auto;
+    padding: 5px 10px;
+    margin: 0;
+    background: #1c2436;
+    border: 1px solid #2e3b52;
+    font-size: 11px;
+    color: #c9d1d9;
   }
+  .icon-btn:hover { background: #28334a; }
 
   .canvas-container {
     position: relative;
     width: 100%;
   }
-
-  canvas {
-    background: #0a0d16;
+  canvas#stage {
+    background: #060911;
     border: 1px solid #283044;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.9);
     display: block;
     width: 100%;
     height: auto;
   }
 
-  /* UKRYTE MENU CHEATÓW */
-  #cheatMenu {
+  /* MODAL ZWYCIĘSTWA */
+  #victoryModal {
     display: none;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(18, 23, 34, 0.95);
-    border: 2px solid #ff0055;
-    border-radius: 12px;
-    padding: 20px;
-    z-index: 100;
-    width: 320px;
-    box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
-    text-align: left;
+    inset: 0;
+    background: rgba(5, 7, 11, 0.9);
+    backdrop-filter: blur(8px);
+    z-index: 90;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
   }
-  #cheatMenu h3 {
-    color: #ff0055;
-    font-size: 16px;
-    margin-bottom: 12px;
-    text-align: center;
-    letter-spacing: 1px;
+  #victoryModal h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 42px;
+    margin-bottom: 8px;
   }
-  .cheat-btn {
-    background: #1f6feb;
-    margin-top: 8px;
-    font-size: 13px;
-    padding: 8px;
+  #victoryModal p {
+    font-size: 18px;
+    color: #8b949e;
+    margin-bottom: 20px;
   }
-  .cheat-btn:hover { background: #388bfd; }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    width: 340px;
+  }
 
   .version-watermark {
     position: absolute;
@@ -234,24 +514,25 @@
     right: 16px;
     font-size: 11px;
     font-family: monospace;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.22);
     pointer-events: none;
-    letter-spacing: 0.5px;
   }
 
   .controls-bar {
     margin-top: 10px;
     color: #8b949e;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.6;
   }
   .controls-bar span {
     background: #121722;
     border: 1px solid #283044;
-    padding: 2px 7px;
+    padding: 2px 8px;
     border-radius: 4px;
-    color: #c9d1d9;
-    font-weight: 600;
+    color: var(--p1-neon);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
   }
 
   .hidden { display: none !important; }
@@ -259,164 +540,438 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>ULTIMATE PING PONG</h1>
-  <p>Realistyczne Tempo, Trudniejszy Rozwój i Zaawansowana Fizyka</p>
-</div>
+<!-- ANIMOWANE TŁO W MENU -->
+<canvas id="bgCanvas"></canvas>
 
-<!-- MENU POKOJU -->
-<div id="menu">
-  <div class="panel" id="mainPanel">
-    <div class="input-group">
-      <label>TWÓJ NICK</label>
-      <input id="nickInput" maxlength="12" placeholder="Gracz 1" value="Gracz">
+<div class="app-layer">
+  <div class="header">
+    <div class="badge">Competitive Sports &bull; v2.5 Pro</div>
+    <h1>CYBERPONG ARENA</h1>
+    <p>Taktyczne Tempo &bull; Zaawansowana Rotacja Magnusa &bull; Rozwój RPG</p>
+  </div>
+
+  <!-- NOWE DWUKOLUMNOWE MENU GŁÓWNE -->
+  <div id="menu">
+    <div class="menu-container" id="mainPanel">
+      
+      <!-- LEWA KOLUMNA: PROFIL I STEROWANIE -->
+      <div class="menu-col">
+        <div>
+          <div class="col-title"><span>01 //</span> Konfiguracja Pilota</div>
+          <div class="input-group">
+            <label>Twój Nick na Arenie</label>
+            <input id="nickInput" maxlength="12" placeholder="Wpisz nick..." value="CyberGracz">
+          </div>
+
+          <div class="input-group">
+            <label>Wybierz System Sterowania</label>
+            <div class="control-grid">
+              <div class="ctrl-card active" id="ctrlKeyboard" onclick="selectControl('keyboard')">
+                <div class="ctrl-icon">⌨️</div>
+                <div class="ctrl-name">Klawiatura</div>
+                <div class="ctrl-desc">Ruch: <b>W/S</b> lub <b>↑/↓</b><br>Zryw: <b>Shift</b> | Smash: <b>Spacja</b></div>
+              </div>
+              <div class="ctrl-card" id="ctrlMouse" onclick="selectControl('mouse')">
+                <div class="ctrl-icon">🖱️</div>
+                <div class="ctrl-name">Myszka</div>
+                <div class="ctrl-desc">Ruch: <b>Kursor</b><br>Smash: <b>LPM</b> | Zryw: <b>PPM</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="physics-info">
+          🌀 <b>Nowa Fizyka Podkręcenia:</b> Uderz piłkę będąc w ruchu, aby nadać jej rotację. Podkręcona piłka zakrzywia lot w powietrzu i dynamicznie przyspiesza po odbiciu od bandy!
+        </div>
+      </div>
+
+      <!-- PRAWA KOLUMNA: TRYBY GRY -->
+      <div class="menu-col">
+        <div>
+          <div class="col-title"><span>02 //</span> Wybór Trybu Rozgrywki</div>
+          
+          <div class="input-group">
+            <label>Trening / Gra Jednoosobowa (VS AI)</label>
+            <div class="row-split">
+              <select id="aiDifficulty">
+                <option value="easy">AI: Rekrut</option>
+                <option value="medium" selected>AI: Weteran</option>
+                <option value="hard">AI: Arcymistrz</option>
+              </select>
+              <button class="btn-ai" onclick="startSingleplayer()">Graj z Botem</button>
+            </div>
+          </div>
+
+          <div class="divider"><span>MULTIPLAYER ONLINE (P2P)</span></div>
+
+          <div class="input-group" style="margin-bottom: 14px;">
+            <label>Stwórz Własny Stół</label>
+            <button class="btn-primary" onclick="createRoom()">Utwórz Pokój (Host - Lewa)</button>
+          </div>
+
+          <div class="input-group" style="margin-bottom: 0;">
+            <label>Dołącz do Stołu Znajomego</label>
+            <div class="row-split">
+              <input id="joinInput" maxlength="6" placeholder="KOD (6 ZN.)" style="text-transform:uppercase;">
+              <button class="btn-secondary" onclick="joinRoom()">Dołącz (Prawa)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-msg" id="statusMsg">Gotowy do wejścia na arenę.</div>
+      </div>
+
     </div>
-    
-    <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Lewa Strona)</button>
-    
-    <div class="divider"><span>LUB</span></div>
-    
-    <div class="input-group">
-      <label>KOD POKOJU</label>
-      <input id="joinInput" maxlength="6" placeholder="np. ABC123" style="text-transform:uppercase;">
-    </div>
-    <button class="btn-secondary" onclick="joinRoom()">Dołącz do Gry (Prawa Strona)</button>
-    
-    <div class="status-msg" id="statusMsg"></div>
-  </div>
 
-  <div class="panel hidden" id="waitPanel">
-    <div style="font-size:14px; color:#8b949e;">Podaj ten kod drugiemu graczowi:</div>
-    <div id="roomCodeDisplay">------</div>
-    <div class="status-msg">Oczekiwanie na połączenie...</div>
-    <button class="btn-cancel" onclick="location.reload()">Anuluj</button>
-  </div>
-</div>
-
-<!-- OBSZAR GRY -->
-<div id="gameWrapper">
-  <div id="hud">
-    <div class="score-board" style="width: 100%; justify-content: space-between;">
-      <span class="team-name p1-color" id="hudP1">Gracz 1</span>
-      <span id="hudScore" style="background:#080b12; padding:4px 20px; border-radius:8px; border: 1px solid #283044;">0 : 0</span>
-      <span class="team-name p2-color" id="hudP2">Gracz 2</span>
+    <!-- PANEL OCZEKIWANIA NA GRACZA -->
+    <div class="wait-panel hidden" id="waitPanel">
+      <div style="font-size:15px; color:#c9d1d9; font-weight:600;">Przekaż ten kod drugiemu graczowi:</div>
+      <div id="roomCodeDisplay">------</div>
+      <div class="status-msg">Oczekiwanie na połączenie z przeciwnikiem...</div>
+      <button class="btn-cancel" onclick="location.reload()">Anuluj i Wróć</button>
     </div>
   </div>
 
-  <!-- ULEPSZENIA GRACZA -->
-  <div id="upgradesPanel">
-    <div>Punkty UP: <span class="upgrade-points" id="ptsDisplay">0</span></div>
-    <div>🌀 Podkręcanie: <b id="statSpin">Lvl 1</b> <button class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+ (1 UP)</button></div>
-    <div>⚡ Szybkość: <b id="statSpeed">Lvl 1</b> <button class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+ (1 UP)</button></div>
-    <div>💥 Smash: <b id="statSmash">Lvl 1</b> <button class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+ (1 UP)</button></div>
-  </div>
+  <!-- OBSZAR GRY -->
+  <div id="gameWrapper">
+    <div id="hud">
+      <div class="player-box">
+        <span class="team-name p1-color" id="hudP1">Gracz 1</span>
+        <div class="stamina-bar-wrap" title="Stamina (Zryw i Smash)">
+          <div class="stamina-fill" id="staminaP1" style="background: var(--p1-neon);"></div>
+        </div>
+      </div>
 
-  <div class="canvas-container">
-    <!-- Wewnętrzna rozdzielczość płótna logiki gry to nadal 900x500 dla zachowania proporcji -->
-    <canvas id="stage" width="900" height="500"></canvas>
-    
-    <!-- UKRYTE MENU CHEATÓW (Pod klawiszem `~` lub `Insert`) -->
-    <div id="cheatMenu">
-      <h3>⚠️ PANEL CHEATÓW ⚠️</h3>
-      <button class="cheat-btn" onclick="cheatAddPoints()">+5 Punktów UP</button>
-      <button class="cheat-btn" onclick="cheatMaxStats()">Maksymalne Statystyki (Lvl 5)</button>
-      <button class="cheat-btn" onclick="cheatSpeedBoost()">Superszybkość Paletki</button>
-      <button class="btn-cancel" onclick="toggleCheatMenu()" style="margin-top:12px;">Zamknij Menu (~)</button>
+      <div class="score-center">
+        <span id="hudScore">0 : 0</span>
+        <span class="goal-limit">Mecz do 7 punktów</span>
+      </div>
+
+      <div class="player-box right">
+        <span class="team-name p2-color" id="hudP2">Gracz 2</span>
+        <div class="stamina-bar-wrap" title="Stamina (Zryw i Smash)">
+          <div class="stamina-fill" id="staminaP2" style="background: var(--p2-neon);"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="version-watermark">v1.5.1 - Hardcore & Cheats Update</div>
-  </div>
+    <!-- PANEL ULEPSZEŃ GRACZA -->
+    <div id="upgradesPanel">
+      <div class="up-badge">PUNKTY UP: <span id="ptsDisplay">0</span></div>
 
-  <div class="controls-bar">
-    Ruch: <span>W / S</span> | Zryw: <span>SHIFT</span> | Smash: <span>SPACJA</span> | Menu Cheatów: <span>~ (Tylda) lub INSERT</span><br>
-    <i>UP dostajesz co <b>3 zdobytym punkcie</b> lub za <b>długą wymianę (10+ odbić)</b>. Koszt kolejnych poziomów rośnie!</i>
+      <div class="stat-item">
+        <span>🌀 Podkręcenie</span>
+        <div class="stat-dots" id="dots-spin"></div>
+        <button class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+ (1 UP)</button>
+      </div>
+
+      <div class="stat-item">
+        <span>⚡ Szybkość</span>
+        <div class="stat-dots" id="dots-speed"></div>
+        <button class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+ (1 UP)</button>
+      </div>
+
+      <div class="stat-item">
+        <span>💥 Smash</span>
+        <div class="stat-dots" id="dots-smash"></div>
+        <button class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+ (1 UP)</button>
+      </div>
+
+      <div class="stat-item">
+        <span>🛡️ Rozmiar</span>
+        <div class="stat-dots" id="dots-size"></div>
+        <button class="stat-btn" id="btnSize" onclick="upgradeStat('size')">+ (1 UP)</button>
+      </div>
+
+      <div class="util-btns">
+        <button class="icon-btn" id="ctrlSwitchBtn" onclick="toggleInGameControl()">⌨️ Sterowanie</button>
+        <button class="icon-btn" id="muteBtn" onclick="toggleMute()">🔊 Dźwięk</button>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="stage" width="900" height="500"></canvas>
+
+      <!-- MODAL ZWYCIĘSTWA -->
+      <div id="victoryModal">
+        <h2 id="winnerTitle">ZWYCIĘSTWO!</h2>
+        <p id="winnerSub">Wynik końcowy: 7 : 4</p>
+        <div class="modal-actions">
+          <button class="btn-primary" onclick="requestRematch()">Zagraj Rewanż</button>
+          <button class="btn-cancel" style="margin-top:0;" onclick="location.reload()">Menu Główne</button>
+        </div>
+      </div>
+
+      <div class="version-watermark">v2.5 - Pro Arena Edition</div>
+    </div>
+
+    <div class="controls-bar" id="controlsHintBar">
+      <!-- Wypełniane dynamicznie w zależności od wybranego sterowania -->
+    </div>
   </div>
 </div>
 
 <script>
+/* ==========================================
+   ANIMOWANE TŁO MENU GŁÓWNEGO
+   ========================================== */
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgBall = { x: 300, y: 200, vx: 3.5, vy: 2.5, r: 8 };
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeBg);
+resizeBg();
+
+function animateMenuBg() {
+  if (!gameActive) {
+    bgCtx.fillStyle = 'rgba(4, 6, 10, 0.25)';
+    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+    bgBall.x += bgBall.vx;
+    bgBall.y += bgBall.vy;
+    if (bgBall.x < 20 || bgBall.x > bgCanvas.width - 20) bgBall.vx *= -1;
+    if (bgBall.y < 20 || bgBall.y > bgCanvas.height - 20) bgBall.vy *= -1;
+
+    bgCtx.beginPath();
+    bgCtx.arc(bgBall.x, bgBall.y, bgBall.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = '#00f0ff';
+    bgCtx.shadowColor = '#00f0ff';
+    bgCtx.shadowBlur = 20;
+    bgCtx.fill();
+    bgCtx.shadowBlur = 0;
+  }
+  requestAnimationFrame(animateMenuBg);
+}
+animateMenuBg();
+
+/* ==========================================
+   SYNTEZATOR AUDIO (Web Audio API)
+   ========================================== */
+const SFX = {
+  ctx: null,
+  muted: false,
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioCtx();
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  play(type) {
+    if (this.muted) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    if (type === 'hit') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+      osc.start(now); osc.stop(now + 0.08);
+    } else if (type === 'spinHit') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(520, now + 0.13);
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.13);
+      osc.start(now); osc.stop(now + 0.13);
+    } else if (type === 'smash') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(45, now + 0.22);
+      gain.gain.setValueAtTime(0.38, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+      osc.start(now); osc.stop(now + 0.22);
+    } else if (type === 'wall') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(210, now);
+      osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+      osc.start(now); osc.stop(now + 0.05);
+    } else if (type === 'dash') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(580, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+      osc.start(now); osc.stop(now + 0.12);
+    } else if (type === 'goal') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.setValueAtTime(390, now + 0.1);
+      osc.frequency.setValueAtTime(520, now + 0.2);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+      osc.start(now); osc.stop(now + 0.4);
+    } else if (type === 'upgrade') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(660, now + 0.08);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now); osc.stop(now + 0.2);
+    }
+  }
+};
+
+function toggleMute() {
+  SFX.muted = !SFX.muted;
+  document.getElementById('muteBtn').textContent = SFX.muted ? '🔇 Wyciszono' : '🔊 Dźwięk';
+}
+
+/* ==========================================
+   KONFIGURACJA GRY I WYBÓR STEROWANIA
+   ========================================== */
 const W = 900, H = 500;
+const WIN_SCORE = 7;
+// Zbalansowane, wolniejsze tempo początkowe
+const INITIAL_BALL_SPEED = 3.1;
+const MAX_NORMAL_SPEED = 6.6;
+const MAX_SMASH_SPEED = 8.4;
+
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 
-let peer = null, conn = null, isHost = false;
-let myName = 'Gracz', oppName = 'Przeciwnik';
-let gameActive = false;
-let keys = {};
+let controlMode = 'keyboard'; // 'keyboard' lub 'mouse'
+let mouseY = H / 2;
 
-// TRUDNIEJSZY SYSTEM ROZWOJU
-let upgradePoints = 0;
-const stats = { spin: 1, speed: 1, smash: 1 };
-let rallyHits = 0; 
+function selectControl(mode) {
+  controlMode = mode;
+  document.getElementById('ctrlKeyboard').classList.toggle('active', mode === 'keyboard');
+  document.getElementById('ctrlMouse').classList.toggle('active', mode === 'mouse');
+  updateControlsBarText();
+}
 
-// Statystyki Paletek
-const BASE_H = 85;
-const P1 = { x: 25, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#00f0ff', spinMult: 1, smashMult: 1 };
-const P2 = { x: W - 25 - 12, y: H/2 - BASE_H/2, w: 12, h: BASE_H, vy: 0, speed: 4.8, score: 0, dashCooldown: 0, color: '#ff0055', spinMult: 1, smashMult: 1 };
+function toggleInGameControl() {
+  selectControl(controlMode === 'keyboard' ? 'mouse' : 'keyboard');
+}
 
-// Piłka
-const BALL = { x: W/2, y: H/2, r: 7.5, vx: 3.2, vy: 1.5, spin: 0, speed: 3.8, trail: [] };
-
-// Przeszkoda
-let obstacle = null;
-
-// Cząsteczki
-let particles = [];
-
-const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*30)]).join('');
-function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
-
-/* --- OBSŁUGA CHEATÓW --- */
-function toggleCheatMenu() {
-  const menu = document.getElementById('cheatMenu');
-  if (menu.style.display === 'block') {
-    menu.style.display = 'none';
+function updateControlsBarText() {
+  const bar = document.getElementById('controlsHintBar');
+  const switchBtn = document.getElementById('ctrlSwitchBtn');
+  if (controlMode === 'keyboard') {
+    if (switchBtn) switchBtn.textContent = '⌨️ Klawiatura';
+    bar.innerHTML = `
+      Tryb Klawiatury &mdash; Ruch: <span>W / S</span> lub <span>↑ / ↓</span> &bull;
+      Zryw (35% Staminy): <span>SHIFT</span> &bull;
+      Smash (40% Staminy): <span>SPACJA</span> &bull;
+      Ulepszenia: <span>1</span> <span>2</span> <span>3</span> <span>4</span>
+    `;
   } else {
-    menu.style.display = 'block';
+    if (switchBtn) switchBtn.textContent = '🖱️ Myszka';
+    bar.innerHTML = `
+      Tryb Myszki &mdash; Ruch: <span>KURSOR MYSZY</span> &bull;
+      Smash (40% Staminy): <span>LEWY PRZYCISK (LPM)</span> &bull;
+      Zryw (35% Staminy): <span>PRAWY PRZYCISK (PPM)</span> &bull;
+      Ulepszenia: <span>1</span> <span>2</span> <span>3</span> <span>4</span>
+    `;
   }
 }
+updateControlsBarText();
 
-function cheatAddPoints() {
-  upgradePoints += 5;
-  updateStatDisplay();
+let peer = null, conn = null;
+let isHost = true, isSinglePlayer = false, aiLevel = 'medium';
+let myName = 'Gracz 1', oppName = 'Gracz 2';
+let gameActive = false, matchOver = false;
+let keys = {};
+
+let shakeTime = 0, shakeIntensity = 0;
+let countdownTimer = 0;
+let bannerText = '', bannerTimer = 0, bannerColor = '#00f0ff';
+
+// Statystyki RPG
+let upgradePoints = 0;
+const stats = { spin: 1, speed: 1, smash: 1, size: 1 };
+let rallyHits = 0;
+let rallyRewarded = false;
+
+const BASE_H = 86;
+function createPaddle(x, color) {
+  return {
+    x, y: H / 2 - BASE_H / 2,
+    w: 13, h: BASE_H,
+    vy: 0, speed: 4.5,
+    score: 0,
+    stamina: 100,
+    dashTimer: 0,
+    smashCharge: 0,
+    color,
+    spinMult: 1, smashMult: 1
+  };
 }
 
-function cheatMaxStats() {
-  stats.spin = 5;
-  stats.speed = 5;
-  stats.smash = 5;
-  upgradePoints += 20;
-  updateStatDisplay();
-  applyStatsToLocalPlayer();
+const P1 = createPaddle(28, '#00f0ff');
+const P2 = createPaddle(W - 28 - 13, '#ff0055');
+
+const BALL = {
+  x: W / 2, y: H / 2, r: 8,
+  vx: 3, vy: 1.5,
+  spin: 0,
+  spinAngle: 0, // kąt wizualnego wiru wokół piłki
+  speed: INITIAL_BALL_SPEED,
+  isSmashed: false,
+  trail: []
+};
+
+let obstacle = null;
+let powerupOrb = null;
+let particles = [];
+let shockwaves = [];
+
+const genCode = () => Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+function setStatus(txt) { document.getElementById('statusMsg').textContent = txt; }
+
+function triggerShake(frames, intensity) {
+  shakeTime = frames;
+  shakeIntensity = intensity;
 }
 
-function cheatSpeedBoost() {
-  const p = isHost ? P1 : P2;
-  p.speed = 15.0; // Ogromna prędkość paletki
+function showBanner(text, color = '#00f0ff', duration = 70) {
+  bannerText = text;
+  bannerColor = color;
+  bannerTimer = duration;
 }
 
-/* --- ULEPSZENIA I TRUDNY SYSTEM UP --- */
-function getUpgradeCost(currentLvl) {
-  return currentLvl; 
-}
+/* ==========================================
+   SYSTEM ULEPSZEŃ (RPG)
+   ========================================== */
+function getUpgradeCost(lvl) { return lvl; }
 
 function upgradeStat(type) {
   const currentLvl = stats[type];
   const cost = getUpgradeCost(currentLvl);
-
   if (upgradePoints < cost || currentLvl >= 5) return;
 
   upgradePoints -= cost;
   stats[type]++;
-  
+  SFX.play('upgrade');
   updateStatDisplay();
   applyStatsToLocalPlayer();
 }
 
 function updateStatDisplay() {
   document.getElementById('ptsDisplay').textContent = upgradePoints;
-  
-  const setupBtn = (id, lvl) => {
-    const btn = document.getElementById(id);
+
+  const renderStat = (type, btnId) => {
+    const lvl = stats[type];
+    const dotsWrap = document.getElementById('dots-' + type);
+    dotsWrap.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i <= lvl ? ' active' : '');
+      dotsWrap.appendChild(d);
+    }
+    const btn = document.getElementById(btnId);
     if (lvl >= 5) {
       btn.textContent = 'MAX';
       btn.disabled = true;
@@ -427,29 +982,42 @@ function updateStatDisplay() {
     }
   };
 
-  document.getElementById('statSpin').textContent = 'Lvl ' + stats.spin;
-  document.getElementById('statSpeed').textContent = 'Lvl ' + stats.speed;
-  document.getElementById('statSmash').textContent = 'Lvl ' + stats.smash;
-
-  setupBtn('btnSpin', stats.spin);
-  setupBtn('btnSpeed', stats.speed);
-  setupBtn('btnSmash', stats.smash);
+  renderStat('spin', 'btnSpin');
+  renderStat('speed', 'btnSpeed');
+  renderStat('smash', 'btnSmash');
+  renderStat('size', 'btnSize');
 }
 
 function applyStatsToLocalPlayer() {
   const p = isHost ? P1 : P2;
-  p.speed = 4.5 + (stats.speed * 0.4);
-  p.spinMult = 1 + (stats.spin * 0.25);
-  p.smashMult = 1 + (stats.smash * 0.2);
+  p.speed = 4.4 + (stats.speed - 1) * 0.6;
+  p.spinMult = 1 + (stats.spin - 1) * 0.22;
+  p.smashMult = 1 + (stats.smash - 1) * 0.18;
+  p.h = BASE_H + (stats.size - 1) * 10;
 }
 
-/* --- MULTIPLAYER (PEERJS) --- */
-function createRoom() {
-  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
-  setStatus('Tworzenie pokoju...');
-  const code = genCode();
-  peer = new Peer('pingpong-' + code);
+/* ==========================================
+   TRYB SINGLEPLAYER (AI) & MULTIPLAYER (P2P)
+   ========================================== */
+function startSingleplayer() {
+  SFX.init();
+  myName = document.getElementById('nickInput').value.trim() || 'CyberGracz';
+  aiLevel = document.getElementById('aiDifficulty').value;
+  const aiNames = { easy: 'Bot Rekrut', medium: 'Bot Weteran', hard: 'Bot Arcymistrz' };
+  oppName = aiNames[aiLevel];
   isHost = true;
+  isSinglePlayer = true;
+  startGame();
+}
+
+function createRoom() {
+  SFX.init();
+  myName = document.getElementById('nickInput').value.trim() || 'Gracz 1';
+  setStatus('Tworzenie pokoju na serwerze P2P...');
+  const code = genCode();
+  peer = new Peer('cyberpong-' + code);
+  isHost = true;
+  isSinglePlayer = false;
 
   peer.on('open', () => {
     document.getElementById('mainPanel').classList.add('hidden');
@@ -463,30 +1031,35 @@ function createRoom() {
     c.on('open', () => conn.send({ t: 'hello', name: myName }));
   });
 
-  peer.on('error', err => setStatus('Błąd: ' + err.type));
+  peer.on('error', err => setStatus('Błąd sieci: ' + err.type));
 }
 
 function joinRoom() {
+  SFX.init();
   myName = document.getElementById('nickInput').value.trim() || 'Gracz 2';
   const code = document.getElementById('joinInput').value.trim().toUpperCase();
-  if (code.length !== 6) { setStatus('Wpisz kod!'); return; }
-  
-  setStatus('Łączenie...');
+  if (code.length !== 6) { setStatus('Wpisz poprawny 6-znakowy kod pokoju!'); return; }
+
+  setStatus('Łączenie z hostem...');
   peer = new Peer();
   isHost = false;
+  isSinglePlayer = false;
 
   peer.on('open', () => {
-    conn = peer.connect('pingpong-' + code);
+    conn = peer.connect('cyberpong-' + code);
     bindConnEvents();
     conn.on('open', () => conn.send({ t: 'hello', name: myName }));
   });
 
-  peer.on('error', () => setStatus('Nie odnaleziono pokoju!'));
+  peer.on('error', () => setStatus('Nie odnaleziono pokoju o podanym kodzie!'));
 }
 
 function bindConnEvents() {
   conn.on('data', handleData);
-  conn.on('close', () => { if (gameActive) alert('Przeciwnik rozłączył się.'); location.reload(); });
+  conn.on('close', () => {
+    if (gameActive) alert('Przeciwnik opuścił grę.');
+    location.reload();
+  });
 }
 
 function handleData(d) {
@@ -496,280 +1069,685 @@ function handleData(d) {
       conn.send({ t: 'start', opp: myName });
       startGame();
     }
-  }
-  else if (d.t === 'start') {
+  } else if (d.t === 'start') {
     oppName = d.opp;
     startGame();
-  }
-  else if (d.t === 'sync') {
+  } else if (d.t === 'rematch') {
+    resetMatch();
+  } else if (d.t === 'fx') {
+    SFX.play(d.sfx);
+    if (d.shake) triggerShake(d.shake[0], d.shake[1]);
+    if (d.part) addParticles(d.part.x, d.part.y, d.part.c, d.part.n);
+    if (d.wave) addShockwave(d.wave.x, d.wave.y, d.wave.c);
+    if (d.banner) showBanner(d.banner.txt, d.banner.c, 65);
+  } else if (d.t === 'sync') {
     if (isHost) {
       P2.y = d.py;
       P2.vy = d.pvy;
+      P2.h = d.ph;
+      P2.stamina = d.stam;
+      P2.smashCharge = d.smashCharge;
       P2.spinMult = d.spinMult;
       P2.smashMult = d.smashMult;
     } else {
-      P1.y = d.py;
-      P1.vy = d.pvy;
+      P1.y = d.p1y; P1.vy = d.p1vy; P1.h = d.p1h;
+      P1.stamina = d.p1stam; P1.smashCharge = d.p1smash;
       BALL.x = d.bx; BALL.y = d.by;
-      BALL.spin = d.spin;
+      BALL.spin = d.spin; BALL.isSmashed = d.smashed;
+      BALL.trail.push({ x: BALL.x, y: BALL.y });
+      if (BALL.trail.length > 10) BALL.trail.shift();
+
       obstacle = d.obs;
+      powerupOrb = d.orb;
+      countdownTimer = d.cd;
+
+      if (d.hits >= 10 && rallyHits < 10) {
+        upgradePoints++;
+        updateStatDisplay();
+        showBanner('10+ ODBIĆ! +1 UP', '#f5b041', 75);
+        SFX.play('upgrade');
+      }
+      rallyHits = d.hits;
+
       if (P1.score !== d.s1 || P2.score !== d.s2) {
-        checkUPAward(d.s2, P2.score);
+        if (d.s2 > P2.score && d.s2 % 2 === 0) {
+          upgradePoints++;
+          updateStatDisplay();
+        }
         P1.score = d.s1; P2.score = d.s2;
         updateHudScore();
+        checkVictoryCondition();
       }
     }
   }
 }
 
-function checkUPAward(newScore, oldScore) {
-  if (newScore > oldScore) {
-    if (newScore % 3 === 0 || rallyHits >= 10) {
-      upgradePoints++;
-      updateStatDisplay();
-    }
+function sendFX(payload) {
+  if (!isSinglePlayer && conn && conn.open && isHost) {
+    conn.send({ t: 'fx', ...payload });
   }
 }
 
+/* ==========================================
+   START MECZU, RESET I PUNKTACJA
+   ========================================== */
 function startGame() {
   document.getElementById('menu').style.display = 'none';
+  document.getElementById('bgCanvas').style.display = 'none';
   document.getElementById('gameWrapper').style.display = 'block';
 
   document.getElementById('hudP1').textContent = isHost ? myName : oppName;
   document.getElementById('hudP2').textContent = isHost ? oppName : myName;
 
   gameActive = true;
+  updateStatDisplay();
   applyStatsToLocalPlayer();
-  resetBall();
+  resetBall(true);
   requestAnimationFrame(gameLoop);
 }
 
-function resetBall() {
+function resetBall(withCountdown = true) {
   BALL.x = W / 2;
   BALL.y = H / 2;
-  BALL.speed = 3.8;
+  BALL.speed = INITIAL_BALL_SPEED;
   BALL.spin = 0;
+  BALL.isSmashed = false;
   BALL.trail = [];
   rallyHits = 0;
-  const angle = (Math.random() * Math.PI / 4) - Math.PI / 8;
+  rallyRewarded = false;
+
+  if (withCountdown) countdownTimer = 105;
+
+  const angle = (Math.random() * Math.PI / 3.2) - Math.PI / 6.4;
   const dir = Math.random() < 0.5 ? 1 : -1;
   BALL.vx = dir * BALL.speed * Math.cos(angle);
   BALL.vy = BALL.speed * Math.sin(angle);
 }
 
-function addParticles(x, y, color, count = 6) {
+function checkVictoryCondition() {
+  if (P1.score >= WIN_SCORE || P2.score >= WIN_SCORE) {
+    matchOver = true;
+    const p1Won = P1.score >= WIN_SCORE;
+    const winnerName = p1Won ? document.getElementById('hudP1').textContent : document.getElementById('hudP2').textContent;
+    const modal = document.getElementById('victoryModal');
+    const title = document.getElementById('winnerTitle');
+    title.textContent = `🏆 WYGRYWA ${winnerName}!`;
+    title.style.color = p1Won ? 'var(--p1-neon)' : 'var(--p2-neon)';
+    document.getElementById('winnerSub').textContent = `Wynik końcowy meczu: ${P1.score} : ${P2.score}`;
+    modal.style.display = 'flex';
+  }
+}
+
+function requestRematch() {
+  if (!isSinglePlayer && conn && conn.open) {
+    conn.send({ t: 'rematch' });
+  }
+  resetMatch();
+}
+
+function resetMatch() {
+  P1.score = 0; P2.score = 0;
+  P1.stamina = 100; P2.stamina = 100;
+  matchOver = false;
+  document.getElementById('victoryModal').style.display = 'none';
+  updateHudScore();
+  resetBall(true);
+}
+
+/* ==========================================
+   SZTUCZNA INTELIGENCJA (BOT)
+   ========================================== */
+function updateAI() {
+  const cfg = {
+    easy:   { speed: 3.4, reactX: W * 0.50, err: 26, smashChance: 0.12, dashChance: 0.01 },
+    medium: { speed: 4.6, reactX: W * 0.35, err: 12, smashChance: 0.45, dashChance: 0.03 },
+    hard:   { speed: 5.8, reactX: W * 0.18, err: 4,  smashChance: 0.75, dashChance: 0.08 }
+  }[aiLevel];
+
+  P2.speed = cfg.speed;
+  P2.stamina = Math.min(100, P2.stamina + 0.35);
+  if (P2.smashCharge > 0) P2.smashCharge--;
+  if (P2.dashTimer > 0) P2.dashTimer--;
+
+  let targetY = H / 2 - P2.h / 2;
+  if (BALL.vx > 0 && BALL.x > cfg.reactX) {
+    const offset = Math.sin(Date.now() * 0.004) * cfg.err;
+    targetY = BALL.y - P2.h / 2 + offset;
+  }
+
+  const diff = targetY - P2.y;
+  let moveDir = 0;
+  if (Math.abs(diff) > 6) moveDir = diff > 0 ? 1 : -1;
+
+  let curSpeed = P2.speed;
+  if (BALL.vx > 0 && BALL.x > W - 220 && Math.abs(diff) > 75 && P2.stamina >= 35 && Math.random() < cfg.dashChance) {
+    P2.stamina -= 35;
+    P2.dashTimer = 10;
+    SFX.play('dash');
+    addParticles(P2.x + P2.w / 2, P2.y + P2.h / 2, P2.color, 10);
+  }
+  if (P2.dashTimer > 0) curSpeed *= 2.0;
+
+  if (BALL.vx > 0 && BALL.x > W - 105 && Math.abs(diff) < 45 && P2.stamina >= 40 && P2.smashCharge === 0) {
+    if (Math.random() < cfg.smashChance) {
+      P2.stamina -= 40;
+      P2.smashCharge = 22;
+    }
+  }
+
+  P2.vy = moveDir * curSpeed;
+  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y + P2.vy));
+}
+
+/* ==========================================
+   FIZYKA, STEROWANIE I MECHANIKA PODKRĘCENIA
+   ========================================== */
+function addParticles(x, y, color, count = 8) {
   for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = 1.2 + Math.random() * 4.0;
     particles.push({
       x, y,
-      vx: (Math.random() - 0.5) * 5,
-      vy: (Math.random() - 0.5) * 5,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
       life: 1.0,
       color
     });
   }
 }
 
+function addShockwave(x, y, color) {
+  shockwaves.push({ x, y, r: 6, alpha: 0.9, color });
+}
+
 function updateHudScore() {
   document.getElementById('hudScore').textContent = `${P1.score} : ${P2.score}`;
 }
 
-/* --- LOGIKA I FIZYKA GRY --- */
+function triggerLocalDash(myPaddle) {
+  if (myPaddle.dashTimer === 0 && myPaddle.stamina >= 35) {
+    myPaddle.stamina -= 35;
+    myPaddle.dashTimer = 11;
+    SFX.play('dash');
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 10);
+  }
+}
+
+function triggerLocalSmash(myPaddle) {
+  if (myPaddle.smashCharge === 0 && myPaddle.stamina >= 40) {
+    myPaddle.stamina -= 40;
+    myPaddle.smashCharge = 25;
+  }
+}
+
 function update() {
+  if (matchOver) return;
+
   const myPaddle = isHost ? P1 : P2;
-  
-  let moveDir = 0;
-  if (keys['KeyW'] || keys['ArrowUp']) moveDir -= 1;
-  if (keys['KeyS'] || keys['ArrowDown']) moveDir += 1;
 
-  if (myPaddle.dashCooldown > 0) myPaddle.dashCooldown--;
+  // Regeneracja Staminy
+  myPaddle.stamina = Math.min(100, myPaddle.stamina + 0.35);
+  if (myPaddle.dashTimer > 0) myPaddle.dashTimer--;
+  if (myPaddle.smashCharge > 0) myPaddle.smashCharge--;
 
-  let currentSpeed = myPaddle.speed;
-  if ((keys['ShiftLeft'] || keys['ShiftRight']) && myPaddle.dashCooldown === 0 && moveDir !== 0) {
-    currentSpeed *= 2.2;
-    myPaddle.dashCooldown = 50;
-    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 8);
+  const maxStep = myPaddle.speed * (myPaddle.dashTimer > 0 ? 2.1 : 1);
+
+  if (controlMode === 'keyboard') {
+    let moveDir = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) moveDir -= 1;
+    if (keys['KeyS'] || keys['ArrowDown']) moveDir += 1;
+
+    if ((keys['ShiftLeft'] || keys['ShiftRight']) && moveDir !== 0) {
+      triggerLocalDash(myPaddle);
+    }
+    if (keys['Space']) {
+      keys['Space'] = false;
+      triggerLocalSmash(myPaddle);
+    }
+
+    myPaddle.vy = moveDir * maxStep;
+    myPaddle.y = Math.max(10, Math.min(H - myPaddle.h - 10, myPaddle.y + myPaddle.vy));
+  } else {
+    // TRYB MYSZKI: Płynne podążanie za kursorem z ograniczeniem do prędkości statystyk
+    const targetY = mouseY - myPaddle.h / 2;
+    const diff = targetY - myPaddle.y;
+    if (Math.abs(diff) < 1.5) {
+      myPaddle.vy = 0;
+    } else {
+      const step = Math.sign(diff) * Math.min(Math.abs(diff), maxStep);
+      myPaddle.vy = step;
+      myPaddle.y = Math.max(10, Math.min(H - myPaddle.h - 10, myPaddle.y + step));
+    }
   }
 
-  myPaddle.vy = moveDir * currentSpeed;
-  myPaddle.y += myPaddle.vy;
+  if (isSinglePlayer) updateAI();
 
-  P1.y = Math.max(10, Math.min(H - P1.h - 10, P1.y));
-  P2.y = Math.max(10, Math.min(H - P2.h - 10, P2.y));
+  document.getElementById('staminaP1').style.width = P1.stamina + '%';
+  document.getElementById('staminaP2').style.width = P2.stamina + '%';
 
+  // Obrót wizualnego wskaźnika rotacji
+  BALL.spinAngle += BALL.spin * 0.14;
+
+  // FIZYKA BOISKA (Host)
   if (isHost) {
-    if (!obstacle && Math.random() < 0.001) {
-      obstacle = {
-        x: W / 2 - 10,
-        y: 80 + Math.random() * (H - 220),
-        w: 20,
-        h: 85,
-        timer: 180
-      };
-    }
-
-    if (obstacle) {
-      obstacle.timer--;
-      if (obstacle.timer <= 0) obstacle = null;
-    }
-
-    BALL.vy += BALL.spin * 0.06;
-    BALL.spin *= 0.97;
-
-    BALL.x += BALL.vx;
-    BALL.y += BALL.vy;
-
-    BALL.trail.push({ x: BALL.x, y: BALL.y });
-    if (BALL.trail.length > 7) BALL.trail.shift();
-
-    if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
-      BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
-      BALL.vy *= -1;
-
-      if (Math.random() < 0.03) {
-        BALL.vx *= -1;
-        addParticles(BALL.x, BALL.y, '#e3b341', 15);
-      } else {
-        addParticles(BALL.x, BALL.y, '#ffffff', 4);
+    if (countdownTimer > 0) {
+      countdownTimer--;
+    } else {
+      // Losowa przeszkoda na środku
+      if (!obstacle && Math.random() < 0.001) {
+        obstacle = {
+          x: W / 2 - 9,
+          y: 70 + Math.random() * (H - 220),
+          w: 18, h: 85,
+          vy: Math.random() < 0.5 ? 1.0 : -1.0,
+          timer: 260
+        };
       }
-    }
+      if (obstacle) {
+        obstacle.timer--;
+        obstacle.y += obstacle.vy;
+        if (obstacle.y <= 30 || obstacle.y + obstacle.h >= H - 30) obstacle.vy *= -1;
+        if (obstacle.timer <= 0) obstacle = null;
+      }
 
-    if (obstacle) {
-      if (BALL.x + BALL.r >= obstacle.x && BALL.x - BALL.r <= obstacle.x + obstacle.w &&
+      // Złoty Orb UP
+      if (!powerupOrb && Math.random() < 0.0008) {
+        powerupOrb = {
+          x: W / 2 + (Math.random() - 0.5) * 180,
+          y: 70 + Math.random() * (H - 140),
+          r: 14, timer: 360
+        };
+      }
+      if (powerupOrb) {
+        powerupOrb.timer--;
+        const dx = BALL.x - powerupOrb.x, dy = BALL.y - powerupOrb.y;
+        if (Math.hypot(dx, dy) <= BALL.r + powerupOrb.r) {
+          if (BALL.vx > 0) {
+            upgradePoints++; updateStatDisplay();
+            showBanner('ZŁOTY ORB! +1 UP', '#f5b041', 65);
+          }
+          SFX.play('upgrade');
+          addShockwave(powerupOrb.x, powerupOrb.y, '#f5b041');
+          addParticles(powerupOrb.x, powerupOrb.y, '#f5b041', 16);
+          sendFX({ sfx: 'upgrade', wave: { x: powerupOrb.x, y: powerupOrb.y, c: '#f5b041' } });
+          powerupOrb = null;
+        } else if (powerupOrb.timer <= 0) {
+          powerupOrb = null;
+        }
+      }
+
+      // ZBALANSOWANA MECHANIKA PODKRĘCENIA (Efekt Magnusa)
+      if (Math.abs(BALL.spin) > 0.05) {
+        BALL.vy += BALL.spin * 0.036;
+        // Zachowanie stałego pędu całkowitego piłki podczas zakrzywiania toru lotu
+        const currentMag = Math.hypot(BALL.vx, BALL.vy);
+        if (currentMag > 0.1) {
+          const signX = Math.sign(BALL.vx) || 1;
+          // Pilnujemy, by kąt pionowy nie zablokował piłki w pionie
+          const maxVy = BALL.speed * 0.84;
+          BALL.vy = Math.max(-maxVy, Math.min(maxVy, BALL.vy));
+          BALL.vx = signX * Math.sqrt(Math.max(1.5, BALL.speed * BALL.speed - BALL.vy * BALL.vy));
+        }
+        BALL.spin *= 0.991; // Łagodne wygaszanie rotacji w powietrzu
+      } else {
+        BALL.spin = 0;
+      }
+
+      BALL.x += BALL.vx;
+      BALL.y += BALL.vy;
+
+      BALL.trail.push({ x: BALL.x, y: BALL.y });
+      if (BALL.trail.length > 11) BALL.trail.shift();
+
+      // Odbicie od górnej i dolnej ściany + "Spin Kick" (odbicie rotacyjne)
+      if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
+        BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
+        BALL.vy *= -1;
+
+        // Jeżeli piłka ma silną rotację, przy kontakcie ze ścianą dostaje rotacyjnego kopa
+        if (Math.abs(BALL.spin) > 0.8) {
+          BALL.vy += BALL.spin * 0.35;
+          BALL.spin *= -0.55; // częściowe odwrócenie i stłumienie spinu po twardym kontakcie
+          addParticles(BALL.x, BALL.y, '#b845ff', 9);
+          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#b845ff', n: 9 } });
+        } else {
+          addParticles(BALL.x, BALL.y, '#ffffff', 5);
+          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#ffffff', n: 5 } });
+        }
+        SFX.play('wall');
+      }
+
+      // Kolizja z przeszkodą
+      if (obstacle &&
+          BALL.x + BALL.r >= obstacle.x && BALL.x - BALL.r <= obstacle.x + obstacle.w &&
           BALL.y + BALL.r >= obstacle.y && BALL.y - BALL.r <= obstacle.y + obstacle.h) {
         BALL.vx *= -1;
-        addParticles(BALL.x, BALL.y, '#a371f7', 8);
+        BALL.x += BALL.vx * 2;
+        SFX.play('wall');
+        addShockwave(BALL.x, BALL.y, '#a371f7');
+        addParticles(BALL.x, BALL.y, '#a371f7', 10);
+        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#a371f7' } });
       }
-    }
 
-    if (BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x) {
-      if (BALL.y >= P1.y && BALL.y <= P1.y + P1.h) {
-        BALL.x = P1.x + P1.w + BALL.r;
-        rallyHits++;
-
-        let collidePoint = (BALL.y - (P1.y + P1.h / 2)) / (P1.h / 2);
-        let angle = collidePoint * (Math.PI / 3.4);
-
-        let isSmash = keys['Space'];
-        let speedBoost = isSmash ? (0.45 * P1.smashMult) : 0.15;
-
-        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5);
-        BALL.spin = P1.vy * 0.45 * P1.spinMult;
-
-        BALL.vx = BALL.speed * Math.cos(angle);
-        BALL.vy = BALL.speed * Math.sin(angle);
-
-        addParticles(BALL.x, BALL.y, P1.color, isSmash ? 12 : 6);
+      // Kolizja z Paletką 1 (Lewa)
+      if (BALL.vx < 0 && BALL.x - BALL.r <= P1.x + P1.w && BALL.x + BALL.r >= P1.x &&
+          BALL.y + BALL.r >= P1.y && BALL.y - BALL.r <= P1.y + P1.h) {
+        handlePaddleHit(P1, 1);
       }
-    }
 
-    if (BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w) {
-      if (BALL.y >= P2.y && BALL.y <= P2.y + P2.h) {
-        BALL.x = P2.x - BALL.r;
-        rallyHits++;
-
-        let collidePoint = (BALL.y - (P2.y + P2.h / 2)) / (P2.h / 2);
-        let angle = collidePoint * (Math.PI / 3.4);
-
-        let isSmash = keys['Space'];
-        let speedBoost = isSmash ? (0.45 * P2.smashMult) : 0.15;
-
-        BALL.speed = Math.min(BALL.speed + speedBoost, 8.5);
-        BALL.spin = P2.vy * 0.45 * P2.spinMult;
-
-        BALL.vx = -BALL.speed * Math.cos(angle);
-        BALL.vy = BALL.speed * Math.sin(angle);
-
-        addParticles(BALL.x, BALL.y, P2.color, isSmash ? 12 : 6);
+      // Kolizja z Paletką 2 (Prawa)
+      if (BALL.vx > 0 && BALL.x + BALL.r >= P2.x && BALL.x - BALL.r <= P2.x + P2.w &&
+          BALL.y + BALL.r >= P2.y && BALL.y - BALL.r <= P2.y + P2.h) {
+        handlePaddleHit(P2, -1);
       }
-    }
 
-    if (BALL.x < -15) {
-      P2.score++;
-      checkUPAward(P2.score, P2.score - 1);
-      updateHudScore();
-      resetBall();
-    } else if (BALL.x > W + 15) {
-      P1.score++;
-      checkUPAward(P1.score, P1.score - 1);
-      updateHudScore();
-      resetBall();
+      // Bramki
+      if (BALL.x < -15) {
+        P2.score++;
+        onGoalScored(2);
+      } else if (BALL.x > W + 15) {
+        P1.score++;
+        onGoalScored(1);
+      }
     }
   }
 
-  particles.forEach((p, idx) => {
-    p.x += p.vx; p.y += p.vy; p.life -= 0.04;
-    if (p.life <= 0) particles.splice(idx, 1);
-  });
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.life -= 0.035;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  for (let i = shockwaves.length - 1; i >= 0; i--) {
+    const sw = shockwaves[i];
+    sw.r += 2.5; sw.alpha -= 0.04;
+    if (sw.alpha <= 0) shockwaves.splice(i, 1);
+  }
 
-  if (conn && conn.open) {
+  if (shakeTime > 0) shakeTime--;
+  if (bannerTimer > 0) bannerTimer--;
+
+  // Synchronizacja P2P
+  if (!isSinglePlayer && conn && conn.open) {
     if (isHost) {
       conn.send({
-        t: 'sync', py: P1.y, pvy: P1.vy,
-        spinMult: P1.spinMult, smashMult: P1.smashMult,
-        bx: BALL.x, by: BALL.y, spin: BALL.spin,
-        obs: obstacle,
+        t: 'sync',
+        p1y: P1.y, p1vy: P1.vy, p1h: P1.h, p1stam: P1.stamina, p1smash: P1.smashCharge,
+        bx: BALL.x, by: BALL.y, spin: BALL.spin, smashed: BALL.isSmashed,
+        obs: obstacle, orb: powerupOrb, cd: countdownTimer, hits: rallyHits,
         s1: P1.score, s2: P2.score
       });
     } else {
       conn.send({
-        t: 'sync', py: P2.y, pvy: P2.vy,
+        t: 'sync',
+        py: P2.y, pvy: P2.vy, ph: P2.h, stam: P2.stamina,
+        smashCharge: P2.smashCharge,
         spinMult: P2.spinMult, smashMult: P2.smashMult
       });
     }
   }
 }
 
-/* --- RENDEROWANIE --- */
+function handlePaddleHit(paddle, dir) {
+  BALL.x = dir === 1 ? P1.x + P1.w + BALL.r : P2.x - BALL.r;
+  rallyHits++;
+
+  if (rallyHits === 10 && !rallyRewarded) {
+    rallyRewarded = true;
+    upgradePoints++;
+    updateStatDisplay();
+    showBanner('10+ ODBIĆ! +1 UP', '#f5b041', 75);
+    SFX.play('upgrade');
+  }
+
+  const collidePoint = (BALL.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
+  const clampedPoint = Math.max(-1, Math.min(1, collidePoint));
+  const angle = clampedPoint * (Math.PI / 3.6);
+
+  const isSmash = paddle.smashCharge > 0;
+  paddle.smashCharge = 0;
+
+  // Obliczanie zbalansowanego podkręcenia (z limitem maksymalnym ±3.0)
+  const rawSpin = (paddle.vy * 0.32 * paddle.spinMult) + (clampedPoint * 0.45 * (paddle.spinMult - 0.8));
+  BALL.spin = Math.max(-3.0, Math.min(3.0, rawSpin));
+  const isHeavySpin = Math.abs(BALL.spin) >= 1.35;
+
+  if (isSmash) {
+    BALL.speed = Math.min(BALL.speed + 0.85 * paddle.smashMult, MAX_SMASH_SPEED);
+    BALL.isSmashed = true;
+    SFX.play('smash');
+    triggerShake(11, 6);
+    addShockwave(BALL.x, BALL.y, '#f5b041');
+    addParticles(BALL.x, BALL.y, '#f5b041', 16);
+    showBanner('SMASH!', paddle.color, 40);
+    sendFX({
+      sfx: 'smash', shake: [11, 6],
+      wave: { x: BALL.x, y: BALL.y, c: '#f5b041' },
+      part: { x: BALL.x, y: BALL.y, c: '#f5b041', n: 16 },
+      banner: { txt: 'SMASH!', c: paddle.color }
+    });
+  } else {
+    BALL.speed = Math.min(BALL.speed + 0.12, MAX_NORMAL_SPEED);
+    BALL.isSmashed = false;
+    const hitSfx = isHeavySpin ? 'spinHit' : 'hit';
+    const fxColor = isHeavySpin ? '#b845ff' : paddle.color;
+    SFX.play(hitSfx);
+    addShockwave(BALL.x, BALL.y, fxColor);
+    addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 12 : 7);
+
+    if (isHeavySpin) showBanner('CURVEBALL!', '#b845ff', 35);
+
+    sendFX({
+      sfx: hitSfx,
+      wave: { x: BALL.x, y: BALL.y, c: fxColor },
+      part: { x: BALL.x, y: BALL.y, c: fxColor, n: isHeavySpin ? 12 : 7 },
+      banner: isHeavySpin ? { txt: 'CURVEBALL!', c: '#b845ff' } : null
+    });
+  }
+
+  BALL.vx = dir * BALL.speed * Math.cos(angle);
+  BALL.vy = BALL.speed * Math.sin(angle);
+}
+
+function onGoalScored(scorer) {
+  SFX.play('goal');
+  triggerShake(14, 8);
+  const goalColor = scorer === 1 ? P1.color : P2.color;
+  showBanner('PUNKT!', goalColor, 65);
+  sendFX({ sfx: 'goal', shake: [14, 8], banner: { txt: 'PUNKT!', c: goalColor } });
+
+  if (scorer === 1 && P1.score % 2 === 0) {
+    upgradePoints++;
+    updateStatDisplay();
+  }
+
+  updateHudScore();
+  checkVictoryCondition();
+  if (!matchOver) resetBall(true);
+}
+
+/* ==========================================
+   RENDEROWANIE ARENY I EFEKTU PODKRĘCENIA
+   ========================================== */
 function render() {
-  ctx.fillStyle = '#0a0d16';
+  ctx.save();
+
+  if (shakeTime > 0) {
+    const dx = (Math.random() - 0.5) * shakeIntensity;
+    const dy = (Math.random() - 0.5) * shakeIntensity;
+    ctx.translate(dx, dy);
+  }
+
+  ctx.fillStyle = '#060911';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.setLineDash([8, 8]);
+  // Siatka taktyczna
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.035)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 45) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 45) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Koło środkowe i linia
+  ctx.strokeStyle = '#182236';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, 70, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.setLineDash([10, 10]);
   ctx.beginPath();
   ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H);
-  ctx.strokeStyle = '#1e2638'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.stroke();
   ctx.setLineDash([]);
 
+  // Licznik COMBO
+  if (rallyHits >= 3) {
+    ctx.font = '900 46px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = rallyHits >= 10 ? 'rgba(245, 176, 65, 0.15)' : 'rgba(255, 255, 255, 0.06)';
+    ctx.fillText(`${rallyHits} HIT COMBO`, W / 2, H / 2 + 16);
+  }
+
+  // Przeszkoda
   if (obstacle) {
+    ctx.shadowColor = '#a371f7';
+    ctx.shadowBlur = 15;
     ctx.fillStyle = '#a371f7';
-    ctx.shadowColor = '#a371f7'; ctx.shadowBlur = 10;
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
+    ctx.beginPath();
+    ctx.roundRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h, 6);
+    ctx.fill();
     ctx.shadowBlur = 0;
   }
 
-  particles.forEach(p => {
+  // Złoty Orb UP
+  if (powerupOrb) {
+    const pulse = Math.sin(Date.now() * 0.01) * 3;
+    ctx.shadowColor = '#f5b041';
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#f5b041';
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill();
+    ctx.arc(powerupOrb.x, powerupOrb.y, powerupOrb.r + pulse, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#f5b041';
+    ctx.font = '900 11px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillText('+UP', powerupOrb.x, powerupOrb.y + 4);
+    ctx.shadowBlur = 0;
+  }
+
+  // Fale uderzeniowe
+  shockwaves.forEach(sw => {
+    ctx.beginPath();
+    ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+    ctx.strokeStyle = sw.color;
+    ctx.lineWidth = 2.5;
+    ctx.globalAlpha = sw.alpha;
+    ctx.stroke();
     ctx.globalAlpha = 1.0;
   });
 
-  BALL.trail.forEach((t, i) => {
+  // Cząsteczki
+  particles.forEach(p => {
     ctx.beginPath();
-    ctx.arc(t.x, t.y, BALL.r * (i / BALL.trail.length), 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life;
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // Paletki
+  const drawPaddle = (p) => {
+    const isCharging = p.smashCharge > 0;
+    ctx.shadowColor = isCharging ? '#f5b041' : p.color;
+    ctx.shadowBlur = isCharging ? 24 : 14;
+    ctx.fillStyle = isCharging ? '#f5b041' : p.color;
+
+    ctx.beginPath();
+    ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(p.x + 3, p.y + 8, p.w - 6, p.h - 16, 3);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  };
+
+  drawPaddle(P1);
+  drawPaddle(P2);
+
+  const hasSpin = Math.abs(BALL.spin) > 0.65;
+
+  // Ślad piłki (zmienia kolor na fioletowy przy mocnym podkręceniu)
+  BALL.trail.forEach((t, i) => {
+    const ratio = i / BALL.trail.length;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, BALL.r * ratio, 0, Math.PI * 2);
+    if (BALL.isSmashed) {
+      ctx.fillStyle = `rgba(245, 176, 65, ${ratio * 0.45})`;
+    } else if (hasSpin) {
+      ctx.fillStyle = `rgba(184, 69, 255, ${ratio * 0.38})`;
+    } else {
+      ctx.fillStyle = `rgba(0, 240, 255, ${ratio * 0.22})`;
+    }
     ctx.fill();
   });
 
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = P1.color; ctx.shadowColor = P1.color;
-  ctx.fillRect(P1.x, P1.y, P1.w, P1.h);
-
-  ctx.fillStyle = P2.color; ctx.shadowColor = P2.color;
-  ctx.fillRect(P2.x, P2.y, P2.w, P2.h);
-
-  const myPaddle = isHost ? P1 : P2;
-  if (myPaddle.dashCooldown > 0) {
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillRect(myPaddle.x, myPaddle.y + myPaddle.h + 6, (myPaddle.dashCooldown / 50) * myPaddle.w, 3);
+  // WIRUJĄCA AURA WOKÓŁ PODKRĘCONEJ PIŁKI
+  if (hasSpin) {
+    ctx.save();
+    ctx.translate(BALL.x, BALL.y);
+    ctx.rotate(BALL.spinAngle);
+    ctx.strokeStyle = '#b845ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, BALL.r + 5, 0, Math.PI * 0.75);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, BALL.r + 5, Math.PI, Math.PI * 1.75);
+    ctx.stroke();
+    ctx.restore();
   }
 
+  // Piłka
   ctx.beginPath();
   ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 12;
+  ctx.fillStyle = BALL.isSmashed ? '#f5b041' : '#ffffff';
+  ctx.shadowColor = BALL.isSmashed ? '#f5b041' : (hasSpin ? '#b845ff' : '#00f0ff');
+  ctx.shadowBlur = BALL.isSmashed ? 22 : 14;
   ctx.fill();
-
   ctx.shadowBlur = 0;
+
+  // Banery
+  if (bannerTimer > 0) {
+    ctx.font = '900 32px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = bannerColor;
+    ctx.shadowColor = bannerColor;
+    ctx.shadowBlur = 15;
+    ctx.fillText(bannerText, W / 2, 72);
+    ctx.shadowBlur = 0;
+  }
+
+  // Odliczanie
+  if (countdownTimer > 0) {
+    const sec = Math.ceil(countdownTimer / 35);
+    ctx.font = '900 62px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 20;
+    ctx.fillText(sec > 0 ? sec : 'GO!', W / 2, H / 2 - 35);
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.restore();
 }
 
 function gameLoop() {
@@ -779,14 +1757,44 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
+/* ==========================================
+   NASŁUCHIWANIE KLAWIATURY I MYSZKI
+   ========================================== */
 addEventListener('keydown', e => {
   keys[e.code] = true;
-  // Nasłuchiwanie skrótu klawiszowego do menu cheatów (~ lub Insert)
-  if (e.code === 'Backquote' || e.code === 'Insert') {
-    toggleCheatMenu();
+  if (['ArrowUp', 'ArrowDown', 'Space'].includes(e.code) && gameActive) {
+    e.preventDefault();
+  }
+  if (gameActive) {
+    if (e.code === 'Digit1') upgradeStat('spin');
+    if (e.code === 'Digit2') upgradeStat('speed');
+    if (e.code === 'Digit3') upgradeStat('smash');
+    if (e.code === 'Digit4') upgradeStat('size');
   }
 });
+
 addEventListener('keyup', e => { keys[e.code] = false; });
+
+// Obsługa ruchu myszką po płótnie
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleY = H / rect.height;
+  mouseY = (e.clientY - rect.top) * scaleY;
+});
+
+// Obsługa przycisków myszy w trybie Myszki (LPM = Smash, PPM = Zryw)
+canvas.addEventListener('mousedown', e => {
+  if (!gameActive || controlMode !== 'mouse') return;
+  const myPaddle = isHost ? P1 : P2;
+  if (e.button === 0) {
+    triggerLocalSmash(myPaddle);
+  } else if (e.button === 2) {
+    triggerLocalDash(myPaddle);
+  }
+});
+
+// Blokada menu kontekstowego pod Prawym Przyciskiem Myszy na boisku
+canvas.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 </body>
 </html>
