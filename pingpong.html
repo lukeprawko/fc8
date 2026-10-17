@@ -9,8 +9,8 @@
 <style>
   :root {
     --bg: #04060c;
-    --panel: rgba(12, 17, 29, 0.85);
-    --card: rgba(20, 28, 46, 0.75);
+    --panel: rgba(12, 17, 29, 0.88);
+    --card: rgba(20, 28, 46, 0.78);
     --p1: #00f0ff;
     --p2: #ff0055;
     --spin: #b845ff;
@@ -109,12 +109,29 @@
 
   .nick-box {
     background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: 2px solid rgba(255, 255, 255, 0.09);
     border-radius: 16px;
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: all 0.2s ease;
+  }
+  .nick-box:focus-within {
+    border-color: var(--p1);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
+  }
+  .nick-box.nick-error {
+    border-color: var(--p2) !important;
+    background: rgba(255, 0, 85, 0.14);
+    box-shadow: 0 0 22px rgba(255, 0, 85, 0.45);
+    animation: nickShake 0.35s ease;
+  }
+  @keyframes nickShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
   }
   .nick-box svg {
     width: 28px;
@@ -129,10 +146,14 @@
     border: none;
     color: #fff;
     font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     outline: none;
+  }
+  .nick-box input::placeholder {
+    color: #586579;
+    font-weight: 700;
   }
 
   .ctrl-selector {
@@ -185,19 +206,19 @@
   /* ŚRODKOWY PASEK: KARTY TRYBÓW GRY */
   .modes-grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
 
   .mode-card {
     background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
-    padding: 16px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 11px;
+    gap: 13px;
     position: relative;
     overflow: hidden;
   }
@@ -233,48 +254,73 @@
 
   .mode-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 900;
     letter-spacing: 1.5px;
     color: #fff;
   }
 
-  /* SEKCJE WYBORU POZIOMU BOTÓW (WRÓG + SOJUSZNIK) */
-  .tier-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  /* WIERSZE WYBORU POZIOMU BOTÓW Z IKONĄ */
+  .tier-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    align-items: center;
+    gap: 8px;
+    background: rgba(8, 12, 22, 0.55);
+    padding: 6px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
-  .tier-label {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
-    font-weight: 800;
-    color: #8b949e;
-    letter-spacing: 1px;
+  .tier-tag {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: #c9d1d9;
+    letter-spacing: 0.8px;
+  }
+  .tier-tag svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
   }
   .ai-tiers {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 7px;
+    gap: 6px;
   }
   .mp-tiers {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
   }
   .tier-btn {
-    background: rgba(6, 9, 16, 0.8);
+    background: rgba(6, 9, 16, 0.85);
     border: 1px solid #263147;
     border-radius: 9px;
-    padding: 7px 4px;
+    padding: 8px 4px;
     color: #8b949e;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
     font-weight: 800;
     cursor: pointer;
     transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tier-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+  .tier-btn:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #d0d7de;
   }
   .tier-btn.active {
     border-color: var(--spin);
@@ -288,22 +334,27 @@
     background: rgba(0, 240, 255, 0.2);
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
   }
+  .tier-btn.mp-mode {
+    padding: 11px 8px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
   .tier-btn.mp-mode.active {
     border-color: var(--p1);
     color: #fff;
-    background: rgba(0, 240, 255, 0.2);
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+    background: rgba(0, 240, 255, 0.18);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
   }
 
-  /* PRZYCISKI AKCJI */
+  /* PRZYCISKI AKCJI Z IKONAMI */
   .solo-btns-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
   }
   .action-btn {
     width: 100%;
-    padding: 12px 10px;
+    padding: 12px 12px;
     border: none;
     border-radius: 12px;
     font-family: 'Orbitron', sans-serif;
@@ -314,6 +365,16 @@
     transition: all 0.2s;
     text-transform: uppercase;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .action-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
   }
   .action-btn:active:not(:disabled) { transform: scale(0.97); }
   .action-btn:disabled {
@@ -421,8 +482,8 @@
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
     font-weight: 800;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 7px 14px;
+    border-radius: 9px;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -509,6 +570,16 @@
   }
   .slot-nick.bot-nick {
     color: #d2a8ff;
+  }
+  .slot-me-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(0, 240, 255, 0.2);
+    color: var(--p1);
+    border: 1px solid var(--p1);
   }
   .slot-controls {
     display: flex;
@@ -796,9 +867,9 @@
     <div class="hub-panel" id="mainPanel">
       <!-- PROFIL I WYBÓR STEROWANIA -->
       <div class="top-row">
-        <div class="nick-box" title="Twój Nick">
+        <div class="nick-box" id="nickBox" title="Podaj swój nick">
           <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
-          <input id="nickInput" maxlength="12" placeholder="NICK..." value="CYBER">
+          <input id="nickInput" maxlength="12" placeholder="WPISZ SWÓJ NICK" autocomplete="off">
         </div>
 
         <div class="ctrl-selector">
@@ -815,7 +886,7 @@
 
       <!-- KARTY TRYBÓW GRY -->
       <div class="modes-grid">
-        <!-- SOLO VS AI (1v1 ORAZ 2v2 Z BOTEM-SOJUSZNIKIEM) -->
+        <!-- SOLO ARENA -->
         <div class="mode-card">
           <div class="mode-header">
             <div class="mode-header-left">
@@ -826,9 +897,12 @@
             </div>
           </div>
 
-          <!-- POZIOM BOTÓW PRZECIWNIKA -->
-          <div class="tier-group">
-            <div class="tier-label"><span>POZIOM PRZECIWNIKÓW (AI)</span></div>
+          <!-- POZIOM RYWALI -->
+          <div class="tier-row">
+            <div class="tier-tag">
+              <svg viewBox="0 0 24 24" fill="#b845ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+              <span>RYWALE</span>
+            </div>
             <div class="ai-tiers">
               <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">ŁATWY</button>
               <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">ŚREDNI</button>
@@ -836,9 +910,12 @@
             </div>
           </div>
 
-          <!-- POZIOM BOTA SOJUSZNIKA -->
-          <div class="tier-group">
-            <div class="tier-label"><span>POZIOM SOJUSZNIKA (2V2 AI)</span></div>
+          <!-- POZIOM PARTNERA -->
+          <div class="tier-row">
+            <div class="tier-tag">
+              <svg viewBox="0 0 24 24" fill="#00f0ff"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+              <span>PARTNER</span>
+            </div>
             <div class="ai-tiers">
               <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">ŁATWY</button>
               <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">ŚREDNI</button>
@@ -846,14 +923,20 @@
             </div>
           </div>
 
-          <!-- DWA PRZYCISKI STARTU SOLO: 1v1 oraz 2v2 -->
+          <!-- PRZYCISKI STARTU SOLO -->
           <div class="solo-btns-row">
-            <button type="button" class="action-btn btn-play-ai" onclick="startSingleplayer()">START VS AI</button>
-            <button type="button" class="action-btn btn-play-solo2v2" onclick="startSolo2v2()">SOLO 2V2</button>
+            <button type="button" class="action-btn btn-play-ai" onclick="startSingleplayer()">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <span>1 VS 1</span>
+            </button>
+            <button type="button" class="action-btn btn-play-solo2v2" onclick="startSolo2v2()">
+              <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              <span>2 VS 2</span>
+            </button>
           </div>
         </div>
 
-        <!-- ONLINE P2P (1v1 / 2v2 / CO-OP VS BOTS) -->
+        <!-- MULTIPLAYER ONLINE -->
         <div class="mode-card">
           <div class="mode-header">
             <div class="mode-header-left">
@@ -864,17 +947,29 @@
             </div>
           </div>
 
-          <!-- PRZEŁĄCZNIK 1v1 / 2v2 -->
+          <!-- CZYSTY PRZEŁĄCZNIK 1 VS 1 / 2 VS 2 Z IKONAMI -->
           <div class="mp-tiers">
-            <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">1 VS 1 (2 GRACZY)</button>
-            <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">2 VS 2 (LUDZIE/BOTY)</button>
+            <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <span>1 VS 1</span>
+            </button>
+            <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">
+              <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              <span>2 VS 2</span>
+            </button>
           </div>
 
-          <button type="button" class="action-btn btn-host" onclick="createRoom()">STWÓRZ POKÓJ</button>
+          <button type="button" class="action-btn btn-host" onclick="createRoom()">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>STWÓRZ POKÓJ</span>
+          </button>
 
           <div class="join-row">
             <input id="joinInput" maxlength="6" placeholder="KOD">
-            <button type="button" class="action-btn btn-join" onclick="joinRoom()">DOŁĄCZ</button>
+            <button type="button" class="action-btn btn-join" onclick="joinRoom()">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span>DOŁĄCZ</span>
+            </button>
           </div>
         </div>
       </div>
@@ -882,44 +977,44 @@
       <div id="statusMsg"></div>
     </div>
 
-    <!-- EKRAN OCZEKIWANIA HOSTA (1v1) -->
+    <!-- EKRAN OCZEKIWANIA HOSTA 1 VS 1 -->
     <div class="wait-panel hidden" id="waitPanel">
-      <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">KOD TWOJEGO POKOJU (1 VS 1)</div>
+      <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU</div>
       <div id="roomCodeDisplay">------</div>
       <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">WRÓĆ</button>
     </div>
 
-    <!-- EKRAN LOBBY 2v2 (4 GRACZY LUB BOTY) -->
+    <!-- EKRAN LOBBY 2 VS 2 -->
     <div class="lobby-panel hidden" id="lobby2v2Panel">
       <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2 — KOD POKOJU</div>
       <div id="lobbyCodeDisplay">------</div>
 
-      <!-- PASEK SZYBKICH PRESETÓW DLA HOSTA (CO-OP 2v2 / WYPEŁNIENIE BOTAMI) -->
+      <!-- PASEK SZYBKICH PRESETÓW DLA HOSTA -->
       <div class="lobby-presets-bar" id="hostPresetsBar">
-        <button type="button" class="preset-btn" onclick="applyCoop2v2Preset()">🤝 CO-OP 2V2 (2 LUDZI VS 2 BOTY)</button>
-        <button type="button" class="preset-btn" onclick="fillEmptySlotsWithBots()">🤖 WYPEŁNIJ WOLNE SLOTY BOTAMI</button>
+        <button type="button" class="preset-btn" onclick="applyCoop2v2Preset()">🤝 CO-OP VS BOTY</button>
+        <button type="button" class="preset-btn" onclick="fillEmptySlotsWithBots()">🤖 WYPEŁNIJ BOTAMI</button>
       </div>
 
       <div class="lobby-teams-grid">
-        <!-- DRUŻYNA 1 (CYJAN) -->
+        <!-- DRUŻYNA 1 -->
         <div class="lobby-team-col t1">
-          <div class="lobby-team-header p1-color">DRUŻYNA 1 (LEWA)</div>
+          <div class="lobby-team-header p1-color">DRUŻYNA 1</div>
           <div class="lobby-slot" id="lobbySlot0" onclick="onLobbySlotClick(0)"></div>
           <div class="lobby-slot" id="lobbySlot1" onclick="onLobbySlotClick(1)"></div>
         </div>
 
-        <!-- DRUŻYNA 2 (CZERWIEŃ) -->
+        <!-- DRUŻYNA 2 -->
         <div class="lobby-team-col t2">
-          <div class="lobby-team-header p2-color">DRUŻYNA 2 (PRAWA)</div>
+          <div class="lobby-team-header p2-color">DRUŻYNA 2</div>
           <div class="lobby-slot" id="lobbySlot2" onclick="onLobbySlotClick(2)"></div>
           <div class="lobby-slot" id="lobbySlot3" onclick="onLobbySlotClick(3)"></div>
         </div>
       </div>
 
-      <div class="lobby-hint" id="lobbyHintText">Oczekiwanie na zapełnienie 4 slotów...</div>
+      <div class="lobby-hint" id="lobbyHintText">Oczekiwanie na graczy...</div>
 
       <div class="lobby-actions">
-        <button type="button" class="action-btn btn-host" id="btnStart2v2" onclick="hostStart2v2Match()" disabled>START MECZU (0/4)</button>
+        <button type="button" class="action-btn btn-host" id="btnStart2v2" onclick="hostStart2v2Match()" disabled>START MECZU</button>
         <button type="button" class="action-btn" style="background:#21262d; width: 42%;" onclick="location.reload()">OPUŚĆ</button>
       </div>
     </div>
@@ -928,7 +1023,7 @@
   <!-- OBSZAR GRY -->
   <div id="gameWrapper">
     <div id="hud">
-      <!-- DRUŻYNA 1 (LEWA) -->
+      <!-- DRUŻYNA 1 -->
       <div class="player-box" id="hudBoxLeft">
         <div class="hud-member" id="hudMember0">
           <span class="team-name p1-color" id="hudNick0">GRACZ 1</span>
@@ -946,7 +1041,7 @@
 
       <span id="hudScore">0 : 0</span>
 
-      <!-- DRUŻYNA 2 (PRAWA) -->
+      <!-- DRUŻYNA 2 -->
       <div class="player-box right" id="hudBoxRight">
         <div class="hud-member" id="hudMember2">
           <span class="team-name p2-color" id="hudNick2">GRACZ 2</span>
@@ -1010,7 +1105,7 @@
         </div>
       </div>
 
-      <!-- MODAL PAUZY PO ROZŁĄCZENIU GRACZA (UŻYWANY W 1v1 LUB GDY HOST WYJDZIE) -->
+      <!-- MODAL PAUZY PO ROZŁĄCZENIU GRACZA -->
       <div id="disconnectModal">
         <h2 style="color: var(--p2);">MECZ PRZERWANY</h2>
         <p id="disconnectSub">Gracz X rozłączył się</p>
@@ -1034,8 +1129,8 @@ window.addEventListener('touchmove', e => e.preventDefault(), { passive: false }
 /* ==========================================
    2. ZMIENNE GLOBALNE, NETCODE I KONFIGURACJA
    ========================================== */
-// Tryb przyznawania punktów ulepszeń: 'personal' | 'team'
 const UP_MODE = 'personal';
+const NICK_STORAGE_KEY = 'cyberpong_player_nick';
 
 const W = 900, H = 500;
 const WIN_SCORE = 7;
@@ -1056,11 +1151,9 @@ let matchPaused = false;
 let controlMode = 'keyboard';
 let mouseY = H / 2;
 
-// Wybór trybu multiplayer w menu ('1v1' | '2v2') i aktywna flaga meczu 2v2
 let mpMode = '1v1';
 let is2v2 = false;
 
-// Poziomy trudności botów wybierane w menu: osobno dla przeciwników i sojuszników (domyślnie ŚREDNI)
 let enemyAiLevel = 'medium';
 let allyAiLevel = 'medium';
 
@@ -1075,29 +1168,61 @@ const BOT_TIER_LABELS_PL = {
   hard: 'PRO'
 };
 
-// Wyniki drużyn: teamScores[1] = Drużyna 1 (Cyjan), teamScores[2] = Drużyna 2 (Czerwień)
 let teamScores = { 1: 0, 2: 0 };
 let lastTeamTouched = { 1: 0, 2: 1 };
 
-// Zunifikowana tablica paletek (2 w trybie solo/1v1, 4 w trybie 2v2)
 let paddles = [];
 let localPaddleId = 0;
 
-// PeerJS: topologia gwiazdy (Host utrzymuje mapę klientów, Gość łączy się tylko z Hostem)
 let peer = null;
 let conn = null, fastConn = null;
 const hostClients = {};
 
-// Stan 4 slotów w lobby 2v2: każdy element to null lub { peerId: 'host'|'bot'|string, nick: string, isBot: boolean, botTier: 'easy'|'medium'|'hard' }
 let lobbySlots = [null, null, null, null];
 let selectedSwapSlot = null;
 let currentRoomCode = '';
 
 let isHost = true, isSinglePlayer = false;
-let myName = 'CYBER', oppName = 'BOT';
+let myName = '', oppName = 'BOT';
 let keys = {};
 
-// Konfiguracja serwerów ICE (STUN + miejsce na darmowy serwer TURN dla połączeń międzynarodowych PL <-> UK)
+// Wczytanie i automatyczny zapis nicku w localStorage
+const nickInputEl = document.getElementById('nickInput');
+const nickBoxEl = document.getElementById('nickBox');
+
+try {
+  const savedNick = localStorage.getItem(NICK_STORAGE_KEY);
+  if (savedNick && savedNick.trim().length > 0) {
+    nickInputEl.value = savedNick.trim().slice(0, 12);
+  }
+} catch (e) {}
+
+nickInputEl.addEventListener('input', () => {
+  nickBoxEl.classList.remove('nick-error');
+  const val = nickInputEl.value.trim();
+  if (val.length > 0) {
+    setStatus('');
+    try { localStorage.setItem(NICK_STORAGE_KEY, val); } catch (e) {}
+  }
+});
+
+// Obowiązkowa walidacja nicku przed rozpoczęciem dowolnego trybu gry
+function requireAndSavePlayerNick() {
+  const val = nickInputEl.value.trim();
+  if (!val) {
+    nickBoxEl.classList.remove('nick-error');
+    void nickBoxEl.offsetWidth; // restart animacji
+    nickBoxEl.classList.add('nick-error');
+    nickInputEl.focus();
+    setStatus('USTAW SWÓJ NICK ABY ZAGRAĆ!');
+    return null;
+  }
+  try {
+    localStorage.setItem(NICK_STORAGE_KEY, val);
+  } catch (e) {}
+  return val;
+}
+
 const PEER_CONFIG = {
   config: {
     iceServers: [
@@ -1107,10 +1232,7 @@ const PEER_CONFIG = {
       { urls: 'stun:stun.cloudflare.com:3478' }
       /* 
        * =========================================================================
-       * GDZIE WKLEIĆ DARMOWY SERWER TURN (np. OpenRelay / Metered.ca / Twilio):
-       * Jeśli bezpośrednie połączenie UDP P2P między PL a UK jest blokowane przez
-       * symetryczny NAT lub firewall, odkomentuj poniższy obiekt i wklej swoje dane:
-       * =========================================================================
+       * GDZIE WKLEIĆ DARMOWY SERWER TURN:
        * ,{
        *   urls: [
        *     'turn:eu-central.turn.twojadomena.com:3478?transport=udp',
@@ -1119,12 +1241,12 @@ const PEER_CONFIG = {
        *   username: 'TWOJ_LOGIN_TURN',
        *   credential: 'TWOJE_HASLO_TURN'
        * }
+       * =========================================================================
        */
     ]
   }
 };
 
-// Zmienne sieciowe, sekwencje pakietów i pomiar pingu
 let outSeq = 0;
 let lastInSeq = -1;
 let tickCounter = 0;
@@ -1132,11 +1254,9 @@ let tickCounter = 0;
 let smoothedPing = 0;
 let pingIntervalId = null;
 
-// Cele interpolacji na kliencie dla piłki
 let hostTargetBall = null;
 let lastLocalGuestHitTime = 0;
 
-// Stały krok czasowy (Fixed Timestep 60 Hz niezależny od odświeżania monitora)
 const FIXED_DT = 1000 / 60;
 let lastFrameTime = 0;
 let accumulator = 0;
@@ -1157,7 +1277,6 @@ function getBasePaddleHeight() {
   return is2v2 ? BASE_H_2V2 : BASE_H_1V1;
 }
 
-// Funkcja nadająca botom unikalne nicki z numeracją (np. BOT PRO #1, BOT PRO #2)
 function refreshLobbyBotNicks() {
   let botCount = 0;
   for (let i = 0; i < 4; i++) {
@@ -1170,12 +1289,11 @@ function refreshLobbyBotNicks() {
   }
 }
 
-// Tworzenie obiektu paletki w ujednoliconej strukturze danych
 function createPaddleObj({ id, team, slot, x, y, h, color, nick, isBot = false, botTier = 'medium', isLocal = false }) {
   return {
     id,
-    team,       // 1 (lewa, cyjan) lub 2 (prawa, czerwień)
-    slot,       // 0 (pełny w 1v1 lub górna połowa w 2v2) | 1 (dolna połowa w 2v2)
+    team,
+    slot,
     x,
     y,
     w: 13,
@@ -1198,7 +1316,6 @@ function createPaddleObj({ id, team, slot, x, y, h, color, nick, isBot = false, 
   };
 }
 
-// Inicjalizacja tablicy paddles[] dla 1v1 / Solo (2 paletki) lub 2v2 (4 paletki)
 function initPaddlesArray(mode2v2, slotsData = null) {
   is2v2 = mode2v2;
   const bh = getBasePaddleHeight();
@@ -1224,7 +1341,6 @@ function initPaddlesArray(mode2v2, slotsData = null) {
     }));
     localPaddleId = p0Local ? 0 : 1;
   } else {
-    // 4 paletki: 0 (Drużyna 1 Góra), 1 (Drużyna 1 Dół), 2 (Drużyna 2 Góra), 3 (Drużyna 2 Dół)
     const startPositions = [
       { team: 1, slot: 0, x: 28,          y: H * 0.25 - bh / 2, color: '#00f0ff' },
       { team: 1, slot: 1, x: 28,          y: H * 0.75 - bh / 2, color: '#00f0ff' },
@@ -1261,7 +1377,6 @@ function getLocalPaddle() {
   return paddles[localPaddleId] || paddles[0];
 }
 
-// Konfiguracja widoczności elementów HUD (2 paski w 1v1, 4 paski i nicki w 2v2)
 function setupHudElements() {
   const hud = document.getElementById('hud');
   hud.classList.toggle('hud-2v2', is2v2);
@@ -1278,6 +1393,7 @@ function setupHudElements() {
     document.getElementById('hudMember0').classList.remove('hidden');
     document.getElementById('hudMember1').classList.remove('hidden');
     document.getElementById('hudMember2').classList.remove('hidden');
+    document.getElementById('hudMember3').classList.add('hidden');
     document.getElementById('hudMember3').classList.remove('hidden');
 
     const formatHudNick = (prefix, p) => `${prefix}: ${p.isBot ? '🤖 ' : ''}${p.nick}`;
@@ -1546,7 +1662,6 @@ function updateStatDisplay() {
   renderStat('size', 'btnSize');
 }
 
-// Nakładanie ograniczeń strefy i blokady przenikania dla paletek tej samej drużyny w 2v2
 function enforceTeamPaddleConstraints() {
   for (let i = 0; i < paddles.length; i++) {
     const p = paddles[i];
@@ -1613,10 +1728,12 @@ function sendStatsUpdate() {
 /* ==========================================
    7. TRYBY SOLO (1v1 + 2v2) ORAZ MULTIPLAYER P2P
    ========================================== */
-// Wariant A1: Klasyczne Solo 1v1 vs AI
 function startSingleplayer() {
+  const validNick = requireAndSavePlayerNick();
+  if (!validNick) return;
+
   SFX.init();
-  myName = document.getElementById('nickInput').value.trim() || 'CYBER';
+  myName = validNick;
   oppName = `${BOT_TIER_NAMES[enemyAiLevel]} #1`;
   isHost = true;
   isSinglePlayer = true;
@@ -1625,10 +1742,12 @@ function startSingleplayer() {
   startGame();
 }
 
-// Wariant A2: Nowy tryb SOLO 2v2 (Gracz + Bot-Sojusznik kontra 2 Boty)
 function startSolo2v2() {
+  const validNick = requireAndSavePlayerNick();
+  if (!validNick) return;
+
   SFX.init();
-  myName = document.getElementById('nickInput').value.trim() || 'CYBER';
+  myName = validNick;
   isHost = true;
   isSinglePlayer = true;
   is2v2 = true;
@@ -1645,12 +1764,15 @@ function startSolo2v2() {
 }
 
 function createRoom() {
+  const validNick = requireAndSavePlayerNick();
+  if (!validNick) return;
+
   SFX.init();
   if (typeof Peer === 'undefined') {
     setStatus('BŁĄD SIECI P2P');
     return;
   }
-  myName = document.getElementById('nickInput').value.trim() || 'GRACZ 1';
+  myName = validNick;
   setStatus('TWORZENIE POKOJU...');
   currentRoomCode = genCode();
   peer = new Peer('cyberpong-' + currentRoomCode, PEER_CONFIG);
@@ -1708,15 +1830,18 @@ function createRoom() {
 }
 
 function joinRoom() {
+  const validNick = requireAndSavePlayerNick();
+  if (!validNick) return;
+
   SFX.init();
   if (typeof Peer === 'undefined') {
     setStatus('BŁĄD SIECI P2P');
     return;
   }
-  myName = document.getElementById('nickInput').value.trim() || 'GRACZ';
+  myName = validNick;
   const code = document.getElementById('joinInput').value.trim().toUpperCase();
   if (code.length !== 6) {
-    setStatus('WPISZ 6-ZNAKOWY KOD!');
+    setStatus('WPISZ 6-ZNAKOWY KOD POKOJU!');
     return;
   }
 
@@ -1793,7 +1918,7 @@ function broadcastReliable(payload, excludePeerId = null) {
 }
 
 /* ==========================================
-   OBSŁUGA LOBBY 2v2 (DODAWANIE BOTÓW, POZIOMY, PRESET CO-OP)
+   OBSŁUGA LOBBY 2v2 (BEZ NAWIASÓW, CZYSTE ETYKIETY)
    ========================================== */
 function getPaddleIdByPeerId(peerId) {
   if (!is2v2) return peerId === 'host' ? 0 : 1;
@@ -1803,7 +1928,6 @@ function getPaddleIdByPeerId(peerId) {
   return -1;
 }
 
-// Dodanie lub usunięcie bota w konkretnym slocie lobby 2v2
 function toggleLobbyBot(slotIdx, ev) {
   if (ev) ev.stopPropagation();
   if (!isHost || gameActive) return;
@@ -1826,7 +1950,6 @@ function toggleLobbyBot(slotIdx, ev) {
   broadcastLobbyState();
 }
 
-// Zmiana poziomu trudności bota w slocie lobby (ŁATWY -> ŚREDNI -> PRO)
 function cycleLobbyBotTier(slotIdx, ev) {
   if (ev) ev.stopPropagation();
   if (!isHost || gameActive) return;
@@ -1843,7 +1966,6 @@ function cycleLobbyBotTier(slotIdx, ev) {
   broadcastLobbyState();
 }
 
-// Wariant B: Preset CO-OP 2v2 (2 ludzi w Drużynie 1 kontra 2 boty w Drużynie 2)
 function applyCoop2v2Preset() {
   if (!isHost || gameActive) return;
 
@@ -1904,12 +2026,20 @@ function renderLobby2v2UI() {
       occupiedCount++;
       const isMe = !data.isBot && ((isHost && data.peerId === 'host') || (!isHost && peer && data.peerId === peer.id));
       nickSpan.className = 'slot-nick' + (data.isBot ? ' bot-nick' : '');
-      nickSpan.textContent = (data.isBot ? '🤖 ' : '') + data.nick + (isMe ? ' (TY)' : '');
+      nickSpan.textContent = (data.isBot ? '🤖 ' : '') + data.nick;
+      leftDiv.appendChild(nickSpan);
+
+      if (isMe) {
+        const meTag = document.createElement('span');
+        meTag.className = 'slot-me-tag';
+        meTag.textContent = 'TY';
+        leftDiv.appendChild(meTag);
+      }
     } else {
       nickSpan.className = 'slot-nick empty';
       nickSpan.textContent = 'WOLNY SLOT';
+      leftDiv.appendChild(nickSpan);
     }
-    leftDiv.appendChild(nickSpan);
     slotEl.appendChild(leftDiv);
 
     const ctrlDiv = document.createElement('div');
@@ -1920,7 +2050,6 @@ function renderLobby2v2UI() {
       tierBtn.type = 'button';
       tierBtn.className = 'slot-mini-btn tier-pill';
       tierBtn.textContent = BOT_TIER_LABELS_PL[data.botTier || 'medium'];
-      tierBtn.title = isHost ? 'Kliknij, aby zmienić poziom trudności bota' : 'Poziom trudności bota';
       if (isHost) {
         tierBtn.onclick = (ev) => cycleLobbyBotTier(i, ev);
       } else {
@@ -1940,7 +2069,7 @@ function renderLobby2v2UI() {
       const addBtn = document.createElement('button');
       addBtn.type = 'button';
       addBtn.className = 'slot-mini-btn add-bot';
-      addBtn.textContent = '+ DODAJ BOTA';
+      addBtn.textContent = '+ BOT';
       addBtn.onclick = (ev) => toggleLobbyBot(i, ev);
       ctrlDiv.appendChild(addBtn);
     }
@@ -1954,15 +2083,15 @@ function renderLobby2v2UI() {
   if (isHost) {
     startBtn.classList.remove('hidden');
     startBtn.disabled = occupiedCount < 4;
-    startBtn.textContent = `START MECZU (${occupiedCount}/4)`;
+    startBtn.textContent = occupiedCount < 4 ? `OCZEKIWANIE • ${occupiedCount} Z 4` : 'START MECZU';
     hintEl.textContent = selectedSwapSlot !== null
-      ? `Wybierz docelowy slot, aby przenieść lub zamienić zawartość ze slotem #${selectedSwapSlot + 1}`
-      : 'Kliknij slot, aby zamienić graczy/boty miejscami, lub dodaj bota do wolnego slotu.';
+      ? `Wybierz docelowy slot, aby zamienić gracza ze slotem #${selectedSwapSlot + 1}`
+      : 'Kliknij slot aby zamienić graczy miejscami lub dodaj bota.';
   } else {
     startBtn.classList.add('hidden');
     hintEl.textContent = occupiedCount < 4
-      ? `Oczekiwanie na zapełnienie slotów (${occupiedCount}/4)...`
-      : 'Komplet w lobby (4/4)! Oczekiwanie na START od hosta...';
+      ? `Oczekiwanie na zapełnienie slotów • ${occupiedCount} z 4`
+      : 'Komplet graczy! Oczekiwanie na START od hosta...';
   }
 }
 
@@ -2030,7 +2159,6 @@ function hostStart2v2Match() {
   sendStatsUpdate();
 }
 
-// Obsługa rozłączenia klienta na hoście: w 2v2 bot przejmuje paletkę w locie!
 function handleClientDisconnectOnHost(remotePeerId) {
   const cl = hostClients[remotePeerId];
   const disconnectedNick = cl ? cl.nick : 'GRACZ';
@@ -2092,7 +2220,7 @@ function showDisconnectPause(reasonText) {
 }
 
 /* ==========================================
-   POMIAR PINGU I KOMPENSACJA OPÓŹNIENIA (TYLKO DLA LUDZI)
+   POMIAR PINGU I KOMPENSACJA OPÓŹNIENIA
    ========================================== */
 function startPingLoop() {
   if (pingIntervalId) clearInterval(pingIntervalId);
@@ -2264,7 +2392,7 @@ function handleGuestIncomingData(d) {
   }
 
   if (d.t === 'full') {
-    setStatus('POKÓJ 2v2 JEST JUŻ PEŁNY (4/4)!');
+    setStatus('POKÓJ JEST JUŻ PEŁNY!');
     return;
   }
 
@@ -2523,8 +2651,8 @@ function checkVictoryCondition() {
     let winnerName = '';
     if (is2v2) {
       winnerName = t1Won
-        ? `DRUŻYNA 1 (${paddles[0].nick} & ${paddles[1].nick})`
-        : `DRUŻYNA 2 (${paddles[2].nick} & ${paddles[3].nick})`;
+        ? `${paddles[0].nick} & ${paddles[1].nick}`
+        : `${paddles[2].nick} & ${paddles[3].nick}`;
     } else {
       winnerName = t1Won ? paddles[0].nick : paddles[1].nick;
     }
@@ -2807,7 +2935,6 @@ function update() {
     }
   }
 
-  // Boty są symulowane TYLKO u hosta. Goście interpolują boty dokładnie tak samo jak inne zdalne paletki.
   for (let i = 0; i < paddles.length; i++) {
     const p = paddles[i];
     if (p.isLocal) continue;
@@ -2908,7 +3035,6 @@ function update() {
         sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#a371f7' } });
       }
 
-      // Kolizje ze wszystkimi paletkami (kompensacja opóźnienia dotyczy tylko paletek ludzi)
       for (let i = 0; i < paddles.length; i++) {
         const p = paddles[i];
         const isLeftTeam = (p.team === 1);
@@ -2959,7 +3085,6 @@ function update() {
       }
     }
   } else {
-    // STRONA GOŚCIA: Lokalna predykcja + płynna interpolacja (lerp)
     if (countdownTimer > 0) {
       countdownTimer--;
     } else {
@@ -3024,7 +3149,6 @@ function update() {
   if (shakeTime > 0) shakeTime--;
   if (bannerTimer > 0) bannerTimer--;
 
-  // Wysyłanie stanu 30 razy na sekundę (co drugą klatkę symulacji 60 Hz)
   if (!isSinglePlayer && (tickCounter % 2 === 0)) {
     if (isHost) {
       const packedPaddles = paddles.map(p => ({
@@ -3257,7 +3381,6 @@ function render() {
     drawRoundedRect(ctx, p.x + 3, p.y + 8, p.w - 6, p.h - 16, 3);
     ctx.shadowBlur = 0;
 
-    // Dyskretny napis "◄ TY" / "TY ►" bez białej świecącej obwódki na paletce
     if (p.isLocal) {
       ctx.save();
       const labelX = p.team === 1 ? p.x + p.w + 10 : p.x - 10;
