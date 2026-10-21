@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Evolution Retro Soccer 2.5D - Referee & Esports Edition</title>
+    <title>Pro Evolution Retro Soccer 2.5D - 1v1 Multiplayer & AI</title>
     <style>
         :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #13192b;
+            --card-bg: #1b233a;
+            --border-color: #2e3b5e;
             --accent-green: #00e676;
-            --accent-gold: #ffd54f;
             --accent-blue: #29b6f6;
             --accent-red: #ff5252;
-            --panel-bg: rgba(16, 19, 30, 0.92);
+            --accent-gold: #ffd54f;
+            --text-main: #ffffff;
+            --text-muted: #b0bec5;
         }
         * {
             box-sizing: border-box;
@@ -18,48 +23,51 @@
             padding: 0;
         }
         body {
-            background: radial-gradient(circle at 50% 20%, #1c2541 0%, #0b0e17 55%, #05060a 100%);
-            color: #ffffff;
+            background: radial-gradient(circle at 50% 15%, #1d2847 0%, #0b0f19 65%, #06080e 100%);
+            color: var(--text-main);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 8px;
+            padding: 10px;
             overflow-x: hidden;
             user-select: none;
         }
 
+        /* Nagłówek */
         .top-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 14px;
+            margin-bottom: 10px;
         }
         .top-brand h1 {
-            font-size: 1.45rem;
+            font-size: 1.55rem;
             font-weight: 900;
-            background: linear-gradient(90deg, #00e676, #69f0ae, #ffd54f);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 10px rgba(0, 230, 118, 0.35);
+        }
+        .top-brand h1 span {
+            color: var(--accent-green);
         }
         .badge-version {
-            background: linear-gradient(135deg, #00c853, #009624);
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 3px 10px;
+            background: var(--accent-green);
+            color: #06150d;
+            font-size: 0.75rem;
+            font-weight: 900;
+            padding: 4px 12px;
             border-radius: 20px;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
         }
 
         #game-container {
             display: flex;
-            gap: 14px;
+            gap: 16px;
             align-items: stretch;
             position: relative;
             max-width: 100%;
@@ -67,13 +75,13 @@
 
         #canvas-wrapper {
             position: relative;
-            border: 3px solid #2b324d;
+            border: 3px solid var(--border-color);
             border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            box-shadow: 0 20px 55px rgba(0,0,0,0.85);
             overflow: hidden;
             background: #1b4d20;
             cursor: crosshair;
-            width: 1120px;
+            width: 1100px;
             height: 660px;
             flex-shrink: 0;
         }
@@ -83,7 +91,7 @@
             height: 100%;
         }
 
-        /* ================= BROADCAST TV SCOREBOARD ================= */
+        /* ================= TELEWIZYJNY PASEK WYNIKU (TV HUD) ================= */
         #tv-hud {
             position: absolute;
             top: 12px;
@@ -91,244 +99,340 @@
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            background: rgba(12, 15, 24, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(13, 18, 30, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.22);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.65);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
             z-index: 10;
             pointer-events: none;
         }
         .tv-team {
-            padding: 7px 16px;
-            font-weight: 800;
-            font-size: 0.9rem;
+            padding: 8px 18px;
+            font-weight: 900;
+            font-size: 0.95rem;
             letter-spacing: 1px;
+            min-width: 140px;
+            text-align: center;
         }
         .tv-blue {
-            background: linear-gradient(90deg, rgba(25, 118, 210, 0.45), transparent);
-            color: #64b5f6;
+            background: linear-gradient(90deg, #1565c0, #0d47a1);
+            color: #ffffff;
         }
         .tv-red {
-            background: linear-gradient(-90deg, rgba(211, 47, 47, 0.45), transparent);
-            color: #ef5350;
+            background: linear-gradient(90deg, #c62828, #b71c1c);
+            color: #ffffff;
         }
         .tv-score {
-            background: #1a2035;
-            padding: 7px 16px;
-            font-size: 1.2rem;
+            background: #0b0f19;
+            padding: 8px 18px;
+            font-size: 1.3rem;
             font-weight: 900;
-            color: #ffffff;
-            border-left: 1px solid rgba(255,255,255,0.1);
-            border-right: 1px solid rgba(255,255,255,0.1);
-            min-width: 78px;
+            color: var(--accent-gold);
+            min-width: 86px;
             text-align: center;
         }
         .tv-timer {
-            background: linear-gradient(135deg, #ffd54f, #ffb300);
-            color: #0d101a;
-            padding: 7px 14px;
-            font-size: 1.05rem;
+            background: var(--accent-gold);
+            color: #0b0f19;
+            padding: 8px 16px;
+            font-size: 1.1rem;
             font-weight: 900;
             font-family: 'Consolas', monospace;
-            min-width: 74px;
+            min-width: 78px;
             text-align: center;
         }
 
-        /* ================= EKRANY MENU (NAPRAWIONE POZYCJONOWANIE I Z-INDEX) ================= */
+        /* ================= CZYTELNE EKRANY MENU ================= */
         .overlay-screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(circle at 20% 20%, rgba(0, 230, 118, 0.16), transparent 45%),
-                radial-gradient(circle at 80% 80%, rgba(41, 182, 246, 0.16), transparent 45%),
-                rgba(8, 10, 18, 0.94);
-            backdrop-filter: blur(10px);
+            inset: 0;
+            background: rgba(9, 13, 24, 0.94);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
             padding: 20px;
-            pointer-events: auto;
         }
         .hidden {
             display: none !important;
         }
 
         .menu-card {
-            background: linear-gradient(160deg, rgba(26, 31, 48, 0.98), rgba(14, 17, 28, 0.99));
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 20px;
-            padding: 24px 30px;
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 18px;
+            padding: 28px 32px;
             width: 100%;
-            max-width: 820px;
-            max-height: 94%;
-            overflow-y: auto;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.85);
-            position: relative;
+            max-width: 840px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
         }
 
         .menu-header {
             text-align: center;
-            margin-bottom: 18px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
         }
         .menu-title {
-            font-size: 1.55rem;
+            font-size: 1.7rem;
             font-weight: 900;
             color: #ffffff;
-            text-transform: uppercase;
             letter-spacing: 1px;
         }
         .menu-subtitle {
-            font-size: 0.85rem;
-            color: #90a4ae;
-            margin-top: 4px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 6px;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* Sekcja wpisania nicku */
+        .nick-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 14px;
-            margin-bottom: 18px;
+            background: var(--card-bg);
+            border: 2px solid #3949ab;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 22px;
         }
-        .field-box {
-            background: rgba(10, 12, 20, 0.85);
-            border: 1px solid #323a56;
-            border-radius: 10px;
-            padding: 10px 14px;
-        }
-        .field-box:focus-within {
-            border-color: var(--accent-green);
-        }
-        .field-box label {
-            display: block;
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-gold);
+        .nick-bar label {
+            font-size: 0.95rem;
             font-weight: 800;
-            margin-bottom: 4px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
         }
-        .field-box input, .field-box select {
-            width: 100%;
-            background: transparent;
-            border: none;
+        .nick-bar input {
+            background: #0b0f19;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 9px 14px;
             color: #ffffff;
-            font-size: 0.96rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
+            width: 240px;
+            text-align: center;
             outline: none;
         }
-        .field-box select option {
-            background: #121521;
-            color: #fff;
+        .nick-bar input:focus {
+            border-color: var(--accent-green);
         }
 
+        /* 3 Duże, czytelne karty trybów */
         .mode-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: 16px;
+            gap: 16px;
         }
         .mode-card {
-            background: linear-gradient(145deg, #222940, #161a29);
-            border: 2px solid rgba(255,255,255,0.12);
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
             border-radius: 14px;
-            padding: 16px 14px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             text-align: center;
-            cursor: pointer;
-            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+            transition: transform 0.15s, border-color 0.15s;
         }
         .mode-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-green);
-            box-shadow: 0 10px 24px rgba(0, 230, 118, 0.25);
+            transform: translateY(-3px);
+            border-color: var(--accent-blue);
         }
-        .mode-icon {
-            font-size: 2rem;
-            margin-bottom: 6px;
-        }
-        .mode-card h3 {
-            font-size: 0.95rem;
-            color: #fff;
-            margin-bottom: 5px;
+        .mode-badge {
+            display: inline-block;
+            align-self: center;
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 6px;
             text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .badge-solo { background: rgba(0, 230, 118, 0.18); color: var(--accent-green); }
+        .badge-host { background: rgba(41, 182, 246, 0.18); color: var(--accent-blue); }
+        .badge-join { background: rgba(255, 82, 82, 0.18); color: var(--accent-red); }
+
+        .mode-card h3 {
+            font-size: 1.15rem;
+            color: #ffffff;
+            margin-bottom: 8px;
         }
         .mode-card p {
-            font-size: 0.75rem;
-            color: #90a4ae;
-            line-height: 1.35;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+        .code-input {
+            width: 100%;
+            background: #0b0f19;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            outline: none;
+            text-transform: uppercase;
+        }
+        .code-input:focus {
+            border-color: var(--accent-gold);
         }
 
+        /* Przyciski */
         .btn {
-            padding: 13px 18px;
+            padding: 12px 18px;
             border: none;
             border-radius: 10px;
             font-weight: 800;
             font-size: 0.92rem;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.6px;
             transition: transform 0.12s, filter 0.12s;
-            color: #fff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            color: #ffffff;
+            width: 100%;
         }
         .btn:hover {
             transform: translateY(-2px);
             filter: brightness(1.12);
         }
-        .btn-green {
-            background: linear-gradient(135deg, #00c853, #009624);
-            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.35);
+        .btn-green { background: linear-gradient(135deg, #00c853, #009624); }
+        .btn-blue { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+        .btn-red { background: linear-gradient(135deg, #e53935, #c62828); }
+        .btn-orange { background: linear-gradient(135deg, #fb8c00, #e65100); }
+
+        /* Lobby 1v1 Banner */
+        .vs-banner {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 14px;
+            background: #0b0f19;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin-bottom: 16px;
         }
-        .btn-blue {
-            background: linear-gradient(135deg, #0288d1, #01579b);
+        .vs-side {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .btn-orange {
-            background: linear-gradient(135deg, #ff8f00, #e65100);
+        .vs-side.right {
+            text-align: right;
+        }
+        .vs-team-tag {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .vs-player-name {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+        .vs-badge {
+            background: var(--card-bg);
+            color: var(--accent-gold);
+            font-weight: 900;
+            font-size: 1rem;
+            padding: 8px 14px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+        }
+
+        .room-code-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 213, 79, 0.12);
+            border: 2px dashed var(--accent-gold);
+            border-radius: 10px;
+            padding: 10px 18px;
+            margin-bottom: 16px;
+        }
+        .room-code-text {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+        }
+        .room-code-text strong {
+            font-size: 1.3rem;
+            font-family: 'Consolas', monospace;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-left: 8px;
         }
 
         .lobby-columns {
             display: grid;
-            grid-template-columns: 1.15fr 1fr;
-            gap: 18px;
-            margin-top: 8px;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
         }
+        .field-box {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+        }
+        .field-box label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .field-box select {
+            width: 100%;
+            background: #0b0f19;
+            border: 1px solid var(--border-color);
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            outline: none;
+        }
+
         .tactical-preview {
-            background:
-                repeating-linear-gradient(90deg, #1e5b24 0px, #1e5b24 38px, #236629 38px, #236629 76px);
-            border: 2px solid rgba(255,255,255,0.7);
+            background: repeating-linear-gradient(90deg, #1e5b24 0px, #1e5b24 38px, #236629 38px, #236629 76px);
+            border: 2px solid rgba(255,255,255,0.75);
             border-radius: 12px;
-            height: 210px;
+            height: 215px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
         }
         .tactical-preview::after {
             content: "";
             position: absolute;
             top: 0; bottom: 0; left: 50%;
             width: 2px;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.55);
         }
         .tactical-circle {
             position: absolute;
             left: 50%; top: 50%;
             width: 58px; height: 58px;
-            border: 2px solid rgba(255,255,255,0.5);
+            border: 2px solid rgba(255,255,255,0.55);
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
         .dot-player {
             position: absolute;
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             border: 2px solid #fff;
@@ -338,108 +442,105 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.65);
             z-index: 2;
-        }
-        .room-badge {
-            background: rgba(255, 213, 79, 0.12);
-            padding: 8px 14px;
-            border-radius: 10px;
-            border: 1px dashed var(--accent-gold);
-            color: var(--accent-gold);
-            font-family: 'Consolas', monospace;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-bottom: 12px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
-            gap: 8px 18px;
-            background: rgba(10, 12, 20, 0.75);
-            padding: 14px 20px;
+            gap: 10px 20px;
+            background: var(--card-bg);
+            padding: 16px 22px;
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            margin: 14px 0;
+            border: 1px solid var(--border-color);
+            margin: 16px 0;
             text-align: center;
         }
-        .stat-val-blue { color: #64b5f6; font-weight: 900; font-size: 1.05rem; }
-        .stat-val-red { color: #ef5350; font-weight: 900; font-size: 1.05rem; }
-        .stat-label { color: #b0bec5; font-size: 0.8rem; text-transform: uppercase; }
+        .stat-val-blue { color: #64b5f6; font-weight: 900; font-size: 1.15rem; }
+        .stat-val-red { color: #ef5350; font-weight: 900; font-size: 1.15rem; }
+        .stat-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
 
-        /* ================= PANEL BOCZNY ================= */
+        /* ================= CZYTELNY PANEL BOCZNY (STEROWANIE) ================= */
         #sidebar {
-            width: 305px;
+            width: 320px;
             background: var(--panel-bg);
-            padding: 15px;
+            padding: 16px;
             border-radius: 16px;
-            border: 1px solid #2b324d;
+            border: 2px solid var(--border-color);
             box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-        #sidebar h2 {
-            font-size: 0.8rem;
-            margin: 8px 0 3px 0;
-            color: var(--accent-gold);
-            border-bottom: 1px solid #262c42;
-            padding-bottom: 2px;
-            text-transform: uppercase;
-        }
-        .control-group {
-            margin-bottom: 4px;
-            font-size: 0.75rem;
-            line-height: 1.38;
-            color: #cfd8dc;
-        }
-        .control-group span {
-            color: var(--accent-green);
-            font-weight: 700;
-        }
         #tactics-badge {
-            font-size: 0.74rem;
+            font-size: 0.8rem;
             text-align: center;
-            color: #90caf9;
-            margin-bottom: 4px;
-            background: #121624;
-            padding: 6px;
+            color: #ffffff;
+            margin-bottom: 8px;
+            background: var(--card-bg);
+            padding: 8px;
             border-radius: 8px;
-            border: 1px solid #232a42;
-            font-weight: 600;
+            border: 1px solid var(--border-color);
+            font-weight: 800;
         }
-        #referee-box {
-            background: linear-gradient(135deg, #212538, #171a28);
-            border-left: 4px solid var(--accent-gold);
-            padding: 7px 9px;
-            border-radius: 8px;
-            font-size: 0.74rem;
-            color: #fff;
-            margin-top: 6px;
+        #sidebar h2 {
+            font-size: 0.82rem;
+            margin: 10px 0 6px 0;
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .ctrl-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+        }
+        .ctrl-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        kbd {
+            background: #0b0f19;
+            border: 1px solid #4a5568;
+            border-bottom: 2px solid #4a5568;
+            border-radius: 5px;
+            padding: 2px 7px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--accent-green);
         }
         #action-feedback {
             margin-top: 8px;
-            padding: 9px;
-            background: #151928;
+            padding: 10px;
+            background: #0b0f19;
             text-align: center;
             border-radius: 10px;
             font-weight: 800;
-            color: #00e676;
-            min-height: 38px;
+            color: var(--accent-green);
+            min-height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
-            border: 1px solid #2d344f;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
         }
     </style>
 </head>
 <body>
 
     <div class="top-brand">
-        <h1>⚽ Pro Evolution Retro Soccer 2.5D</h1>
-        <span class="badge-version">Instant Start & Referee</span>
+        <h1>⚽ Pro Evolution <span>Retro Soccer 2.5D</span></h1>
+        <span class="badge-version">1v1 Multiplayer & AI</span>
     </div>
 
     <div id="game-container">
@@ -448,69 +549,98 @@
             <div id="tv-hud">
                 <div class="tv-team tv-blue" id="hud-blue-name">NIEBIESCY</div>
                 <div class="tv-score" id="hud-score">0 : 0</div>
-                <div class="tv-team tv-red">CZERWONI</div>
+                <div class="tv-team tv-red" id="hud-red-name">CZERWONI</div>
                 <div class="tv-timer" id="hud-timer">05:00</div>
             </div>
 
-            <canvas id="field" width="1120" height="660"></canvas>
+            <canvas id="field" width="1100" height="660"></canvas>
 
-            <!-- EKRAN 1: MENU GŁÓWNE -->
+            <!-- EKRAN 1: CZYTELNE MENU GŁÓWNE -->
             <div id="menu-login" class="overlay-screen">
                 <div class="menu-card">
                     <div class="menu-header">
-                        <div class="menu-title">🏆 Stadion Główny & Multiplayer P2P</div>
-                        <div class="menu-subtitle">Oficjalny mecz 5-minutowy z sędzią na boisku, kartkami i taktyką 3v3</div>
+                        <div class="menu-title">🏆 WYBIERZ TRYB ROZGRYWKI</div>
+                        <div class="menu-subtitle">Graj 1 na 1 ze znajomym przez internet (Niebiescy vs Czerwoni) lub przeciwko AI</div>
                     </div>
 
-                    <div class="form-grid">
-                        <div class="field-box">
-                            <label>Twój Nick nad zawodnikiem</label>
-                            <input type="text" id="player-nick" value="Kapitan_PL" maxlength="14" placeholder="Wpisz swój nick...">
-                        </div>
-                        <div class="field-box">
-                            <label>Kod Pokoju Online (Opcjonalnie)</label>
-                            <input type="text" id="room-code-input" placeholder="Wpisz kod znajomego (np. PES-4821)...">
-                        </div>
+                    <div class="nick-bar">
+                        <label for="player-nick">👤 Twój Nick na boisku:</label>
+                        <input type="text" id="player-nick" value="Gracz_1" maxlength="14" placeholder="Wpisz swój nick...">
                     </div>
 
                     <div class="mode-cards">
-                        <div class="mode-card" id="btn-mode-solo">
-                            <div class="mode-icon">📋</div>
-                            <h3>Sztab Taktyczny (AI)</h3>
-                            <p>Wybierz formację i taktykę przed 5-minutowym meczem z AI.</p>
+                        <!-- KARTA 1: SOLO VS AI -->
+                        <div class="mode-card">
+                            <div>
+                                <span class="mode-badge badge-solo">1 Gracz (Offline)</span>
+                                <h3>🤖 Mecz z Komputerem</h3>
+                                <p>Zagraj pełny 5-minutowy mecz przeciwko taktycznej sztucznej inteligencji.</p>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <button type="button" class="btn btn-green" id="btn-quick-start">⚡ Szybki Start</button>
+                                <button type="button" class="btn btn-blue" id="btn-mode-solo" style="padding:8px; font-size:0.8rem;">📋 Wybierz Formację</button>
+                            </div>
                         </div>
-                        <div class="mode-card" id="btn-mode-host">
-                            <div class="mode-icon">🌐</div>
-                            <h3>Stwórz Pokój P2P</h3>
-                            <p>Wygeneruj kod pokoju WebRTC i zaproś znajomego przez GitHub Pages.</p>
+
+                        <!-- KARTA 2: HOST MULTIPLAYER (NIEBIESCY) -->
+                        <div class="mode-card">
+                            <div>
+                                <span class="mode-badge badge-host">Gracz 1 • Niebiescy</span>
+                                <h3>🌐 Stwórz Pokój 1v1</h3>
+                                <p>Utwórz pokój online, odbierz 4-cyfrowy kod i wyślij go znajomemu, aby zagrać na siebie!</p>
+                            </div>
+                            <button type="button" class="btn btn-blue" id="btn-mode-host">➕ Utwórz Pokój Online</button>
                         </div>
-                        <div class="mode-card" id="btn-mode-join">
-                            <div class="mode-icon">🔗</div>
-                            <h3>Dołącz do Gry</h3>
-                            <p>Połącz się bezpośrednio z pokojem hosta po wpisaniu kodu powyżej.</p>
+
+                        <!-- KARTA 3: DOŁĄCZ MULTIPLAYER (CZERWONI) -->
+                        <div class="mode-card">
+                            <div>
+                                <span class="mode-badge badge-join">Gracz 2 • Czerwoni</span>
+                                <h3>🔗 Dołącz do Znajomego</h3>
+                                <p>Wpisz 4-cyfrowy kod pokoju otrzymany od Hosta, aby sterować drużyną Czerwonych:</p>
+                                <input type="text" id="room-code-input" class="code-input" maxlength="10" placeholder="NP. 4821">
+                            </div>
+                            <button type="button" class="btn btn-red" id="btn-mode-join">⚔️ Dołącz jako Czerwoni</button>
                         </div>
                     </div>
-
-                    <button type="button" class="btn btn-green" id="btn-quick-start" style="width: 100%; font-size: 1.05rem; padding: 15px;">
-                        ⚡ SZYBKI MECZ (WEJDŹ OD RAZU NA BOISKO - ENTER)
-                    </button>
                 </div>
             </div>
 
-            <!-- EKRAN 2: SZTAB TAKTYCZNY I WYBÓR FORMACJI -->
+            <!-- EKRAN 2: LOBBY 1V1 & SZTAB TAKTYCZNY -->
             <div id="menu-lobby" class="overlay-screen hidden">
                 <div class="menu-card">
                     <div class="menu-header">
-                        <div class="menu-title">📋 Sztab Taktyczny & Wybór Formacji</div>
-                        <div class="menu-subtitle">Skonfiguruj ustawienie zespołu przed pierwszym gwizdkiem sędziego (Czas meczu: 5:00)</div>
+                        <div class="menu-title">📋 LOBBY MECZOWE & SZTAB TAKTYCZNY</div>
+                        <div class="menu-subtitle" id="lobby-subtitle">Ustaw formację swojej drużyny przed pierwszym gwizdkiem (Czas meczu: 5:00)</div>
                     </div>
 
-                    <div id="room-status" class="room-badge">Tryb: Mecz z AI | Sędzia Główny: Szymon M.</div>
+                    <!-- BANER GRACZ 1 (NIEBIESCY) VS GRACZ 2 (CZERWONI) -->
+                    <div class="vs-banner">
+                        <div class="vs-side">
+                            <span class="vs-team-tag" style="color:#64b5f6;">🔵 Drużyna Niebieskich (Host)</span>
+                            <span class="vs-player-name" id="lobby-blue-nick">Gracz_1</span>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="vs-side right">
+                            <span class="vs-team-tag" style="color:#ef5350;">🔴 Drużyna Czerwonych (Gość)</span>
+                            <span class="vs-player-name" id="lobby-red-nick">Komputer (AI)</span>
+                        </div>
+                    </div>
+
+                    <!-- PASEK Z KODEM POKOJU (WIDOCZNY W MULTIPLAYERZE) -->
+                    <div id="room-code-panel" class="room-code-bar hidden">
+                        <div class="room-code-text" id="room-status-text">
+                            KOD POKOJU DLA ZNAJOMEGO: <strong id="display-room-code">----</strong>
+                        </div>
+                        <button type="button" class="btn btn-orange" id="btn-copy-code" style="width:auto; padding:8px 14px; font-size:0.8rem;">
+                            📋 Kopiuj Kod
+                        </button>
+                    </div>
 
                     <div class="lobby-columns">
                         <div>
-                            <div class="field-box" style="margin-bottom:12px;">
-                                <label>Formacja Zespołu (3v3)</label>
+                            <div class="field-box">
+                                <label id="label-formation">Twoja Formacja (3v3):</label>
                                 <select id="formation-select">
                                     <option value="1-1-1">1-1-1 (Zbalansowana: GK - DEF - FWD)</option>
                                     <option value="1-2-0">1-2-0 (Mur Obronny: GK - 2x DEF)</option>
@@ -518,22 +648,22 @@
                                 </select>
                             </div>
                             <div class="field-box">
-                                <label>Styl Taktyczny</label>
+                                <label id="label-tactic">Taktyka Twojej Drużyny:</label>
                                 <select id="tactic-select">
                                     <option value="balanced">Tiki-Taka (Krótkie podania i wsparcie)</option>
                                     <option value="pressing">Gegenpressing (Wysoki odbiór i pressing)</option>
                                     <option value="counter">Kontratak (Głęboka obrona i długie piłki)</option>
                                 </select>
                             </div>
-                            <div style="font-size:0.8rem; color:#b0bec5; line-height:1.4; margin-top:12px; background:rgba(10,12,20,0.75); padding:10px; border-radius:10px; border:1px solid #262c42;">
-                                <strong style="color:var(--accent-green);">Analiza taktyczna:</strong>
+                            <div style="font-size:0.84rem; color:var(--text-muted); line-height:1.45; background:#0b0f19; padding:12px; border-radius:10px; border:1px solid var(--border-color);">
+                                <strong style="color:var(--accent-green);">Opis taktyki:</strong>
                                 <span id="tactic-desc">Zawodnicy szukają wolnych przestrzeni blisko rozgrywającego, ułatwiając szybkie podania.</span>
                             </div>
                         </div>
 
                         <div>
-                            <div style="font-size:0.75rem; color:var(--accent-gold); margin-bottom:5px; text-align:center; font-weight:800;">
-                                TABLICA TAKTYCZNA (ZAWODNICY + SĘDZIA)
+                            <div style="font-size:0.8rem; color:var(--accent-gold); margin-bottom:6px; text-align:center; font-weight:800;">
+                                PODGLĄD USTAWIENIA NA BOISKU (NIEBIESCY VS CZERWONI)
                             </div>
                             <div class="tactical-preview" id="tactical-board">
                                 <div class="tactical-circle"></div>
@@ -541,23 +671,25 @@
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:14px; margin-top:18px;">
-                        <button type="button" class="btn btn-orange" id="btn-back-menu" style="flex:0.35;">⬅ Wróć</button>
-                        <button type="button" class="btn btn-green" id="btn-start-match" style="flex:1;">⚽ ROZPOCZNIJ MECZ (5:00)</button>
+                    <div style="display:flex; gap:14px; margin-top:20px;">
+                        <button type="button" class="btn btn-orange" id="btn-back-menu" style="flex:0.35;">⬅ Wróć do Menu</button>
+                        <button type="button" class="btn btn-green" id="btn-start-match" style="flex:1; font-size:1.05rem;">
+                            ⚽ ROZPOCZNIJ MECZ (5:00)
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- EKRAN 3: KONIEC MECZU (PO UPŁYWIE 5 MINUT) -->
+            <!-- EKRAN 3: KONIEC MECZU -->
             <div id="menu-gameover" class="overlay-screen hidden">
                 <div class="menu-card" style="max-width: 640px; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 4px;">🏆</div>
-                    <div class="menu-title" id="end-title">KONIEC MECZU (90' / 5:00)</div>
-                    <div class="menu-subtitle" id="end-winner" style="font-size:1.1rem; color:var(--accent-gold); font-weight:800; margin-top:4px;">
+                    <div style="font-size: 3.2rem; margin-bottom: 4px;">🏆</div>
+                    <div class="menu-title">KONIEC MECZU (5:00)</div>
+                    <div class="menu-subtitle" id="end-winner" style="font-size:1.2rem; color:var(--accent-gold); font-weight:900; margin-top:6px;">
                         ZWYCIĘSTWO NIEBIESKICH!
                     </div>
 
-                    <div style="font-size: 2.5rem; font-weight: 900; margin: 10px 0; letter-spacing: 3px;" id="end-score">
+                    <div style="font-size: 2.6rem; font-weight: 900; margin: 12px 0; letter-spacing: 3px;" id="end-score">
                         <span style="color:#64b5f6;">0</span> : <span style="color:#ef5350;">0</span>
                     </div>
 
@@ -575,64 +707,61 @@
                         <div class="stat-val-red" id="stat-cards-red">0 ŻK / 0 CZK</div>
                     </div>
 
-                    <div style="display:flex; gap:14px; margin-top:16px;">
-                        <button type="button" class="btn btn-blue" id="btn-end-lobby" style="flex:1;">📋 Zmień Taktykę</button>
+                    <div style="display:flex; gap:14px; margin-top:18px;">
+                        <button type="button" class="btn btn-blue" id="btn-end-lobby" style="flex:1;">📋 Sztab Taktyczny</button>
                         <button type="button" class="btn btn-green" id="btn-end-rematch" style="flex:1;">🔄 Zagraj Rewanż (5:00)</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL BOCZNY -->
+        <!-- CZYTELNY PANEL BOCZNY -->
         <div id="sidebar">
             <div>
-                <div id="tactics-badge">Formacja: 1-1-1 | Taktyka: Tiki-Taka</div>
+                <div id="tactics-badge">Tryb: Solo vs AI (1-1-1)</div>
 
-                <h2>Ruch i Kondycja:</h2>
-                <div class="control-group">
-                    <span>Chodzenie:</span> W, A, S, D (Celowanie myszką)<br>
-                    <span>Sprint:</span> Shift (zużywa staminę)
+                <h2>🏃 Ruch i Sprint</h2>
+                <div class="ctrl-list">
+                    <div class="ctrl-row"><span>Poruszanie się</span> <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></div>
+                    <div class="ctrl-row"><span>Sprint</span> <kbd>Shift</kbd></div>
+                    <div class="ctrl-row"><span>Celowanie</span> <kbd>Kursor Myszy</kbd></div>
                 </div>
 
-                <h2>Atak (z piłką + Pasek Siły):</h2>
-                <div class="control-group">
-                    <span>Strzał (przytrzymaj):</span> Lewy Myszki (LPM)<br>
-                    <span>Podanie dolne (przytrzymaj):</span> Prawy Myszki (PPM)<br>
-                    <span>Podanie górne / Lob (przytrzymaj):</span> Q<br>
-                    <span>Wypuszczenie piłki na bieg:</span> E<br>
-                    <span>Zastawka z piłką (tarcza):</span> Spacja
+                <h2>⚽ Atak (Gdy masz piłkę)</h2>
+                <div class="ctrl-list">
+                    <div class="ctrl-row"><span>Strzał (Pasek siły)</span> <kbd>LPM (Przytrzymaj)</kbd></div>
+                    <div class="ctrl-row"><span>Podanie dołem</span> <kbd>PPM (Przytrzymaj)</kbd></div>
+                    <div class="ctrl-row"><span>Podanie górą (Lob)</span> <kbd>Q (Przytrzymaj)</kbd></div>
+                    <div class="ctrl-row"><span>Wypuszczenie piłki</span> <kbd>E</kbd></div>
+                    <div class="ctrl-row"><span>Zastawka ciałem</span> <kbd>Spacja</kbd></div>
                 </div>
 
-                <h2>Obrona (bez piłki):</h2>
-                <div class="control-group">
-                    <span>Czysty odbiór piłki:</span> Lewy Myszki (LPM)<br>
-                    <span>Agresywny wślizg (ryzyko faulu!):</span> Prawy (PPM)<br>
-                    <span>Zmiana zawodnika:</span> Spacja
+                <h2>🛡️ Obrona (Bez piłki)</h2>
+                <div class="ctrl-list">
+                    <div class="ctrl-row"><span>Czysty odbiór</span> <kbd>LPM</kbd></div>
+                    <div class="ctrl-row"><span>Agresywny wślizg</span> <kbd>PPM</kbd></div>
+                    <div class="ctrl-row"><span>Zmiana zawodnika</span> <kbd>Spacja</kbd></div>
                 </div>
 
-                <h2>Sztuczki i Kombinacje (Z, X, C):</h2>
-                <div class="control-group">
-                    <span>Z:</span> Roulette &nbsp;|&nbsp; <span>X:</span> Stepover &nbsp;|&nbsp; <span>C:</span> Sombrero<br>
-                    <span>Z+X:</span> Elastico &nbsp;|&nbsp; <span>X+C:</span> Rainbow &nbsp;|&nbsp; <span>Z+C:</span> Rabona<br>
-                    <span>Z+Z:</span> Croqueta &nbsp;|&nbsp; <span>Z+X+C:</span> Gaucho Flip!
-                </div>
-
-                <div id="referee-box">
-                    🔊 <strong>Sędzia & Kickoff:</strong> Po stracie bramki następuje pauza i ustawienie 1 zawodnika na środku boiska (ochrona przed spamem strzału).
+                <h2>✨ Sztuczki Techniczne</h2>
+                <div class="ctrl-list">
+                    <div class="ctrl-row"><span>Roulette / Feint / Lob</span> <kbd>Z</kbd> / <kbd>X</kbd> / <kbd>C</kbd></div>
+                    <div class="ctrl-row"><span>Elastico / Rainbow</span> <kbd>Z+X</kbd> / <kbd>X+C</kbd></div>
+                    <div class="ctrl-row"><span>Gaucho Flip!</span> <kbd>Z + X + C</kbd></div>
                 </div>
             </div>
 
             <div>
-                <button type="button" class="btn btn-blue" id="btn-sidebar-lobby" style="width:100%; padding:8px; font-size:0.75rem;">
-                    ⚙️ Sztab Taktyczny / Lobby
+                <button type="button" class="btn btn-blue" id="btn-sidebar-lobby" style="padding:10px; font-size:0.8rem;">
+                    ⚙️ Menu / Sztab Taktyczny
                 </button>
-                <div id="action-feedback">Menu gotowe! Kliknij Szybki Mecz lub wybierz tryb.</div>
+                <div id="action-feedback">Gotowy do gry!</div>
             </div>
         </div>
     </div>
 
 <script>
-// Zabezpieczenie (Polyfill) dla ctx.roundRect na starszych przeglądarkach
+// Polyfill dla roundRect
 if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
         if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
@@ -651,24 +780,17 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
     };
 }
 
-// Dynamiczne ładowanie PeerJS w tle (nie blokuje uruchomienia gry ani menu!)
-let peerScriptLoaded = false;
+// Dynamiczne ładowanie PeerJS dla trybu Online
 function loadPeerJSAsync(callback) {
     if (typeof Peer !== 'undefined') {
-        peerScriptLoaded = true;
         if (callback) callback();
         return;
     }
     const script = document.createElement('script');
     script.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
     script.async = true;
-    script.onload = () => {
-        peerScriptLoaded = true;
-        if (callback) callback();
-    };
-    script.onerror = () => {
-        if (callback) callback();
-    };
+    script.onload = () => { if (callback) callback(); };
+    script.onerror = () => { if (callback) callback(); };
     document.head.appendChild(script);
 }
 
@@ -679,6 +801,7 @@ const tacticsBadgeEl = document.getElementById('tactics-badge');
 const hudScoreEl = document.getElementById('hud-score');
 const hudTimerEl = document.getElementById('hud-timer');
 const hudBlueNameEl = document.getElementById('hud-blue-name');
+const hudRedNameEl = document.getElementById('hud-red-name');
 
 window.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -701,9 +824,13 @@ let matchPhase = 'PLAYING'; // 'PLAYING', 'GOAL_PAUSE', 'KICKOFF_WAIT'
 let phaseTimer = 0;
 let pendingKickoffTeam = 'blue';
 
-let playerNick = "Kapitan_PL";
-let currentFormation = "1-1-1";
-let currentTactic = "balanced";
+// Dane obu drużyn (Gracz 1 = Niebiescy, Gracz 2 / AI = Czerwoni)
+let blueNick = "Gracz_1";
+let redNick = "Komputer (AI)";
+let blueFormation = "1-1-1";
+let redFormation = "1-1-1";
+let blueTactic = "balanced";
+let redTactic = "balanced";
 
 const matchStats = {
     shotsBlue: 0, shotsRed: 0,
@@ -718,9 +845,29 @@ const matchStats = {
     }
 };
 
+// ==================== ZMIENNE MULTIPLAYER 1V1 (HOST VS CLIENT) ====================
 let peer = null;
 let netConn = null;
-let mpRole = 'solo';
+let mpRole = 'solo'; // 'solo' | 'host' (Niebiescy) | 'client' (Czerwoni)
+let currentRoomShortCode = "";
+
+// Wejścia zdalnego Gracza 2 (Czerwonych) odbierane przez Hosta
+const remoteClientInput = {
+    keys: { KeyW: false, KeyS: false, KeyA: false, KeyD: false, Shift: false, Space: false },
+    mouseX: WORLD.width / 2,
+    mouseY: WORLD.height / 2,
+    chargeActive: false,
+    chargeType: null,
+    chargePower: 0
+};
+
+function isOnline1v1() {
+    return (mpRole === 'host' || mpRole === 'client') && netConn && netConn.open;
+}
+
+function getMyTeamColor() {
+    return mpRole === 'client' ? 'red' : 'blue';
+}
 
 let scoreBlue = 0;
 let scoreRed = 0;
@@ -753,6 +900,7 @@ function isInputLocked() {
     return !gameStarted || matchEnded || matchPhase === 'GOAL_PAUSE' || matchPhase === 'KICKOFF_WAIT';
 }
 
+// Pasek ładowania siły dla lokalnego gracza (działa zarówno dla Hosta jak i Klienta!)
 const chargeState = {
     active: false,
     type: null,
@@ -761,7 +909,8 @@ const chargeState = {
     rate: 2.35,
     start(type) {
         if (isInputLocked()) return;
-        const activePlayer = getActivePlayer();
+        const myTeam = getMyTeamColor();
+        const activePlayer = getActivePlayer(myTeam);
         if (!activePlayer || ball.owner !== activePlayer) return;
         if (!this.active) {
             this.active = true;
@@ -774,7 +923,8 @@ const chargeState = {
             this.cancel();
             return;
         }
-        const activePlayer = getActivePlayer();
+        const myTeam = getMyTeamColor();
+        const activePlayer = getActivePlayer(myTeam);
         if (!this.active) return;
         if (!activePlayer || ball.owner !== activePlayer) {
             this.cancel();
@@ -788,9 +938,23 @@ const chargeState = {
             return;
         }
         if (!this.active || (expectedType && this.type !== expectedType)) return;
-        const activePlayer = getActivePlayer();
+        const myTeam = getMyTeamColor();
+        const activePlayer = getActivePlayer(myTeam);
+
         if (activePlayer && ball.owner === activePlayer) {
-            executeChargedAction(activePlayer, this.type, this.power);
+            if (mpRole === 'client' && isOnline1v1()) {
+                // Klient (Czerwoni) wysyła rozkaz wykonania naładowanego strzału/podania do Hosta
+                netConn.send({
+                    type: 'client_cmd',
+                    cmd: 'chargedAction',
+                    actionType: this.type,
+                    power: this.power,
+                    aimX: mouse.worldX,
+                    aimY: mouse.worldY
+                });
+            } else {
+                executeChargedAction(activePlayer, this.type, this.power, mouse.worldX, mouse.worldY);
+            }
         }
         this.cancel();
     },
@@ -940,87 +1104,243 @@ const referee = {
     }
 };
 
-// ==================== MENU MULTIPLAYER & LOBBY TAKTYCZNE ====================
+// ==================== MENU MULTIPLAYER 1V1 & LOBBY ====================
+function getEnteredNick() {
+    const val = document.getElementById('player-nick').value.trim();
+    return val || "Gracz_PL";
+}
+
 function openLobby(mode) {
-    const nickInput = document.getElementById('player-nick').value.trim();
-    playerNick = nickInput || "Kapitan_PL";
-    hudBlueNameEl.innerText = playerNick.toUpperCase();
+    const myNick = getEnteredNick();
     mpRole = mode;
 
     document.getElementById('menu-login').classList.add('hidden');
     document.getElementById('menu-gameover').classList.add('hidden');
     document.getElementById('menu-lobby').classList.remove('hidden');
 
-    const statusEl = document.getElementById('room-status');
+    const codePanel = document.getElementById('room-code-panel');
+    const codeDisplay = document.getElementById('display-room-code');
+    const statusText = document.getElementById('room-status-text');
 
     if (mode === 'solo') {
-        statusEl.innerText = `Tryb: Oficjalny Mecz 5:00 vs AI | Kapitan: ${playerNick} | Sędzia: Aktywny`;
+        blueNick = myNick;
+        redNick = "Komputer (AI)";
+        codePanel.classList.add('hidden');
+        document.getElementById('label-formation').innerText = "Formacja Niebieskich (3v3):";
+        document.getElementById('label-tactic').innerText = "Taktyka Niebieskich:";
+        updateLobbyNamesUI();
     } else if (mode === 'host') {
-        const shortCode = 'PES-' + Math.floor(1000 + Math.random() * 9000);
-        statusEl.innerText = `Ładowanie modułu WebRTC (Kod: ${shortCode})...`;
+        blueNick = myNick;
+        redNick = "Oczekiwanie na Gracza 2...";
+        updateLobbyNamesUI();
+
+        currentRoomShortCode = String(Math.floor(1000 + Math.random() * 9000));
+        const fullPeerId = 'pes25d-room-' + currentRoomShortCode;
+
+        codePanel.classList.remove('hidden');
+        codeDisplay.innerText = currentRoomShortCode;
+        statusText.innerHTML = `KOD POKOJU DLA GRACZA 2: <strong id="display-room-code">${currentRoomShortCode}</strong> (Oczekiwanie na połączenie...)`;
+        document.getElementById('label-formation').innerText = "Twoja Formacja (Niebiescy):";
+        document.getElementById('label-tactic').innerText = "Twoja Taktyka (Niebiescy):";
+
         loadPeerJSAsync(() => {
             if (typeof Peer === 'undefined') {
-                statusEl.innerText = `Tryb Lokalny / AI (Kod: ${shortCode})`;
+                statusText.innerHTML = `Błąd ładowania sieci WebRTC – sprawdź połączenie z internetem.`;
                 return;
             }
             try {
                 if (peer) peer.destroy();
-                peer = new Peer(shortCode);
-                peer.on('open', id => {
-                    statusEl.innerText = `🌐 KOD POKOJU: ${id} (Wyślij znajomemu! Czas meczu: 5:00)`;
+                peer = new Peer(fullPeerId);
+                peer.on('open', () => {
+                    statusText.innerHTML = `KOD POKOJU DLA ZNAJOMEGO: <strong id="display-room-code">${currentRoomShortCode}</strong> (Czekam na Gracza 2...)`;
                 });
                 peer.on('connection', conn => {
                     netConn = conn;
                     setupNetHandlers();
-                    statusEl.innerText = `✅ Połączono z graczem! Kod: ${shortCode}`;
-                });
-                peer.on('error', () => {
-                    statusEl.innerText = `Tryb Lokalny / AI (Kod: ${shortCode})`;
                 });
             } catch (err) {
-                statusEl.innerText = `Tryb Lokalny (Kod: ${shortCode})`;
+                statusText.innerHTML = `Nie udało się utworzyć pokoju P2P.`;
             }
         });
     } else if (mode === 'join') {
-        const targetCode = document.getElementById('room-code-input').value.trim();
-        if (!targetCode) {
-            statusEl.innerText = `Brak kodu – uruchomiono tryb Solo vs AI`;
-            mpRole = 'solo';
-        } else {
-            statusEl.innerText = `Łączenie z pokojem: ${targetCode}...`;
-            loadPeerJSAsync(() => {
-                if (typeof Peer === 'undefined') {
-                    statusEl.innerText = `Brak sieci P2P – uruchomiono tryb z AI`;
-                    return;
-                }
-                try {
-                    if (peer) peer.destroy();
-                    peer = new Peer();
-                    peer.on('open', () => {
-                        netConn = peer.connect(targetCode);
-                        setupNetHandlers();
-                    });
-                } catch (err) {
-                    statusEl.innerText = `Nie udało się połączyć – gra z AI`;
-                }
-            });
+        let rawCode = document.getElementById('room-code-input').value.trim().toUpperCase();
+        rawCode = rawCode.replace('PES-', '').replace('PES25D-ROOM-', '');
+
+        if (!rawCode) {
+            alert("Wpisz 4-cyfrowy kod pokoju Hosta (np. 4821)!");
+            backToMainMenu();
+            return;
         }
+
+        redNick = myNick;
+        blueNick = "Łączenie z Hostem...";
+        updateLobbyNamesUI();
+
+        currentRoomShortCode = rawCode;
+        const fullPeerId = 'pes25d-room-' + rawCode;
+
+        codePanel.classList.remove('hidden');
+        statusText.innerHTML = `ŁĄCZENIE Z POKOJEM: <strong>${rawCode}</strong>...`;
+        document.getElementById('label-formation').innerText = "Twoja Formacja (Czerwoni):";
+        document.getElementById('label-tactic').innerText = "Twoja Taktyka (Czerwoni):";
+
+        loadPeerJSAsync(() => {
+            if (typeof Peer === 'undefined') {
+                statusText.innerHTML = `Błąd sieci WebRTC.`;
+                return;
+            }
+            try {
+                if (peer) peer.destroy();
+                peer = new Peer();
+                peer.on('open', () => {
+                    netConn = peer.connect(fullPeerId);
+                    setupNetHandlers();
+                });
+            } catch (err) {
+                statusText.innerHTML = `Błąd połączenia z pokojem ${rawCode}.`;
+            }
+        });
     }
 
     updateTacticalPreview();
 }
 
+function updateLobbyNamesUI() {
+    document.getElementById('lobby-blue-nick').innerText = blueNick;
+    document.getElementById('lobby-red-nick').innerText = redNick;
+    hudBlueNameEl.innerText = blueNick.toUpperCase();
+    hudRedNameEl.innerText = redNick.toUpperCase();
+}
+
 function setupNetHandlers() {
     if (!netConn) return;
+
     netConn.on('open', () => {
-        netConn.send({ type: 'hello', nick: playerNick });
-        document.getElementById('room-status').innerText = `✅ Połączono P2P! Gotowy do 5-minutowego meczu.`;
+        const statusText = document.getElementById('room-status-text');
+        if (mpRole === 'client') {
+            statusText.innerHTML = `✅ POŁĄCZONO! Grasz jako <strong>CZERWONI</strong> przeciwko Hostowi!`;
+            netConn.send({
+                type: 'client_join_lobby',
+                nick: redNick,
+                formation: document.getElementById('formation-select').value,
+                tactic: document.getElementById('tactic-select').value
+            });
+        } else if (mpRole === 'host') {
+            statusText.innerHTML = `✅ GRACZ 2 DOŁĄCZYŁ DO POKOJU! Możesz rozpocząć mecz!`;
+        }
     });
+
     netConn.on('data', data => {
-        if (data.type === 'sync' && mpRole === 'client') {
+        if (!data || !data.type) return;
+
+        // 1. Komunikaty w Lobby (synchronizacja nicków i formacji obu graczy)
+        if (data.type === 'client_join_lobby' && mpRole === 'host') {
+            redNick = data.nick || "Gracz_2";
+            redFormation = data.formation || "1-1-1";
+            redTactic = data.tactic || "balanced";
+            updateLobbyNamesUI();
+            updateTacticalPreview();
+            setFeedback(`Gracz ${redNick} dołączył jako Czerwoni!`, "#00e676");
+
+            netConn.send({
+                type: 'host_lobby_state',
+                blueNick,
+                blueFormation,
+                blueTactic,
+                redNick,
+                redFormation,
+                redTactic
+            });
+        } else if (data.type === 'host_lobby_state' && mpRole === 'client') {
+            blueNick = data.blueNick;
+            blueFormation = data.blueFormation;
+            blueTactic = data.blueTactic;
+            updateLobbyNamesUI();
+            updateTacticalPreview();
+            setFeedback(`Połączono z Hostem (${blueNick})!`, "#29b6f6");
+        } else if (data.type === 'lobby_tactics_change') {
+            if (mpRole === 'host') {
+                redFormation = data.formation;
+                redTactic = data.tactic;
+            } else {
+                blueFormation = data.formation;
+                blueTactic = data.tactic;
+            }
+            updateTacticalPreview();
+        } else if (data.type === 'request_start_match' && mpRole === 'host') {
+            // Gdy Klient kliknie Start, Host uruchamia mecz dla obu
+            startMatchFromLobby();
+        } else if (data.type === 'start_match_now' && mpRole === 'client') {
+            // Host wystartował mecz -> otwórz boisko u Klienta!
+            blueNick = data.blueNick;
+            redNick = data.redNick;
+            blueFormation = data.blueFormation;
+            redFormation = data.redFormation;
+            blueTactic = data.blueTactic;
+            redTactic = data.redTactic;
+            updateLobbyNamesUI();
+            launchClientMatch();
+        }
+
+        // 2. Komunikaty w trakcie meczu (Gracz 2 -> Host)
+        else if (data.type === 'client_input' && mpRole === 'host') {
+            remoteClientInput.keys = data.keys || remoteClientInput.keys;
+            remoteClientInput.mouseX = data.mouseX ?? remoteClientInput.mouseX;
+            remoteClientInput.mouseY = data.mouseY ?? remoteClientInput.mouseY;
+            remoteClientInput.chargeActive = !!data.chargeActive;
+            remoteClientInput.chargeType = data.chargeType;
+            remoteClientInput.chargePower = data.chargePower || 0;
+        } else if (data.type === 'client_cmd' && mpRole === 'host') {
+            handleRemoteClientCommand(data);
+        }
+
+        // 3. Synchronizacja stanu świata (Host -> Gracz 2)
+        else if (data.type === 'sync' && mpRole === 'client') {
             applyNetworkSync(data.state);
         }
     });
+
+    netConn.on('close', () => {
+        setFeedback("Połączenie z drugim graczem zostało przerwane.", "#ff5252");
+    });
+}
+
+// Obsługa akcji wysłanych przez Gracza 2 (Czerwonych) na serwerze Hosta
+function handleRemoteClientCommand(data) {
+    if (isInputLocked()) return;
+    const redActive = getActivePlayer('red');
+    if (!redActive) return;
+
+    const hasBall = (ball.owner === redActive);
+
+    if (data.cmd === 'chargedAction' && hasBall) {
+        executeChargedAction(redActive, data.actionType, data.power, data.aimX, data.aimY);
+    } else if (data.cmd === 'knockOn' && hasBall) {
+        if (setPiece.active) endSetPiece();
+        let aimAngle = getPlayerAimAngle(redActive, 0.35, data.aimX, data.aimY);
+        ball.kick(redActive, aimAngle, 10.5, 1.2, 10);
+        redActive.speedBoostTimer = 32;
+        spawnParticles(redActive.x, redActive.y, 0, 6, '#ffee58', 2.5, 18, 3);
+        setFeedback(`${redNick} wypuszcza piłkę na sprint!`, "#ffee58");
+    } else if (data.cmd === 'tackle' && !hasBall) {
+        performStandingTackle(redActive);
+    } else if (data.cmd === 'slide' && !hasBall) {
+        if (redActive.slideCooldown <= 0 && !redActive.isSliding && !setPiece.active) {
+            let toMouse = Math.atan2(data.aimY - redActive.y, data.aimX - redActive.x);
+            if (!redActive.isMoving) redActive.angle = toMouse;
+            redActive.startSlide();
+            setFeedback(`${redNick}: Agresywny wślizg!`, "#ef5350");
+        }
+    } else if (data.cmd === 'switchPlayer' && !hasBall) {
+        if (!(setPiece.active && setPiece.type === 'KICKOFF' && setPiece.team === 'red')) {
+            let candidates = redTeam.filter(p => !p.sentOff && p.role !== 'GK' && p !== redActive);
+            if (candidates.length > 0) {
+                manualOverrideRed = candidates[0];
+            }
+        }
+    } else if (data.cmd === 'trick' && hasBall && !setPiece.active && redActive.trickTimer <= 0) {
+        executeTrickForPlayer(redActive, data.combo);
+    }
 }
 
 function backToMainMenu() {
@@ -1038,14 +1358,30 @@ function reopenTacticsMenu() {
 }
 
 function updateTacticalPreview() {
-    currentFormation = document.getElementById('formation-select').value;
-    currentTactic = document.getElementById('tactic-select').value;
+    const selectedForm = document.getElementById('formation-select').value;
+    const selectedTac = document.getElementById('tactic-select').value;
+
+    if (mpRole === 'client') {
+        redFormation = selectedForm;
+        redTactic = selectedTac;
+    } else {
+        blueFormation = selectedForm;
+        blueTactic = selectedTac;
+    }
+
+    if (isOnline1v1()) {
+        netConn.send({
+            type: 'lobby_tactics_change',
+            formation: selectedForm,
+            tactic: selectedTac
+        });
+    }
 
     const descEl = document.getElementById('tactic-desc');
-    if (currentTactic === 'balanced') {
+    if (selectedTac === 'balanced') {
         descEl.innerText = "Tiki-Taka: Zawodnicy tworzą trójkąty podań i zawsze pokazują się do gry kombinacyjnej.";
-    } else if (currentTactic === 'pressing') {
-        descEl.innerText = "Gegenpressing: Twój zespół agresywnie atakuje rywala z piłką i wysoko ustawia linię obrony.";
+    } else if (selectedTac === 'pressing') {
+        descEl.innerText = "Gegenpressing: Zespół agresywnie atakuje rywala z piłką i wysoko ustawia linię obrony.";
     } else {
         descEl.innerText = "Kontratak: Zespół zagęszcza własną połowę, a po odbiorze napastnicy natychmiast sprintują za plecy obrońców.";
     }
@@ -1053,8 +1389,8 @@ function updateTacticalPreview() {
     const board = document.getElementById('tactical-board');
     board.innerHTML = '<div class="tactical-circle"></div>';
 
-    let blueCoords = getFormationNormalizedCoords(currentFormation, 'blue');
-    let redCoords = getFormationNormalizedCoords('1-1-1', 'red');
+    let blueCoords = getFormationNormalizedCoords(blueFormation, 'blue');
+    let redCoords = getFormationNormalizedCoords(redFormation, 'red');
 
     blueCoords.forEach((pt, idx) => {
         const dot = document.createElement('div');
@@ -1082,7 +1418,7 @@ function updateTacticalPreview() {
     refDot.style.borderColor = '#c6ff00';
     refDot.style.color = '#c6ff00';
     refDot.style.left = '50%';
-    refDot.style.top = '22%';
+    refDot.style.top = '20%';
     refDot.innerText = 'REF';
     board.appendChild(refDot);
 }
@@ -1113,11 +1449,13 @@ function getFormationNormalizedCoords(formation, team) {
 }
 
 function applyFormationAndTacticsToTeams() {
-    const nickInput = document.getElementById('player-nick').value.trim();
-    if (nickInput) playerNick = nickInput;
-    hudBlueNameEl.innerText = playerNick.toUpperCase();
+    if (mpRole === 'solo') {
+        blueNick = getEnteredNick();
+        redNick = "Komputer (AI)";
+    }
+    updateLobbyNamesUI();
 
-    const blueCoords = getFormationNormalizedCoords(currentFormation, 'blue');
+    const blueCoords = getFormationNormalizedCoords(blueFormation, 'blue');
     blueTeam.forEach((p, i) => {
         if (p.sentOff) return;
         p.role = blueCoords[i].role;
@@ -1125,7 +1463,7 @@ function applyFormationAndTacticsToTeams() {
         p.baseY = WORLD.marginY + blueCoords[i].ny * (WORLD.height - WORLD.marginY * 2);
     });
 
-    const redCoords = getFormationNormalizedCoords('1-1-1', 'red');
+    const redCoords = getFormationNormalizedCoords(redFormation, 'red');
     redTeam.forEach((p, i) => {
         if (p.sentOff) return;
         p.role = redCoords[i].role;
@@ -1133,18 +1471,20 @@ function applyFormationAndTacticsToTeams() {
         p.baseY = WORLD.marginY + redCoords[i].ny * (WORLD.height - WORLD.marginY * 2);
     });
 
-    const tacticNames = { balanced: 'Tiki-Taka', pressing: 'Gegenpressing', counter: 'Kontratak' };
-    tacticsBadgeEl.innerText = `${playerNick} | Formacja: ${currentFormation} | Taktyka: ${tacticNames[currentTactic]}`;
+    const modeName = isOnline1v1() ? `1v1 Online (${blueNick} vs ${redNick})` : `Solo vs AI (${blueFormation})`;
+    tacticsBadgeEl.innerText = modeName;
 }
 
 function clearAllInputStates() {
     chargeState.cancel();
     mouse.leftDown = false;
     mouse.rightDown = false;
-    for (let k in keys) {
-        keys[k] = false;
-    }
+    for (let k in keys) keys[k] = false;
+    remoteClientInput.chargeActive = false;
 }
+
+let manualOverrideBlue = null;
+let manualOverrideRed = null;
 
 function setupKickoff(kickoffTeam) {
     clearAllInputStates();
@@ -1166,7 +1506,6 @@ function setupKickoff(kickoffTeam) {
         p.angle = p.team === 'blue' ? 0 : Math.PI;
     });
 
-    // Wybierz DOKŁADNIE 1 zawodnika z drużyny rozpoczynającej na środku boiska
     const teamList = (kickoffTeam === 'blue' ? blueTeam : redTeam).filter(p => !p.sentOff);
     let fieldPlayers = teamList.filter(p => p.role !== 'GK');
     let kickoffTaker = fieldPlayers.length > 0 ? fieldPlayers[fieldPlayers.length - 1] : teamList[0];
@@ -1175,12 +1514,10 @@ function setupKickoff(kickoffTeam) {
     kickoffTaker.y = WORLD.height / 2;
     kickoffTaker.angle = kickoffTeam === 'blue' ? 0 : Math.PI;
 
-    if (kickoffTeam === 'blue') {
-        manualPlayerOverride = kickoffTaker;
-    } else {
-        let blueField = blueTeam.filter(p => !p.sentOff && p.role !== 'GK');
-        manualPlayerOverride = blueField.length > 0 ? blueField[blueField.length - 1] : blueTeam[0];
-    }
+    let blueField = blueTeam.filter(p => !p.sentOff && p.role !== 'GK');
+    let redField = redTeam.filter(p => !p.sentOff && p.role !== 'GK');
+    manualOverrideBlue = kickoffTeam === 'blue' ? kickoffTaker : (blueField[blueField.length - 1] || blueTeam[0]);
+    manualOverrideRed = kickoffTeam === 'red' ? kickoffTaker : (redField[redField.length - 1] || redTeam[0]);
 
     ball.owner = kickoffTaker;
     ball.lastKicker = null;
@@ -1203,20 +1540,36 @@ function setupKickoff(kickoffTeam) {
     setPiece.y = WORLD.height / 2;
 
     matchPhase = 'KICKOFF_WAIT';
-    phaseTimer = 45; // Krótka pauza na środku przed gwizdkiem sędziego
+    phaseTimer = 45;
 
     referee.x = WORLD.width / 2;
     referee.y = WORLD.height / 2 - 145;
 
-    const teamLabel = kickoffTeam === 'blue' ? `DRUŻYNA ${playerNick.toUpperCase()}` : 'CZERWONI';
+    const teamLabel = kickoffTeam === 'blue' ? blueNick.toUpperCase() : redNick.toUpperCase();
     const col = kickoffTeam === 'blue' ? '#42a5f5' : '#ef5350';
     showTempBanner(`WZNOWIENIE ZE ŚRODKA`, `Rozpoczyna: ${teamLabel} (Chwila do gwizdka...)`, col, 50);
 }
 
 function startMatchFromLobby() {
+    // Jeżeli Klient kliknie Start, wysyła sygnał do Hosta
+    if (mpRole === 'client' && isOnline1v1()) {
+        netConn.send({ type: 'request_start_match' });
+        return;
+    }
+
     document.getElementById('menu-login').classList.add('hidden');
     document.getElementById('menu-lobby').classList.add('hidden');
     document.getElementById('menu-gameover').classList.add('hidden');
+
+    if (mpRole === 'host' && isOnline1v1()) {
+        netConn.send({
+            type: 'start_match_now',
+            blueNick, redNick,
+            blueFormation, redFormation,
+            blueTactic, redTactic
+        });
+    }
+
     if (matchEnded || matchTimeRemaining <= 0) {
         restartFullMatch();
         return;
@@ -1227,7 +1580,23 @@ function startMatchFromLobby() {
     lastFrameTimestamp = performance.now();
 }
 
+function launchClientMatch() {
+    document.getElementById('menu-login').classList.add('hidden');
+    document.getElementById('menu-lobby').classList.add('hidden');
+    document.getElementById('menu-gameover').classList.add('hidden');
+    matchEnded = false;
+    gameStarted = true;
+    applyFormationAndTacticsToTeams();
+    lastFrameTimestamp = performance.now();
+    setFeedback(`Mecz 1v1 rozpoczęty! Sterujesz drużyną CZERWONYCH!`, "#ef5350");
+}
+
 function restartFullMatch() {
+    if (mpRole === 'client' && isOnline1v1()) {
+        netConn.send({ type: 'request_start_match' });
+        return;
+    }
+
     scoreBlue = 0;
     scoreRed = 0;
     matchTimeRemaining = MATCH_DURATION_SECONDS;
@@ -1240,6 +1609,15 @@ function restartFullMatch() {
         p.sentOff = false;
         p.stamina = 100;
     });
+
+    if (mpRole === 'host' && isOnline1v1()) {
+        netConn.send({
+            type: 'start_match_now',
+            blueNick, redNick,
+            blueFormation, redFormation,
+            blueTactic, redTactic
+        });
+    }
 
     applyFormationAndTacticsToTeams();
     setupKickoff('blue');
@@ -1263,10 +1641,10 @@ function triggerMatchOver() {
 
     const winnerEl = document.getElementById('end-winner');
     if (scoreBlue > scoreRed) {
-        winnerEl.innerText = `🏆 ZWYCIĘSTWO DRUŻYNY ${playerNick.toUpperCase()}!`;
+        winnerEl.innerText = `🏆 ZWYCIĘSTWO: ${blueNick.toUpperCase()} (NIEBIESCY)!`;
         winnerEl.style.color = '#00e676';
     } else if (scoreRed > scoreBlue) {
-        winnerEl.innerText = `ZWYCIĘSTWO DRUŻYNY CZERWONYCH!`;
+        winnerEl.innerText = `🏆 ZWYCIĘSTWO: ${redNick.toUpperCase()} (CZERWONI)!`;
         winnerEl.style.color = '#ff5252';
     } else {
         winnerEl.innerText = `REMIS PO ZACIĘTYM MECZU!`;
@@ -1302,7 +1680,8 @@ const camera = {
     targetZoom: 1.0,
     shake: 0,
     update() {
-        let active = getActivePlayer();
+        const myTeam = getMyTeamColor();
+        let active = getActivePlayer(myTeam);
         let focusX = ball.x + ball.vx * 9;
         let focusY = ball.y + ball.vy * 7;
 
@@ -1386,9 +1765,8 @@ function updateAndDrawParticles() {
     ctx.globalAlpha = 1;
 }
 
-// ==================== OBSŁUGA KLAWIATURY I MYSZY ====================
+// ==================== OBSŁUGA KLAWIATURY I MYSZY (DLA OBU GRACZY) ====================
 const keys = {};
-let manualPlayerOverride = null;
 
 canvas.addEventListener('mousemove', e => {
     const rect = canvas.getBoundingClientRect();
@@ -1398,7 +1776,8 @@ canvas.addEventListener('mousemove', e => {
 
 canvas.addEventListener('mousedown', e => {
     if (isInputLocked()) return;
-    const activePlayer = getActivePlayer();
+    const myTeam = getMyTeamColor();
+    const activePlayer = getActivePlayer(myTeam);
     if (!activePlayer) return;
 
     const hasBall = (ball.owner === activePlayer);
@@ -1408,14 +1787,20 @@ canvas.addEventListener('mousedown', e => {
         if (hasBall) {
             chargeState.start('shot');
         } else {
-            performStandingTackle(activePlayer);
+            if (mpRole === 'client' && isOnline1v1()) {
+                netConn.send({ type: 'client_cmd', cmd: 'tackle' });
+            } else {
+                performStandingTackle(activePlayer);
+            }
         }
     } else if (e.button === 2) { // PPM
         mouse.rightDown = true;
         if (hasBall) {
             chargeState.start('lowPass');
         } else {
-            if (activePlayer.slideCooldown <= 0 && !activePlayer.isSliding && !setPiece.active) {
+            if (mpRole === 'client' && isOnline1v1()) {
+                netConn.send({ type: 'client_cmd', cmd: 'slide', aimX: mouse.worldX, aimY: mouse.worldY });
+            } else if (activePlayer.slideCooldown <= 0 && !activePlayer.isSliding && !setPiece.active) {
                 let toMouse = Math.atan2(mouse.worldY - activePlayer.y, mouse.worldX - activePlayer.x);
                 if (!activePlayer.isMoving) activePlayer.angle = toMouse;
                 activePlayer.startSlide();
@@ -1436,11 +1821,6 @@ window.addEventListener('mouseup', e => {
 });
 
 window.addEventListener('keydown', e => {
-    // Skrót Enter uruchamia grę bezpośrednio z menu
-    if (e.code === 'Enter' && !gameStarted && !matchEnded) {
-        startMatchFromLobby();
-        return;
-    }
     if (!gameStarted || matchEnded) return;
     if (["Space", "ShiftLeft", "ShiftRight", "KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "KeyZ", "KeyX", "KeyC"].includes(e.code)) {
         e.preventDefault();
@@ -1463,7 +1843,8 @@ function handleKeyDownOnce(code) {
     if (isInputLocked()) return;
     handleTrickComboInput(code);
 
-    const activePlayer = getActivePlayer();
+    const myTeam = getMyTeamColor();
+    const activePlayer = getActivePlayer(myTeam);
     if (!activePlayer) return;
     const hasBall = (ball.owner === activePlayer);
 
@@ -1471,37 +1852,45 @@ function handleKeyDownOnce(code) {
         if (code === 'KeyQ') {
             chargeState.start('lobPass');
         } else if (code === 'KeyE') {
-            if (setPiece.active) endSetPiece();
-            let aimAngle = getPlayerAimAngle(activePlayer, 0.35);
-            ball.kick(activePlayer, aimAngle, 10.5, 1.2, 10);
-            activePlayer.speedBoostTimer = 32;
-            spawnParticles(activePlayer.x, activePlayer.y, 0, 6, '#ffee58', 2.5, 18, 3);
-            setFeedback("Wypuszczenie piłki na odejście (E)!", "#ffee58");
+            if (mpRole === 'client' && isOnline1v1()) {
+                netConn.send({ type: 'client_cmd', cmd: 'knockOn', aimX: mouse.worldX, aimY: mouse.worldY });
+            } else {
+                if (setPiece.active) endSetPiece();
+                let aimAngle = getPlayerAimAngle(activePlayer, 0.35, mouse.worldX, mouse.worldY);
+                ball.kick(activePlayer, aimAngle, 10.5, 1.2, 10);
+                activePlayer.speedBoostTimer = 32;
+                spawnParticles(activePlayer.x, activePlayer.y, 0, 6, '#ffee58', 2.5, 18, 3);
+                setFeedback("Wypuszczenie piłki na odejście (E)!", "#ffee58");
+            }
         }
     } else {
-        if (code === 'Space' && !(setPiece.active && setPiece.type === 'KICKOFF' && setPiece.team === 'blue')) {
-            let candidates = blueTeam.filter(p => !p.sentOff && p.role !== 'GK' && p !== activePlayer);
-            if (candidates.length > 0) {
-                manualPlayerOverride = candidates[0];
-                setFeedback("Zmiana zawodnika (Spacja)", "#4fc3f7");
+        if (code === 'Space') {
+            if (mpRole === 'client' && isOnline1v1()) {
+                netConn.send({ type: 'client_cmd', cmd: 'switchPlayer' });
+            } else if (!(setPiece.active && setPiece.type === 'KICKOFF' && setPiece.team === 'blue')) {
+                let candidates = blueTeam.filter(p => !p.sentOff && p.role !== 'GK' && p !== activePlayer);
+                if (candidates.length > 0) {
+                    manualOverrideBlue = candidates[0];
+                    setFeedback("Zmiana zawodnika (Spacja)", "#4fc3f7");
+                }
             }
         }
     }
 }
 
-function getPlayerAimAngle(player, mouseWeight = 0.75) {
-    let mouseAngle = Math.atan2(mouse.worldY - player.y, mouse.worldX - player.x);
+function getPlayerAimAngle(player, mouseWeight = 0.75, targetMouseX = mouse.worldX, targetMouseY = mouse.worldY) {
+    let mouseAngle = Math.atan2(targetMouseY - player.y, targetMouseX - player.x);
     if (!player.isMoving) return mouseAngle;
     let diff = normalizeAngle(mouseAngle - player.angle);
     return player.angle + diff * mouseWeight;
 }
 
-function executeChargedAction(player, type, powerPct) {
+function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY = mouse.worldY) {
     if (isInputLocked()) return;
     if (setPiece.active) endSetPiece();
 
     let ratio = Math.max(0.15, powerPct / 100);
-    let aimAngle = getPlayerAimAngle(player, 0.85);
+    let aimAngle = getPlayerAimAngle(player, 0.85, aimX, aimY);
     player.angle = aimAngle;
 
     if (type === 'shot') {
@@ -1517,7 +1906,8 @@ function executeChargedAction(player, type, powerPct) {
         if (mate) {
             let leadAngle = Math.atan2(mate.y + mate.vy * 10 - player.y, mate.x + mate.vx * 10 - player.x);
             aimAngle = aimAngle * 0.35 + leadAngle * 0.65;
-            if (player.team === 'blue') manualPlayerOverride = mate;
+            if (player.team === 'blue') manualOverrideBlue = mate;
+            else manualOverrideRed = mate;
         }
         let passSpeed = 9.5 + ratio * 11.5;
         ball.kick(player, aimAngle, passSpeed, 0, 16);
@@ -1525,7 +1915,10 @@ function executeChargedAction(player, type, powerPct) {
         setFeedback(`Podanie dolne (${Math.round(powerPct)}%)`, "#66bb6a");
     } else if (type === 'lobPass') {
         let mate = findTeammateNearAngle(player, aimAngle, 0.75);
-        if (mate && player.team === 'blue') manualPlayerOverride = mate;
+        if (mate) {
+            if (player.team === 'blue') manualOverrideBlue = mate;
+            else manualOverrideRed = mate;
+        }
         let lobSpeed = 8.5 + ratio * 10.5;
         let lobVz = 6.5 + ratio * 5.8;
         ball.kick(player, aimAngle, lobSpeed, lobVz, 18);
@@ -1552,7 +1945,8 @@ function findTeammateNearAngle(passer, targetAngle, maxDiff) {
 function performStandingTackle(player) {
     if (isInputLocked() || setPiece.active) return;
     player.lungeTimer = 16;
-    let oppWithBall = allPlayers.find(p => !p.sentOff && p.team === 'red' && ball.owner === p);
+    const oppTeamColor = player.team === 'blue' ? 'red' : 'blue';
+    let oppWithBall = allPlayers.find(p => !p.sentOff && p.team === oppTeamColor && ball.owner === p);
     let distToOwner = oppWithBall ? Math.hypot(player.x - oppWithBall.x, player.y - oppWithBall.y) : 999;
     let distToBall = Math.hypot(player.x - ball.x, player.y - ball.y);
 
@@ -1635,31 +2029,36 @@ function handleTrickComboInput(code) {
         recentKeys.push(code);
         clearTimeout(trickTimeout);
         trickTimeout = setTimeout(() => {
-            executeTrickCombo(recentKeys);
+            const comboCopy = [...recentKeys];
             recentKeys = [];
+            if (mpRole === 'client' && isOnline1v1()) {
+                netConn.send({ type: 'client_cmd', cmd: 'trick', combo: comboCopy });
+            } else {
+                const activePlayer = getActivePlayer('blue');
+                if (activePlayer && ball.owner === activePlayer && activePlayer.trickTimer <= 0 && !setPiece.active) {
+                    executeTrickForPlayer(activePlayer, comboCopy);
+                }
+            }
         }, 250);
     }
 }
 
-function executeTrickCombo(combo) {
-    if (isInputLocked() || setPiece.active) return;
-    const activePlayer = getActivePlayer();
-    if (!activePlayer || ball.owner !== activePlayer || activePlayer.trickTimer > 0) return;
-
+function executeTrickForPlayer(player, combo) {
+    if (isInputLocked() || setPiece.active || !player || ball.owner !== player) return;
     const str = combo.join('+');
     if (combo.length >= 3 && str.includes('KeyZ') && str.includes('KeyX') && str.includes('KeyC')) {
-        activePlayer.triggerTrick("Ronaldinho Gaucho Flip!", 'gaucho', 1.95);
+        player.triggerTrick("Ronaldinho Gaucho Flip!", 'gaucho', 1.95);
     } else if (combo.length === 2) {
-        if (str === 'KeyZ+KeyZ') activePlayer.triggerTrick("Double La Croqueta!", 'croqueta', 1.65);
-        else if (str === 'KeyX+KeyX') activePlayer.triggerTrick("Drag Back Spin!", 'dragback', 1.6);
-        else if (str.includes('KeyZ') && str.includes('KeyX')) activePlayer.triggerTrick("Elastico Super!", 'elastico', 1.85);
-        else if (str.includes('KeyX') && str.includes('KeyC')) activePlayer.triggerTrick("Rainbow Flick Pro!", 'rainbow', 1.8);
-        else if (str.includes('KeyZ') && str.includes('KeyC')) activePlayer.triggerTrick("Rabona Fake Chop!", 'rabona', 1.75);
-        else activePlayer.triggerTrick("Combo Stepover!", 'feint', 1.65);
+        if (str === 'KeyZ+KeyZ') player.triggerTrick("Double La Croqueta!", 'croqueta', 1.65);
+        else if (str === 'KeyX+KeyX') player.triggerTrick("Drag Back Spin!", 'dragback', 1.6);
+        else if (str.includes('KeyZ') && str.includes('KeyX')) player.triggerTrick("Elastico Super!", 'elastico', 1.85);
+        else if (str.includes('KeyX') && str.includes('KeyC')) player.triggerTrick("Rainbow Flick Pro!", 'rainbow', 1.8);
+        else if (str.includes('KeyZ') && str.includes('KeyC')) player.triggerTrick("Rabona Fake Chop!", 'rabona', 1.75);
+        else player.triggerTrick("Combo Stepover!", 'feint', 1.65);
     } else if (combo.length === 1) {
-        if (combo[0] === 'KeyZ') activePlayer.triggerTrick("Roulette 360°", 'roulette', 1.5);
-        else if (combo[0] === 'KeyX') activePlayer.triggerTrick("Body Feint Stepover", 'feint', 1.55);
-        else if (combo[0] === 'KeyC') activePlayer.triggerTrick("Sombrero Flick!", 'sombrero', 1.45);
+        if (combo[0] === 'KeyZ') player.triggerTrick("Roulette 360°", 'roulette', 1.5);
+        else if (combo[0] === 'KeyX') player.triggerTrick("Body Feint Stepover", 'feint', 1.55);
+        else if (combo[0] === 'KeyC') player.triggerTrick("Sombrero Flick!", 'sombrero', 1.45);
     }
 }
 
@@ -1712,7 +2111,8 @@ function triggerSetPiece(type, team, x, y, extraSubText = "") {
     ball.owner = taker;
     ball.lastTouchTeam = team;
 
-    if (team === 'blue') manualPlayerOverride = taker;
+    if (team === 'blue') manualOverrideBlue = taker;
+    else manualOverrideRed = taker;
 
     let otherMate = teamPlayers.find(p => p !== taker && p.role !== 'GK');
     if (otherMate) {
@@ -1752,16 +2152,16 @@ function triggerSetPiece(type, team, x, y, extraSubText = "") {
         }
     }
 
-    const teamName = team === 'blue' ? 'NIEBIESKICH' : 'CZERWONYCH';
+    const teamName = team === 'blue' ? blueNick.toUpperCase() : redNick.toUpperCase();
     const col = team === 'blue' ? '#42a5f5' : '#ef5350';
     if (type === 'THROW_IN') {
-        showTempBanner(`AUT DLA ${teamName}`, "Użyj PPM lub Q aby wznowić grę", col, 60);
+        showTempBanner(`AUT (${teamName})`, "Użyj PPM lub Q aby wznowić grę", col, 60);
     } else if (type === 'CORNER') {
-        showTempBanner(`RZUT ROŻNY DLA ${teamName}!`, "Dośrodkuj w pole karne (Q lub PPM)", col, 70);
+        showTempBanner(`RZUT ROŻNY (${teamName})!`, "Dośrodkuj w pole karne (Q lub PPM)", col, 70);
     } else if (type === 'FREE_KICK') {
         showTempBanner(`🔊 FAUL! RZUT WOLNY (${teamName})`, extraSubText || "Sędzia odgwizdał przewinienie!", "#ffd54f", 85);
     } else if (type === 'PENALTY') {
-        showTempBanner(`🔊 RZUT KARNY DLA ${teamName}!`, extraSubText || "Faul w polu karnym! Strzał z 11 metrów!", "#ff5252", 95);
+        showTempBanner(`🔊 RZUT KARNY (${teamName})!`, extraSubText || "Faul w polu karnym! Strzał z 11 metrów!", "#ff5252", 95);
     } else {
         showTempBanner(`OD BRAMKI (${teamName})`, "Wznowienie gry z pola bramkowego", col, 60);
     }
@@ -1917,7 +2317,7 @@ const ball = {
                         if (this.x < WORLD.marginX - 24) {
                             scoreRed++;
                             this.netSwayLeft = 18;
-                            triggerGoal("GOL DLA CZERWONYCH!", "#ef5350", 'blue');
+                            triggerGoal(`GOL DLA ${redNick.toUpperCase()}!`, "#ef5350", 'blue');
                             return;
                         }
                     } else {
@@ -1936,7 +2336,7 @@ const ball = {
                         if (this.x > WORLD.width - WORLD.marginX + 24) {
                             scoreBlue++;
                             this.netSwayRight = 18;
-                            triggerGoal("GOL DLA NIEBIESKICH!", "#42a5f5", 'red');
+                            triggerGoal(`GOL DLA ${blueNick.toUpperCase()}!`, "#42a5f5", 'red');
                             return;
                         }
                     } else {
@@ -1979,7 +2379,8 @@ const ball = {
                         this.lastTouchTeam = p.team;
                         this.vz = 0;
                         this.z = 0;
-                        if (p.team === 'blue') manualPlayerOverride = null;
+                        if (p.team === 'blue') manualOverrideBlue = null;
+                        else manualOverrideRed = null;
                         break;
                     }
                 }
@@ -2037,7 +2438,7 @@ const ball = {
     }
 };
 
-// ==================== KLASA ZAWODNIKA 2.5D ====================
+// ==================== KLASA ZAWODNIKA 2.5D (OBSŁUGUJE GRACZA 1, GRACZA 2 ORAZ AI) ====================
 class Player {
     constructor(x, y, team, role, number, skinColor, hairColor) {
         this.x = x;
@@ -2115,7 +2516,7 @@ class Player {
         this.vy = Math.sin(this.angle) * 8.2;
     }
 
-    update(isControlled) {
+    update(isHumanControlled, inputSource = null) {
         if (this.sentOff) return;
 
         this.isMoving = false;
@@ -2126,8 +2527,8 @@ class Player {
             this.vx = 0;
             this.vy = 0;
             this.isSliding = false;
-            if (matchPhase === 'KICKOFF_WAIT' && isControlled && this.team === 'blue') {
-                this.angle = Math.atan2(mouse.worldY - this.y, mouse.worldX - this.x);
+            if (matchPhase === 'KICKOFF_WAIT' && isHumanControlled && inputSource) {
+                this.angle = Math.atan2(inputSource.mouseY - this.y, inputSource.mouseX - this.x);
             }
             return;
         }
@@ -2162,10 +2563,11 @@ class Player {
             if (this.afterimages[i].alpha <= 0) this.afterimages.splice(i, 1);
         }
 
+        // Wykonawca stałego fragmentu gry (Gracz 1, Gracz 2 lub AI)
         if (setPiece.active && setPiece.taker === this) {
-            if (isControlled && this.team === 'blue') {
-                this.angle = Math.atan2(mouse.worldY - this.y, mouse.worldX - this.x);
-                if (setPiece.type === 'KICKOFF' && (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD'])) {
+            if (isHumanControlled && inputSource) {
+                this.angle = Math.atan2(inputSource.mouseY - this.y, inputSource.mouseX - this.x);
+                if (setPiece.type === 'KICKOFF' && (inputSource.keys.KeyW || inputSource.keys.KeyS || inputSource.keys.KeyA || inputSource.keys.KeyD)) {
                     endSetPiece();
                 } else {
                     return;
@@ -2218,7 +2620,7 @@ class Player {
                 cleanlyWonBall = true;
                 camera.shake = 5;
                 spawnParticles(ball.x, ball.y, 2, 10, '#ffffff', 3, 20, 3.5);
-                if (this.team === 'blue') setFeedback("Czysty odbiór wślizgiem!", "#00e676");
+                setFeedback("Czysty odbiór wślizgiem!", "#00e676");
             }
 
             if (!cleanlyWonBall && !setPiece.active) {
@@ -2237,16 +2639,18 @@ class Player {
             return;
         }
 
-        if (isControlled && this.team === 'blue') {
+        // Sterowanie przez człowieka (Gracz 1 Niebiescy LUB Gracz 2 Czerwoni w 1v1!)
+        if (isHumanControlled && inputSource) {
             let dx = 0, dy = 0;
-            if (keys['KeyW']) dy -= 1;
-            if (keys['KeyS']) dy += 1;
-            if (keys['KeyA']) dx -= 1;
-            if (keys['KeyD']) dx += 1;
+            if (inputSource.keys.KeyW) dy -= 1;
+            if (inputSource.keys.KeyS) dy += 1;
+            if (inputSource.keys.KeyA) dx -= 1;
+            if (inputSource.keys.KeyD) dx += 1;
 
-            if (ball.owner === this && keys['Space']) {
+            if (ball.owner === this && inputSource.keys.Space) {
                 this.isShielding = true;
-                for (let opp of redTeam) {
+                let oppList = this.team === 'blue' ? redTeam : blueTeam;
+                for (let opp of oppList) {
                     if (opp.sentOff) continue;
                     let d = Math.hypot(opp.x - this.x, opp.y - this.y);
                     if (d < 54 && d > 0.1) {
@@ -2266,8 +2670,7 @@ class Player {
                 let mult = this.speedMultiplier * (this.speedBoostTimer > 0 ? 1.25 : 1);
                 if (this.isShielding) mult *= 0.62;
 
-                const sprintPressed = keys['ShiftLeft'] || keys['ShiftRight'];
-                if (sprintPressed && this.stamina > 5 && !this.isShielding) {
+                if (inputSource.keys.Shift && this.stamina > 5 && !this.isShielding) {
                     mult *= 1.44;
                     this.isSprinting = true;
                     this.stamina = Math.max(0, this.stamina - 0.38);
@@ -2292,7 +2695,7 @@ class Player {
                 this.vy *= 0.7;
                 this.stamina = Math.min(100, this.stamina + 0.45);
                 if (ball.owner === this && !this.isShielding) {
-                    this.angle = Math.atan2(mouse.worldY - this.y, mouse.worldX - this.x);
+                    this.angle = Math.atan2(inputSource.mouseY - this.y, inputSource.mouseX - this.x);
                 }
             }
         } else {
@@ -2335,7 +2738,7 @@ class Player {
         const enemyGoalX = this.team === 'blue' ? WORLD.width - WORLD.marginX : WORLD.marginX;
         const attackDir = this.team === 'blue' ? 1 : -1;
         const centerY = WORLD.height / 2;
-        const tactic = this.team === 'blue' ? currentTactic : 'balanced';
+        const tactic = this.team === 'blue' ? blueTactic : redTactic;
 
         if (this.role === 'GK') {
             if (ball.owner === this) {
@@ -2383,7 +2786,7 @@ class Player {
                 ball.kick(this, shotAngle, 20.5, 3.2);
                 camera.shake = 6;
                 this.aiDecisionCooldown = 30;
-                setFeedback(this.team === 'red' ? "Czerwoni uderzają w róg bramki!" : "Strzał na bramkę!", "#ef5350");
+                setFeedback("Strzał na bramkę!", "#ef5350");
                 return;
             }
 
@@ -2396,7 +2799,7 @@ class Player {
                     let passAngle = Math.atan2(mate.y + mate.vy * 10 - this.y, mate.x + mate.vx * 10 - this.x);
                     ball.kick(this, passAngle, 15.5, 0);
                     this.aiDecisionCooldown = 35;
-                    setFeedback("Szybka wymiana podań!", "#ffa726");
+                    setFeedback("Wymiana podań!", "#ffa726");
                     return;
                 }
             }
@@ -2451,7 +2854,7 @@ class Player {
             let pressSpeed = tactic === 'pressing' ? 1.12 : 1.03;
             this.moveTowards(predictX, predictY, pressSpeed);
 
-            if (this.team === 'red' && ball.owner && ball.owner.team === 'blue') {
+            if (this.team === 'red' && !isOnline1v1() && ball.owner && ball.owner.team === 'blue') {
                 let d = Math.hypot(this.x - ball.x, this.y - ball.y);
                 if (d < 46 && ball.owner.trickTimer === 0 && !ball.owner.isShielding && Math.random() < 0.075) {
                     ball.owner.stunTimer = 18;
@@ -2506,8 +2909,11 @@ class Player {
         }
     }
 
-    draw(isControlled) {
+    draw(isActiveBlue, isActiveRed) {
         if (this.sentOff) return;
+
+        const isControlledByAnyone = isActiveBlue || isActiveRed;
+        const isMyLocalPlayer = (mpRole === 'client' && isActiveRed) || (mpRole !== 'client' && isActiveBlue);
 
         for (let img of this.afterimages) {
             ctx.save();
@@ -2538,16 +2944,16 @@ class Player {
             ctx.restore();
         }
 
-        if (isControlled && this.team === 'blue') {
+        if (isControlledByAnyone) {
             let pulse = Math.sin(tickCount * 0.14) * 2;
             ctx.beginPath();
             ctx.ellipse(this.x, this.y + 6, this.radius + 7 + pulse, (this.radius + 7 + pulse) * 0.5, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = '#ffeb3b';
+            ctx.strokeStyle = isActiveBlue ? '#ffeb3b' : '#00e5ff';
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            if (ball.owner === this) {
-                let aimA = getPlayerAimAngle(this, 0.85);
+            if (isMyLocalPlayer && ball.owner === this) {
+                let aimA = getPlayerAimAngle(this, 0.85, mouse.worldX, mouse.worldY);
                 ctx.save();
                 ctx.beginPath();
                 ctx.setLineDash([6, 6]);
@@ -2564,12 +2970,27 @@ class Player {
             ctx.fillStyle = this.stamina > 30 ? '#66bb6a' : '#ef5350';
             ctx.fillRect(this.x - 20, this.y + 18, 40 * (this.stamina / 100), 4);
 
-            if (chargeState.active && ball.owner === this) {
+            // Pasek ładowania dla lokalnego gracza (lub zdalnego w 1v1)
+            let showCharge = false;
+            let cType = null;
+            let cPower = 0;
+
+            if (isMyLocalPlayer && chargeState.active && ball.owner === this) {
+                showCharge = true;
+                cType = chargeState.type;
+                cPower = chargeState.power;
+            } else if (isActiveRed && remoteClientInput.chargeActive && ball.owner === this) {
+                showCharge = true;
+                cType = remoteClientInput.chargeType;
+                cPower = remoteClientInput.chargePower;
+            }
+
+            if (showCharge) {
                 const barW = 54;
                 const barH = 8;
                 const bx = this.x - barW / 2;
                 const by = this.y + 26;
-                const pct = chargeState.power / chargeState.maxPower;
+                const pct = cPower / 100;
 
                 ctx.save();
                 ctx.fillStyle = 'rgba(10, 12, 18, 0.88)';
@@ -2581,11 +3002,11 @@ class Player {
                 ctx.stroke();
 
                 let grad = ctx.createLinearGradient(bx, by, bx + barW, by);
-                if (chargeState.type === 'shot') {
+                if (cType === 'shot') {
                     grad.addColorStop(0, '#ffee58');
                     grad.addColorStop(0.6, '#ffa726');
                     grad.addColorStop(1, '#e53935');
-                } else if (chargeState.type === 'lowPass') {
+                } else if (cType === 'lowPass') {
                     grad.addColorStop(0, '#a5d6a7');
                     grad.addColorStop(1, '#00e676');
                 } else {
@@ -2602,7 +3023,7 @@ class Player {
                 ctx.font = 'bold 10px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#ffeb3b';
-                ctx.fillText(`${labelMap[chargeState.type]} ${Math.round(chargeState.power)}%`, this.x, by + 19);
+                ctx.fillText(`${labelMap[cType] || 'SIŁA'} ${Math.round(cPower)}%`, this.x, by + 19);
                 ctx.restore();
             }
         }
@@ -2715,14 +3136,14 @@ class Player {
             ctx.strokeRect(this.x + 14, this.y - 32, 6, 9);
         }
 
-        if (isControlled && this.team === 'blue') {
+        if (isControlledByAnyone) {
             let bounce = Math.sin(tickCount * 0.15) * 2.5;
             ctx.beginPath();
             ctx.moveTo(this.x, this.y - 34 + bounce);
             ctx.lineTo(this.x - 6, this.y - 43 + bounce);
             ctx.lineTo(this.x + 6, this.y - 43 + bounce);
             ctx.closePath();
-            ctx.fillStyle = '#ffeb3b';
+            ctx.fillStyle = isActiveBlue ? '#ffeb3b' : '#00e5ff';
             ctx.fill();
 
             ctx.save();
@@ -2731,7 +3152,7 @@ class Player {
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = '#000';
             ctx.shadowBlur = 4;
-            ctx.fillText(playerNick, this.x, this.y - 47 + bounce);
+            ctx.fillText(isActiveBlue ? blueNick : redNick, this.x, this.y - 47 + bounce);
             ctx.restore();
         }
 
@@ -2772,19 +3193,28 @@ const redTeam = [
 
 const allPlayers = [...blueTeam, ...redTeam];
 
-function getActivePlayer() {
-    if (setPiece.active && setPiece.team === 'blue' && setPiece.taker && !setPiece.taker.sentOff) {
+// Zwraca aktywnego zawodnika dla wybranej drużyny ('blue' lub 'red')
+function getActivePlayer(team = 'blue') {
+    if (team === 'red' && !isOnline1v1() && mpRole === 'solo') {
+        return null; // W trybie solo Czerwonymi steruje w 100% AI
+    }
+
+    const teamArr = team === 'blue' ? blueTeam : redTeam;
+    const manualOverride = team === 'blue' ? manualOverrideBlue : manualOverrideRed;
+
+    if (setPiece.active && setPiece.team === team && setPiece.taker && !setPiece.taker.sentOff) {
         return setPiece.taker;
     }
-    if (ball.owner && ball.owner.team === 'blue' && !ball.owner.sentOff) {
-        manualPlayerOverride = null;
+    if (ball.owner && ball.owner.team === team && !ball.owner.sentOff) {
+        if (team === 'blue') manualOverrideBlue = null;
+        else manualOverrideRed = null;
         return ball.owner;
     }
-    if (manualPlayerOverride && manualPlayerOverride.team === 'blue' && !manualPlayerOverride.sentOff) {
-        return manualPlayerOverride;
+    if (manualOverride && manualOverride.team === team && !manualOverride.sentOff) {
+        return manualOverride;
     }
-    let available = blueTeam.filter(p => !p.sentOff && p.role !== 'GK');
-    if (available.length === 0) available = blueTeam.filter(p => !p.sentOff);
+    let available = teamArr.filter(p => !p.sentOff && p.role !== 'GK');
+    if (available.length === 0) available = teamArr.filter(p => !p.sentOff);
     return available.reduce((prev, curr) =>
         Math.hypot(curr.x - ball.x, curr.y - ball.y) < Math.hypot(prev.x - ball.x, prev.y - ball.y) ? curr : prev
     , available[0]);
@@ -2812,33 +3242,120 @@ function triggerGoal(msg, color, concedingTeam) {
     }
 }
 
+// ==================== SYNCHRONIZACJA SIECIOWA 1V1 (HOST <-> CLIENT) ====================
+function sendClientInputToHost() {
+    if (mpRole === 'client' && isOnline1v1()) {
+        netConn.send({
+            type: 'client_input',
+            keys: {
+                KeyW: !!keys['KeyW'],
+                KeyS: !!keys['KeyS'],
+                KeyA: !!keys['KeyA'],
+                KeyD: !!keys['KeyD'],
+                Shift: !!(keys['ShiftLeft'] || keys['ShiftRight']),
+                Space: !!keys['Space']
+            },
+            mouseX: mouse.worldX,
+            mouseY: mouse.worldY,
+            chargeActive: chargeState.active,
+            chargeType: chargeState.type,
+            chargePower: chargeState.power
+        });
+    }
+}
+
 function broadcastNetworkState() {
-    if (mpRole === 'host' && netConn && netConn.open && tickCount % 2 === 0) {
+    if (mpRole === 'host' && isOnline1v1()) {
+        const ownerIdx = ball.owner ? allPlayers.indexOf(ball.owner) : -1;
+        const activeBlueIdx = allPlayers.indexOf(getActivePlayer('blue'));
+        const activeRedIdx = allPlayers.indexOf(getActivePlayer('red'));
+
         netConn.send({
             type: 'sync',
             state: {
-                bx: ball.x, by: ball.y, bz: ball.z,
+                bx: ball.x, by: ball.y, bz: ball.z, bvx: ball.vx, bvy: ball.vy, rot: ball.rotation,
+                ownerIdx,
+                swayL: ball.netSwayLeft, swayR: ball.netSwayRight,
                 sb: scoreBlue, sr: scoreRed,
                 t: matchTimeRemaining,
-                players: allPlayers.map(p => ({ x: p.x, y: p.y, a: p.angle }))
+                phase: matchPhase,
+                ended: matchEnded,
+                activeBlueIdx, activeRedIdx,
+                sp: setPiece.active ? { type: setPiece.type, team: setPiece.team, x: setPiece.x, y: setPiece.y } : null,
+                ref: { x: referee.x, y: referee.y, a: referee.angle, m: referee.isMoving, w: referee.whistleTimer, ct: referee.cardTimer, cc: referee.cardColor },
+                ban: { t: goalCelebrationTimer, txt: bannerText, sub: bannerSubText, col: bannerColor },
+                stats: matchStats,
+                players: allPlayers.map(p => ({
+                    x: p.x, y: p.y, vx: p.vx, vy: p.vy, a: p.angle,
+                    st: p.stamina, m: p.isMoving, sp: p.isSprinting, sh: p.isShielding,
+                    sl: p.isSliding, tt: p.trickTimer, tn: p.trickName, tty: p.trickType,
+                    stn: p.stunTimer, yc: p.yellowCards, rc: p.redCards, so: p.sentOff, role: p.role
+                }))
             }
         });
     }
 }
 
+let clientActiveBlueIdx = 2;
+let clientActiveRedIdx = 5;
+
 function applyNetworkSync(st) {
     if (!st) return;
     ball.x = st.bx; ball.y = st.by; ball.z = st.bz;
+    ball.vx = st.bvx; ball.vy = st.bvy; ball.rotation = st.rot;
+    ball.owner = st.ownerIdx >= 0 ? allPlayers[st.ownerIdx] : null;
+    ball.netSwayLeft = st.swayL; ball.netSwayRight = st.swayR;
+
     scoreBlue = st.sb; scoreRed = st.sr;
-    if (typeof st.t === 'number') matchTimeRemaining = st.t;
+    matchTimeRemaining = st.t;
+    matchPhase = st.phase;
+    clientActiveBlueIdx = st.activeBlueIdx;
+    clientActiveRedIdx = st.activeRedIdx;
+
+    if (st.sp) {
+        setPiece.active = true;
+        setPiece.type = st.sp.type;
+        setPiece.team = st.sp.team;
+        setPiece.x = st.sp.x;
+        setPiece.y = st.sp.y;
+    } else {
+        setPiece.active = false;
+    }
+
+    if (st.ref) {
+        referee.x = st.ref.x; referee.y = st.ref.y; referee.angle = st.ref.a;
+        referee.isMoving = st.ref.m;
+        if (referee.isMoving) referee.animCycle += 0.26;
+        referee.whistleTimer = st.ref.w; referee.cardTimer = st.ref.ct; referee.cardColor = st.ref.cc;
+    }
+
+    if (st.ban) {
+        goalCelebrationTimer = st.ban.t;
+        bannerText = st.ban.txt;
+        bannerSubText = st.ban.sub;
+        bannerColor = st.ban.col;
+    }
+
+    if (st.stats) {
+        Object.assign(matchStats, st.stats);
+    }
+
     updateScoreboardUI();
+    hudTimerEl.innerText = formatTimer(matchTimeRemaining);
+
     st.players.forEach((ps, i) => {
-        if (allPlayers[i]) {
-            allPlayers[i].x = ps.x;
-            allPlayers[i].y = ps.y;
-            allPlayers[i].angle = ps.a;
-        }
+        const p = allPlayers[i];
+        if (!p) return;
+        p.x = ps.x; p.y = ps.y; p.vx = ps.vx; p.vy = ps.vy; p.angle = ps.a;
+        p.stamina = ps.st; p.isMoving = ps.m; p.isSprinting = ps.sp; p.isShielding = ps.sh;
+        p.isSliding = ps.sl; p.trickTimer = ps.tt; p.trickName = ps.tn; p.trickType = ps.tty;
+        p.stunTimer = ps.stn; p.yellowCards = ps.yc; p.redCards = ps.rc; p.sentOff = ps.so; p.role = ps.role;
+        if (p.isMoving) p.animCycle += p.isSprinting ? 0.38 : 0.25;
     });
+
+    if (st.ended && !matchEnded) {
+        triggerMatchOver();
+    }
 }
 
 // ==================== RENDEROWANIE STADIONU 2.5D ====================
@@ -2867,7 +3384,7 @@ function drawStadium25D() {
     ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'center';
     for (let bx = pitchX + 160; bx < pitchX + pitchW; bx += 340) {
-        ctx.fillText("⚽ PRO EVOLUTION RETRO 2.5D • REFEREE & KICKOFF EDITION ⚽", bx, pitchY - 22);
+        ctx.fillText("⚽ PRO EVOLUTION RETRO 2.5D • 1V1 MULTIPLAYER ARENA ⚽", bx, pitchY - 22);
     }
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
@@ -2968,7 +3485,7 @@ function drawGoal25D(lineX, centerY, isLeft, sway) {
     ctx.stroke();
 }
 
-function drawHUD() {
+function drawHUD(activeBlue, activeRed) {
     const mapW = 210;
     const mapH = 124;
     const mapX = canvas.width / 2 - mapW / 2;
@@ -2990,16 +3507,16 @@ function drawHUD() {
     ctx.lineTo(mapX + mapW / 2, mapY + mapH);
     ctx.stroke();
 
-    const active = getActivePlayer();
     for (let p of allPlayers) {
         if (p.sentOff) continue;
         let rx = mapX + (p.x / WORLD.width) * mapW;
         let ry = mapY + (p.y / WORLD.height) * mapH;
+        let isAct = (p === activeBlue || p === activeRed);
         ctx.beginPath();
-        ctx.arc(rx, ry, p === active ? 4.8 : 3.5, 0, Math.PI * 2);
+        ctx.arc(rx, ry, isAct ? 4.8 : 3.5, 0, Math.PI * 2);
         ctx.fillStyle = p.team === 'blue' ? '#42a5f5' : '#ef5350';
         ctx.fill();
-        if (p === active) {
+        if (isAct) {
             ctx.strokeStyle = '#ffeb3b';
             ctx.lineWidth = 1.5;
             ctx.stroke();
@@ -3017,7 +3534,7 @@ function drawHUD() {
     ctx.fill();
 
     if (goalCelebrationTimer > 0) {
-        ctx.fillStyle = 'rgba(8, 10, 18, 0.72)';
+        ctx.fillStyle = 'rgba(8, 10, 18, 0.78)';
         ctx.fillRect(0, canvas.height / 2 - 68, canvas.width, 125);
 
         ctx.font = '900 38px Segoe UI, sans-serif';
@@ -3043,6 +3560,16 @@ document.getElementById('btn-quick-start').addEventListener('click', () => {
     startMatchFromLobby();
 });
 
+document.getElementById('btn-copy-code').addEventListener('click', () => {
+    if (currentRoomShortCode && navigator.clipboard) {
+        navigator.clipboard.writeText(currentRoomShortCode);
+        document.getElementById('btn-copy-code').innerText = "✅ Skopiowano!";
+        setTimeout(() => {
+            document.getElementById('btn-copy-code').innerText = "📋 Kopiuj Kod";
+        }, 1800);
+    }
+});
+
 document.getElementById('formation-select').addEventListener('change', updateTacticalPreview);
 document.getElementById('tactic-select').addEventListener('change', updateTacticalPreview);
 document.getElementById('btn-back-menu').addEventListener('click', backToMainMenu);
@@ -3060,76 +3587,109 @@ function gameLoop(now = performance.now()) {
 
     tickCount++;
 
-    if (goalCelebrationTimer > 0) {
+    if (goalCelebrationTimer > 0 && mpRole !== 'client') {
         goalCelebrationTimer--;
     }
 
+    let activeBlue = null;
+    let activeRed = null;
+
     if (gameStarted && !matchEnded) {
-        if (matchPhase === 'GOAL_PAUSE') {
-            phaseTimer--;
-            ball.update();
-            referee.update();
-            if (phaseTimer <= 0) {
-                setupKickoff(pendingKickoffTeam);
-            }
-        } else if (matchPhase === 'KICKOFF_WAIT') {
-            phaseTimer--;
-            const activePlayer = getActivePlayer();
-            allPlayers.forEach(p => p.update(p === activePlayer));
-            ball.update();
-            referee.update();
-            if (phaseTimer <= 0) {
-                matchPhase = 'PLAYING';
-                clearAllInputStates();
-                referee.blowWhistle();
-                setFeedback("🔊 Gwizdek sędziego! Gra wznowiona ze środka!", "#00e676");
-            }
+        chargeState.update();
+
+        if (mpRole === 'client' && isOnline1v1()) {
+            // Klient wysyła swoje wejścia (Czerwoni) do Hosta i odbiera stan świata
+            sendClientInputToHost();
+            activeBlue = allPlayers[clientActiveBlueIdx] || null;
+            activeRed = allPlayers[clientActiveRedIdx] || null;
         } else {
-            matchTimeRemaining -= dt;
-            hudTimerEl.innerText = formatTimer(matchTimeRemaining);
+            // Host (lub tryb Solo) oblicza fizykę dla obu drużyn
+            activeBlue = getActivePlayer('blue');
+            activeRed = getActivePlayer('red');
 
-            if (matchTimeRemaining <= 30) {
-                hudTimerEl.style.background = 'linear-gradient(135deg, #ff5252, #d32f2f)';
-                hudTimerEl.style.color = '#ffffff';
-            } else {
-                hudTimerEl.style.background = 'linear-gradient(135deg, #ffd54f, #ffb300)';
-                hudTimerEl.style.color = '#0d101a';
-            }
+            const hostInputSource = {
+                keys: {
+                    KeyW: !!keys['KeyW'],
+                    KeyS: !!keys['KeyS'],
+                    KeyA: !!keys['KeyA'],
+                    KeyD: !!keys['KeyD'],
+                    Shift: !!(keys['ShiftLeft'] || keys['ShiftRight']),
+                    Space: !!keys['Space']
+                },
+                mouseX: mouse.worldX,
+                mouseY: mouse.worldY
+            };
 
-            if (matchTimeRemaining <= 0) {
-                matchTimeRemaining = 0;
-                hudTimerEl.innerText = "00:00";
-                triggerMatchOver();
-            } else {
-                chargeState.update();
-                const activePlayer = getActivePlayer();
-
-                allPlayers.forEach(p => p.update(p === activePlayer));
+            if (matchPhase === 'GOAL_PAUSE') {
+                phaseTimer--;
                 ball.update();
                 referee.update();
+                if (phaseTimer <= 0) {
+                    setupKickoff(pendingKickoffTeam);
+                }
+            } else if (matchPhase === 'KICKOFF_WAIT') {
+                phaseTimer--;
+                allPlayers.forEach(p => {
+                    if (p === activeBlue) p.update(true, hostInputSource);
+                    else if (p === activeRed && isOnline1v1()) p.update(true, remoteClientInput);
+                    else p.update(false, null);
+                });
+                ball.update();
+                referee.update();
+                if (phaseTimer <= 0) {
+                    matchPhase = 'PLAYING';
+                    clearAllInputStates();
+                    referee.blowWhistle();
+                    setFeedback("🔊 Gwizdek sędziego! Gra wznowiona ze środka!", "#00e676");
+                }
+            } else {
+                matchTimeRemaining -= dt;
+                hudTimerEl.innerText = formatTimer(matchTimeRemaining);
 
-                for (let i = 0; i < allPlayers.length; i++) {
-                    if (allPlayers[i].sentOff) continue;
-                    for (let j = i + 1; j < allPlayers.length; j++) {
-                        if (allPlayers[j].sentOff) continue;
-                        let p1 = allPlayers[i];
-                        let p2 = allPlayers[j];
-                        let dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-                        let minDist = p1.radius + p2.radius;
-                        if (dist < minDist && dist > 0.01) {
-                            let overlap = (minDist - dist) * 0.5;
-                            let angle = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-                            p1.x += Math.cos(angle) * overlap;
-                            p1.y += Math.sin(angle) * overlap;
-                            p2.x -= Math.cos(angle) * overlap;
-                            p2.y -= Math.sin(angle) * overlap;
+                if (matchTimeRemaining <= 0) {
+                    matchTimeRemaining = 0;
+                    hudTimerEl.innerText = "00:00";
+                    triggerMatchOver();
+                } else {
+                    allPlayers.forEach(p => {
+                        if (p === activeBlue) {
+                            p.update(true, hostInputSource);
+                        } else if (p === activeRed && isOnline1v1()) {
+                            // Drugi gracz (Klient) steruje aktywnym zawodnikiem Czerwonych!
+                            p.update(true, remoteClientInput);
+                        } else {
+                            p.update(false, null);
+                        }
+                    });
+                    ball.update();
+                    referee.update();
+
+                    for (let i = 0; i < allPlayers.length; i++) {
+                        if (allPlayers[i].sentOff) continue;
+                        for (let j = i + 1; j < allPlayers.length; j++) {
+                            if (allPlayers[j].sentOff) continue;
+                            let p1 = allPlayers[i];
+                            let p2 = allPlayers[j];
+                            let dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                            let minDist = p1.radius + p2.radius;
+                            if (dist < minDist && dist > 0.01) {
+                                let overlap = (minDist - dist) * 0.5;
+                                let angle = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+                                p1.x += Math.cos(angle) * overlap;
+                                p1.y += Math.sin(angle) * overlap;
+                                p2.x -= Math.cos(angle) * overlap;
+                                p2.y -= Math.sin(angle) * overlap;
+                            }
                         }
                     }
                 }
-
-                broadcastNetworkState();
             }
+
+            broadcastNetworkState();
         }
+    } else {
+        activeBlue = getActivePlayer('blue');
+        activeRed = getActivePlayer('red');
     }
 
     camera.update();
@@ -3140,7 +3700,6 @@ function gameLoop(now = performance.now()) {
     drawStadium25D();
     updateAndDrawParticles();
 
-    const activePlayer = getActivePlayer();
     const renderList = [
         ...allPlayers.filter(p => !p.sentOff).map(p => ({ type: 'player', y: p.y, obj: p })),
         { type: 'referee', y: referee.y, obj: referee },
@@ -3152,12 +3711,12 @@ function gameLoop(now = performance.now()) {
         if (item.type === 'ball' || item.type === 'referee') {
             item.obj.draw();
         } else {
-            item.obj.draw(item.obj === activePlayer);
+            item.obj.draw(item.obj === activeBlue, item.obj === activeRed);
         }
     }
 
     camera.restoreTransform();
-    drawHUD();
+    drawHUD(activeBlue, activeRed);
 
     requestAnimationFrame(gameLoop);
 }
