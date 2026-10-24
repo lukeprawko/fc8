@@ -706,137 +706,88 @@
     display: block;
   }
 
-  /* Nowoczesne, przezroczyste pływające GUI ze szkła akrylowego */
+  /* Dyskretne, minimalistyczne menu ikonowe w lewym górnym rogu */
   .stage-hud {
     position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 14px;
+    left: 14px;
     z-index: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: rgba(12, 15, 24, 0.65);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    gap: 4px;
+    padding: 4px 6px;
+    background: rgba(10, 13, 22, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 999px;
     box-shadow: 
-      0 16px 40px rgba(0, 0, 0, 0.65), 
-      0 0 20px rgba(0, 0, 0, 0.4), 
-      inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      0 8px 24px rgba(0, 0, 0, 0.55), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    opacity: 0.85;
   }
 
   .stage-hud:hover {
-    background: rgba(15, 18, 28, 0.82);
-    border-color: rgba(255, 255, 255, 0.18);
+    opacity: 1;
+    background: rgba(13, 16, 26, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
     box-shadow: 
-      0 20px 45px rgba(0, 0, 0, 0.75), 
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      0 12px 30px rgba(0, 0, 0, 0.7), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
 
-  /* Przycisk powrotu do Hubu */
-  .stage-hud-btn.back {
-    height: 36px;
-    padding: 0 14px 0 10px;
-    border-radius: 999px;
-    background: rgba(245, 158, 11, 0.16);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    color: #fbbf24;
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .stage-hud-btn.back:hover {
-    background: rgba(245, 158, 11, 0.28);
-    border-color: var(--gold);
-    color: #ffffff;
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
-    transform: translateY(-1px);
-  }
-
-  .stage-hud-btn.back svg {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.2s ease;
-  }
-
-  .stage-hud-btn.back:hover svg {
-    transform: translateX(-2px);
-  }
-
-  .stage-hud-btn.back kbd {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    color: #fcd34d;
-  }
-
-  /* Nazwa gry w HUD z diodą live */
-  .hud-game-name {
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 13.5px;
-    letter-spacing: -0.2px;
-    color: #ffffff;
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .hud-game-name i {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    display: inline-block;
-  }
-
-  /* Okrągłe, przezroczyste przyciski ikonowe */
   .stage-hud-icon-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: #cbd5e1;
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .stage-hud-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.25);
     color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   }
 
   .stage-hud-icon-btn:active {
-    transform: translateY(0);
+    transform: scale(0.95);
     background: rgba(255, 255, 255, 0.22);
   }
 
+  /* Przycisk powrotu do Hubu - złoty akcent NOVA */
+  .stage-hud-icon-btn.back {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.28);
+    color: #fbbf24;
+  }
+
+  .stage-hud-icon-btn.back:hover {
+    background: rgba(245, 158, 11, 0.28);
+    border-color: var(--gold);
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+  }
+
   .stage-hud-icon-btn svg {
-    width: 16px;
+    width: 15px;
+    height: 15px;
+    display: block;
+  }
+
+  .stage-hud-divider {
+    width: 1px;
     height: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 2px;
   }
 
   /* ---------- PANEL ADMINA (F2) ---------- */
@@ -1167,22 +1118,18 @@
 
 <!-- EKRAN GRY (STAGE / MODAL PEŁNY EKRAN) -->
 <div id="stage">
-  <div class="stage-hud" id="stageHud">
-    <button type="button" class="stage-hud-btn back" onclick="closeGame()" title="Wróć do listy gier (ESC)">
+  <div class="stage-hud" id="stageHud" title="NOVA Arcade">
+    <button type="button" class="stage-hud-icon-btn back" onclick="closeGame()" title="Wróć do Hubu (ESC)" aria-label="Wróć do Hubu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-      <span>Hub</span>
-      <kbd>ESC</kbd>
     </button>
-    <div class="hud-game-name">
-      <i></i>
-      <span id="hudGameTitle">Gra</span>
-    </div>
-    <button type="button" class="stage-hud-icon-btn" onclick="reloadGameFrame()" title="Przeładuj grę">
+    <div class="stage-hud-divider"></div>
+    <button type="button" class="stage-hud-icon-btn" onclick="reloadGameFrame()" title="Przeładuj grę" aria-label="Przeładuj grę">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
     </button>
-    <button type="button" class="stage-hud-icon-btn" onclick="toggleFullscreen()" title="Tryb pełnoekranowy">
+    <button type="button" class="stage-hud-icon-btn" onclick="toggleFullscreen()" title="Tryb pełnoekranowy" aria-label="Tryb pełnoekranowy">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
     </button>
+    <span id="hudGameTitle" style="display:none;" aria-hidden="true"></span>
   </div>
   <iframe id="gameFrame" src="about:blank" allow="autoplay; fullscreen; gamepad; cross-origin-isolated"></iframe>
 </div>
@@ -1600,7 +1547,10 @@ function launchGame(url, title) {
   activeGameUrl = url;
   const frame = document.getElementById('gameFrame');
   frame.src = url;
-  document.getElementById('hudGameTitle').textContent = title || 'Gra';
+  const titleEl = document.getElementById('hudGameTitle');
+  if (titleEl) titleEl.textContent = title || 'Gra';
+  const hud = document.getElementById('stageHud');
+  if (hud) hud.title = `${title || 'Gra'} • ESC aby wyjść`;
   document.getElementById('stage').classList.add('open');
   frame.focus();
 }
