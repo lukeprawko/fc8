@@ -349,18 +349,18 @@
   /* PRZYCISKI AKCJI Z IKONAMI */
   .solo-btns-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
   }
   .action-btn {
     width: 100%;
-    padding: 12px 12px;
+    padding: 12px 10px;
     border: none;
     border-radius: 12px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 1.2px;
+    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
@@ -368,7 +368,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
   }
   .action-btn svg {
     width: 16px;
@@ -394,6 +394,12 @@
     box-shadow: 0 6px 20px rgba(0, 180, 219, 0.3);
   }
   .btn-play-solo2v2:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 0 25px rgba(0, 240, 255, 0.55); }
+
+  .btn-play-arcade {
+    background: linear-gradient(135deg, #f5b041, #d97706);
+    box-shadow: 0 6px 20px rgba(245, 176, 65, 0.35);
+  }
+  .btn-play-arcade:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 0 25px rgba(245, 176, 65, 0.65); }
 
   .btn-host {
     background: linear-gradient(135deg, #00b4db, #0077b6);
@@ -428,6 +434,81 @@
   }
   .btn-join:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 0 25px rgba(255, 0, 85, 0.55); }
 
+  /* WYBÓR CYBER-ARENY */
+  .arena-selector-wrap {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .arena-selector-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--p1);
+  }
+  .arena-selector-label svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    filter: drop-shadow(0 0 6px var(--p1));
+  }
+  .arena-tiles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .arena-tile {
+    background: rgba(6, 9, 16, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .arena-tile:hover {
+    border-color: rgba(0, 240, 255, 0.4);
+  }
+  .arena-tile.active {
+    border-color: var(--p1);
+    background: rgba(0, 240, 255, 0.14);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+  }
+  .arena-tile .arena-icon {
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .arena-tile .arena-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    color: #fff;
+    pointer-events: none;
+  }
+  .arena-tile .arena-sub {
+    font-size: 9px;
+    font-weight: 600;
+    color: #8b949e;
+    pointer-events: none;
+  }
+  .arena-tile.active .arena-sub {
+    color: var(--p1);
+  }
+
   /* PANEL OCZEKIWANIA 1v1 */
   .wait-panel {
     background: var(--panel);
@@ -440,13 +521,37 @@
     text-align: center;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
   }
+  .code-box-wrap {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    margin: 8px 0;
+    transition: transform 0.15s ease;
+  }
+  .code-box-wrap:hover {
+    transform: scale(1.02);
+  }
+  .code-box-wrap:active {
+    transform: scale(0.98);
+  }
+  .copy-hint {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: #8b949e;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    transition: color 0.15s;
+  }
+  .code-box-wrap:hover .copy-hint {
+    color: var(--p1);
+  }
   #roomCodeDisplay, #lobbyCodeDisplay {
     font-family: 'Orbitron', sans-serif;
     font-size: 30px;
     font-weight: 900;
     letter-spacing: 8px;
     color: var(--p1);
-    margin: 10px 0;
+    margin: 4px 0;
     background: #05070b;
     padding: 10px 18px;
     border-radius: 14px;
@@ -816,6 +921,46 @@
     height: 100%;
   }
 
+  /* WIRTUALNE PRZYCISKI DOTYKOWE NA TELEFON / TABLET */
+  .touch-controls {
+    display: none;
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 80;
+  }
+  .touch-btn {
+    pointer-events: auto;
+    background: rgba(10, 16, 28, 0.85);
+    border: 2px solid var(--p1);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    touch-action: manipulation;
+    user-select: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+    transition: transform 0.08s, background 0.08s;
+  }
+  .touch-btn:active {
+    transform: scale(0.92);
+    background: rgba(0, 240, 255, 0.35);
+  }
+  .touch-btn.touch-smash {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .touch-btn.touch-smash:active {
+    background: rgba(245, 176, 65, 0.35);
+  }
+
   /* MODAL KOŃCA MECZU I ROZŁĄCZENIA GRACZA */
   #victoryModal, #disconnectModal {
     display: none;
@@ -834,11 +979,11 @@
   }
   #victoryModal h2, #disconnectModal h2 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 36px;
+    font-size: clamp(24px, 5vw, 36px);
     margin-bottom: 8px;
   }
   #victoryModal p, #disconnectModal p {
-    font-size: 18px;
+    font-size: clamp(14px, 3.5vw, 18px);
     color: #8b949e;
     margin-bottom: 22px;
   }
@@ -846,10 +991,207 @@
     display: flex;
     gap: 12px;
     width: 320px;
+    max-width: 90vw;
     justify-content: center;
   }
 
   .hidden { display: none !important; }
+
+  /* ==========================================
+     RESPONSYWNOŚĆ DLA SMARTFONÓW I TABLETÓW
+     ========================================== */
+  @media (max-width: 768px), (pointer: coarse) {
+    .touch-controls {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .app-layer {
+      padding: 6px;
+      justify-content: flex-start;
+      overflow-y: auto;
+    }
+    .logo-wrap {
+      margin-bottom: 6px;
+    }
+    .logo-wrap h1 {
+      font-size: 26px;
+      letter-spacing: 4px;
+    }
+    .hub-panel {
+      padding: 12px;
+      width: 100%;
+      max-width: 98vw;
+      gap: 10px;
+      border-radius: 16px;
+    }
+    .top-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .nick-box {
+      padding: 8px 12px;
+    }
+    .nick-box input {
+      font-size: 14px;
+    }
+    .ctrl-tile {
+      padding: 6px;
+    }
+    .ctrl-tile svg {
+      width: 20px;
+      height: 20px;
+    }
+    .ctrl-tile span {
+      font-size: 9px;
+    }
+    .arena-selector-wrap {
+      padding: 8px 10px;
+      gap: 6px;
+    }
+    .arena-selector-label {
+      font-size: 9px;
+    }
+    .arena-tiles-grid {
+      gap: 5px;
+    }
+    .arena-tile {
+      padding: 5px 2px;
+    }
+    .arena-tile .arena-icon {
+      font-size: 13px;
+    }
+    .arena-tile .arena-name {
+      font-size: 8px;
+      letter-spacing: 0.3px;
+    }
+    .arena-tile .arena-sub {
+      font-size: 7.5px;
+    }
+    .modes-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .mode-card {
+      padding: 12px;
+      gap: 8px;
+    }
+    .mode-icon {
+      width: 32px;
+      height: 32px;
+    }
+    .mode-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .mode-title {
+      font-size: 13px;
+    }
+    .tier-row {
+      grid-template-columns: 78px 1fr;
+      padding: 4px 6px;
+    }
+    .tier-tag {
+      font-size: 8px;
+    }
+    .tier-tag svg {
+      width: 12px;
+      height: 12px;
+    }
+    .tier-btn {
+      padding: 5px 2px;
+      font-size: 8.5px;
+    }
+    .solo-btns-row {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5px;
+    }
+    .solo-btns-row .action-btn {
+      font-size: 8.5px;
+      padding: 9px 3px;
+      letter-spacing: 0.5px;
+    }
+    .solo-btns-row .action-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+    .mp-tiers .tier-btn.mp-mode {
+      padding: 8px 4px;
+      font-size: 10px;
+    }
+    .join-row input {
+      font-size: 12px;
+      padding: 0 6px;
+    }
+    .btn-join {
+      font-size: 10px;
+      padding: 9px;
+    }
+    .wait-panel, .lobby-panel {
+      padding: 14px;
+      width: 96vw;
+    }
+    #roomCodeDisplay, #lobbyCodeDisplay {
+      font-size: 22px;
+      letter-spacing: 4px;
+      padding: 6px 10px;
+    }
+    .lobby-teams-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .lobby-slot {
+      min-height: 44px;
+      padding: 6px 8px;
+    }
+    #gameWrapper {
+      width: 100vw;
+      max-width: 100vw;
+    }
+    #hud {
+      padding: 5px 10px;
+    }
+    .team-name {
+      font-size: 11px;
+      max-width: 105px;
+    }
+    .stamina-bar-wrap {
+      width: 80px;
+      height: 5px;
+    }
+    #hudScore {
+      font-size: 18px;
+      padding: 2px 10px;
+      letter-spacing: 2px;
+    }
+    #upgradesPanel {
+      padding: 4px 6px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .stat-item {
+      padding: 2px 5px;
+      font-size: 10px;
+      gap: 3px;
+    }
+    .dot {
+      width: 4px;
+      height: 7px;
+    }
+    .stat-btn {
+      padding: 2px 4px;
+      font-size: 8.5px;
+    }
+    .up-badge {
+      font-size: 9px;
+      padding: 2px 5px;
+    }
+    .icon-btn {
+      font-size: 8.5px;
+      padding: 3px 6px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -880,6 +1222,31 @@
           <div class="ctrl-tile" id="ctrlMouse" onclick="selectControl('mouse')">
             <svg viewBox="0 0 24 24"><path d="M13 1.07V9h7c0-4.08-3.05-7.44-7-7.93zM4 15c0 4.42 3.58 8 8 8s8-3.58 8-8v-4H4v4zm7-13.93C7.05 1.56 4 4.92 4 9h7V1.07z"/></svg>
             <span>MYSZKA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WYBÓR CYBER-ARENY -->
+      <div class="arena-selector-wrap">
+        <div class="arena-selector-label">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          <span>WYBIERZ CYBER-ARENĘ</span>
+        </div>
+        <div class="arena-tiles-grid">
+          <div class="arena-tile active" id="arena-tokio" onclick="selectArena('tokio')">
+            <span class="arena-icon">⚡</span>
+            <span class="arena-name">NEO-TOKIO</span>
+            <span class="arena-sub">KLASYCZNA</span>
+          </div>
+          <div class="arena-tile" id="arena-hex" onclick="selectArena('hex')">
+            <span class="arena-icon">🛑</span>
+            <span class="arena-name">HEX-ARENA</span>
+            <span class="arena-sub">SKOŚNE ROGI</span>
+          </div>
+          <div class="arena-tile" id="arena-pinball" onclick="selectArena('pinball')">
+            <span class="arena-icon">🎯</span>
+            <span class="arena-name">PINBALL</span>
+            <span class="arena-sub">BUMPERS</span>
           </div>
         </div>
       </div>
@@ -933,6 +1300,10 @@
               <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
               <span>2 VS 2</span>
             </button>
+            <button type="button" class="action-btn btn-play-arcade" onclick="startWallArcade()">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H7v-4h4v4zm0-6H7V7h4v4zm6 6h-4v-4h4v4zm0-6h-4V7h4v4z"/></svg>
+              <span>ŚCIANA</span>
+            </button>
           </div>
         </div>
 
@@ -980,14 +1351,20 @@
     <!-- EKRAN OCZEKIWANIA HOSTA 1 VS 1 -->
     <div class="wait-panel hidden" id="waitPanel">
       <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU</div>
-      <div id="roomCodeDisplay">------</div>
-      <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">WRÓĆ</button>
+      <div class="code-box-wrap" onclick="copyRoomCodeToClipboard()" title="Kliknij, aby skopiować kod!">
+        <div id="roomCodeDisplay">------</div>
+        <div class="copy-hint">📋 KLIKNIJ ABY SKOPIOWAĆ</div>
+      </div>
+      <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">WRÓĆ</button>
     </div>
 
     <!-- EKRAN LOBBY 2 VS 2 -->
     <div class="lobby-panel hidden" id="lobby2v2Panel">
       <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2 — KOD POKOJU</div>
-      <div id="lobbyCodeDisplay">------</div>
+      <div class="code-box-wrap" onclick="copyRoomCodeToClipboard()" title="Kliknij, aby skopiować kod!">
+        <div id="lobbyCodeDisplay">------</div>
+        <div class="copy-hint">📋 KLIKNIJ ABY SKOPIOWAĆ</div>
+      </div>
 
       <!-- PASEK SZYBKICH PRESETÓW DLA HOSTA -->
       <div class="lobby-presets-bar" id="hostPresetsBar">
@@ -1015,7 +1392,7 @@
 
       <div class="lobby-actions">
         <button type="button" class="action-btn btn-host" id="btnStart2v2" onclick="hostStart2v2Match()" disabled>START MECZU</button>
-        <button type="button" class="action-btn" style="background:#21262d; width: 42%;" onclick="location.reload()">OPUŚĆ</button>
+        <button type="button" class="action-btn" style="background:#21262d; width: 42%;" onclick="returnToMenu()">OPUŚĆ</button>
       </div>
     </div>
   </div>
@@ -1095,13 +1472,19 @@
     <div class="canvas-container">
       <canvas id="stage" width="900" height="500"></canvas>
 
+      <!-- PRZYCISKI DOTYKOWE NA MOBILKI -->
+      <div id="touchControls" class="touch-controls">
+        <button type="button" id="touchDashBtn" class="touch-btn touch-dash">⚡ DASH</button>
+        <button type="button" id="touchSmashBtn" class="touch-btn touch-smash">💥 SMASH</button>
+      </div>
+
       <!-- MODAL ZWYCIĘSTWA -->
       <div id="victoryModal">
         <h2 id="winnerTitle">ZWYCIĘSTWO!</h2>
         <p id="winnerSub">7 : 0</p>
         <div class="modal-actions">
-          <button type="button" class="action-btn btn-host" onclick="requestRematch()">REWANŻ</button>
-          <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">MENU</button>
+          <button type="button" class="action-btn btn-host" id="btnRematch" onclick="requestRematch()">REWANŻ</button>
+          <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">MENU</button>
         </div>
       </div>
 
@@ -1110,7 +1493,7 @@
         <h2 style="color: var(--p2);">MECZ PRZERWANY</h2>
         <p id="disconnectSub">Gracz X rozłączył się</p>
         <div class="modal-actions">
-          <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">POWRÓT DO MENU</button>
+          <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">POWRÓT DO MENU</button>
         </div>
       </div>
     </div>
@@ -1120,17 +1503,23 @@
 
 <script>
 /* ==========================================
-   1. BLOKADA PRZEWIJANIA I PRAWEGO PRZYCISKU
+   1. BLOKADA PRZEWIJANIA I KONTROLA MENU KONTEKSTOWEGO
    ========================================== */
-window.addEventListener('contextmenu', e => e.preventDefault());
-window.addEventListener('wheel', e => e.preventDefault(), { passive: false });
-window.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+window.addEventListener('contextmenu', e => {
+  if (gameActive) e.preventDefault();
+});
+window.addEventListener('wheel', e => {
+  if (gameActive) e.preventDefault();
+}, { passive: false });
+window.addEventListener('touchmove', e => {
+  if (gameActive) e.preventDefault();
+}, { passive: false });
 
 /* ==========================================
    2. ZMIENNE GLOBALNE, NETCODE I KONFIGURACJA
    ========================================== */
-const UP_MODE = 'personal';
 const NICK_STORAGE_KEY = 'cyberpong_player_nick';
+const WALL_RECORD_KEY = 'cyberpong_wall_record';
 
 const W = 900, H = 500;
 const WIN_SCORE = 7;
@@ -1153,6 +1542,29 @@ let mouseY = H / 2;
 
 let mpMode = '1v1';
 let is2v2 = false;
+let isWallArcade = false;
+let wallScore = 0;
+let wallRecordAtStart = 0;
+let hasBeatenWallRecord = false;
+
+// Zróżnicowane Cyber-Areny: 'tokio' (klasyczna), 'hex' (skośne rogi), 'pinball' (bumpers)
+let selectedArena = 'tokio';
+const HEX_CORNER_SIZE = 95;
+let bumpers = [
+  { x: W / 2, y: H * 0.30, r: 33, flash: 0 },
+  { x: W / 2, y: H * 0.70, r: 33, flash: 0 }
+];
+
+function selectArena(name) {
+  selectedArena = name;
+  ['tokio', 'hex', 'pinball'].forEach(a => {
+    const el = document.getElementById('arena-' + a);
+    if (el) el.classList.toggle('active', a === name);
+  });
+  if (isHost && is2v2) {
+    broadcastLobbyState();
+  }
+}
 
 let enemyAiLevel = 'medium';
 let allyAiLevel = 'medium';
@@ -1185,6 +1597,20 @@ let currentRoomCode = '';
 let isHost = true, isSinglePlayer = false;
 let myName = '', oppName = 'BOT';
 let keys = {};
+
+// Automatyczne wykrycie kodu pokoju z adresu URL (np. pingpong.html#ABCDEF)
+if (window.location.hash && window.location.hash.length >= 7) {
+  const hashVal = window.location.hash.slice(1).trim().toUpperCase();
+  if (hashVal.length === 6) {
+    setTimeout(() => {
+      const ji = document.getElementById('joinInput');
+      if (ji) {
+        ji.value = hashVal;
+        setStatus(`KOD POKOJU Z LINKU: ${hashVal}`);
+      }
+    }, 200);
+  }
+}
 
 // Wczytanie i automatyczny zapis nicku w localStorage
 const nickInputEl = document.getElementById('nickInput');
@@ -1321,7 +1747,15 @@ function initPaddlesArray(mode2v2, slotsData = null) {
   const bh = getBasePaddleHeight();
   paddles = [];
 
-  if (!mode2v2) {
+  if (isWallArcade) {
+    paddles.push(createPaddleObj({
+      id: 0, team: 1, slot: 0,
+      x: 28, y: H / 2 - bh / 2, h: bh,
+      color: '#00f0ff', nick: myName,
+      isBot: false, botTier: 'medium', isLocal: true
+    }));
+    localPaddleId = 0;
+  } else if (!mode2v2) {
     const p0Nick = isSinglePlayer ? myName : (isHost ? myName : oppName);
     const p1Nick = isSinglePlayer ? oppName : (isHost ? oppName : myName);
     const p0Local = isSinglePlayer ? true : isHost;
@@ -1381,7 +1815,17 @@ function setupHudElements() {
   const hud = document.getElementById('hud');
   hud.classList.toggle('hud-2v2', is2v2);
 
-  if (!is2v2) {
+  if (isWallArcade) {
+    document.getElementById('hudMember0').classList.remove('hidden');
+    document.getElementById('hudMember1').classList.add('hidden');
+    document.getElementById('hudMember2').classList.remove('hidden');
+    document.getElementById('hudMember3').classList.add('hidden');
+
+    document.getElementById('hudNick0').textContent = paddles[0] ? paddles[0].nick : myName;
+    const bestScore = parseInt(localStorage.getItem(WALL_RECORD_KEY) || '0', 10);
+    document.getElementById('hudNick2').textContent = `REKORD: ${bestScore}`;
+    document.getElementById('hudScore').textContent = 'HITS: 0';
+  } else if (!is2v2) {
     document.getElementById('hudMember0').classList.remove('hidden');
     document.getElementById('hudMember1').classList.add('hidden');
     document.getElementById('hudMember2').classList.remove('hidden');
@@ -1477,7 +1921,7 @@ function animateMenuBg() {
 animateMenuBg();
 
 /* ==========================================
-   4. SYNTEZATOR DŹWIĘKU (Web Audio API)
+   4. SYNTEZATOR DŹWIĘKU I MUZYKI SYNTHWAVE (Web Audio API)
    ========================================== */
 const SFX = {
   ctx: null,
@@ -1504,7 +1948,7 @@ const SFX = {
 
       if (type === 'hit') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(320, now);
         osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
         gain.gain.setValueAtTime(0.22, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
@@ -1512,27 +1956,27 @@ const SFX = {
       } else if (type === 'spinHit') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(240, now);
-        osc.frequency.exponentialRampToValueAtTime(520, now + 0.13);
+        osc.frequency.exponentialRampToValueAtTime(560, now + 0.13);
         gain.gain.setValueAtTime(0.28, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.13);
         osc.start(now); osc.stop(now + 0.13);
       } else if (type === 'smash') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.setValueAtTime(190, now);
         osc.frequency.exponentialRampToValueAtTime(45, now + 0.22);
         gain.gain.setValueAtTime(0.38, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
         osc.start(now); osc.stop(now + 0.22);
       } else if (type === 'wall') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(210, now);
+        osc.frequency.setValueAtTime(220, now);
         osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
         osc.start(now); osc.stop(now + 0.05);
       } else if (type === 'dash') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(580, now);
+        osc.frequency.setValueAtTime(600, now);
         osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
@@ -1552,19 +1996,298 @@ const SFX = {
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'bumper') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(740, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.14);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
+        osc.start(now); osc.stop(now + 0.14);
+        try {
+          const osc2 = this.ctx.createOscillator();
+          const gain2 = this.ctx.createGain();
+          osc2.type = 'triangle';
+          osc2.frequency.setValueAtTime(1480, now);
+          osc2.frequency.exponentialRampToValueAtTime(700, now + 0.09);
+          gain2.gain.setValueAtTime(0.18, now);
+          gain2.gain.linearRampToValueAtTime(0.01, now + 0.09);
+          osc2.connect(gain2); gain2.connect(this.ctx.destination);
+          osc2.start(now); osc2.stop(now + 0.09);
+        } catch (e) {}
       }
     } catch (e) {}
+  },
+
+  /* PROCEDURALNA MUZYKA SYNTHWAVE BEZ ZEWNĘTRZNYCH PLIKÓW */
+  music: {
+    isPlaying: false,
+    timerId: null,
+    step: 0,
+    tempo: 122,
+    nextNoteTime: 0,
+    masterGain: null,
+    filterNode: null,
+
+    init(audioCtx) {
+      if (this.masterGain || !audioCtx) return;
+      this.masterGain = audioCtx.createGain();
+      this.masterGain.gain.value = 0.16;
+
+      this.filterNode = audioCtx.createBiquadFilter();
+      this.filterNode.type = 'lowpass';
+      this.filterNode.frequency.value = 1600;
+
+      this.masterGain.connect(this.filterNode);
+      this.filterNode.connect(audioCtx.destination);
+    },
+
+    start() {
+      if (this.isPlaying || SFX.muted) return;
+      SFX.init();
+      if (!SFX.ctx) return;
+      this.init(SFX.ctx);
+      this.isPlaying = true;
+      this.step = 0;
+      this.nextNoteTime = SFX.ctx.currentTime + 0.05;
+      this.schedule();
+    },
+
+    stop() {
+      this.isPlaying = false;
+      if (this.timerId) {
+        clearTimeout(this.timerId);
+        this.timerId = null;
+      }
+    },
+
+    schedule() {
+      if (!this.isPlaying || !SFX.ctx) return;
+      const secondsPerBeat = 60.0 / this.tempo;
+      const stepDuration = secondsPerBeat / 4;
+
+      while (this.nextNoteTime < SFX.ctx.currentTime + 0.16) {
+        this.playStep(this.step, this.nextNoteTime);
+        this.step = (this.step + 1) % 32;
+        this.nextNoteTime += stepDuration;
+      }
+      this.timerId = setTimeout(() => this.schedule(), 40);
+    },
+
+    playStep(step, time) {
+      const ctx = SFX.ctx;
+      if (!ctx || SFX.muted) return;
+
+      // 1. Linia basowa Synthwave (D-moll)
+      const bassNotes = [
+        73.42, 73.42, 146.83, 73.42,  87.31, 87.31, 73.42, 73.42,
+        98.00, 98.00, 87.31, 87.31,   110.00, 110.00, 98.00, 87.31,
+        73.42, 73.42, 146.83, 73.42,  87.31, 87.31, 73.42, 73.42,
+        130.81, 130.81, 110.00, 110.00, 98.00, 98.00, 87.31, 65.41
+      ];
+
+      const freq = bassNotes[step % bassNotes.length];
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const bFilter = ctx.createBiquadFilter();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+
+      bFilter.type = 'lowpass';
+      bFilter.frequency.setValueAtTime(500, time);
+      bFilter.frequency.exponentialRampToValueAtTime(140, time + 0.08);
+
+      gain.gain.setValueAtTime(0.22, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
+
+      osc.connect(bFilter);
+      bFilter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(time);
+      osc.stop(time + 0.09);
+
+      // 2. Stopa (Kick 808) na cztery ćwierćnuty
+      if (step % 4 === 0) {
+        const kOsc = ctx.createOscillator();
+        const kGain = ctx.createGain();
+        kOsc.type = 'sine';
+        kOsc.frequency.setValueAtTime(130, time);
+        kOsc.frequency.exponentialRampToValueAtTime(35, time + 0.07);
+        kGain.gain.setValueAtTime(0.32, time);
+        kGain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+        kOsc.connect(kGain);
+        kGain.connect(this.masterGain);
+        kOsc.start(time);
+        kOsc.stop(time + 0.08);
+      }
+
+      // 3. Werbel / Clap na 2 i 4 miarę
+      if (step % 8 === 4) {
+        try {
+          const bufLen = Math.floor(ctx.sampleRate * 0.05);
+          const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+          const out = noiseBuf.getChannelData(0);
+          for (let i = 0; i < bufLen; i++) out[i] = Math.random() * 2 - 1;
+
+          const noise = ctx.createBufferSource();
+          noise.buffer = noiseBuf;
+          const nFilter = ctx.createBiquadFilter();
+          nFilter.type = 'bandpass';
+          nFilter.frequency.value = 1000;
+
+          const sGain = ctx.createGain();
+          sGain.gain.setValueAtTime(0.22, time);
+          sGain.gain.exponentialRampToValueAtTime(0.01, time + 0.06);
+
+          noise.connect(nFilter);
+          nFilter.connect(sGain);
+          sGain.connect(this.masterGain);
+          noise.start(time);
+          noise.stop(time + 0.06);
+        } catch (e) {}
+      }
+
+      // 4. Hi-Hat na off-beat
+      if (step % 2 === 1) {
+        try {
+          const hLen = Math.floor(ctx.sampleRate * 0.02);
+          const hBuf = ctx.createBuffer(1, hLen, ctx.sampleRate);
+          const hData = hBuf.getChannelData(0);
+          for (let i = 0; i < hLen; i++) hData[i] = (Math.random() * 2 - 1) * 0.35;
+
+          const hSrc = ctx.createBufferSource();
+          hSrc.buffer = hBuf;
+          const hFilt = ctx.createBiquadFilter();
+          hFilt.type = 'highpass';
+          hFilt.frequency.value = 7000;
+
+          const hGain = ctx.createGain();
+          hGain.gain.setValueAtTime(step % 4 === 2 ? 0.09 : 0.05, time);
+          hGain.gain.exponentialRampToValueAtTime(0.005, time + 0.02);
+
+          hSrc.connect(hFilt);
+          hFilt.connect(hGain);
+          hGain.connect(this.masterGain);
+          hSrc.start(time);
+          hSrc.stop(time + 0.02);
+        } catch (e) {}
+      }
+
+      // 5. Arpeggio melodyczne Synth lead w tle
+      if (step % 2 === 0) {
+        const leadScale = [293.66, 349.23, 392.00, 440.00, 523.25, 587.33];
+        const note = leadScale[(step * 3) % leadScale.length];
+        const lOsc = ctx.createOscillator();
+        const lGain = ctx.createGain();
+        lOsc.type = 'sine';
+        lOsc.frequency.setValueAtTime(note, time);
+        lGain.gain.setValueAtTime(0.04, time);
+        lGain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+        lOsc.connect(lGain);
+        lGain.connect(this.masterGain);
+        lOsc.start(time);
+        lOsc.stop(time + 0.08);
+      }
+    }
+  },
+
+  startMusic() {
+    this.music.start();
+  },
+  stopMusic() {
+    this.music.stop();
   }
 };
 
 function toggleMute() {
   SFX.muted = !SFX.muted;
   document.getElementById('muteBtn').textContent = SFX.muted ? '🔇' : '🔊';
+  if (SFX.muted) {
+    SFX.stopMusic();
+  } else if (gameActive && !matchPaused) {
+    SFX.startMusic();
+  }
 }
 
 /* ==========================================
-   5. STEROWANIE I INTERFEJS MENU
+   5. STEROWANIE, SPA POWRÓT DO MENU I KOPIOWANIE KODU
    ========================================== */
+function copyRoomCodeToClipboard() {
+  if (!currentRoomCode) return;
+  const url = `${window.location.origin}${window.location.pathname}#${currentRoomCode}`;
+  window.location.hash = currentRoomCode;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(currentRoomCode).then(() => {
+      showCopyNotification();
+    }).catch(() => {
+      showCopyNotification();
+    });
+  } else {
+    showCopyNotification();
+  }
+}
+
+function showCopyNotification() {
+  const el1 = document.getElementById('roomCodeDisplay');
+  const el2 = document.getElementById('lobbyCodeDisplay');
+  if (el1) el1.innerHTML = `${currentRoomCode} <span style="font-size:11px;color:#7ee787;display:block;letter-spacing:1px;">✓ SKOPIOWANO!</span>`;
+  if (el2) el2.innerHTML = `${currentRoomCode} <span style="font-size:11px;color:#7ee787;display:block;letter-spacing:1px;">✓ SKOPIOWANO!</span>`;
+  setTimeout(() => {
+    if (el1) el1.textContent = currentRoomCode;
+    if (el2) el2.textContent = currentRoomCode;
+  }, 1600);
+}
+
+function returnToMenu() {
+  gameActive = false;
+  matchOver = false;
+  matchPaused = false;
+  isWallArcade = false;
+
+  SFX.stopMusic();
+
+  if (pingIntervalId) {
+    clearInterval(pingIntervalId);
+    pingIntervalId = null;
+  }
+
+  if (conn) {
+    try { conn.close(); } catch (e) {}
+    conn = null;
+  }
+  if (fastConn) {
+    try { fastConn.close(); } catch (e) {}
+    fastConn = null;
+  }
+  for (const pid in hostClients) {
+    try {
+      if (hostClients[pid].ctrlConn) hostClients[pid].ctrlConn.close();
+      if (hostClients[pid].fastConn) hostClients[pid].fastConn.close();
+    } catch (e) {}
+    delete hostClients[pid];
+  }
+  if (peer) {
+    try { peer.destroy(); } catch (e) {}
+    peer = null;
+  }
+
+  document.getElementById('victoryModal').style.display = 'none';
+  document.getElementById('disconnectModal').style.display = 'none';
+  document.getElementById('gameWrapper').style.display = 'none';
+
+  document.getElementById('menu').style.display = 'flex';
+  document.getElementById('mainPanel').classList.remove('hidden');
+  document.getElementById('waitPanel').classList.add('hidden');
+  document.getElementById('lobby2v2Panel').classList.add('hidden');
+  document.getElementById('bgCanvas').style.display = 'block';
+
+  lobbySlots = [null, null, null, null];
+  selectedSwapSlot = null;
+  currentRoomCode = '';
+  setStatus('');
+}
 function selectControl(mode) {
   controlMode = mode;
   document.getElementById('ctrlKeyboard').classList.toggle('active', mode === 'keyboard');
@@ -1677,17 +2400,21 @@ function enforceTeamPaddleConstraints() {
 
   for (const [topP, botP] of pairs) {
     if (!topP || !botP) continue;
-    const minGap = 4;
+    const minGap = 6;
     const overlap = (topP.y + topP.h + minGap) - botP.y;
     if (overlap > 0) {
-      if (topP.isLocal && !botP.isLocal) {
-        topP.y = Math.max(10, botP.y - topP.h - minGap);
-      } else if (botP.isLocal && !topP.isLocal) {
-        botP.y = Math.min(H - botP.h - 10, topP.y + topP.h + minGap);
-      } else {
-        const mid = (topP.y + topP.h + botP.y) / 2;
-        topP.y = Math.max(10, mid - minGap / 2 - topP.h);
-        botP.y = Math.min(H - botP.h - 10, topP.y + topP.h + minGap);
+      // Płynne, sprężyste rozsuwanie paletek (soft spring separation)
+      const push = overlap * 0.45;
+      topP.y = Math.max(10, topP.y - push);
+      botP.y = Math.min(H - botP.h - 10, botP.y + push);
+
+      if (topP.y + topP.h + minGap > botP.y) {
+        const diff = (topP.y + topP.h + minGap) - botP.y;
+        if (botP.y + diff <= H - botP.h - 10) {
+          botP.y += diff;
+        } else {
+          topP.y = Math.max(10, topP.y - diff);
+        }
       }
     }
   }
@@ -1726,8 +2453,26 @@ function sendStatsUpdate() {
 }
 
 /* ==========================================
-   7. TRYBY SOLO (1v1 + 2v2) ORAZ MULTIPLAYER P2P
+   7. TRYBY SOLO (1v1, 2v2, ŚCIANA ARCADE) ORAZ MULTIPLAYER P2P
    ========================================== */
+function startWallArcade() {
+  const validNick = requireAndSavePlayerNick();
+  if (!validNick) return;
+
+  SFX.init();
+  myName = validNick;
+  oppName = 'ŚCIANA ENERGII';
+  isHost = true;
+  isSinglePlayer = true;
+  is2v2 = false;
+  isWallArcade = true;
+  wallScore = 0;
+  wallRecordAtStart = parseInt(localStorage.getItem(WALL_RECORD_KEY) || '0', 10);
+  hasBeatenWallRecord = false;
+  localPaddleId = 0;
+  startGame();
+}
+
 function startSingleplayer() {
   const validNick = requireAndSavePlayerNick();
   if (!validNick) return;
@@ -1738,6 +2483,7 @@ function startSingleplayer() {
   isHost = true;
   isSinglePlayer = true;
   is2v2 = false;
+  isWallArcade = false;
   localPaddleId = 0;
   startGame();
 }
@@ -1751,6 +2497,7 @@ function startSolo2v2() {
   isHost = true;
   isSinglePlayer = true;
   is2v2 = true;
+  isWallArcade = false;
   localPaddleId = 0;
 
   lobbySlots = [
@@ -1873,7 +2620,7 @@ function bindGuestReliableEvents(c) {
     if (gameActive && !matchOver) {
       showDisconnectPause('Host zakończył połączenie');
     } else {
-      location.reload();
+      returnToMenu();
     }
   });
 }
@@ -2125,7 +2872,8 @@ function broadcastLobbyState() {
   broadcastReliable({
     t: 'lobby',
     code: currentRoomCode,
-    slots: serialized
+    slots: serialized,
+    arena: selectedArena
   });
 }
 
@@ -2150,7 +2898,8 @@ function hostStart2v2Match() {
       cl.ctrlConn.send({
         t: 'start2v2',
         slots: serialized,
-        yourPaddleId: assignedId
+        yourPaddleId: assignedId,
+        arena: selectedArena
       });
     }
   }
@@ -2319,7 +3068,7 @@ function handleHostIncomingData(remotePeerId, d) {
       oppName = cl.nick;
       localPaddleId = 0;
       if (cl.ctrlConn && cl.ctrlConn.open) {
-        cl.ctrlConn.send({ t: 'start', opp: myName });
+        cl.ctrlConn.send({ t: 'start', opp: myName, arena: selectedArena });
       }
       startGame();
       sendStatsUpdate();
@@ -2380,6 +3129,9 @@ function handleHostIncomingData(remotePeerId, d) {
 
 function handleGuestIncomingData(d) {
   if (!d || !d.t) return;
+  if (d.arena && selectedArena !== d.arena) {
+    selectArena(d.arena);
+  }
 
   if (d.t === 'ping') {
     sendFast({ t: 'pong', ts: d.ts });
@@ -2462,7 +3214,7 @@ function handleGuestIncomingData(d) {
   if (d.t === 'upAward') {
     const myPaddle = getLocalPaddle();
     if (!myPaddle) return;
-    const granted = UP_MODE === 'team' ? (d.team === myPaddle.team) : (d.padId === myPaddle.id);
+    const granted = (d.padId === myPaddle.id || (!is2v2 && d.team === myPaddle.team));
     if (granted) {
       upgradePoints++;
       updateStatDisplay();
@@ -2478,7 +3230,7 @@ function handleGuestIncomingData(d) {
     const newMyScore = myTeam === 1 ? d.s1 : d.s2;
 
     if (newMyScore > prevMyScore && newMyScore % 2 === 0) {
-      const earned = UP_MODE === 'team' || d.scorerPadId === localPaddleId;
+      const earned = (d.scorerPadId === localPaddleId || (!is2v2 && myTeam === (d.s1 > d.s2 ? 1 : 2)));
       if (earned) {
         upgradePoints++;
         updateStatDisplay();
@@ -2601,6 +3353,8 @@ function startGame(slotsData = null) {
   document.getElementById('bgCanvas').style.display = 'none';
   document.getElementById('gameWrapper').style.display = 'flex';
   document.getElementById('disconnectModal').style.display = 'none';
+  const rematchBtn = document.getElementById('btnRematch');
+  if (rematchBtn) rematchBtn.textContent = isWallArcade ? 'ZAGRAJ ZNOWU' : 'REWANŻ';
 
   outSeq = 0;
   lastInSeq = -1;
@@ -2609,6 +3363,7 @@ function startGame(slotsData = null) {
   matchPaused = false;
   matchOver = false;
   teamScores = { 1: 0, 2: 0 };
+  wallScore = 0;
 
   initPaddlesArray(is2v2, slotsData);
   lastTeamTouched = { 1: 0, 2: is2v2 ? 2 : 1 };
@@ -2619,6 +3374,7 @@ function startGame(slotsData = null) {
   applyStatsToLocalPlayer();
   resetBall(true);
   startPingLoop();
+  SFX.startMusic();
 
   lastFrameTime = performance.now();
   accumulator = 0;
@@ -2639,14 +3395,16 @@ function resetBall(withCountdown = true) {
   if (withCountdown) countdownTimer = 75;
 
   const angle = (Math.random() * Math.PI / 3.4) - Math.PI / 6.8;
-  const dir = Math.random() < 0.5 ? 1 : -1;
+  const dir = isWallArcade ? 1 : (Math.random() < 0.5 ? 1 : -1);
   BALL.vx = dir * BALL.speed * Math.cos(angle);
   BALL.vy = BALL.speed * Math.sin(angle);
 }
 
 function checkVictoryCondition() {
+  if (isWallArcade) return;
   if (teamScores[1] >= WIN_SCORE || teamScores[2] >= WIN_SCORE) {
     matchOver = true;
+    SFX.stopMusic();
     const t1Won = teamScores[1] >= WIN_SCORE;
     let winnerName = '';
     if (is2v2) {
@@ -2662,11 +3420,17 @@ function checkVictoryCondition() {
     title.textContent = `🏆 ${winnerName}`;
     title.style.color = t1Won ? 'var(--p1)' : 'var(--p2)';
     document.getElementById('winnerSub').textContent = `${teamScores[1]} : ${teamScores[2]}`;
+    const rematchBtn = document.getElementById('btnRematch');
+    if (rematchBtn) rematchBtn.textContent = 'REWANŻ';
     modal.style.display = 'flex';
   }
 }
 
 function requestRematch() {
+  if (isWallArcade) {
+    startWallArcade();
+    return;
+  }
   if (!isSinglePlayer) {
     if (isHost) broadcastReliable({ t: 'rematch' });
     else sendReliable({ t: 'rematch' });
@@ -2686,6 +3450,7 @@ function resetMatch() {
   document.getElementById('victoryModal').style.display = 'none';
   updateHudScore();
   resetBall(true);
+  SFX.startMusic();
 }
 
 /* ==========================================
@@ -2894,9 +3659,122 @@ function predictLocalGuestBounce(myPaddle) {
   BALL.vy = BALL.speed * Math.sin(angle);
 }
 
+function handleArenaCollisions(prevX, prevY) {
+  if (selectedArena === 'hex') {
+    const C = HEX_CORNER_SIZE;
+
+    // 1. Lewy górny róg (Top-Left): x + y <= C + BALL.r
+    if (BALL.x + BALL.y <= C + BALL.r) {
+      const dot = (BALL.vx + BALL.vy) * 0.7071;
+      if (dot < 0) {
+        const newVx = -BALL.vy;
+        const newVy = -BALL.vx;
+        BALL.vx = newVx;
+        BALL.vy = newVy;
+        const excess = (C + BALL.r) - (BALL.x + BALL.y);
+        BALL.x += excess * 0.5 + 2;
+        BALL.y += excess * 0.5 + 2;
+        SFX.play('wall');
+        addShockwave(BALL.x, BALL.y, '#00f0ff');
+        addParticles(BALL.x, BALL.y, '#00f0ff', 10);
+        triggerShake(5, 3);
+        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#00f0ff' } });
+      }
+    }
+    // 2. Prawy górny róg (Top-Right): (W - x) + y <= C + BALL.r
+    if ((W - BALL.x) + BALL.y <= C + BALL.r) {
+      const dot = (-BALL.vx + BALL.vy) * 0.7071;
+      if (dot < 0) {
+        const newVx = BALL.vy;
+        const newVy = BALL.vx;
+        BALL.vx = newVx;
+        BALL.vy = newVy;
+        const excess = (C + BALL.r) - ((W - BALL.x) + BALL.y);
+        BALL.x -= excess * 0.5 + 2;
+        BALL.y += excess * 0.5 + 2;
+        SFX.play('wall');
+        addShockwave(BALL.x, BALL.y, '#ff0055');
+        addParticles(BALL.x, BALL.y, '#ff0055', 10);
+        triggerShake(5, 3);
+        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#ff0055' } });
+      }
+    }
+    // 3. Lewy dolny róg (Bottom-Left): x + (H - y) <= C + BALL.r
+    if (BALL.x + (H - BALL.y) <= C + BALL.r) {
+      const dot = (BALL.vx - BALL.vy) * 0.7071;
+      if (dot < 0) {
+        const newVx = BALL.vy;
+        const newVy = BALL.vx;
+        BALL.vx = newVx;
+        BALL.vy = newVy;
+        const excess = (C + BALL.r) - (BALL.x + (H - BALL.y));
+        BALL.x += excess * 0.5 + 2;
+        BALL.y -= excess * 0.5 + 2;
+        SFX.play('wall');
+        addShockwave(BALL.x, BALL.y, '#00f0ff');
+        addParticles(BALL.x, BALL.y, '#00f0ff', 10);
+        triggerShake(5, 3);
+        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#00f0ff' } });
+      }
+    }
+    // 4. Prawy dolny róg (Bottom-Right): (W - x) + (H - y) <= C + BALL.r
+    if ((W - BALL.x) + (H - BALL.y) <= C + BALL.r) {
+      const dot = (-BALL.vx - BALL.vy) * 0.7071;
+      if (dot < 0) {
+        const newVx = -BALL.vy;
+        const newVy = -BALL.vx;
+        BALL.vx = newVx;
+        BALL.vy = newVy;
+        const excess = (C + BALL.r) - ((W - BALL.x) + (H - BALL.y));
+        BALL.x -= excess * 0.5 + 2;
+        BALL.y -= excess * 0.5 + 2;
+        SFX.play('wall');
+        addShockwave(BALL.x, BALL.y, '#ff0055');
+        addParticles(BALL.x, BALL.y, '#ff0055', 10);
+        triggerShake(5, 3);
+        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#ff0055' } });
+      }
+    }
+  }
+
+  if (selectedArena === 'pinball') {
+    for (let i = 0; i < bumpers.length; i++) {
+      const b = bumpers[i];
+      const dx = BALL.x - b.x;
+      const dy = BALL.y - b.y;
+      const dist = Math.hypot(dx, dy);
+      const minDist = BALL.r + b.r;
+      if (dist < minDist) {
+        const nx = dx / (dist || 1);
+        const ny = dy / (dist || 1);
+        const dot = BALL.vx * nx + BALL.vy * ny;
+        if (dot < 0) {
+          BALL.vx = BALL.vx - 2 * dot * nx;
+          BALL.vy = BALL.vy - 2 * dot * ny;
+          BALL.speed = Math.min(13.6, Math.max(BALL.speed * 1.15, 8.8));
+          const curSpd = Math.hypot(BALL.vx, BALL.vy) || 1;
+          BALL.vx = (BALL.vx / curSpd) * BALL.speed;
+          BALL.vy = (BALL.vy / curSpd) * BALL.speed;
+          BALL.x = b.x + nx * (minDist + 2);
+          BALL.y = b.y + ny * (minDist + 2);
+          b.flash = 14;
+          SFX.play('bumper');
+          addShockwave(b.x, b.y, '#f5b041');
+          addParticles(BALL.x, BALL.y, '#f5b041', 14);
+          triggerShake(7, 4);
+          sendFX({ sfx: 'bumper', wave: { x: b.x, y: b.y, c: '#f5b041' }, part: { x: BALL.x, y: BALL.y, c: '#f5b041', n: 14 } });
+        }
+      }
+    }
+  }
+}
+
 function update() {
   if (matchOver || matchPaused) return;
   tickCounter++;
+  for (let bi = 0; bi < bumpers.length; bi++) {
+    if (bumpers[bi].flash > 0) bumpers[bi].flash--;
+  }
 
   const myPaddle = getLocalPaddle();
 
@@ -2986,7 +3864,7 @@ function update() {
           const scorerPadId = lastTeamTouched[scoringTeam];
           const hostPad = getLocalPaddle();
 
-          if (hostPad && ((UP_MODE === 'team' && hostPad.team === scoringTeam) || (UP_MODE === 'personal' && hostPad.id === scorerPadId))) {
+          if (hostPad && (hostPad.id === scorerPadId || (!is2v2 && hostPad.team === scoringTeam))) {
             upgradePoints++;
             updateStatDisplay();
             showBanner('+1 UP', '#f5b041', 65);
@@ -3003,20 +3881,36 @@ function update() {
         }
       }
 
+      const prevBallX = BALL.x;
+      const prevBallY = BALL.y;
+
       stepBallMotion();
 
       BALL.trail.push({ x: BALL.x, y: BALL.y });
       if (BALL.trail.length > 11) BALL.trail.shift();
 
-      if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
-        BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
-        BALL.vy *= -1;
-
-        if (Math.abs(BALL.spin) > 0.8) {
-          BALL.vy += BALL.spin * 0.32;
+      // GWARANTOWANE ODBICIE OD SUFITU / PODŁOGI (BRAK BLOKOWANIA ZE SPINEM)
+      if (BALL.y - BALL.r <= 0) {
+        BALL.y = BALL.r;
+        BALL.vy = Math.abs(BALL.vy);
+        if (Math.abs(BALL.spin) > 0.4) {
+          BALL.vy = Math.max(1.8, BALL.vy + Math.abs(BALL.spin) * 0.25);
           BALL.spin *= -0.55;
-          addParticles(BALL.x, BALL.y, '#b845ff', 9);
-          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#b845ff', n: 9 } });
+          addParticles(BALL.x, BALL.y, '#b845ff', 8);
+          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#b845ff', n: 8 } });
+        } else {
+          addParticles(BALL.x, BALL.y, '#ffffff', 5);
+          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#ffffff', n: 5 } });
+        }
+        SFX.play('wall');
+      } else if (BALL.y + BALL.r >= H) {
+        BALL.y = H - BALL.r;
+        BALL.vy = -Math.abs(BALL.vy);
+        if (Math.abs(BALL.spin) > 0.4) {
+          BALL.vy = Math.min(-1.8, BALL.vy - Math.abs(BALL.spin) * 0.25);
+          BALL.spin *= -0.55;
+          addParticles(BALL.x, BALL.y, '#b845ff', 8);
+          sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#b845ff', n: 8 } });
         } else {
           addParticles(BALL.x, BALL.y, '#ffffff', 5);
           sendFX({ sfx: 'wall', part: { x: BALL.x, y: BALL.y, c: '#ffffff', n: 5 } });
@@ -3035,28 +3929,91 @@ function update() {
         sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#a371f7' } });
       }
 
+      // TRYB WALL ARCADE: ODBIJANIE OD NEONOWEJ ŚCIANY PO PRAWEJ STRONIE
+      if (isWallArcade) {
+        const wallBarrierX = W - 22;
+        const crossedWall = (prevBallX + BALL.r <= wallBarrierX && BALL.x + BALL.r >= wallBarrierX) ||
+                            (BALL.vx > 0 && BALL.x + BALL.r >= wallBarrierX);
+
+        if (crossedWall) {
+          BALL.x = wallBarrierX - BALL.r;
+          BALL.vx = -Math.abs(BALL.vx);
+          BALL.speed = Math.min(13.4, BALL.speed + 0.22);
+          wallScore++;
+          teamScores[1] = wallScore;
+          rallyHits = wallScore;
+
+          if (wallScore > wallRecordAtStart) {
+            localStorage.setItem(WALL_RECORD_KEY, wallScore);
+            const rEl = document.getElementById('hudNick2');
+            if (rEl) rEl.textContent = `REKORD: ${wallScore}`;
+            if (!hasBeatenWallRecord && wallRecordAtStart > 0) {
+              hasBeatenWallRecord = true;
+              showBanner('NOWY REKORD!', '#f5b041', 70);
+              SFX.play('upgrade');
+            }
+          }
+
+          if (wallScore % 10 === 0) {
+            upgradePoints++;
+            updateStatDisplay();
+            showBanner(`${wallScore} ODBIĆ! +1 UP`, '#f5b041', 65);
+            SFX.play('upgrade');
+          } else {
+            SFX.play('hit');
+          }
+
+          addShockwave(wallBarrierX, BALL.y, '#00f0ff');
+          addParticles(wallBarrierX, BALL.y, '#00f0ff', 11);
+          triggerShake(5, 3);
+          updateHudScore();
+        }
+
+        if (BALL.x < -15) {
+          onWallArcadeGameOver();
+        }
+      }
+
+      // OBSŁUGA GEOMETRII CYBER-ARENY (HEX ROGI I PINBALL BUMPERS)
+      handleArenaCollisions(prevBallX, prevBallY);
+
+      // CIĄGŁA DETEKCJA KOLIZJI (SWEPT CCD) PRZECIWKO TUNELOWANIU PIŁKI
       for (let i = 0; i < paddles.length; i++) {
         const p = paddles[i];
         const isLeftTeam = (p.team === 1);
         const dir = isLeftTeam ? 1 : -1;
+        const faceX = isLeftTeam ? p.x + p.w : p.x;
 
-        const xOverlap = isLeftTeam
-          ? (BALL.vx < 0 && BALL.x - BALL.r <= p.x + p.w && BALL.x + BALL.r >= p.x)
-          : (BALL.vx > 0 && BALL.x + BALL.r >= p.x && BALL.x - BALL.r <= p.x + p.w);
+        const crossedFace = isLeftTeam
+          ? ((prevBallX - BALL.r >= faceX && BALL.x - BALL.r <= faceX) ||
+             (BALL.vx < 0 && BALL.x - BALL.r <= faceX && BALL.x + BALL.r >= p.x))
+          : ((prevBallX + BALL.r <= faceX && BALL.x + BALL.r >= faceX) ||
+             (BALL.vx > 0 && BALL.x + BALL.r >= faceX && BALL.x - BALL.r <= p.x + p.w));
 
-        if (!xOverlap) continue;
+        if (!crossedFace) continue;
+
+        let t = 0;
+        if (BALL.x !== prevBallX) {
+          t = isLeftTeam
+            ? Math.max(0, Math.min(1, (prevBallX - BALL.r - faceX) / (prevBallX - BALL.x)))
+            : Math.max(0, Math.min(1, (faceX - (prevBallX + BALL.r)) / (BALL.x - prevBallX)));
+        }
+        const impactY = prevBallY + (BALL.y - prevBallY) * t;
 
         let hitDetected = false;
         let hitPaddleState = p;
 
         if (p.isLocal || p.isBot) {
-          if (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h) {
+          if ((impactY + BALL.r >= p.y && impactY - BALL.r <= p.y + p.h) ||
+              (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h)) {
             hitDetected = true;
           }
         } else {
           const rewound = getRewoundPaddleForGuest(p);
-          const currentHit = (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h);
-          const rewoundHit = (BALL.y + BALL.r >= rewound.y && BALL.y - BALL.r <= rewound.y + p.h);
+          const currentHit = (impactY + BALL.r >= p.y && impactY - BALL.r <= p.y + p.h) ||
+                             (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h);
+          const rewoundHit = (impactY + BALL.r >= rewound.y && impactY - BALL.r <= rewound.y + p.h) ||
+                             (BALL.y + BALL.r >= rewound.y && BALL.y - BALL.r <= rewound.y + p.h);
 
           if (rewoundHit || currentHit) {
             hitDetected = true;
@@ -3070,18 +4027,22 @@ function update() {
 
         if (hitDetected) {
           lastTeamTouched[p.team] = p.id;
+          BALL.x = isLeftTeam ? faceX + BALL.r : faceX - BALL.r;
+          BALL.y = impactY;
           handlePaddleHit(hitPaddleState, dir);
           p.smashCharge = 0;
           break;
         }
       }
 
-      if (BALL.x < -15) {
-        teamScores[2]++;
-        onGoalScored(2);
-      } else if (BALL.x > W + 15) {
-        teamScores[1]++;
-        onGoalScored(1);
+      if (!isWallArcade) {
+        if (BALL.x < -15) {
+          teamScores[2]++;
+          onGoalScored(2);
+        } else if (BALL.x > W + 15) {
+          teamScores[1]++;
+          onGoalScored(1);
+        }
       }
     }
   } else {
@@ -3092,6 +4053,9 @@ function update() {
         obstacle.y += obstacle.vy;
         if (obstacle.y <= 30 || obstacle.y + obstacle.h >= H - 30) obstacle.vy *= -1;
       }
+
+      const prevGuestBallX = BALL.x;
+      const prevGuestBallY = BALL.y;
 
       stepBallMotion();
 
@@ -3105,24 +4069,36 @@ function update() {
         }
       }
 
-      if (BALL.y - BALL.r <= 0 || BALL.y + BALL.r >= H) {
-        BALL.y = BALL.y - BALL.r <= 0 ? BALL.r : H - BALL.r;
-        BALL.vy *= -1;
+      if (BALL.y - BALL.r <= 0) {
+        BALL.y = BALL.r;
+        BALL.vy = Math.abs(BALL.vy);
+        if (hostTargetBall) hostTargetBall.y = BALL.y;
+      } else if (BALL.y + BALL.r >= H) {
+        BALL.y = H - BALL.r;
+        BALL.vy = -Math.abs(BALL.vy);
         if (hostTargetBall) hostTargetBall.y = BALL.y;
       }
 
+      // OBSŁUGA GEOMETRII CYBER-ARENY DLA GOŚCIA
+      handleArenaCollisions(prevGuestBallX, prevGuestBallY);
+
+      // CIĄGŁA DETEKCJA KOLIZJI DLA GOŚCIA
       for (let i = 0; i < paddles.length; i++) {
         const p = paddles[i];
         const isLeftTeam = (p.team === 1);
-        const xOverlap = isLeftTeam
-          ? (BALL.vx < 0 && BALL.x - BALL.r <= p.x + p.w && BALL.x + BALL.r >= p.x)
-          : (BALL.vx > 0 && BALL.x + BALL.r >= p.x && BALL.x - BALL.r <= p.x + p.w);
+        const faceX = isLeftTeam ? p.x + p.w : p.x;
 
-        if (xOverlap && BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h) {
+        const crossedFace = isLeftTeam
+          ? ((prevGuestBallX - BALL.r >= faceX && BALL.x - BALL.r <= faceX) ||
+             (BALL.vx < 0 && BALL.x - BALL.r <= faceX && BALL.x + BALL.r >= p.x))
+          : ((prevGuestBallX + BALL.r <= faceX && BALL.x + BALL.r >= faceX) ||
+             (BALL.vx > 0 && BALL.x + BALL.r >= faceX && BALL.x - BALL.r <= p.x + p.w));
+
+        if (crossedFace && BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h) {
           if (p.isLocal) {
             predictLocalGuestBounce(p);
           } else {
-            BALL.x = isLeftTeam ? p.x + p.w + BALL.r : p.x - BALL.r;
+            BALL.x = isLeftTeam ? faceX + BALL.r : faceX - BALL.r;
             BALL.vx = isLeftTeam ? Math.abs(BALL.vx) : -Math.abs(BALL.vx);
             hostTargetBall = null;
           }
@@ -3174,7 +4150,8 @@ function update() {
         cd: countdownTimer,
         hits: rallyHits,
         s1: teamScores[1],
-        s2: teamScores[2]
+        s2: teamScores[2],
+        arena: selectedArena
       });
     } else if (myPaddle) {
       sendFast({
@@ -3272,7 +4249,7 @@ function onGoalScored(scoringTeam) {
 
   const hostPad = getLocalPaddle();
   if (hostPad && hostPad.team === scoringTeam && teamScores[scoringTeam] % 2 === 0) {
-    if (UP_MODE === 'team' || scorerPadId === hostPad.id) {
+    if (scorerPadId === hostPad.id || !is2v2) {
       upgradePoints++;
       updateStatDisplay();
     }
@@ -3281,6 +4258,30 @@ function onGoalScored(scoringTeam) {
   updateHudScore();
   checkVictoryCondition();
   if (!matchOver) resetBall(true);
+}
+
+function onWallArcadeGameOver() {
+  matchOver = true;
+  SFX.stopMusic();
+  SFX.play('smash');
+  triggerShake(18, 9);
+
+  const isNewRec = wallScore > wallRecordAtStart && (wallRecordAtStart > 0 || wallScore >= 3);
+  if (wallScore > wallRecordAtStart) {
+    localStorage.setItem(WALL_RECORD_KEY, wallScore);
+  }
+  const finalBest = Math.max(wallRecordAtStart, wallScore);
+
+  const modal = document.getElementById('victoryModal');
+  const title = document.getElementById('winnerTitle');
+  const sub = document.getElementById('winnerSub');
+  const rematchBtn = document.getElementById('btnRematch');
+
+  title.textContent = isNewRec ? '🔥 NOWY REKORD!' : 'KONIEC GRY!';
+  title.style.color = isNewRec ? 'var(--gold)' : 'var(--p1)';
+  sub.textContent = `WYNIK: ${wallScore} • REKORD: ${finalBest}`;
+  if (rematchBtn) rematchBtn.textContent = 'ZAGRAJ ZNOWU';
+  modal.style.display = 'flex';
 }
 
 /* ==========================================
@@ -3324,6 +4325,117 @@ function render() {
     ctx.textAlign = 'center';
     ctx.fillStyle = rallyHits >= 10 ? 'rgba(245, 176, 65, 0.15)' : 'rgba(255, 255, 255, 0.06)';
     ctx.fillText(`${rallyHits} COMBO`, W / 2, H / 2 + 16);
+  }
+
+  // WIZUALIZACJA ŚCIANY W TRYBIE ARCADE
+  if (isWallArcade) {
+    ctx.save();
+    ctx.strokeStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(W - 22, 0);
+    ctx.lineTo(W - 22, H);
+    ctx.stroke();
+
+    const pulseA = 0.07 + Math.sin(Date.now() * 0.007) * 0.04;
+    ctx.fillStyle = `rgba(0, 240, 255, ${pulseA})`;
+    ctx.fillRect(W - 22, 0, 22, H);
+    ctx.restore();
+  }
+
+  // ELEMENTY ARENY: HEX-ARENA (ŚCIĘTE SKOŚNE NAROŻNIKI 45°)
+  if (selectedArena === 'hex') {
+    ctx.save();
+    const C = HEX_CORNER_SIZE;
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 14;
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 3;
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+
+    const corners = [
+      [[0, 0], [C, 0], [0, C]],
+      [[W, 0], [W - C, 0], [W, C]],
+      [[0, H], [C, H], [0, H - C]],
+      [[W, H], [W - C, H], [W, H - C]]
+    ];
+
+    corners.forEach(pts => {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      ctx.lineTo(pts[1][0], pts[1][1]);
+      ctx.lineTo(pts[2][0], pts[2][1]);
+      ctx.closePath();
+      ctx.fill();
+
+      // Linia odbicia
+      ctx.beginPath();
+      ctx.moveTo(pts[1][0], pts[1][1]);
+      ctx.lineTo(pts[2][0], pts[2][1]);
+      ctx.stroke();
+
+      // Cyber punkty węzłowe
+      ctx.fillStyle = '#00f0ff';
+      ctx.beginPath();
+      ctx.arc(pts[1][0], pts[1][1], 3.5, 0, Math.PI * 2);
+      ctx.arc(pts[2][0], pts[2][1], 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+    });
+
+    ctx.restore();
+  }
+
+  // ELEMENTY ARENY: PINBALL BUMPERS (ODBOJE PINBALLOWE)
+  if (selectedArena === 'pinball') {
+    bumpers.forEach(b => {
+      ctx.save();
+      const flashRatio = Math.max(0, Math.min(1, (b.flash || 0) / 14));
+      const r = b.r * (1 + flashRatio * 0.18);
+      const isHit = flashRatio > 0.05;
+
+      ctx.shadowColor = isHit ? '#ffffff' : '#f5b041';
+      ctx.shadowBlur = isHit ? 30 : 16;
+
+      const grad = ctx.createRadialGradient(b.x, b.y, 2, b.x, b.y, r);
+      if (isHit) {
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.4, '#ffb703');
+        grad.addColorStop(1, '#ff0055');
+      } else {
+        grad.addColorStop(0, '#381f08');
+        grad.addColorStop(0.65, '#bd6e00');
+        grad.addColorStop(1, '#693800');
+      }
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Neonowa obwódka
+      ctx.strokeStyle = isHit ? '#ffffff' : '#f5b041';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // Wewnętrzny ring
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, r * 0.58, 0, Math.PI * 2);
+      ctx.strokeStyle = isHit ? '#ffffff' : 'rgba(255, 230, 160, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Napis BUMP
+      ctx.font = '900 11px Orbitron';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = isHit ? '#ffffff' : '#ffca3a';
+      ctx.shadowBlur = 0;
+      ctx.fillText('BUMP', b.x, b.y);
+
+      ctx.restore();
+    });
   }
 
   if (obstacle) {
@@ -3502,9 +4614,17 @@ function gameLoop(timestamp) {
 }
 
 /* ==========================================
-   12. OBSŁUGA KLAWIATURY I MYSZKI (NA CAŁYM OKNIE)
+   12. OBSŁUGA KLAWIATURY, MYSZKI I DOTYKU NA TELEFONACH
    ========================================== */
 window.addEventListener('keydown', e => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+    return;
+  }
+
+  if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+    document.activeElement.blur();
+  }
+
   keys[e.code] = true;
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab'].includes(e.code) && gameActive) {
     e.preventDefault();
@@ -3524,7 +4644,7 @@ window.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
   if (rect.height > 0) {
     const scaleY = H / rect.height;
-    mouseY = (e.clientY - rect.top) * scaleY;
+    mouseY = Math.max(0, Math.min(H, (e.clientY - rect.top) * scaleY));
   }
 });
 
@@ -3538,6 +4658,54 @@ window.addEventListener('mousedown', e => {
   } else if (e.button === 2) {
     e.preventDefault();
     triggerLocalDash(myPaddle);
+  }
+});
+
+/* OBSŁUGA EKRANÓW DOTYKOWYCH (SMARTFONY / TABLETY) */
+function handleTouchPaddle(e) {
+  if (!gameActive || matchOver || matchPaused) return;
+  const touch = e.touches[0];
+  if (!touch) return;
+  const rect = canvas.getBoundingClientRect();
+  if (rect.height > 0) {
+    const scaleY = H / rect.height;
+    mouseY = Math.max(0, Math.min(H, (touch.clientY - rect.top) * scaleY));
+    controlMode = 'mouse';
+  }
+}
+
+canvas.addEventListener('touchstart', handleTouchPaddle, { passive: true });
+canvas.addEventListener('touchmove', handleTouchPaddle, { passive: true });
+
+const touchDashBtn = document.getElementById('touchDashBtn');
+const touchSmashBtn = document.getElementById('touchSmashBtn');
+
+if (touchDashBtn) {
+  touchDashBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    triggerLocalDash(getLocalPaddle());
+  }, { passive: false });
+  touchDashBtn.addEventListener('click', e => {
+    e.preventDefault();
+    triggerLocalDash(getLocalPaddle());
+  });
+}
+
+if (touchSmashBtn) {
+  touchSmashBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    triggerLocalSmash(getLocalPaddle());
+  }, { passive: false });
+  touchSmashBtn.addEventListener('click', e => {
+    e.preventDefault();
+    triggerLocalSmash(getLocalPaddle());
+  });
+}
+
+// Zapobieganie blokowaniu spacji przez aktywny focus na przyciskach
+document.addEventListener('click', e => {
+  if (e.target && e.target.tagName === 'BUTTON') {
+    e.target.blur();
   }
 });
 </script>
