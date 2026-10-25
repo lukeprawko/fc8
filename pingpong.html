@@ -2,9 +2,13 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CYBERPONG</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<!-- FIREBASE SDK (AUTH & FIRESTORE DO SYNCHRONIZACJI PROFILU MIĘDZY URZĄDZENIAMI) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -21,8 +25,15 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none;
     -webkit-user-drag: none;
+  }
+  #gameCanvas, #bgCanvas, .hud, button, .action-btn, .clean-btn, .talent-card-btn, .ctrl-tile, .arena-tile {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   html, body {
@@ -65,17 +76,18 @@
   /* LOGO W MENU */
   .logo-wrap {
     text-align: center;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
+    user-select: none;
   }
   .logo-wrap h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(30px, 4.2vw, 50px);
+    font-size: clamp(34px, 4.6vw, 54px);
     font-weight: 900;
-    letter-spacing: 8px;
+    letter-spacing: 9px;
     background: linear-gradient(90deg, var(--p1), #ffffff, var(--p2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.4));
+    filter: drop-shadow(0 0 28px rgba(0, 240, 255, 0.45));
   }
 
   /* NOWOCZESNE MENU BEZ ZBĘDNEGO TEKSTU */
@@ -89,103 +101,54 @@
     background: var(--panel);
     backdrop-filter: blur(22px);
     border: 1px solid rgba(0, 240, 255, 0.22);
-    border-radius: 24px;
-    padding: 24px;
-    width: 750px;
+    border-radius: 28px;
+    padding: 26px 32px;
+    width: 870px;
     max-width: 95vw;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 240, 255, 0.08);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 45px rgba(0, 240, 255, 0.09);
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
   }
 
   /* GÓRNY PASEK: NICK + WYBÓR STEROWANIA */
   .top-row {
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 18px;
     align-items: stretch;
-  }
-
-  .nick-box {
-    background: var(--card);
-    border: 2px solid rgba(255, 255, 255, 0.09);
-    border-radius: 16px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.2s ease;
-  }
-  .nick-box:focus-within {
-    border-color: var(--p1);
-    box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
-  }
-  .nick-box.nick-error {
-    border-color: var(--p2) !important;
-    background: rgba(255, 0, 85, 0.14);
-    box-shadow: 0 0 22px rgba(255, 0, 85, 0.45);
-    animation: nickShake 0.35s ease;
-  }
-  @keyframes nickShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    50% { transform: translateX(6px); }
-    75% { transform: translateX(-4px); }
-  }
-  .nick-box svg {
-    width: 28px;
-    height: 28px;
-    fill: var(--p1);
-    flex-shrink: 0;
-    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
-  }
-  .nick-box input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    outline: none;
-  }
-  .nick-box input::placeholder {
-    color: #586579;
-    font-weight: 700;
   }
 
   .ctrl-selector {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .ctrl-tile {
     background: var(--card);
     border: 2px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
-    padding: 10px;
+    border-radius: 18px;
+    padding: 14px 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 7px;
     transition: all 0.2s ease;
   }
   .ctrl-tile svg {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     fill: #8b949e;
     transition: all 0.2s ease;
     pointer-events: none;
   }
   .ctrl-tile span {
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     color: #8b949e;
     pointer-events: none;
   }
@@ -207,18 +170,18 @@
   .modes-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 
   .mode-card {
     background: var(--card);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 18px;
+    border-radius: 20px;
+    padding: 22px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 13px;
+    gap: 15px;
     position: relative;
     overflow: hidden;
   }
@@ -232,12 +195,12 @@
   .mode-header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
   }
   .mode-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -250,60 +213,60 @@
     background: rgba(0, 240, 255, 0.15);
     border: 1px solid rgba(0, 240, 255, 0.4);
   }
-  .mode-icon svg { width: 22px; height: 22px; }
+  .mode-icon svg { width: 24px; height: 24px; }
 
   .mode-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 900;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.8px;
     color: #fff;
   }
 
   /* WIERSZE WYBORU POZIOMU BOTÓW Z IKONĄ */
   .tier-row {
     display: grid;
-    grid-template-columns: 92px 1fr;
+    grid-template-columns: 106px 1fr;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     background: rgba(8, 12, 22, 0.55);
-    padding: 6px 8px;
-    border-radius: 12px;
+    padding: 8px 10px;
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
   .tier-tag {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 800;
     color: #c9d1d9;
     letter-spacing: 0.8px;
   }
   .tier-tag svg {
-    width: 15px;
-    height: 15px;
+    width: 17px;
+    height: 17px;
     flex-shrink: 0;
   }
   .ai-tiers {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
+    gap: 7px;
   }
   .mp-tiers {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .tier-btn {
     background: rgba(6, 9, 16, 0.85);
     border: 1px solid #263147;
-    border-radius: 9px;
-    padding: 8px 4px;
+    border-radius: 10px;
+    padding: 9px 6px;
     color: #8b949e;
     font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 800;
     cursor: pointer;
     transition: all 0.15s;
@@ -313,8 +276,8 @@
     gap: 6px;
   }
   .tier-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 17px;
+    height: 17px;
     fill: currentColor;
     flex-shrink: 0;
   }
@@ -335,9 +298,14 @@
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
   }
   .tier-btn.mp-mode {
-    padding: 11px 8px;
-    font-size: 12px;
-    border-radius: 12px;
+    padding: 13px 10px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    border-radius: 13px;
+  }
+  .tier-btn.mp-mode svg {
+    width: 18px;
+    height: 18px;
   }
   .tier-btn.mp-mode.active {
     border-color: var(--p1);
@@ -351,16 +319,32 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .solo-btns-row .action-btn {
+    padding: 12px 6px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .solo-btns-row .action-btn svg {
+    width: 16px;
+    height: 16px;
   }
   .action-btn {
     width: 100%;
-    padding: 12px 10px;
+    padding: 14px 12px;
     border: none;
-    border-radius: 12px;
+    border-radius: 13px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
@@ -368,11 +352,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
   }
   .action-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
     flex-shrink: 0;
   }
@@ -409,20 +393,21 @@
 
   .join-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
   }
   .join-row input {
     width: 52%;
     background: rgba(5, 7, 12, 0.9);
     border: 1px solid #28334a;
-    border-radius: 12px;
-    padding: 0 12px;
+    border-radius: 13px;
+    padding: 0 14px;
+    height: 46px;
     color: var(--p1);
     font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     text-align: center;
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
     outline: none;
   }
@@ -434,79 +419,982 @@
   }
   .btn-join:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 0 25px rgba(255, 0, 85, 0.55); }
 
-  /* WYBÓR CYBER-ARENY */
+  /* WYBÓR ARENY (PROSTY, MINIMALISTYCZNY DESIGN: IKONA + NAZWA) */
   .arena-selector-wrap {
-    background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .arena-selector-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    color: var(--p1);
-  }
-  .arena-selector-label svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-    filter: drop-shadow(0 0 6px var(--p1));
+    width: 100%;
+    margin-bottom: 2px;
   }
   .arena-tiles-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
+    gap: 12px;
   }
   .arena-tile {
-    background: rgba(6, 9, 16, 0.85);
-    border: 2px solid rgba(255, 255, 255, 0.07);
-    border-radius: 12px;
-    padding: 8px 6px;
+    background: rgba(13, 19, 33, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 13px 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    transition: all 0.2s ease;
+    gap: 7px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
   }
   .arena-tile:hover {
-    border-color: rgba(0, 240, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(20, 28, 48, 0.85);
+    transform: translateY(-1px);
+  }
+  .arena-tile svg {
+    width: 22px;
+    height: 22px;
+    fill: #8b949e;
+    transition: all 0.2s ease;
+  }
+  .arena-tile span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #8b949e;
+    transition: all 0.2s ease;
   }
   .arena-tile.active {
     border-color: var(--p1);
-    background: rgba(0, 240, 255, 0.14);
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    background: rgba(0, 240, 255, 0.12);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.22);
   }
-  .arena-tile .arena-icon {
-    font-size: 16px;
-    pointer-events: none;
+  .arena-tile.active svg {
+    fill: var(--p1);
+    filter: drop-shadow(0 0 8px var(--p1));
   }
-  .arena-tile .arena-name {
+  .arena-tile.active span {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  }
+
+  /* MODUŁ KONTA GRACZA I DRZEWKO UMIEJĘTNOŚCI */
+  /* MODUŁ KONTA / PROFILU GRACZA (FIREBASE & CHMURA) */
+  .account-module-box {
+    background: var(--card);
+    border: 2px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 108px;
+  }
+  .account-module-box:hover {
+    border-color: rgba(0, 240, 255, 0.35);
+  }
+  .account-logged {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+  }
+  .account-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .account-player-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .account-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: rgba(0, 240, 255, 0.12);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .account-avatar svg {
+    width: 17px;
+    height: 17px;
+    fill: var(--p1);
+    filter: drop-shadow(0 0 5px var(--p1));
+  }
+  .account-nick-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .account-nick-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 165px;
+  }
+  .account-sync-status {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    font-weight: 700;
+    color: #00ff88;
+    letter-spacing: 0.5px;
+  }
+  .account-top-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .account-sp-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: #ffcf40;
+    background: rgba(245, 176, 65, 0.18);
+    border: 1.5px solid #f5b041;
+    padding: 5px 11px;
+    border-radius: 9px;
+    box-shadow: 0 0 12px rgba(245, 176, 65, 0.35);
+    white-space: nowrap;
+    letter-spacing: 0.8px;
+    transition: all 0.2s ease;
+  }
+  .account-sp-badge.has-sp {
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(245, 176, 65, 0.35), rgba(217, 119, 6, 0.35));
+    border-color: #ffd700;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+  }
+  .btn-acc-switch {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #8b949e;
+    transition: all 0.2s;
+  }
+  .btn-acc-switch:hover {
+    border-color: #00f0ff;
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.12);
+  }
+  .btn-acc-switch svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
+
+  .account-level-row {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    align-items: center;
+    gap: 9px;
+    background: rgba(6, 10, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9px;
+    padding: 5px 9px;
+  }
+  .account-lvl-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10.5px;
+    font-weight: 900;
+    color: #00f0ff;
+    letter-spacing: 0.7px;
+    text-align: center;
+    background: rgba(0, 240, 255, 0.12);
+    border-radius: 6px;
+    padding: 2.5px 5px;
+  }
+  .account-exp-bar-wrap {
+    position: relative;
+    width: 100%;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  .account-exp-bar-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    background: linear-gradient(90deg, #00f0ff, #b845ff);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    transition: width 0.3s ease;
+  }
+  .account-exp-bar-label {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.6px;
+    z-index: 2;
+  }
+
+  .btn-talent-tree {
+    background: rgba(13, 20, 36, 0.9);
+    border: 1.5px solid rgba(0, 240, 255, 0.45);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: #ffffff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-talent-tree:hover {
+    background: rgba(0, 240, 255, 0.16);
+    border-color: #00f0ff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    transform: translateY(-1px);
+    color: #00f0ff;
+  }
+  .btn-talent-tree svg {
+    width: 15px;
+    height: 15px;
+    fill: #f5b041;
+    filter: drop-shadow(0 0 4px rgba(245, 176, 65, 0.5));
+    transition: fill 0.2s;
+  }
+  .btn-talent-tree:hover svg {
+    fill: #00f0ff;
+    filter: drop-shadow(0 0 6px #00f0ff);
+  }
+
+  /* MODUŁ LOGOWANIA / REJESTRACJI FIREBASE */
+  .account-login-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+  .account-login-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
     font-weight: 900;
+    color: #00f0ff;
     letter-spacing: 0.8px;
-    color: #fff;
-    pointer-events: none;
   }
-  .arena-tile .arena-sub {
-    font-size: 9px;
-    font-weight: 600;
+  .btn-login-close {
+    background: transparent;
+    border: none;
     color: #8b949e;
-    pointer-events: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 4px;
   }
-  .arena-tile.active .arena-sub {
-    color: var(--p1);
+  .btn-login-close:hover {
+    color: #fff;
+  }
+  .account-login-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .account-login-inputs input {
+    background: rgba(6, 10, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 7px;
+    padding: 5px 8px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    outline: none;
+    transition: border 0.15s;
+  }
+  .account-login-inputs input:focus {
+    border-color: var(--p1);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+  }
+  .account-login-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .btn-auth-action {
+    padding: 6px 8px;
+    border-radius: 7px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-auth-login {
+    background: rgba(0, 240, 255, 0.16);
+    border: 1.5px solid var(--p1);
+    color: #00f0ff;
+  }
+  .btn-auth-login:hover {
+    background: var(--p1);
+    color: #05070d;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+  }
+  .btn-auth-register {
+    background: rgba(245, 176, 65, 0.16);
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+  }
+  .btn-auth-register:hover {
+    background: var(--gold);
+    color: #05070d;
+    box-shadow: 0 0 12px rgba(245, 176, 65, 0.4);
+  }
+  .account-auth-feedback {
+    font-size: 9px;
+    font-weight: 700;
+    min-height: 12px;
+    text-align: center;
+    color: #ff0055;
+    line-height: 1.2;
+  }
+  .account-auth-tools {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 3px;
+  }
+  .btn-acc-tool {
+    background: transparent;
+    border: none;
+    color: #8b949e;
+    font-size: 8.5px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 4px;
+    transition: color 0.15s;
+    text-decoration: underline;
+  }
+  .btn-acc-tool:hover {
+    color: #00f0ff;
+  }
+  .acc-auth-err {
+    font-size: 9.5px;
+    color: #ff0055;
+    font-weight: 700;
+    min-height: 12px;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  /* =========================================================================
+     MODAL DRZEWKA ROZWOJU - CZYSTY, PRZESTRZENNY DESIGN ESPORTOWY
+     ========================================================================= */
+  #talentTreeModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 14, 0.94);
+    backdrop-filter: blur(14px);
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .tree-modal-box {
+    background: #090e1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 210, 255, 0.05);
+    border-radius: 16px;
+    width: 96vw;
+    max-width: 1200px;
+    height: 88vh;
+    min-height: 560px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* GŁÓWNY NAGŁÓWEK OKNA */
+  .tree-modal-header {
+    padding: 12px 22px;
+    background: #0d1424;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .tree-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .tree-modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    color: #f8fafc;
+  }
+  .tree-header-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tree-sp-counter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #0b0f19;
+    background: #f59e0b;
+    padding: 4px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .tree-spent-counter {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .tree-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-tree-reset {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-tree-reset.available:hover {
+    background: rgba(245, 158, 11, 0.22);
+    border-color: #fbbf24;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .btn-tree-reset.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #64748b;
+    background: transparent;
+  }
+  .btn-tree-reset.used {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #475569;
+    background: transparent;
+  }
+  .btn-tree-close {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-tree-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* GŁÓWNY PASEK ZAKŁADEK / DASHBOARD 4 ŚCIEŻEK SPECJALIZACJI */
+  .tree-nav-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 12px 22px;
+    background: #090e1a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+  }
+  @media (max-width: 900px) {
+    .tree-nav-tabs {
+      overflow-x: auto;
+      display: flex;
+    }
+  }
+  .tree-nav-tab {
+    background: #0e1526;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: left;
+    min-width: 150px;
+    position: relative;
+    font-family: inherit;
+  }
+  .tree-nav-tab:hover {
+    background: #141f36;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+  .tree-nav-tab.active {
+    background: #162442;
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* 4 UNIKALNE MOTYWY KOLORYSTYCZNE DLA 4 GAŁĘZI W ZAKŁADKACH */
+  .tree-nav-tab.branch-tab-speed.active {
+    border-color: #00f0ff;
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.12) 0%, rgba(14, 21, 38, 0.95) 100%);
+    box-shadow: inset 0 2.5px 0 #00f0ff, 0 4px 20px rgba(0, 240, 255, 0.22);
+  }
+  .tree-nav-tab.branch-tab-speed .tab-name { color: #f0fdfa; }
+  .tree-nav-tab.branch-tab-speed.active .tab-name { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
+
+  .tree-nav-tab.branch-tab-force.active {
+    border-color: #ff3366;
+    background: linear-gradient(180deg, rgba(255, 51, 102, 0.12) 0%, rgba(14, 21, 38, 0.95) 100%);
+    box-shadow: inset 0 2.5px 0 #ff3366, 0 4px 20px rgba(255, 51, 102, 0.22);
+  }
+  .tree-nav-tab.branch-tab-force .tab-name { color: #fff1f2; }
+  .tree-nav-tab.branch-tab-force.active .tab-name { color: #ff3366; text-shadow: 0 0 12px rgba(255, 51, 102, 0.4); }
+
+  .tree-nav-tab.branch-tab-spin.active {
+    border-color: #c084fc;
+    background: linear-gradient(180deg, rgba(192, 132, 252, 0.12) 0%, rgba(14, 21, 38, 0.95) 100%);
+    box-shadow: inset 0 2.5px 0 #c084fc, 0 4px 20px rgba(192, 132, 252, 0.22);
+  }
+  .tree-nav-tab.branch-tab-spin .tab-name { color: #faf5ff; }
+  .tree-nav-tab.branch-tab-spin.active .tab-name { color: #c084fc; text-shadow: 0 0 12px rgba(192, 132, 252, 0.4); }
+
+  .tree-nav-tab.branch-tab-defense.active {
+    border-color: #00ff9d;
+    background: linear-gradient(180deg, rgba(0, 255, 157, 0.12) 0%, rgba(14, 21, 38, 0.95) 100%);
+    box-shadow: inset 0 2.5px 0 #00ff9d, 0 4px 20px rgba(0, 255, 157, 0.22);
+  }
+  .tree-nav-tab.branch-tab-defense .tab-name { color: #f0fdf4; }
+  .tree-nav-tab.branch-tab-defense.active .tab-name { color: #00ff9d; text-shadow: 0 0 12px rgba(0, 255, 157, 0.4); }
+
+  .tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .tab-icon {
+    font-size: 16px;
+  }
+  .tab-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    transition: color 0.15s ease;
+  }
+  .tab-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: #94a3b8;
+  }
+  .tree-nav-tab.active .tab-count {
+    color: #f8fafc;
+  }
+  .tab-progress {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .tab-progress-bar {
+    height: 100%;
+    background: #00f0ff;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .branch-tab-speed .tab-progress-bar { background: #00f0ff; box-shadow: 0 0 8px #00f0ff; }
+  .branch-tab-force .tab-progress-bar { background: #ff3366; box-shadow: 0 0 8px #ff3366; }
+  .branch-tab-spin .tab-progress-bar { background: #c084fc; box-shadow: 0 0 8px #c084fc; }
+  .branch-tab-defense .tab-progress-bar { background: #00ff9d; box-shadow: 0 0 8px #00ff9d; }
+  .tab-desc {
+    font-size: 10.5px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tree-nav-tab.active .tab-desc {
+    color: #94a3b8;
+  }
+
+  /* GŁÓWNY KONTENER DRZEWKA */
+  .simple-tree-container {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 24px 32px;
+    box-sizing: border-box;
+    background: #080c16;
+  }
+  .simple-tree-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  .simple-tree-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .simple-tree-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+  .simple-tree-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* WIDOK POJEDYNCZEJ ŚCIEŻKI (SPACIOUS PROGRESSION ROADMAP) */
+  .tree-roadmap {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+  }
+
+  /* DEFINICJE MOTYWÓW KOLORYSTYCZNYCH DLA 4 ŚCIEŻEK */
+  .tree-roadmap.branch-speed {
+    --accent: #00f0ff;
+    --accent-rgb: 0, 240, 255;
+    --accent-subtle: rgba(0, 240, 255, 0.08);
+    --accent-border: rgba(0, 240, 255, 0.35);
+  }
+  .tree-roadmap.branch-force {
+    --accent: #ff3366;
+    --accent-rgb: 255, 51, 102;
+    --accent-subtle: rgba(255, 51, 102, 0.08);
+    --accent-border: rgba(255, 51, 102, 0.35);
+  }
+  .tree-roadmap.branch-spin {
+    --accent: #c084fc;
+    --accent-rgb: 192, 132, 252;
+    --accent-subtle: rgba(192, 132, 252, 0.08);
+    --accent-border: rgba(192, 132, 252, 0.35);
+  }
+  .tree-roadmap.branch-defense {
+    --accent: #00ff9d;
+    --accent-rgb: 0, 255, 157;
+    --accent-subtle: rgba(0, 255, 157, 0.08);
+    --accent-border: rgba(0, 255, 157, 0.35);
+  }
+
+  .roadmap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 18px;
+    background: #0c1322;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    margin-bottom: 4px;
+  }
+  .roadmap-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+  }
+  .roadmap-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .roadmap-track {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+  }
+  .roadmap-track::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    bottom: 24px;
+    left: 20px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    z-index: 1;
+  }
+
+  .roadmap-node-row {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 16px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .node-rail-point {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .node-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #090e1a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #64748b;
+    transition: all 0.2s ease;
+  }
+
+  /* WĘZEŁ: ODBLOKOWANY */
+  .roadmap-node-row.unlocked .node-circle {
+    background: rgba(var(--accent-rgb), 0.12);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  /* WĘZEŁ: DOSTĘPNY DO KUPNA */
+  .roadmap-node-row.available .node-circle {
+    border: 1.5px solid #f59e0b;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.08);
+  }
+
+  /* WĘZEŁ: ZABLOKOWANY */
+  .roadmap-node-row.locked .node-circle {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #475569;
+    background: #080c16;
+  }
+
+  /* KARTA ZAWARTOŚCI W WIDOKU ROADMAP */
+  .node-content-card {
+    background: #0d1424;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 13px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: all 0.2s ease;
+  }
+  .node-content-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: #111a2f;
+  }
+  @media (max-width: 640px) {
+    .node-content-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-right-action {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  /* KARTA: ODBLOKOWANA */
+  .roadmap-node-row.unlocked .node-content-card {
+    background: rgba(var(--accent-rgb), 0.04);
+    border: 1px solid var(--accent-border);
+  }
+
+  /* KARTA: DOSTĘPNA DO KUPNA */
+  .roadmap-node-row.available .node-content-card {
+    background: rgba(245, 158, 11, 0.03);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  /* KARTA: ZABLOKOWANA */
+  .roadmap-node-row.locked .node-content-card {
+    background: #090e18;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    opacity: 0.72;
+  }
+  .roadmap-node-row.locked .node-content-card:hover {
+    opacity: 0.95;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* INFORMACJA PO LEWEJ STRONIE KARTY */
+  .card-left-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 auto;
+  }
+
+  /* GÓRNY WIERSZ KARTY */
+  .card-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-tier-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .roadmap-node-row.unlocked .card-tier-label {
+    color: var(--accent);
+  }
+  .roadmap-node-row.available .card-tier-label {
+    color: #fbbf24;
+  }
+  .roadmap-node-row.legend-tier .card-tier-label {
+    color: #f59e0b;
+  }
+
+  /* OPIS BENEFITU */
+  .card-benefit-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #cbd5e1;
+  }
+  .roadmap-node-row.unlocked .card-benefit-text {
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .stat-num {
+    color: var(--accent, #38bdf8);
+    font-weight: 700;
+  }
+  .roadmap-node-row.locked .stat-num {
+    color: #94a3b8;
+  }
+
+  /* PRAWA STRONA: AKCJA */
+  .card-right-action {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* PIGUŁKI STATUSU */
+  .roadmap-pill {
+    font-family: 'Orbitron', -apple-system, sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .roadmap-pill.unlocked {
+    background: rgba(var(--accent-rgb), 0.12);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .roadmap-pill.need-sp {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+  }
+  .roadmap-pill.locked {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #64748b;
+    font-size: 10px;
+  }
+
+  /* PRZYCISK ODBLOKUJ */
+  .roadmap-action-btn {
+    font-family: 'Orbitron', -apple-system, sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    padding: 7px 18px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .roadmap-action-btn.can-buy {
+    background: #f59e0b;
+    color: #0b0f19;
+    border-color: #fbbf24;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+  }
+  .roadmap-action-btn.can-buy:hover {
+    background: #fbbf24;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5);
+  }
+
+  /* STYLIZACJA ZMĘCZENIA (FATIGUE) NA PASKU STAMINY */
+  .stamina-fill.exhausted {
+    background: #ff0055 !important;
+    box-shadow: 0 0 10px #ff0055 !important;
+    animation: fatiguePulse 0.4s infinite alternate;
+  }
+  @keyframes fatiguePulse {
+    from { opacity: 0.6; }
+    to { opacity: 1.0; }
   }
 
   /* PANEL OCZEKIWANIA 1v1 */
@@ -832,63 +1720,48 @@
     flex-shrink: 0;
   }
 
-  /* PASEK ULEPSZEŃ */
-  #upgradesPanel {
+  /* CZYSTY PASEK NAWIGACJI W GRZE */
+  #upgradesPanel, .clean-game-nav {
     width: 100%;
-    background: #090d16;
-    border: 1px solid #283044;
+    background: #090e1a;
+    border: 1px solid #1e293b;
     border-bottom: none;
     padding: 6px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
+    box-sizing: border-box;
   }
-  .up-badge {
-    background: rgba(245, 176, 65, 0.14);
-    border: 1px solid var(--gold);
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-weight: 800;
+  .btn-game-tree {
+    background: rgba(245, 176, 65, 0.12);
+    border: 1px solid rgba(245, 176, 65, 0.4);
     color: var(--gold);
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-  }
-  .stat-item {
+    font-size: 11px;
+    font-weight: 900;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #111726;
-    padding: 4px 9px;
-    border-radius: 8px;
-    border: 1px solid #1f293d;
-    font-size: 13px;
-    font-weight: 700;
   }
-  .stat-dots { display: flex; gap: 3px; }
-  .dot {
-    width: 7px;
-    height: 11px;
-    background: #21262d;
-    border-radius: 2px;
+  .btn-game-tree:hover {
+    background: rgba(245, 176, 65, 0.25);
+    box-shadow: 0 0 12px rgba(245, 176, 65, 0.4);
+    transform: translateY(-1px);
   }
-  .dot.active {
-    background: var(--p1);
-    box-shadow: 0 0 6px var(--p1);
+  .game-controls-hint {
+    font-size: 10.5px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
-  .stat-btn {
-    padding: 3px 8px;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    font-weight: 800;
-    background: #238636;
-    color: #fff;
-    cursor: pointer;
+  @media (max-width: 760px) {
+    .game-controls-hint { display: none; }
   }
-  .stat-btn:hover:not(:disabled) { background: #2ea44f; }
-  .stat-btn:disabled { background: #1a2029; color: #484f58; cursor: not-allowed; }
 
   .util-btns { display: flex; gap: 6px; }
   .icon-btn {
@@ -1007,6 +1880,78 @@
     justify-content: center;
   }
 
+  /* PRZYCISK RESTART W PAUZIE - CZYTELNY I WIDOCZNY */
+  .btn-pause-restart {
+    background: #f5b041 !important;
+    color: #0b0f19 !important;
+    font-weight: 900 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(245, 176, 65, 0.45) !important;
+  }
+  .btn-pause-restart:hover {
+    background: #ffbe53 !important;
+    box-shadow: 0 0 20px rgba(245, 176, 65, 0.7) !important;
+  }
+
+  /* KARTA PODSUMOWANIA NAGRÓD XP PO MECZU (#victoryModal) */
+  .victory-rewards-card {
+    background: rgba(15, 23, 42, 0.88);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin: 6px auto 14px;
+    width: 100%;
+    max-width: 330px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  }
+  .victory-xp-earned {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #f5b041;
+    text-shadow: 0 0 14px rgba(245, 176, 65, 0.55);
+  }
+  .victory-xp-reason {
+    display: none !important;
+  }
+  .victory-exp-bar-wrap {
+    width: 100%;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 4px 0;
+  }
+  .victory-exp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d2ff, #a855f7);
+    transition: width 0.4s ease;
+  }
+  .victory-exp-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+  }
+  .victory-sp-info {
+    font-size: 10.5px;
+    color: #38bdf8;
+    font-weight: 700;
+  }
+
   .hidden { display: none !important; }
 
   /* ==========================================
@@ -1041,12 +1986,6 @@
     .top-row {
       grid-template-columns: 1fr;
       gap: 8px;
-    }
-    .nick-box {
-      padding: 8px 12px;
-    }
-    .nick-box input {
-      font-size: 14px;
     }
     .ctrl-tile {
       padding: 6px;
@@ -1221,66 +2160,110 @@
     <div class="hub-panel" id="mainPanel">
       <!-- PROFIL I WYBÓR STEROWANIA -->
       <div class="top-row">
-        <div class="nick-box" id="nickBox" title="Podaj swój nick">
-          <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
-          <input id="nickInput" maxlength="12" placeholder="WPISZ SWÓJ NICK" autocomplete="off">
+        <div class="account-module-box" id="accountModuleWrap">
+          <!-- WIDOK ZALOGOWANEGO GRACZA -->
+          <div class="account-logged" id="accountLoggedView" style="display: flex;">
+            <div class="account-header-row">
+              <div class="account-player-identity">
+                <div class="account-avatar">
+                  <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
+                </div>
+                <div class="account-nick-wrap">
+                  <span class="account-nick-val" id="playerNickDisplay">GRACZ</span>
+                  <span class="account-sync-status" id="accountSyncStatus" title="Synchronizacja z bazą Firebase">☁️ CHMURA</span>
+                </div>
+              </div>
+              <div class="account-top-right">
+                <div class="account-sp-badge" id="accSpDisplay" title="Dostępne punkty umiejętności (SP) do wydania w drzewku talentów">⚡ 3 SP</div>
+                <button type="button" class="btn-acc-switch" onclick="handleAccountSwitchClick()" title="Zaloguj na inne konto / wyloguj z chmury">
+                  <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pasek poziomu i EXP -->
+            <div class="account-level-row">
+              <div class="account-lvl-badge" id="accLevelDisplay">LVL 1</div>
+              <div class="account-exp-bar-wrap" title="Punkty doświadczenia do kolejnego poziomu">
+                <div class="account-exp-bar-fill" id="accExpBarFill" style="width: 0%;"></div>
+                <div class="account-exp-bar-label" id="accExpDisplay">0 / 150 XP</div>
+              </div>
+            </div>
+
+            <button type="button" class="btn-talent-tree" onclick="openTalentTreeModal()" title="Otwórz drzewko rozwoju postaci">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              <span>DRZEWKO TALENTÓW</span>
+            </button>
+          </div>
+
+          <!-- WIDOK LOGOWANIA / REJESTRACJI FIREBASE -->
+          <div class="account-login-card" id="accountLoginView" style="display: none;">
+            <div class="account-login-title-row">
+              <span>KONTO W CHMURZE FIREBASE</span>
+              <button type="button" class="btn-login-close" onclick="toggleAccountAuthView()" title="Wróć do profilu">✕</button>
+            </div>
+            <div class="account-login-inputs">
+              <input type="text" id="accAuthNick" maxlength="12" placeholder="NICK (np. FledRychu)">
+              <input type="password" id="accAuthPass" placeholder="HASŁO">
+            </div>
+            <div class="account-login-actions">
+              <button type="button" class="btn-auth-action btn-auth-login" onclick="handleFirebaseLogin()">ZALOGUJ</button>
+              <button type="button" class="btn-auth-action btn-auth-register" onclick="handleFirebaseRegister()">ZAREJESTRUJ</button>
+            </div>
+            <div class="account-auth-feedback" id="accAuthFeedback"></div>
+          </div>
         </div>
 
         <div class="ctrl-selector">
-          <div class="ctrl-tile active" id="ctrlKeyboard" onclick="selectControl('keyboard')">
+          <div class="ctrl-tile active" id="ctrlKeyboard" role="button" tabindex="0" aria-pressed="true" onclick="selectControl('keyboard')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectControl('keyboard');}">
             <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
             <span>KLAWIATURA</span>
           </div>
-          <div class="ctrl-tile" id="ctrlMouse" onclick="selectControl('mouse')">
+          <div class="ctrl-tile" id="ctrlMouse" role="button" tabindex="0" aria-pressed="false" onclick="selectControl('mouse')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectControl('mouse');}">
             <svg viewBox="0 0 24 24"><path d="M13 1.07V9h7c0-4.08-3.05-7.44-7-7.93zM4 15c0 4.42 3.58 8 8 8s8-3.58 8-8v-4H4v4zm7-13.93C7.05 1.56 4 4.92 4 9h7V1.07z"/></svg>
             <span>MYSZKA</span>
           </div>
         </div>
       </div>
 
-      <!-- WYBÓR CYBER-ARENY -->
+      <!-- WYBÓR ARENY (PROSTE I TEMATYCZNE: KLASYCZNA, WIR, PINBALL) -->
       <div class="arena-selector-wrap">
-        <div class="arena-selector-label">
-          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-          <span>WYBIERZ CYBER-ARENĘ</span>
-        </div>
         <div class="arena-tiles-grid">
-          <div class="arena-tile active" id="arena-tokio" onclick="selectArena('tokio')">
-            <span class="arena-icon">⚡</span>
-            <span class="arena-name">NEO-TOKIO</span>
-            <span class="arena-sub">KLASYCZNA</span>
+          <div class="arena-tile active" id="arena-tokio" role="button" tabindex="0" aria-pressed="true" onclick="selectArena('tokio')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectArena('tokio');}" title="Klasyczny stół turniejowy">
+            <svg viewBox="0 0 24 24"><path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-8 7H5V6h6v5zm2-5h6v5h-6V6zm-8 7h6v5H5v-5zm8 5v-5h6v5h-6z"/></svg>
+            <span>KLASYCZNA</span>
           </div>
-          <div class="arena-tile" id="arena-hex" onclick="selectArena('hex')">
-            <span class="arena-icon">🛑</span>
-            <span class="arena-name">HEX-ARENA</span>
-            <span class="arena-sub">SKOŚNE ROGI</span>
+
+          <div class="arena-tile" id="arena-vortex" role="button" tabindex="0" aria-pressed="false" onclick="selectArena('vortex')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectArena('vortex');}" title="Wir grawitacyjny w centrum stołu wystrzeliwujący piłkę ukośnie">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-7.07 17.07l1.41-1.41A8 8 0 1 1 20 12h-2a6 6 0 1 0-6 6v-2a4 4 0 1 1 4-4h-2a2 2 0 1 0-2 2v2a8 8 0 0 1-8-8A10 10 0 0 0 12 2z"/></svg>
+            <span>WIR</span>
           </div>
-          <div class="arena-tile" id="arena-pinball" onclick="selectArena('pinball')">
-            <span class="arena-icon">🎯</span>
-            <span class="arena-name">PINBALL</span>
-            <span class="arena-sub">BUMPERS</span>
+
+          <div class="arena-tile" id="arena-pinball" role="button" tabindex="0" aria-pressed="false" onclick="selectArena('pinball')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectArena('pinball');}" title="Sprężyste odboje flipperowe">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 8a2 2 0 1 1 2-2 2 2 0 0 1-2 2z"/></svg>
+            <span>PINBALL</span>
           </div>
         </div>
       </div>
 
-      <!-- KARTY TRYBÓW GRY -->
+      <!-- KARTY TRYBÓW GRY (PROSTE I TEMATYCZNE NAZWY) -->
       <div class="modes-grid">
-        <!-- SOLO ARENA -->
+        <!-- GRA Z BOTAMI (SOLO / CO-OP) -->
         <div class="mode-card">
           <div class="mode-header">
             <div class="mode-header-left">
               <div class="mode-icon ai-ic">
                 <svg viewBox="0 0 24 24" fill="#b845ff"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zM9 13c-.83 0-1.5-.67-1.5-1.5S8.17 10 9 10s1.5.67 1.5 1.5S9.83 13 9 13zm6 0c-.83 0-1.5-.67-1.5-1.5S14.17 10 15 10s1.5.67 1.5 1.5S15.83 13 15 13z"/></svg>
               </div>
-              <div class="mode-title">SOLO ARENA</div>
+              <div class="mode-title">GRA Z BOTAMI</div>
             </div>
           </div>
 
-          <!-- POZIOM RYWALI -->
+          <!-- POZIOM BOTA RYWALA -->
           <div class="tier-row">
             <div class="tier-tag">
               <svg viewBox="0 0 24 24" fill="#b845ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
-              <span>RYWALE</span>
+              <span>BOT RYWAL</span>
             </div>
             <div class="ai-tiers">
               <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">ŁATWY</button>
@@ -1289,11 +2272,11 @@
             </div>
           </div>
 
-          <!-- POZIOM PARTNERA -->
+          <!-- POZIOM BOTA SOJUSZNIKA -->
           <div class="tier-row">
             <div class="tier-tag">
               <svg viewBox="0 0 24 24" fill="#00f0ff"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-              <span>PARTNER</span>
+              <span>SOJUSZNIK</span>
             </div>
             <div class="ai-tiers">
               <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">ŁATWY</button>
@@ -1319,26 +2302,26 @@
           </div>
         </div>
 
-        <!-- MULTIPLAYER ONLINE -->
+        <!-- MECZ ONLINE (MULTIPLAYER) -->
         <div class="mode-card">
           <div class="mode-header">
             <div class="mode-header-left">
               <div class="mode-icon p2p-ic">
                 <svg viewBox="0 0 24 24" fill="#00f0ff"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
               </div>
-              <div class="mode-title">MULTIPLAYER</div>
+              <div class="mode-title">MECZ ONLINE</div>
             </div>
           </div>
 
-          <!-- CZYSTY PRZEŁĄCZNIK 1 VS 1 / 2 VS 2 Z IKONAMI -->
+          <!-- PRZEŁĄCZNIK 1v1 / 2v2 Z IKONAMI -->
           <div class="mp-tiers">
             <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">
               <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-              <span>1 VS 1</span>
+              <span>1vs1</span>
             </button>
             <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">
               <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-              <span>2 VS 2</span>
+              <span>2vs2</span>
             </button>
           </div>
 
@@ -1448,33 +2431,16 @@
     </div>
 
     <!-- PASEK ULEPSZEŃ -->
-    <div id="upgradesPanel">
-      <div class="up-badge">UP: <span id="ptsDisplay">0</span></div>
-
-      <div class="stat-item">
-        <span>🌀</span>
-        <div class="stat-dots" id="dots-spin"></div>
-        <button type="button" class="stat-btn" id="btnSpin" onclick="upgradeStat('spin')">+1</button>
+    <!-- CZYSTY PASEK NAWIGACJI W GRZE (BEZ ZBĘDNYCH ULEPSZEŃ UP) -->
+    <div id="upgradesPanel" class="clean-game-nav">
+      <div class="game-nav-left">
+        <button type="button" class="btn-game-tree" onclick="openTalentTreeModal()" title="Otwórz drzewko rozwoju postaci">
+          <span>⭐ DRZEWKO TALENTÓW</span>
+        </button>
       </div>
-
-      <div class="stat-item">
-        <span>⚡</span>
-        <div class="stat-dots" id="dots-speed"></div>
-        <button type="button" class="stat-btn" id="btnSpeed" onclick="upgradeStat('speed')">+1</button>
+      <div class="game-nav-center">
+        <span class="game-controls-hint">ESC: Pauza • Kółko / W,S: Ruch • LPM / E: Dash • PPM / Q: Smash</span>
       </div>
-
-      <div class="stat-item">
-        <span>💥</span>
-        <div class="stat-dots" id="dots-smash"></div>
-        <button type="button" class="stat-btn" id="btnSmash" onclick="upgradeStat('smash')">+1</button>
-      </div>
-
-      <div class="stat-item">
-        <span>🛡️</span>
-        <div class="stat-dots" id="dots-size"></div>
-        <button type="button" class="stat-btn" id="btnSize" onclick="upgradeStat('size')">+1</button>
-      </div>
-
       <div class="util-btns">
         <button type="button" class="icon-btn" id="ctrlSwitchBtn" onclick="toggleInGameControl()">⌨️ KLAWIATURA</button>
         <button type="button" class="icon-btn" id="pauseBtn" onclick="togglePauseGame()" title="Pauza (ESC / P)">⏸️</button>
@@ -1491,13 +2457,24 @@
         <button type="button" id="touchSmashBtn" class="touch-btn touch-smash">💥 SMASH</button>
       </div>
 
-      <!-- MODAL ZWYCIĘSTWA -->
+      <!-- MODAL ZWYCIĘSTWA / PODSUMOWANIE MECZU -->
       <div id="victoryModal">
         <h2 id="winnerTitle">ZWYCIĘSTWO!</h2>
         <p id="winnerSub">7 : 0</p>
-        <div class="modal-actions">
+
+        <!-- KARTA NAGRÓD XP PO KAŻDEJ RUNDZIE / MECZU -->
+        <div class="victory-rewards-card" id="victoryRewardsCard">
+          <div class="victory-xp-earned" id="vicXpEarned">+45 XP</div>
+          <div class="victory-exp-bar-wrap">
+            <div class="victory-exp-bar-fill" id="vicExpBarFill" style="width: 0%;"></div>
+            <div class="victory-exp-label" id="vicExpLabel">LVL 1 • 0 / 150 XP</div>
+          </div>
+          <div class="victory-sp-info" id="vicSpInfo">⚡ Kolejny punkt talentu (SP) na LVL 2 (za 1 poziom)</div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 10px;">
           <button type="button" class="action-btn btn-host" id="btnRematch" onclick="requestRematch()">REWANŻ</button>
-          <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">MENU</button>
+          <button type="button" class="action-btn" style="background:#1e293b; color:#e2e8f0;" onclick="returnToMenu()">MENU GŁÓWNE</button>
         </div>
       </div>
 
@@ -1516,13 +2493,84 @@
         <p id="pauseSub">Gra została wstrzymana</p>
         <div class="modal-actions" style="flex-direction: column; width: 220px; gap: 8px;">
           <button type="button" class="action-btn btn-host" onclick="togglePauseGame(false)">▶ WZNÓW</button>
-          <button type="button" class="action-btn btn-play-solo" onclick="restartCurrentMatch()">🔄 RESTART</button>
-          <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">MENU GŁÓWNE</button>
+          <button type="button" class="action-btn btn-pause-restart" onclick="restartCurrentMatch()">🔄 RESTART</button>
+          <button type="button" class="action-btn" style="background:#1e293b; color:#e2e8f0;" onclick="returnToMenu()">MENU GŁÓWNE</button>
         </div>
       </div>
     </div>
   </div>
 
+</div>
+
+<!-- MODAL DRZEWKA TALENTÓW (NOWOCZESNY DESIGN, 4 ŚCIEŻKI ROZWOJU Z KONDUTORAMI MOCY I ZAKŁADKAMI) -->
+<div id="talentTreeModal">
+  <div class="tree-modal-box">
+    <div class="tree-modal-header">
+      <div class="tree-header-left">
+        <span class="tree-modal-title">⚡ DRZEWKO SPECJALIZACJI</span>
+        <div class="tree-header-stats">
+          <span class="tree-sp-counter" id="modalSpCounter">⚡ 0 SP</span>
+          <span class="tree-spent-counter" id="modalSpentCounter">Wydano: 0 / 116 SP</span>
+        </div>
+      </div>
+      <div class="tree-header-actions">
+        <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET (1 DARMOWY)</button>
+        <button type="button" class="btn-tree-close" onclick="closeTalentTreeModal()" title="Zamknij okno drzewka">✕ ZAMKNIJ</button>
+      </div>
+    </div>
+
+    <!-- GŁÓWNY PASEK ZAKŁADEK / DASHBOARD ŚCIEŻEK -->
+    <div class="tree-nav-tabs">
+      <button type="button" class="tree-nav-tab branch-tab-speed active" data-filter="speed" onclick="filterTreeBranch('speed')">
+        <div class="tab-header">
+          <span class="tab-name"><span class="tab-icon">🏃</span> ZWINNOŚĆ</span>
+          <span class="tab-count" id="tabCountSpeed">0/5</span>
+        </div>
+        <div class="tab-progress">
+          <div class="tab-progress-bar" id="tabBarSpeed" style="width: 0%;"></div>
+        </div>
+        <div class="tab-desc">Tempo i zrywy</div>
+      </button>
+
+      <button type="button" class="tree-nav-tab branch-tab-force" data-filter="force" onclick="filterTreeBranch('force')">
+        <div class="tab-header">
+          <span class="tab-name"><span class="tab-icon">💥</span> SIŁA</span>
+          <span class="tab-count" id="tabCountForce">0/5</span>
+        </div>
+        <div class="tab-progress">
+          <div class="tab-progress-bar" id="tabBarForce" style="width: 0%;"></div>
+        </div>
+        <div class="tab-desc">Moc i meteor</div>
+      </button>
+
+      <button type="button" class="tree-nav-tab branch-tab-spin" data-filter="spin" onclick="filterTreeBranch('spin')">
+        <div class="tab-header">
+          <span class="tab-name"><span class="tab-icon">🌀</span> ROTACJA</span>
+          <span class="tab-count" id="tabCountSpin">0/5</span>
+        </div>
+        <div class="tab-progress">
+          <div class="tab-progress-bar" id="tabBarSpin" style="width: 0%;"></div>
+        </div>
+        <div class="tab-desc">Kontrola toru lotu</div>
+      </button>
+
+      <button type="button" class="tree-nav-tab branch-tab-defense" data-filter="defense" onclick="filterTreeBranch('defense')">
+        <div class="tab-header">
+          <span class="tab-name"><span class="tab-icon">🛡️</span> OBRONA</span>
+          <span class="tab-count" id="tabCountDefense">0/5</span>
+        </div>
+        <div class="tab-progress">
+          <div class="tab-progress-bar" id="tabBarDefense" style="width: 0%;"></div>
+        </div>
+        <div class="tab-desc">Zasięg i tarcza</div>
+      </button>
+    </div>
+
+    <!-- KONTENER GŁÓWNY DRZEWKA -->
+    <div class="simple-tree-container" id="simpleTreeContainer">
+      <!-- Generowane dynamicznie przez renderSkillTreeGraph() -->
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1545,6 +2593,19 @@ window.addEventListener('touchmove', e => {
 const NICK_STORAGE_KEY = 'cyberpong_player_nick';
 const WALL_RECORD_KEY = 'cyberpong_wall_record';
 
+function safeGetStorage(key, fallback = null) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return fallback;
+  }
+}
+function safeSetStorage(key, val) {
+  try {
+    localStorage.setItem(key, val);
+  } catch (e) {}
+}
+
 const W = 900, H = 500;
 const WIN_SCORE = 7;
 
@@ -1563,6 +2624,8 @@ let matchOver = false;
 let matchPaused = false;
 let controlMode = 'keyboard';
 let mouseY = H / 2;
+let isRightMouseDown = false;
+let isLeftMouseDown = false;
 
 let mpMode = '1v1';
 let is2v2 = false;
@@ -1571,20 +2634,25 @@ let wallScore = 0;
 let wallRecordAtStart = 0;
 let hasBeatenWallRecord = false;
 
-// Zróżnicowane Cyber-Areny: 'tokio' (klasyczna), 'hex' (skośne rogi), 'pinball' (bumpers)
+// Zróżnicowane Cyber-Areny: 'tokio' (klasyczna), 'vortex' (wir grawitacyjny), 'pinball' (bumpers)
 let selectedArena = 'tokio';
 const HEX_CORNER_SIZE = 95;
 let bumpers = [
   { x: W / 2, y: H * 0.30, r: 33, flash: 0 },
   { x: W / 2, y: H * 0.70, r: 33, flash: 0 }
 ];
+const VORTEX = { x: W / 2, y: H / 2, r: 38, angle: 0, pullRange: 86 };
 
 function selectArena(name) {
   selectedArena = name;
-  if (name === 'pinball') obstacle = null;
-  ['tokio', 'hex', 'pinball'].forEach(a => {
+  if (name === 'pinball' || name === 'vortex') obstacle = null;
+  ['tokio', 'vortex', 'pinball'].forEach(a => {
     const el = document.getElementById('arena-' + a);
-    if (el) el.classList.toggle('active', a === name);
+    if (el) {
+      const isActive = (a === name);
+      el.classList.toggle('active', isActive);
+      el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
   });
   if (isHost && is2v2) {
     broadcastLobbyState();
@@ -1618,6 +2686,7 @@ const hostClients = {};
 let lobbySlots = [null, null, null, null];
 let selectedSwapSlot = null;
 let currentRoomCode = '';
+let connectedOpponentPeerId = null;
 
 let isHost = true, isSinglePlayer = false;
 let myName = '', oppName = 'BOT';
@@ -1637,41 +2706,1022 @@ if (window.location.hash && window.location.hash.length >= 7) {
   }
 }
 
-// Wczytanie i automatyczny zapis nicku w localStorage
-const nickInputEl = document.getElementById('nickInput');
-const nickBoxEl = document.getElementById('nickBox');
+/* ==========================================
+   SYSTEM KONT GRACZY & DRZEWKO TALENTÓW
+   ========================================== */
+const ACCOUNTS_DB_KEY = 'CYBERPONG_ACCOUNTS_v2';
+const CURRENT_USER_KEY = 'CYBERPONG_CURRENT_USER';
+
+const SKILL_TREE_BRANCHES = [
+  {
+    id: 'speed',
+    name: 'ZWINNOŚĆ',
+    icon: '🏃',
+    color: '#00d2ff',
+    desc: 'Tempo i zrywy (max +45% łącznego bonusu)',
+    nodes: [
+      {
+        id: 'spd_1', tier: 1, cost: 2, req: null,
+        icon: '⚡', type: 'stat',
+        benefit: '+8% prędkości paletki',
+        legacyIds: ['speed_1', 'spd_1']
+      },
+      {
+        id: 'spd_2', tier: 2, cost: 4, req: 'spd_1',
+        icon: '💨', type: 'stat',
+        benefit: '+14% prędkości łącznie',
+        legacyIds: ['speed_2', 'spd_2']
+      },
+      {
+        id: 'spd_3', tier: 3, cost: 6, req: 'spd_2',
+        icon: '🚀', type: 'skill',
+        benefit: 'Po dashu 35% szans na zryw: +25% prędkości na 0,5 s (cooldown 1,5 s)',
+        legacyIds: ['speed_3', 'spd_3']
+      },
+      {
+        id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
+        icon: '🌈', type: 'skill',
+        benefit: 'Co 8–14 s paletka zmienia kolor i dostaje +35% prędkości na 2,5 s',
+        legacyIds: ['speed_4', 'spd_4']
+      },
+      {
+        id: 'spd_5', tier: 5, cost: 10, req: 'spd_4',
+        icon: '👻', type: 'legend',
+        benefit: 'Stałe +18% prędkości, dash bez cooldownu i o 40% mniejszy koszt energii',
+        legacyIds: ['speed_5', 'spd_5', 'spd_6']
+      }
+    ]
+  },
+  {
+    id: 'force',
+    name: 'SIŁA',
+    icon: '💥',
+    color: '#ff3366',
+    desc: 'Moc uderzeń i rykoszety (reset po punkcie)',
+    nodes: [
+      {
+        id: 'pwr_1', tier: 1, cost: 2, req: null,
+        icon: '💥', type: 'stat',
+        benefit: '+10% siły smasha',
+        legacyIds: ['force_1', 'atk_1', 'pwr_1']
+      },
+      {
+        id: 'pwr_2', tier: 2, cost: 4, req: 'pwr_1',
+        icon: '🔥', type: 'stat',
+        benefit: '+18% siły smasha łącznie',
+        legacyIds: ['force_2', 'atk_2', 'pwr_2']
+      },
+      {
+        id: 'pwr_3', tier: 3, cost: 6, req: 'pwr_2',
+        icon: '⚡', type: 'skill',
+        benefit: 'Odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)',
+        legacyIds: ['force_3', 'atk_3', 'pwr_3']
+      },
+      {
+        id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
+        icon: '🌋', type: 'skill',
+        benefit: 'Każde trafienie daje stos (max 3), każdy to +8% siły smasha (reset po punkcie)',
+        legacyIds: ['force_4', 'atk_4', 'pwr_4']
+      },
+      {
+        id: 'pwr_5', tier: 5, cost: 10, req: 'pwr_4',
+        icon: '☄️', type: 'legend',
+        benefit: 'Przy 3 stosach smash leci 16.5 px/f z ogniem, a rywal jest spowolniony o 30% na 1,2 s',
+        legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
+      }
+    ]
+  },
+  {
+    id: 'spin',
+    name: 'ROTACJA',
+    icon: '🌀',
+    color: '#a855f7',
+    desc: 'Kontrola toru i rotacja piłki',
+    nodes: [
+      {
+        id: 'spn_1', tier: 1, cost: 2, req: null,
+        icon: '🌀', type: 'stat',
+        benefit: '+12% siły podkręcania',
+        legacyIds: ['spin_1', 'spn_1']
+      },
+      {
+        id: 'spn_2', tier: 2, cost: 4, req: 'spn_1',
+        icon: '🌪️', type: 'stat',
+        benefit: '+22% podkręcania łącznie i +15% czasu trwania rotacji',
+        legacyIds: ['spin_2', 'spn_2']
+      },
+      {
+        id: 'spn_3', tier: 3, cost: 6, req: 'spn_2',
+        icon: '🪃', type: 'skill',
+        benefit: '35% szans, że odbicie od ściany odświeży rotację piłki',
+        legacyIds: ['spin_3', 'spn_3']
+      },
+      {
+        id: 'spn_4', tier: 4, cost: 7, req: 'spn_3',
+        icon: '🌌', type: 'skill',
+        benefit: 'Raz na 18 s piłka w połowie boiska gwałtownie skręca w przeciwną stronę (ok. 25°)',
+        legacyIds: ['spin_4', 'spn_4']
+      },
+      {
+        id: 'spn_5', tier: 5, cost: 10, req: 'spn_4',
+        icon: '🎛️', type: 'legend',
+        benefit: 'Przez 0,6 s po uderzeniu widzisz kółko kontroli: przytrzymaj LPM lub PPM, aby sterować lotem piłki myszką',
+        legacyIds: ['spin_5', 'spn_5', 'spn_6']
+      }
+    ]
+  },
+  {
+    id: 'defense',
+    name: 'OBRONA',
+    icon: '🛡️',
+    color: '#10b981',
+    desc: 'Długość paletki, energia i tarcza (1/set)',
+    nodes: [
+      {
+        id: 'def_1', tier: 1, cost: 2, req: null,
+        icon: '🛡️', type: 'stat',
+        benefit: '+6 px długości paletki',
+        legacyIds: ['def_1']
+      },
+      {
+        id: 'def_2', tier: 2, cost: 4, req: 'def_1',
+        icon: '🔋', type: 'stat',
+        benefit: '+10 px długości łącznie i +20 maks. energii',
+        legacyIds: ['def_2', 'stm_1', 'stm_2']
+      },
+      {
+        id: 'def_3', tier: 3, cost: 6, req: 'def_2',
+        icon: '🔌', type: 'skill',
+        benefit: 'Każde udane odbicie daje +10 energii',
+        legacyIds: ['def_3', 'stm_3']
+      },
+      {
+        id: 'def_4', tier: 4, cost: 7, req: 'def_3',
+        icon: '⚔️', type: 'skill',
+        benefit: 'Odbicie w ostatniej chwili tłumi uderzenie o 30% i daje +1 prędkości',
+        legacyIds: ['def_4', 'stm_4']
+      },
+      {
+        id: 'def_5', tier: 5, cost: 10, req: 'def_4',
+        icon: '🔰', type: 'legend',
+        benefit: 'Raz na set, gdy piłka minie paletkę, tarcza odbija ją z powrotem i daje +40 energii',
+        legacyIds: ['def_5', 'def_6', 'stm_5']
+      }
+    ]
+  }
+];
+
+const SKILL_TREE_NODES = {
+  root: { id: 'root', branch: 'root', tier: 0, type: 'root', name: 'Start', benefit: 'Start', cost: 0, req: null }
+};
+SKILL_TREE_BRANCHES.forEach(b => {
+  b.nodes.forEach(n => {
+    n.branch = b.id;
+    n.color = b.color;
+    n.name = n.benefit;
+    n.stat = n.benefit;
+    SKILL_TREE_NODES[n.id] = n;
+  });
+});
+
+const TALENTS_DEF = SKILL_TREE_NODES;
+
+const PLAYER_PROFILE_KEY = 'CYBERPONG_PLAYER_PROFILE_v2';
+
+/* =========================================================================
+   KONFIGURACJA I INICJALIZACJA BAZY DANYCH GOOGLE FIREBASE CLOUD
+   ========================================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCtKxDIKJOWtfGZ2RXTSEHS37SIIRC92gM",
+  authDomain: "nova-s-e94ea.firebaseapp.com",
+  projectId: "nova-s-e94ea",
+  storageBucket: "nova-s-e94ea.firebasestorage.app",
+  messagingSenderId: "831762785334",
+  appId: "1:831762785334:web:da4cc29c9ffbfb5a66a497",
+  measurementId: "G-9WF1QJ1V67"
+};
+
+let fbApp = null;
+let fbAuth = null;
+let fbDb = null;
 
 try {
-  const savedNick = localStorage.getItem(NICK_STORAGE_KEY);
-  if (savedNick && savedNick.trim().length > 0) {
-    nickInputEl.value = savedNick.trim().slice(0, 12);
+  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+    fbApp = firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+    fbDb = firebase.firestore();
   }
-} catch (e) {}
+} catch (e) {
+  console.warn('Firebase init info:', e);
+}
 
-nickInputEl.addEventListener('input', () => {
-  nickBoxEl.classList.remove('nick-error');
-  const val = nickInputEl.value.trim();
-  if (val.length > 0) {
-    setStatus('');
-    try { localStorage.setItem(NICK_STORAGE_KEY, val); } catch (e) {}
+function nickToEmail(nick) {
+  return 'u_' + encodeURIComponent(nick.trim().toLowerCase()) + '@cyberpong.app';
+}
+
+function getXpRequiredForLevel(level) {
+  if (level < 10) return 150;
+  return 150 + (level - 9) * 60;
+}
+
+function getLevelProgress(totalExp) {
+  let exp = Math.max(0, totalExp || 0);
+  let lvl = 1;
+  while (true) {
+    const req = getXpRequiredForLevel(lvl);
+    if (exp < req) {
+      return {
+        level: lvl,
+        currentExp: exp,
+        neededExp: req,
+        pct: Math.min(100, Math.max(0, Math.round((exp / req) * 100)))
+      };
+    }
+    exp -= req;
+    lvl++;
+  }
+}
+
+function getPlayerProfile() {
+  try {
+    const raw = localStorage.getItem(PLAYER_PROFILE_KEY);
+    let prof = raw ? JSON.parse(raw) : null;
+    if (!prof || typeof prof !== 'object') {
+      const oldNick = localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER') || 'GRACZ';
+      prof = {
+        nick: oldNick,
+        level: 1,
+        exp: 0,
+        sp: 3,
+        spentSp: 0,
+        freeResets: 1,
+        talents: { root: true },
+        stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 }
+      };
+      localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof));
+    }
+    if (!prof.nick) prof.nick = 'GRACZ';
+    if (!prof.talents || typeof prof.talents !== 'object') prof.talents = {};
+    prof.talents.root = true;
+    if (typeof prof.freeResets !== 'number') prof.freeResets = 1;
+
+    // Migracja wsteczna starych identyfikatorów talentów:
+    for (const key in SKILL_TREE_NODES) {
+      const node = SKILL_TREE_NODES[key];
+      if (node.legacyIds) {
+        for (const leg of node.legacyIds) {
+          if (prof.talents[leg]) prof.talents[node.id] = true;
+        }
+      }
+    }
+
+    // Przeliczenie wydanych punktów na podstawie aktualnego drzewka
+    let calcSpent = 0;
+    for (const tKey in prof.talents) {
+      if (prof.talents[tKey] && SKILL_TREE_NODES[tKey]) {
+        calcSpent += SKILL_TREE_NODES[tKey].cost;
+      }
+    }
+    prof.spentSp = calcSpent;
+
+    if (typeof prof.exp !== 'number') prof.exp = 0;
+    // Wyznaczenie aktualnego poziomu i postępu XP
+    const prog = getLevelProgress(prof.exp);
+    prof.level = prog.level;
+
+    // 3 punkty SP na start (lvl 1) + 1 punkt SP za każdy kolejny poziom
+    const totalSpDue = 3 + (prof.level - 1);
+    const totalSpAcquired = (prof.spentSp || 0) + (prof.sp || 0);
+    if (totalSpAcquired < totalSpDue) {
+      prof.sp = totalSpDue - (prof.spentSp || 0);
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof)); } catch (e) {}
+    }
+
+    if (typeof prof.sp !== 'number') prof.sp = 3;
+    if (!prof.stats || typeof prof.stats !== 'object') {
+      prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    }
+    return prof;
+  } catch (e) {
+    return {
+      nick: 'GRACZ',
+      level: 1,
+      exp: 0,
+      sp: 3,
+      spentSp: 0,
+      freeResets: 1,
+      talents: { root: true },
+      stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 }
+    };
+  }
+}
+
+function syncProfileToCloud(prof) {
+  if (fbAuth && fbAuth.currentUser && fbDb) {
+    try {
+      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(prof, { merge: true }).catch(err => {
+        console.warn('Błąd synchronizacji chmury Firestore:', err);
+      });
+    } catch (e) {}
+  }
+}
+
+function savePlayerProfile(prof) {
+  if (!prof) return;
+  try {
+    localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof));
+    if (prof.nick) {
+      myName = prof.nick;
+      localStorage.setItem(NICK_STORAGE_KEY, prof.nick);
+      localStorage.setItem('CYBERPONG_CURRENT_USER', prof.nick);
+    }
+  } catch (e) {}
+  syncProfileToCloud(prof);
+  updateAccountUI();
+}
+
+function getCurrentAccount() {
+  return getPlayerProfile();
+}
+
+function saveCurrentAccount(acc) {
+  savePlayerProfile(acc);
+}
+
+function updateAccountUI() {
+  const prof = getPlayerProfile();
+  myName = prof.nick;
+
+  const nickDisplay = document.getElementById('playerNickDisplay');
+  if (nickDisplay) nickDisplay.textContent = prof.nick || 'GRACZ';
+
+  const prog = getLevelProgress(prof.exp || 0);
+  const lvl = prog.level;
+  const inLevel = prog.currentExp;
+  const neededExp = prog.neededExp;
+  const pct = prog.pct;
+
+  const lvlEl = document.getElementById('accLevelDisplay');
+  const expBarFill = document.getElementById('accExpBarFill');
+  const expEl = document.getElementById('accExpDisplay');
+  if (lvlEl) lvlEl.textContent = `LVL ${lvl}`;
+  if (expBarFill) expBarFill.style.width = pct + '%';
+
+  // Format bez "(brak ___ XP)"
+  if (expEl) {
+    expEl.textContent = `${inLevel} / ${neededExp} XP`;
+    if (expEl.parentElement) {
+      expEl.parentElement.title = `Poziom ${lvl}: ${inLevel} / ${neededExp} XP | Kolejny punkt SP na LVL ${lvl + 1} (za 1 poziom)`;
+    }
+  }
+
+  const spEl = document.getElementById('accSpDisplay');
+  if (spEl) {
+    const spVal = prof.sp || 0;
+    spEl.textContent = `⚡ ${spVal} SP`;
+    spEl.classList.toggle('has-sp', spVal > 0);
+  }
+
+  const syncStatus = document.getElementById('accountSyncStatus');
+  if (syncStatus) {
+    const isOnline = !!(fbAuth && fbAuth.currentUser);
+    syncStatus.textContent = isOnline ? '☁️ ONLINE' : '💾 LOKALNIE';
+    syncStatus.style.color = isOnline ? '#00ff88' : '#8b949e';
+  }
+
+  const modalSp = document.getElementById('modalSpCounter');
+  if (modalSp) modalSp.textContent = `⚡ ${prof.sp || 0} SP`;
+  const modalSpent = document.getElementById('modalSpentCounter');
+  if (modalSpent) modalSpent.textContent = `Wydano: ${prof.spentSp || 0} / 116 SP`;
+}
+
+function toggleAccountAuthView(forceState) {
+  const loginView = document.getElementById('accountLoginView');
+  const loggedView = document.getElementById('accountLoggedView');
+  if (!loginView || !loggedView) return;
+  const isCurrentlyLogin = loginView.style.display !== 'none';
+  const showLogin = (typeof forceState === 'boolean') ? forceState : !isCurrentlyLogin;
+  loginView.style.display = showLogin ? 'flex' : 'none';
+  loggedView.style.display = showLogin ? 'none' : 'flex';
+
+  const fbFeedback = document.getElementById('accAuthFeedback');
+  if (fbFeedback) fbFeedback.textContent = '';
+  if (showLogin) {
+    const nickIn = document.getElementById('accAuthNick');
+    if (nickIn) nickIn.value = getPlayerProfile().nick || '';
+  }
+}
+
+async function handleFirebaseLogout() {
+  try {
+    if (fbAuth && fbAuth.currentUser) {
+      await fbAuth.signOut();
+    }
+  } catch (e) {
+    console.warn('Błąd wylogowywania:', e);
+  }
+  updateAccountUI();
+  toggleAccountAuthView(true);
+  showBanner('Wylogowano z chmury Firebase', '#8b949e', 50);
+}
+
+function handleAccountSwitchClick() {
+  if (fbAuth && fbAuth.currentUser) {
+    if (confirm('Czy chcesz wylogować się z konta w chmurze Firebase?')) {
+      handleFirebaseLogout();
+      return;
+    }
+  }
+  toggleAccountAuthView();
+}
+
+async function handleFirebaseRegister() {
+  const nickInput = document.getElementById('accAuthNick');
+  const passInput = document.getElementById('accAuthPass');
+  const fbFeedback = document.getElementById('accAuthFeedback');
+  if (!fbAuth) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Brak połączenia z Firebase SDK!';
+    }
+    return;
+  }
+  const nick = nickInput ? nickInput.value.trim() : '';
+  const pass = passInput ? passInput.value : '';
+  if (!nick || nick.length < 3) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Nick musi mieć min. 3 znaki!';
+    }
+    return;
+  }
+  if (!pass || pass.length < 6) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Hasło musi mieć min. 6 znaków!';
+    }
+    return;
+  }
+
+  if (fbFeedback) {
+    fbFeedback.style.color = '#00f0ff';
+    fbFeedback.textContent = 'Rejestracja w chmurze Firebase...';
+  }
+
+  try {
+    const email = nickToEmail(nick);
+    const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+    const currentLocal = getPlayerProfile();
+    const newProf = {
+      ...currentLocal,
+      nick: nick,
+      updatedAt: Date.now()
+    };
+    if (fbDb) {
+      await fbDb.collection('players').doc(cred.user.uid).set(newProf);
+    }
+    savePlayerProfile(newProf);
+    if (fbFeedback) {
+      fbFeedback.style.color = '#00ff88';
+      fbFeedback.textContent = '✓ Zarejestrowano pomyślnie!';
+    }
+    setTimeout(() => {
+      toggleAccountAuthView(false);
+    }, 800);
+    SFX.play('upgrade');
+    showBanner(`☁️ ZAREJESTROWANO: ${nick}!`, '#00ff88', 60);
+  } catch (err) {
+    console.error('Firebase Register Error:', err);
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      if (err.code === 'auth/email-already-in-use') {
+        fbFeedback.textContent = 'Ten nick jest już zajęty! Kliknij ZALOGUJ.';
+      } else {
+        fbFeedback.textContent = err.message || 'Błąd rejestracji!';
+      }
+    }
+  }
+}
+
+async function handleFirebaseLogin() {
+  const nickInput = document.getElementById('accAuthNick');
+  const passInput = document.getElementById('accAuthPass');
+  const fbFeedback = document.getElementById('accAuthFeedback');
+  if (!fbAuth) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Brak połączenia z Firebase SDK!';
+    }
+    return;
+  }
+  const nick = nickInput ? nickInput.value.trim() : '';
+  const pass = passInput ? passInput.value : '';
+  if (!nick) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Wpisz swój nick!';
+    }
+    return;
+  }
+  if (!pass) {
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      fbFeedback.textContent = 'Wpisz hasło!';
+    }
+    return;
+  }
+
+  if (fbFeedback) {
+    fbFeedback.style.color = '#00f0ff';
+    fbFeedback.textContent = 'Pobieranie profilu z chmury...';
+  }
+
+  try {
+    const email = nickToEmail(nick);
+    const cred = await fbAuth.signInWithEmailAndPassword(email, pass);
+    if (fbDb) {
+      const snap = await fbDb.collection('players').doc(cred.user.uid).get();
+      if (snap.exists) {
+        const cloudProf = snap.data();
+        savePlayerProfile(cloudProf);
+      } else {
+        const localProf = getPlayerProfile();
+        localProf.nick = nick;
+        await fbDb.collection('players').doc(cred.user.uid).set(localProf);
+        savePlayerProfile(localProf);
+      }
+    }
+    if (fbFeedback) {
+      fbFeedback.style.color = '#00ff88';
+      fbFeedback.textContent = '✓ Zalogowano i zsynchronizowano!';
+    }
+    setTimeout(() => {
+      toggleAccountAuthView(false);
+    }, 700);
+    SFX.play('upgrade');
+    showBanner(`☁️ ZALOGOWANO: ${nick}!`, '#00f0ff', 60);
+  } catch (err) {
+    console.error('Firebase Login Error:', err);
+    if (fbFeedback) {
+      fbFeedback.style.color = '#ff0055';
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        fbFeedback.textContent = 'Niepoprawny nick lub hasło!';
+      } else {
+        fbFeedback.textContent = err.message || 'Błąd logowania!';
+      }
+    }
+  }
+}
+
+function initAccountSystem() {
+  const prof = getPlayerProfile();
+  myName = prof.nick;
+  setStatus('');
+  updateAccountUI();
+  applyStatsToLocalPlayer();
+
+  if (fbAuth) {
+    fbAuth.onAuthStateChanged(user => {
+      if (user && fbDb) {
+        fbDb.collection('players').doc(user.uid).get().then(snap => {
+          if (snap.exists) {
+            const cloudData = snap.data();
+            savePlayerProfile(cloudData);
+          }
+        }).catch(err => {
+          console.warn('Auth state sync error:', err);
+        });
+      }
+      updateAccountUI();
+    });
+  }
+}
+
+function requireAndSavePlayerNick() {
+  const prof = getPlayerProfile();
+  myName = prof.nick;
+  return prof.nick;
+}
+
+function isTalentNodeUnlocked(nodeId, acc) {
+  if (nodeId === 'root' || !nodeId) return true;
+  if (!acc || !acc.talents) return false;
+  if (acc.talents[nodeId]) return true;
+  const node = SKILL_TREE_NODES[nodeId];
+  if (node && node.legacyIds) {
+    for (const leg of node.legacyIds) {
+      if (acc.talents[leg]) return true;
+    }
+  }
+  return false;
+}
+
+function openTalentTreeModal() {
+  const modal = document.getElementById('talentTreeModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  renderSkillTreeGraph();
+}
+
+function closeTalentTreeModal() {
+  const modal = document.getElementById('talentTreeModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Zamykanie modala po kliknięciu w tło poza okienkiem
+document.addEventListener('click', e => {
+  const modal = document.getElementById('talentTreeModal');
+  if (modal && e.target === modal) {
+    closeTalentTreeModal();
   }
 });
 
-// Obowiązkowa walidacja nicku przed rozpoczęciem dowolnego trybu gry
-function requireAndSavePlayerNick() {
-  const val = nickInputEl.value.trim();
-  if (!val) {
-    nickBoxEl.classList.remove('nick-error');
-    void nickBoxEl.offsetWidth; // restart animacji
-    nickBoxEl.classList.add('nick-error');
-    nickInputEl.focus();
-    setStatus('USTAW SWÓJ NICK ABY ZAGRAĆ!');
-    return null;
+// Zamykanie modala klawiszem ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('talentTreeModal');
+    if (modal && modal.style.display === 'flex') {
+      closeTalentTreeModal();
+    }
   }
-  try {
-    localStorage.setItem(NICK_STORAGE_KEY, val);
-  } catch (e) {}
-  return val;
+});
+
+function buyTalent(nodeId) {
+  const node = SKILL_TREE_NODES[nodeId];
+  if (!node) return;
+  const acc = getCurrentAccount();
+  if (isTalentNodeUnlocked(node.id, acc)) return;
+  if (node.req && !isTalentNodeUnlocked(node.req, acc)) return;
+  if ((acc.sp || 0) < node.cost) return;
+
+  acc.sp -= node.cost;
+  if (!acc.talents) acc.talents = {};
+  acc.talents[node.id] = true;
+  acc.spentSp = (acc.spentSp || 0) + node.cost;
+
+  saveCurrentAccount(acc);
+  SFX.play('upgrade');
+  triggerShake(5, 3);
+  renderSkillTreeGraph();
+  applyStatsToLocalPlayer();
+}
+
+function handleResetTalents() {
+  const acc = getCurrentAccount();
+  if (!acc) return;
+
+  const freeResets = typeof acc.freeResets === 'number' ? acc.freeResets : 1;
+  const spent = acc.spentSp || 0;
+
+  if (freeResets <= 0) {
+    alert('Wykorzystałeś już swój darmowy reset drzewka rozwoju!');
+    return;
+  }
+
+  if (spent <= 0) {
+    alert('Nie wydałeś jeszcze żadnych punktów SP, więc reset nie jest potrzebny.');
+    return;
+  }
+
+  const confirmMsg = `Czy na pewno chcesz zresetować drzewko rozwoju?\n\n• Odzyskasz: ${spent} SP\n• Wszystkie ulepszenia zostaną zablokowane\n• Zużyjesz darmowy reset (1/1)\n\nKontynuować?`;
+  if (!confirm(confirmMsg)) return;
+
+  // Zwrot punktów SP i reset talentów
+  acc.sp = (acc.sp || 0) + spent;
+  acc.spentSp = 0;
+  acc.talents = { root: true };
+  acc.freeResets = 0;
+
+  // Bezpiecznik minimalnego bilansu SP (3 na start + 1 za każdy poziom powyżej 1)
+  const totalSpDue = 3 + (Math.max(1, acc.level || 1) - 1);
+  if (acc.sp < totalSpDue) {
+    acc.sp = totalSpDue;
+  }
+
+  saveCurrentAccount(acc);
+  SFX.play('upgrade');
+  triggerShake(5, 3);
+  renderSkillTreeGraph();
+  applyStatsToLocalPlayer();
+  updateAccountUI();
+
+  if (typeof showBanner === 'function') {
+    showBanner(`Drzewko rozwoju zresetowane! Zwrócono +${spent} SP.`, '#38bdf8', 70);
+  }
+}
+
+let currentTreeFilter = 'speed';
+
+function filterTreeBranch(branchId) {
+  if (!['speed', 'force', 'spin', 'defense'].includes(branchId)) {
+    branchId = 'speed';
+  }
+  currentTreeFilter = branchId;
+  const tabs = document.querySelectorAll('.tree-nav-tab');
+  tabs.forEach(tab => {
+    if (tab.getAttribute('data-filter') === branchId) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+  renderSkillTreeGraph();
+}
+
+function formatTalentBenefit(text) {
+  if (!text) return '';
+  const regex = /(?:[+-]?\d+(?:[.,]\d+)?(?:[–-]\d+(?:[.,]\d+)?)?\s*s\b(?!t)|[+-]?\d+(?:[.,]\d+)?\s*(?:px\/f|px|energii|prędkości)|[+-]?\d+(?:[.,]\d+)?%|25°|\+20 maks\. energii|\b(?:LPM|PPM)\b)/gi;
+  return text.replace(regex, (m) => `<strong class="stat-num">${m}</strong>`);
+}
+
+function renderSkillTreeGraph() {
+  const acc = getCurrentAccount();
+  const container = document.getElementById('simpleTreeContainer');
+  const spCounter = document.getElementById('modalSpCounter');
+  const spentCounter = document.getElementById('modalSpentCounter');
+  const resetBtn = document.getElementById('btnTreeReset');
+
+  let totalUnlocked = 0;
+  const branchStats = {};
+  SKILL_TREE_BRANCHES.forEach(b => {
+    let u = 0;
+    let spent = 0;
+    b.nodes.forEach(n => {
+      if (isTalentNodeUnlocked(n.id, acc)) {
+        u++;
+        totalUnlocked++;
+        spent += n.cost;
+      }
+    });
+    branchStats[b.id] = { unlocked: u, total: b.nodes.length, spent: spent };
+  });
+
+  if (spCounter) spCounter.textContent = `⚡ ${acc.sp || 0} SP`;
+  if (spentCounter) spentCounter.textContent = `Wydano: ${acc.spentSp || 0} / 116 SP`;
+
+  // Aktualizacja przycisku darmowego resetu
+  if (resetBtn) {
+    const freeResets = typeof acc.freeResets === 'number' ? acc.freeResets : 1;
+    const spent = acc.spentSp || 0;
+    if (freeResets > 0) {
+      resetBtn.innerHTML = `🔄 RESET (1 DARMOWY)`;
+      resetBtn.disabled = spent === 0;
+      resetBtn.className = 'btn-tree-reset' + (spent > 0 ? ' available' : ' disabled');
+      resetBtn.title = spent > 0 ? `Zresetuj drzewko i odzyskaj ${spent} SP (Darmowy reset: 1/1)` : 'Wydaj punkty SP, aby móc skorzystać z darmowego resetu';
+    } else {
+      resetBtn.innerHTML = `🔄 RESET (WYKORZYSTANY)`;
+      resetBtn.disabled = true;
+      resetBtn.className = 'btn-tree-reset used';
+      resetBtn.title = 'Wykorzystano już darmowy reset drzewka rozwoju';
+    }
+  }
+
+  // Aktualizacja zakładek (dashboard 4 gałęzi)
+  const tabs = document.querySelectorAll('.tree-nav-tab');
+  tabs.forEach(tab => {
+    const filter = tab.getAttribute('data-filter');
+    if (filter === currentTreeFilter) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  const tabCountSpeed = document.getElementById('tabCountSpeed');
+  if (tabCountSpeed) tabCountSpeed.textContent = `${branchStats.speed ? branchStats.speed.unlocked : 0}/5`;
+  const tabBarSpeed = document.getElementById('tabBarSpeed');
+  if (tabBarSpeed) tabBarSpeed.style.width = `${((branchStats.speed ? branchStats.speed.unlocked : 0) / 5) * 100}%`;
+
+  const tabCountForce = document.getElementById('tabCountForce');
+  if (tabCountForce) tabCountForce.textContent = `${branchStats.force ? branchStats.force.unlocked : 0}/5`;
+  const tabBarForce = document.getElementById('tabBarForce');
+  if (tabBarForce) tabBarForce.style.width = `${((branchStats.force ? branchStats.force.unlocked : 0) / 5) * 100}%`;
+
+  const tabCountSpin = document.getElementById('tabCountSpin');
+  if (tabCountSpin) tabCountSpin.textContent = `${branchStats.spin ? branchStats.spin.unlocked : 0}/5`;
+  const tabBarSpin = document.getElementById('tabBarSpin');
+  if (tabBarSpin) tabBarSpin.style.width = `${((branchStats.spin ? branchStats.spin.unlocked : 0) / 5) * 100}%`;
+
+  const tabCountDefense = document.getElementById('tabCountDefense');
+  if (tabCountDefense) tabCountDefense.textContent = `${branchStats.defense ? branchStats.defense.unlocked : 0}/5`;
+  const tabBarDefense = document.getElementById('tabBarDefense');
+  if (tabBarDefense) tabBarDefense.style.width = `${((branchStats.defense ? branchStats.defense.unlocked : 0) / 5) * 100}%`;
+
+  if (!container) return;
+  container.innerHTML = '';
+
+  // ZAWSZE WYŚWIETLAJ CZYTELNĄ, PRZESTRZENNĄ ROADMAPĘ WYBRANEJ GAŁĘZI
+  const branch = SKILL_TREE_BRANCHES.find(b => b.id === currentTreeFilter) || SKILL_TREE_BRANCHES[0];
+  const bStat = branchStats[branch.id] || { unlocked: 0, total: 5, spent: 0 };
+
+  const roadmap = document.createElement('div');
+  roadmap.className = `tree-roadmap branch-${branch.id}`;
+
+  // Nagłówek ścieżki z dynamicznym opisem i podsumowaniem
+  const header = document.createElement('div');
+  header.className = 'roadmap-header';
+  header.innerHTML = `
+    <div class="roadmap-badge" style="color: ${branch.color};">
+      <span style="font-size: 22px;">${branch.icon}</span>
+      <span>${branch.name}</span>
+    </div>
+    <div class="roadmap-desc">${branch.desc} • <strong style="color: #f8fafc;">${bStat.unlocked}/5</strong> odblokowano (${bStat.spent} SP)</div>
+  `;
+  roadmap.appendChild(header);
+
+  // Szyna z węzłami (track)
+  const track = document.createElement('div');
+  track.className = 'roadmap-track';
+
+  branch.nodes.forEach(node => {
+    const isUnlocked = isTalentNodeUnlocked(node.id, acc);
+    const isReqMet = !node.req || isTalentNodeUnlocked(node.req, acc);
+    const canAfford = (acc.sp || 0) >= node.cost;
+
+    let rowState = 'locked';
+    if (isUnlocked) rowState = 'unlocked';
+    else if (isReqMet) rowState = 'available';
+
+    const isLegend = node.tier === 5 || node.type === 'legend';
+
+    let tierLabel = `POZIOM ${node.tier}`;
+    if (isLegend) {
+      tierLabel = 'POZIOM 5 • MISTRZOSTWO';
+    }
+
+    let circleSymbol = isUnlocked ? '✓' : `${node.tier}`;
+    let actionHtml = '';
+
+    if (isUnlocked) {
+      actionHtml = `<span class="roadmap-pill unlocked">✓ Odblokowane</span>`;
+    } else if (isReqMet) {
+      if (canAfford) {
+        actionHtml = `<button type="button" class="roadmap-action-btn can-buy" onclick="buyTalent('${node.id}')">Odblokuj (${node.cost} SP)</button>`;
+      } else {
+        const missing = node.cost - (acc.sp || 0);
+        actionHtml = `<span class="roadmap-pill need-sp">${node.cost} SP (brak ${missing})</span>`;
+      }
+    } else {
+      actionHtml = `<span class="roadmap-pill locked">${node.cost} SP • Wymaga poz. ${node.tier - 1}</span>`;
+    }
+
+    const formattedDesc = formatTalentBenefit(node.benefit);
+
+    const row = document.createElement('div');
+    row.className = `roadmap-node-row ${rowState} ${isLegend ? 'legend-tier' : ''}`;
+    row.innerHTML = `
+      <div class="node-rail-point">
+        <div class="node-circle" title="Poziom ${node.tier}">${circleSymbol}</div>
+      </div>
+      <div class="node-content-card">
+        <div class="card-left-info">
+          <div class="card-top-row">
+            <span class="card-tier-label">${tierLabel}</span>
+          </div>
+          <div class="card-benefit-text">${formattedDesc}</div>
+        </div>
+        <div class="card-right-action">
+          ${actionHtml}
+        </div>
+      </div>
+    `;
+    track.appendChild(row);
+  });
+
+  roadmap.appendChild(track);
+  container.appendChild(roadmap);
+}
+
+function renderTalentTreeUI() {
+  renderSkillTreeGraph();
+}
+
+function calculateWallXp(score, isRecord = false) {
+  const s = Math.max(0, score || 0);
+  if (s <= 0) return 0;
+
+  // Bazowe 2 XP za rozegrany trening (jeśli gracz odbił min. 1 raz)
+  let xp = 2;
+
+  // Bonus za pobicie rekordu ściany (+2 XP)
+  if (isRecord) {
+    xp += 2;
+  }
+
+  // Skalowanie z odbić (+3 XP co 20 odbić, max 20 XP w Fazie 1, a od 200 odbić +15 XP co 100):
+  if (s < 20) {
+    // Płynne XP dla 1-19 odbić, aby gracz nie widział pustego +0 XP (np. 7-13 odbić: +1 XP, 14-19: +2 XP)
+    xp += Math.floor(s / 7);
+  } else if (s <= 140) {
+    // +3 XP za każde pełne 20 odbić (max 20 XP przy 140 odbiciach)
+    xp += Math.min(20, Math.floor(s / 20) * 3);
+  } else if (s < 200) {
+    xp += 20;
+  } else {
+    // Faza 2: od 200 odbić +15 XP co 100 odbić
+    const extraHundreds = Math.floor((s - 100) / 100);
+    xp += 20 + (extraHundreds * 15);
+  }
+
+  return xp;
+}
+
+function awardAccountRewards(isWin, isWallStreak) {
+  const acc = getCurrentAccount();
+  if (!acc) return;
+  if (!acc.stats) acc.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+
+  const oldProg = getLevelProgress(acc.exp || 0);
+  const oldLvl = oldProg.level;
+  acc.stats.matches++;
+  
+  let gainedXp = 0;
+  let reasonText = 'Ukończony mecz';
+
+  if (isWallArcade) {
+    // 1. ŚCIANA: bazowe 2 XP + odbicia (+3 XP co 20 odbić, max 20 XP; od 200 odbić +15 XP co 100)
+    gainedXp = calculateWallXp(wallScore, isWallStreak);
+    reasonText = isWallStreak ? `Nowy rekord ściany (${wallScore} odbić)!` : `Ściana energii (${wallScore} odbić)`;
+    if (wallScore > (acc.stats.wallRecord || 0)) {
+      acc.stats.wallRecord = wallScore;
+    }
+    if (gainedXp > 0) {
+      showBanner(`🧱 ŚCIANA: +${gainedXp} XP`, '#00f0ff', 75);
+    }
+  } else {
+    // Odczyt goli gracza i przeciwnika
+    const myPad = getLocalPaddle();
+    const myTeam = myPad ? myPad.team : 1;
+    const oppTeam = myTeam === 1 ? 2 : 1;
+    const myGoals = teamScores[myTeam] || 0;
+    const oppGoals = teamScores[oppTeam] || 0;
+    const pointDiff = isWin ? Math.max(0, myGoals - oppGoals) : 0;
+
+    if (isSinglePlayer) {
+      // 2. BOTY: 10 XP bazowe + różnica punktów + 5 za wina | 2 za loose
+      const baseXp = 10;
+      if (isWin) {
+        acc.stats.wins++;
+        gainedXp = baseXp + pointDiff + 5;
+        reasonText = 'Wygrana z botem!';
+        showBanner(`🏆 WYGRANA Z BOTEM! +${gainedXp} XP`, '#f5b041', 85);
+      } else {
+        gainedXp = baseXp + 2;
+        reasonText = 'Mecz z botem (porażka)';
+        showBanner(`🤖 MECZ Z BOTEM: +${gainedXp} XP`, '#00f0ff', 75);
+      }
+    } else {
+      // 3. LUDZIE (P2P ONLINE): 25 XP bazowe + różnica punktów + 20 za wina | 8 za loose
+      const baseXp = 25;
+      if (isWin) {
+        acc.stats.wins++;
+        gainedXp = baseXp + pointDiff + 20;
+        reasonText = 'Zwycięstwo online!';
+        showBanner(`🏆 ZWYCIĘSTWO ONLINE! +${gainedXp} XP`, '#f5b041', 85);
+      } else {
+        gainedXp = baseXp + 8;
+        reasonText = 'Mecz online z graczem';
+        showBanner(`🌐 MECZ ONLINE: +${gainedXp} XP`, '#00f0ff', 75);
+      }
+    }
+  }
+
+  acc.exp = (acc.exp || 0) + gainedXp;
+
+  const newProg = getLevelProgress(acc.exp || 0);
+  const newLvl = newProg.level;
+  const spEarned = newLvl - oldLvl;
+
+  if (newLvl > oldLvl) {
+    acc.level = newLvl;
+    acc.sp = (acc.sp || 0) + spEarned;
+    setTimeout(() => {
+      showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${spEarned} SP ODBLOKOWANE!`, '#00ff88', 110);
+      SFX.play('upgrade');
+      triggerShake(6, 4);
+    }, 1200);
+  }
+
+  saveCurrentAccount(acc);
+
+  // Aktualizacja okna podsumowania meczu (#victoryModal) - TYLKO +XP, stan poziomu i kolejny punkt SP
+  const xpValEl = document.getElementById('vicXpEarned');
+  const barFillEl = document.getElementById('vicExpBarFill');
+  const labelEl = document.getElementById('vicExpLabel');
+  const spInfoEl = document.getElementById('vicSpInfo');
+
+  if (xpValEl) xpValEl.textContent = `+${gainedXp} XP`;
+  if (barFillEl) barFillEl.style.width = newProg.pct + '%';
+  if (labelEl) labelEl.textContent = `LVL ${newProg.level} • ${newProg.currentExp} / ${newProg.neededExp} XP`;
+  if (spInfoEl) {
+    if (spEarned > 0) {
+      spInfoEl.textContent = `🌟 AWANS! OTRZYMASZ +${spEarned} PUNKT TALENTU (SP)!`;
+      spInfoEl.style.color = '#00ff88';
+    } else {
+      spInfoEl.textContent = `⚡ Kolejny punkt talentu (SP) na LVL ${newProg.level + 1} (za 1 poziom)`;
+      spInfoEl.style.color = '#38bdf8';
+    }
+  }
 }
 
 const PEER_CONFIG = {
@@ -1714,10 +3764,13 @@ let accumulator = 0;
 
 let shakeTime = 0, shakeIntensity = 0;
 let countdownTimer = 0;
+let isServing = false;
+let servingPaddleId = 0;
+let serveTimer = 0;
 let bannerText = '', bannerTimer = 0, bannerColor = '#00f0ff';
 
 let upgradePoints = 0;
-const stats = { spin: 1, speed: 1, smash: 1, size: 1 };
+const stats = { speed: 1, size: 1, smash: 1, spin: 1, stamina: 1 };
 let rallyHits = 0;
 let rallyRewarded = false;
 
@@ -1750,8 +3803,12 @@ function createPaddleObj({ id, team, slot, x, y, h, color, nick, isBot = false, 
     w: 13,
     h,
     vy: 0,
-    speed: 6.0,
+    speed: 6.8,
+    baseSpeed: 6.8,
+    staticSpeedBonus: 0,
     stamina: 100,
+    maxStamina: 100,
+    staminaRegen: 0.50,
     dashTimer: 0,
     smashCharge: 0,
     color,
@@ -1763,7 +3820,17 @@ function createPaddleObj({ id, team, slot, x, y, h, color, nick, isBot = false, 
     aiNoiseSeed: id * 1.73 + 0.5,
     isLocal,
     targetY: y,
-    targetVy: 0
+    targetVy: 0,
+    warmupStacks: 0,
+    aegisReady: true,
+    dashSurgeTimer: 0,
+    speedBurstTimer: 0,
+    speedBurstNext: 480 + Math.floor(Math.random() * 360),
+    speedBurstColor: null,
+    lastDashSurgeTime: 0,
+    lastSingularityTime: 0,
+    slowTimer: 0,
+    slowFactor: 1.0
   };
 }
 
@@ -1891,6 +3958,18 @@ const BALL = {
   spinAngle: 0,
   speed: INITIAL_BALL_SPEED,
   isSmashed: false,
+  plasmaBurn: false,
+  hasSpiralPhantom: false,
+  isMeteor: false,
+  ricochetCount: 0,
+  flightControlTimer: 0,
+  flightControlPaddleId: 0,
+  isSmashFlight: false,
+  singularityArmed: false,
+  singularityOwnerTeam: 1,
+  hasExtendedSpin: false,
+  lastHitPaddle: null,
+  lastHitTeam: 1,
   trail: []
 };
 
@@ -1961,7 +4040,7 @@ animateMenuBg();
    ========================================== */
 const SFX = {
   ctx: null,
-  muted: localStorage.getItem('pong_muted') === '1',
+  muted: safeGetStorage('pong_muted') === '1',
   init() {
     try {
       if (!this.ctx) {
@@ -1982,7 +4061,7 @@ const SFX = {
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
-      if (type === 'hit') {
+      if (type === 'hit' || type === 'paddle') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(320, now);
         osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
@@ -2032,6 +4111,13 @@ const SFX = {
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'warp') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(740, now + 0.16);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+        osc.start(now); osc.stop(now + 0.16);
       } else if (type === 'bumper') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(740, now);
@@ -2364,7 +4450,7 @@ function restartCurrentMatch() {
   if (isWallArcade) {
     startWallArcade();
   } else if (isSinglePlayer) {
-    if (is2v2) startSolo2v2Match();
+    if (is2v2) startSolo2v2();
     else startSingleplayer();
   } else {
     resetMatch();
@@ -2372,8 +4458,16 @@ function restartCurrentMatch() {
 }
 function selectControl(mode) {
   controlMode = mode;
-  document.getElementById('ctrlKeyboard').classList.toggle('active', mode === 'keyboard');
-  document.getElementById('ctrlMouse').classList.toggle('active', mode === 'mouse');
+  const kbEl = document.getElementById('ctrlKeyboard');
+  const msEl = document.getElementById('ctrlMouse');
+  if (kbEl) {
+    kbEl.classList.toggle('active', mode === 'keyboard');
+    kbEl.setAttribute('aria-pressed', mode === 'keyboard' ? 'true' : 'false');
+  }
+  if (msEl) {
+    msEl.classList.toggle('active', mode === 'mouse');
+    msEl.setAttribute('aria-pressed', mode === 'mouse' ? 'true' : 'false');
+  }
   const switchBtn = document.getElementById('ctrlSwitchBtn');
   if (switchBtn) {
     switchBtn.textContent = mode === 'keyboard' ? '⌨️ KLAWIATURA' : '🖱️ MYSZKA';
@@ -2422,49 +4516,77 @@ function showBanner(text, color = '#00f0ff', duration = 65) {
 }
 
 /* ==========================================
-   6. SYSTEM ULEPSZEŃ (RPG) - TYLKO PRZY ZMIANIE
+   6. SYSTEM ULEPSZEŃ (RPG) - 5 POZIOMÓW & MASTERY
    ========================================== */
-function getUpgradeCost(lvl) { return lvl; }
+function getUpgradeCost(lvl) {
+  if (lvl === 1) return 2;
+  if (lvl === 2) return 2;
+  if (lvl === 3) return 3;
+  if (lvl === 4) return 4;
+  return 999;
+}
 
 function upgradeStat(type) {
   const currentLvl = stats[type];
+  if (currentLvl >= 5) return;
   const cost = getUpgradeCost(currentLvl);
-  if (upgradePoints < cost || currentLvl >= 5) return;
+  if (upgradePoints < cost) return;
 
   upgradePoints -= cost;
   stats[type]++;
   SFX.play('upgrade');
+
+  if (stats[type] === 5) {
+    const statNames = {
+      speed: 'NITRO SZYBKOŚĆ',
+      size: 'IMPERIUM ROZMIARU',
+      smash: 'METEOR SMASH',
+      spin: 'KWANTOWY VORTEX',
+      stamina: 'OVERCHARGE DYNAMO'
+    };
+    showBanner(`🌟 MASTERY: ${statNames[type] || type.toUpperCase()}!`, '#f5b041', 95);
+    triggerShake(9, 5);
+    addShockwave(W / 2, H / 2, '#f5b041');
+    addParticles(W / 2, H / 2, '#f5b041', 25);
+  }
+
   updateStatDisplay();
   applyStatsToLocalPlayer();
 }
 
 function updateStatDisplay() {
-  document.getElementById('ptsDisplay').textContent = upgradePoints;
+  const ptsEl = document.getElementById('ptsDisplay');
+  if (ptsEl) ptsEl.textContent = upgradePoints;
 
   const renderStat = (type, btnId) => {
     const lvl = stats[type];
     const dotsWrap = document.getElementById('dots-' + type);
+    if (!dotsWrap) return;
     dotsWrap.innerHTML = '';
     for (let i = 1; i <= 5; i++) {
       const d = document.createElement('div');
-      d.className = 'dot' + (i <= lvl ? ' active' : '');
+      d.className = 'dot' + (i <= lvl ? ' active' : '') + (i === 5 && lvl >= 5 ? ' mastery' : '');
       dotsWrap.appendChild(d);
     }
     const btn = document.getElementById(btnId);
+    if (!btn) return;
     if (lvl >= 5) {
-      btn.textContent = 'MAX';
+      btn.textContent = 'MAX 🌟';
       btn.disabled = true;
+      btn.classList.add('mastery');
     } else {
+      btn.classList.remove('mastery');
       const cost = getUpgradeCost(lvl);
       btn.textContent = `+${cost}`;
       btn.disabled = upgradePoints < cost;
     }
   };
 
-  renderStat('spin', 'btnSpin');
   renderStat('speed', 'btnSpeed');
-  renderStat('smash', 'btnSmash');
   renderStat('size', 'btnSize');
+  renderStat('smash', 'btnSmash');
+  renderStat('spin', 'btnSpin');
+  renderStat('stamina', 'btnStamina');
 }
 
 function enforceTeamPaddleConstraints() {
@@ -2505,13 +4627,97 @@ function enforceTeamPaddleConstraints() {
 function applyStatsToLocalPlayer() {
   const p = getLocalPaddle();
   if (!p) return;
-  p.speed = 6.0 + (stats.speed - 1) * 0.75;
-  p.spinMult = 1 + (stats.spin - 1) * 0.24;
-  p.smashMult = 1 + (stats.smash - 1) * 0.18;
-  p.h = getBasePaddleHeight() + (stats.size - 1) * (is2v2 ? 8 : 10);
-  enforceTeamPaddleConstraints();
 
+  const acc = getCurrentAccount();
+
+  // Wartości bazowe gracza
+  let baseSpeedVal = 6.8;
+  let heightVal = getBasePaddleHeight(); // 80px w 1v1, 65px w 2v2
+  let smashMultVal = 1.0;
+  let spinMultVal = 1.0;
+  let staminaRegenVal = 0.50;
+  let maxStaminaVal = 100;
+
+  // 1. Gałąź Zwinności:
+  let staticSpeedBonus = 0;
+  p.hasPhantomStep = isTalentNodeUnlocked('spd_5', acc);
+  if (p.hasPhantomStep) {
+    staticSpeedBonus = 0.32; // +14% (spd_2) + +18% (spd_5) = +32%
+  } else if (isTalentNodeUnlocked('spd_2', acc)) {
+    staticSpeedBonus = 0.14; // +14% łącznie
+  } else if (isTalentNodeUnlocked('spd_1', acc)) {
+    staticSpeedBonus = 0.08; // +8%
+  }
+  p.staticSpeedBonus = staticSpeedBonus;
+  p.hasDashSurge = isTalentNodeUnlocked('spd_3', acc);
+  p.hasSpeedBurst = isTalentNodeUnlocked('spd_4', acc);
+
+  // 2. Gałąź Siły:
+  if (isTalentNodeUnlocked('pwr_2', acc)) {
+    smashMultVal = 1.18; // +18% łącznie
+  } else if (isTalentNodeUnlocked('pwr_1', acc)) {
+    smashMultVal = 1.10; // +10%
+  }
+  p.hasRicochet = isTalentNodeUnlocked('pwr_3', acc);
+  p.hasWarmup = isTalentNodeUnlocked('pwr_4', acc);
+  p.hasMeteor = isTalentNodeUnlocked('pwr_5', acc);
+
+  // 3. Gałąź Rotacji (bonusy dodawane liniowo, nie mnożone):
+  p.hasExtendedSpin = isTalentNodeUnlocked('spn_2', acc);
+  if (p.hasExtendedSpin) {
+    spinMultVal = 1.22; // +22% łącznie
+  } else if (isTalentNodeUnlocked('spn_1', acc)) {
+    spinMultVal = 1.12; // +12%
+  }
+  p.hasBoomerang = isTalentNodeUnlocked('spn_3', acc);
+  p.hasSingularity = isTalentNodeUnlocked('spn_4', acc);
+  p.hasFlightControl = isTalentNodeUnlocked('spn_5', acc);
+
+  // 4. Gałąź Obrony:
+  if (isTalentNodeUnlocked('def_2', acc)) {
+    heightVal += 10; // +10px łącznie
+    maxStaminaVal += 20; // +20 max staminy (120)
+  } else if (isTalentNodeUnlocked('def_1', acc)) {
+    heightVal += 6; // +6px długości
+  }
+  p.hasSyphon = isTalentNodeUnlocked('def_3', acc);
+  p.hasParry = isTalentNodeUnlocked('def_4', acc);
+  p.hasAegisShield = isTalentNodeUnlocked('def_5', acc);
+
+  p.baseSpeed = baseSpeedVal;
+  p.speed = baseSpeedVal * (1 + staticSpeedBonus);
+  p.h = heightVal;
+  p.smashMult = smashMultVal;
+  p.spinMult = spinMultVal;
+  p.staminaRegen = staminaRegenVal;
+  p.maxStamina = maxStaminaVal;
+
+  enforceTeamPaddleConstraints();
   sendStatsUpdate();
+}
+
+function applyNetworkStatsToPaddle(p, d) {
+  if (!p || !d) return;
+  if (typeof d.h === 'number') p.h = d.h;
+  if (typeof d.speed === 'number') p.speed = d.speed;
+  if (typeof d.baseSpeed === 'number') p.baseSpeed = d.baseSpeed;
+  if (typeof d.staticSpeedBonus === 'number') p.staticSpeedBonus = d.staticSpeedBonus;
+  if (typeof d.spinMult === 'number') p.spinMult = d.spinMult;
+  if (typeof d.smashMult === 'number') p.smashMult = d.smashMult;
+  if (typeof d.maxStamina === 'number') p.maxStamina = d.maxStamina;
+  p.hasDashSurge = !!d.hasDashSurge;
+  p.hasSpeedBurst = !!d.hasSpeedBurst;
+  p.hasPhantomStep = !!d.hasPhantomStep;
+  p.hasRicochet = !!d.hasRicochet;
+  p.hasWarmup = !!d.hasWarmup;
+  p.hasMeteor = !!d.hasMeteor;
+  p.hasExtendedSpin = !!d.hasExtendedSpin;
+  p.hasBoomerang = !!d.hasBoomerang;
+  p.hasFlightControl = !!d.hasFlightControl;
+  p.hasSingularity = !!d.hasSingularity;
+  p.hasSyphon = !!d.hasSyphon;
+  p.hasParry = !!d.hasParry;
+  p.hasAegisShield = !!d.hasAegisShield;
 }
 
 function sendStatsUpdate() {
@@ -2523,8 +4729,25 @@ function sendStatsUpdate() {
     t: 'stats',
     id: p.id,
     h: p.h,
+    speed: p.speed,
+    baseSpeed: p.baseSpeed || 6.8,
+    staticSpeedBonus: p.staticSpeedBonus || 0,
     spinMult: p.spinMult,
-    smashMult: p.smashMult
+    smashMult: p.smashMult,
+    maxStamina: p.maxStamina || 100,
+    hasDashSurge: !!p.hasDashSurge,
+    hasSpeedBurst: !!p.hasSpeedBurst,
+    hasPhantomStep: !!p.hasPhantomStep,
+    hasRicochet: !!p.hasRicochet,
+    hasWarmup: !!p.hasWarmup,
+    hasMeteor: !!p.hasMeteor,
+    hasExtendedSpin: !!p.hasExtendedSpin,
+    hasBoomerang: !!p.hasBoomerang,
+    hasFlightControl: !!p.hasFlightControl,
+    hasSingularity: !!p.hasSingularity,
+    hasSyphon: !!p.hasSyphon,
+    hasParry: !!p.hasParry,
+    hasAegisShield: !!p.hasAegisShield
   };
 
   if (isHost) {
@@ -2549,7 +4772,7 @@ function startWallArcade() {
   is2v2 = false;
   isWallArcade = true;
   wallScore = 0;
-  wallRecordAtStart = parseInt(localStorage.getItem(WALL_RECORD_KEY) || '0', 10);
+  wallRecordAtStart = parseInt(safeGetStorage(WALL_RECORD_KEY, '0'), 10);
   hasBeatenWallRecord = false;
   localPaddleId = 0;
   startGame();
@@ -2995,6 +5218,9 @@ function handleClientDisconnectOnHost(remotePeerId) {
   const disconnectedNick = cl ? cl.nick : 'GRACZ';
   const padId = getPaddleIdByPeerId(remotePeerId);
   delete hostClients[remotePeerId];
+  if (remotePeerId === connectedOpponentPeerId) {
+    connectedOpponentPeerId = null;
+  }
 
   if (!gameActive) {
     if (is2v2) {
@@ -3144,9 +5370,25 @@ function handleHostIncomingData(remotePeerId, d) {
     return;
   }
 
+  if (d.t === 'serve') {
+    if (isServing) {
+      executeServe(!!d.manual);
+    }
+    return;
+  }
+
   if (d.t === 'hello') {
     cl.nick = (d.name || 'GRACZ').slice(0, 12);
     if (!is2v2) {
+      if (connectedOpponentPeerId && connectedOpponentPeerId !== remotePeerId) {
+        if (cl.ctrlConn && cl.ctrlConn.open) {
+          cl.ctrlConn.send({ t: 'full' });
+          setTimeout(() => { try { cl.ctrlConn.close(); } catch(e){} }, 400);
+        }
+        delete hostClients[remotePeerId];
+        return;
+      }
+      connectedOpponentPeerId = remotePeerId;
       oppName = cl.nick;
       localPaddleId = 0;
       if (cl.ctrlConn && cl.ctrlConn.open) {
@@ -3175,11 +5417,9 @@ function handleHostIncomingData(remotePeerId, d) {
     const pid = getPaddleIdByPeerId(remotePeerId);
     const p = paddles[pid];
     if (p) {
-      if (typeof d.h === 'number') p.h = d.h;
-      if (typeof d.spinMult === 'number') p.spinMult = d.spinMult;
-      if (typeof d.smashMult === 'number') p.smashMult = d.smashMult;
+      applyNetworkStatsToPaddle(p, d);
       if (is2v2) {
-        broadcastReliable({ t: 'stats', id: pid, h: p.h, spinMult: p.spinMult, smashMult: p.smashMult }, remotePeerId);
+        broadcastReliable({ t: 'stats', ...d, id: pid }, remotePeerId);
       }
     }
     return;
@@ -3204,6 +5444,8 @@ function handleHostIncomingData(remotePeerId, d) {
       p.vy = d.pvy;
       p.stamina = d.stam;
       p.smashCharge = d.smashCharge;
+      p.isRightMouseDown = !!d.rmb;
+      p.targetMouseY = d.targetY;
       recordClientHistory(cl, performance.now(), d.py, d.pvy);
     }
   }
@@ -3281,9 +5523,7 @@ function handleGuestIncomingData(d) {
     const targetId = typeof d.id === 'number' ? d.id : 0;
     const p = paddles[targetId];
     if (p && !p.isLocal) {
-      if (typeof d.h === 'number') p.h = d.h;
-      if (typeof d.spinMult === 'number') p.spinMult = d.spinMult;
-      if (typeof d.smashMult === 'number') p.smashMult = d.smashMult;
+      applyNetworkStatsToPaddle(p, d);
     }
     return;
   }
@@ -3306,18 +5546,6 @@ function handleGuestIncomingData(d) {
   }
 
   if (d.t === 'score') {
-    const myPaddle = getLocalPaddle();
-    const myTeam = myPaddle ? myPaddle.team : 2;
-    const prevMyScore = teamScores[myTeam];
-    const newMyScore = myTeam === 1 ? d.s1 : d.s2;
-
-    if (newMyScore > prevMyScore && newMyScore % 2 === 0) {
-      const earned = (d.scorerPadId === localPaddleId || (!is2v2 && myTeam === (d.s1 > d.s2 ? 1 : 2)));
-      if (earned) {
-        upgradePoints++;
-        updateStatDisplay();
-      }
-    }
 
     teamScores[1] = d.s1;
     teamScores[2] = d.s2;
@@ -3328,6 +5556,11 @@ function handleGuestIncomingData(d) {
   }
 
   if (d.t === 'fx') {
+    if (d.slow) {
+      paddles.forEach(p => {
+        if (p && p.team !== d.slow) p.slowTimer = 90;
+      });
+    }
     if (d.pad === localPaddleId && (performance.now() - lastLocalGuestHitTime < 260)) {
       if (d.banner) showBanner(d.banner.txt, d.banner.c, 65);
       return;
@@ -3385,6 +5618,11 @@ function handleGuestIncomingData(d) {
       BALL.speed = Math.hypot(d.bvx, d.bvy) || INITIAL_BALL_SPEED;
       BALL.spin = d.spin;
       BALL.isSmashed = d.smashed;
+      if (d.fct !== undefined) {
+        BALL.flightControlTimer = d.fct;
+        BALL.flightControlPaddleId = d.fcp;
+        BALL.isSmashFlight = !!d.smf;
+      }
 
       const errDist = Math.hypot(predX - BALL.x, predY - BALL.y);
       if (errDist > 60 || d.cd > 0) {
@@ -3400,12 +5638,6 @@ function handleGuestIncomingData(d) {
     powerupOrb = d.orb;
     countdownTimer = d.cd;
 
-    if (d.hits >= 10 && rallyHits < 10) {
-      upgradePoints++;
-      updateStatDisplay();
-      showBanner('10+ COMBO! +1 UP', '#f5b041', 70);
-      SFX.play('upgrade');
-    }
     rallyHits = d.hits;
 
     if (teamScores[1] !== d.s1 || teamScores[2] !== d.s2) {
@@ -3435,6 +5667,8 @@ function startGame(slotsData = null) {
   document.getElementById('bgCanvas').style.display = 'none';
   document.getElementById('gameWrapper').style.display = 'flex';
   document.getElementById('disconnectModal').style.display = 'none';
+  const vicModal = document.getElementById('victoryModal');
+  if (vicModal) vicModal.style.display = 'none';
   const rematchBtn = document.getElementById('btnRematch');
   if (rematchBtn) rematchBtn.textContent = isWallArcade ? 'ZAGRAJ ZNOWU' : 'REWANŻ';
 
@@ -3463,27 +5697,98 @@ function startGame(slotsData = null) {
   requestAnimationFrame(gameLoop);
 }
 
-function resetBall(withCountdown = true) {
-  BALL.x = W / 2;
-  BALL.y = H / 2;
+function resetBall(withCountdown = true, servingTeam = 1) {
   BALL.speed = INITIAL_BALL_SPEED;
   BALL.spin = 0;
   BALL.isSmashed = false;
+  BALL.plasmaBurn = false;
+  BALL.hasSpiralPhantom = false;
+  BALL.isMeteor = false;
+  BALL.ricochetCount = 0;
+  BALL.flightControlTimer = 0;
+  BALL.isSmashFlight = false;
+  isRightMouseDown = false;
+  isLeftMouseDown = false;
+  BALL.singularityArmed = false;
+  BALL.hasExtendedSpin = false;
+  BALL.lastHitPaddle = null;
   BALL.trail = [];
+  BALL.vortexCurved = 0;
   hostTargetBall = null;
   rallyHits = 0;
   rallyRewarded = false;
+  obstacle = null;
+  countdownTimer = 0;
+  paddles.forEach(p => { p.warmupStacks = 0; });
 
-  if (withCountdown) countdownTimer = 75;
+  if (isWallArcade) {
+    servingPaddleId = 0;
+  } else if (servingTeam === 2) {
+    servingPaddleId = is2v2 ? 2 : 1;
+  } else {
+    servingPaddleId = 0;
+  }
 
-  const angle = (Math.random() * Math.PI / 3.4) - Math.PI / 6.8;
-  const dir = isWallArcade ? 1 : (Math.random() < 0.5 ? 1 : -1);
-  BALL.vx = dir * BALL.speed * Math.cos(angle);
-  BALL.vy = BALL.speed * Math.sin(angle);
+  isServing = true;
+  serveTimer = 90; // Szybki, dynamiczny timer (~1.5s max)
+
+  const srvPad = paddles[servingPaddleId] || paddles[0];
+  if (srvPad) {
+    BALL.x = srvPad.team === 1 ? srvPad.x + srvPad.w + BALL.r + 4 : srvPad.x - BALL.r - 4;
+    BALL.y = Math.max(BALL.r + 8, Math.min(H - BALL.r - 8, srvPad.y + srvPad.h / 2));
+  } else {
+    BALL.x = W / 2;
+    BALL.y = H / 2;
+  }
+  BALL.vx = 0;
+  BALL.vy = 0;
+}
+
+function executeServe(isManual = false) {
+  if (!isServing) return;
+  if (!isSinglePlayer && !isHost) {
+    sendReliable({ t: 'serve', manual: isManual });
+  }
+  isServing = false;
+  const srvPad = paddles[servingPaddleId] || paddles[0];
+  if (!srvPad) {
+    BALL.vx = 7;
+    BALL.vy = 2;
+    return;
+  }
+
+  const dir = srvPad.team === 1 ? 1 : -1;
+  const relY = (BALL.y - H / 2) / (H / 2);
+  const motionCut = (srvPad.vy || 0) * 0.035;
+  let aimAngle = Math.max(-0.46, Math.min(0.46, (relY * -0.24) + motionCut));
+
+  const isPower = isManual && (srvPad.dashTimer > 0 || Math.abs(srvPad.vy) > 2.6);
+  if (isPower) {
+    BALL.speed = INITIAL_BALL_SPEED * 1.30;
+    BALL.spin = Math.max(-2.2, Math.min(2.2, Math.sign(srvPad.vy || -relY || 1) * 0.65 * (srvPad.spinMult || 1.0)));
+    BALL.isSmashed = true;
+    SFX.play('smash');
+    triggerShake(5, 3);
+    addParticles(BALL.x, BALL.y, '#f5b041', 12);
+    showBanner('⚡ SKILL SERVE!', '#f5b041', 35);
+  } else {
+    BALL.speed = INITIAL_BALL_SPEED * 1.06;
+    BALL.spin = Math.max(-1.2, Math.min(1.2, (srvPad.vy || 0) * 0.12 * (srvPad.spinMult || 1.0)));
+    SFX.play('paddle');
+    addParticles(BALL.x, BALL.y, srvPad.color, 8);
+  }
+
+  BALL.vx = dir * BALL.speed * Math.cos(aimAngle);
+  BALL.vy = BALL.speed * Math.sin(aimAngle);
+
+  sendFX({
+    sfx: isPower ? 'smash' : 'paddle',
+    wave: { x: BALL.x, y: BALL.y, c: srvPad.color }
+  });
 }
 
 function checkVictoryCondition() {
-  if (isWallArcade) return;
+  if (isWallArcade || matchOver) return;
   if (teamScores[1] >= WIN_SCORE || teamScores[2] >= WIN_SCORE) {
     matchOver = true;
     SFX.stopMusic();
@@ -3505,10 +5810,16 @@ function checkVictoryCondition() {
     const rematchBtn = document.getElementById('btnRematch');
     if (rematchBtn) rematchBtn.textContent = 'REWANŻ';
     modal.style.display = 'flex';
+
+    const myPad = getLocalPaddle();
+    const myTeamWon = myPad && ((myPad.team === 1 && t1Won) || (myPad.team === 2 && !t1Won));
+    awardAccountRewards(!!myTeamWon, false);
   }
 }
 
 function requestRematch() {
+  const vicModal = document.getElementById('victoryModal');
+  if (vicModal) vicModal.style.display = 'none';
   if (isWallArcade) {
     startWallArcade();
     return;
@@ -3552,6 +5863,14 @@ function updateAI(botPaddle) {
   botPaddle.stamina = Math.min(100, botPaddle.stamina + 0.35);
   if (botPaddle.smashCharge > 0) botPaddle.smashCharge--;
   if (botPaddle.dashTimer > 0) botPaddle.dashTimer--;
+
+  if (isServing && servingPaddleId === botPaddle.id) {
+    const targetY = H / 2 - botPaddle.h / 2 + Math.sin(Date.now() * 0.003) * 50;
+    const diff = targetY - botPaddle.y;
+    botPaddle.vy = Math.sign(diff) * Math.min(Math.abs(diff), 2.2);
+    botPaddle.y += botPaddle.vy;
+    return;
+  }
 
   const isLeftTeam = (botPaddle.team === 1);
   const ballApproaching = isLeftTeam ? (BALL.vx < 0) : (BALL.vx > 0);
@@ -3602,6 +5921,10 @@ function updateAI(botPaddle) {
 
   const diff = targetY - botPaddle.y;
   let curSpeed = botPaddle.speed;
+  if (botPaddle.slowTimer > 0) {
+    botPaddle.slowTimer--;
+    curSpeed *= (botPaddle.slowFactor || 0.70);
+  }
 
   if (shouldChase && distToMyGoalLine < 220 && Math.abs(diff) > 68 && botPaddle.stamina >= 35 && botPaddle.dashTimer === 0) {
     if (Math.random() < cfg.dashChance) {
@@ -3617,9 +5940,9 @@ function updateAI(botPaddle) {
   }
   if (botPaddle.dashTimer > 0) curSpeed *= 2.0;
 
-  if (shouldChase && distToMyGoalLine < 105 && Math.abs(diff) < 45 && botPaddle.stamina >= 40 && botPaddle.smashCharge === 0) {
+  if (shouldChase && distToMyGoalLine < 105 && Math.abs(diff) < 45 && botPaddle.stamina >= 50 && botPaddle.smashCharge === 0) {
     if (Math.random() < cfg.smashChance) {
-      botPaddle.stamina -= 40;
+      botPaddle.stamina -= 50;
       botPaddle.smashCharge = 22;
     }
   }
@@ -3667,30 +5990,63 @@ function updateHudScore() {
 }
 
 function updateHudStaminaBars() {
+  const updateBar = (pad, barId) => {
+    if (!pad) return;
+    const bar = document.getElementById(barId);
+    if (!bar) return;
+    const maxSt = pad.maxStamina || 100;
+    const pct = Math.max(0, Math.min(100, (pad.stamina / maxSt) * 100));
+    bar.style.width = pct + '%';
+    const isExhausted = pad.stamina < 22 && !pad.hasStaminaMastery;
+    bar.classList.toggle('exhausted', isExhausted);
+  };
+
   if (!is2v2) {
-    if (paddles[0]) document.getElementById('staminaBar0').style.width = paddles[0].stamina + '%';
-    if (paddles[1]) document.getElementById('staminaBar2').style.width = paddles[1].stamina + '%';
+    updateBar(paddles[0], 'staminaBar0');
+    updateBar(paddles[1], 'staminaBar2');
   } else {
     for (let i = 0; i < 4; i++) {
-      if (paddles[i]) {
-        document.getElementById('staminaBar' + i).style.width = paddles[i].stamina + '%';
-      }
+      updateBar(paddles[i], 'staminaBar' + i);
     }
   }
 }
 
 function triggerLocalDash(myPaddle) {
-  if (myPaddle && myPaddle.dashTimer === 0 && myPaddle.stamina >= 35) {
-    myPaddle.stamina -= 35;
-    myPaddle.dashTimer = 12;
+  if (!myPaddle) return;
+  const isExhausted = (myPaddle.stamina < 20 && !myPaddle.hasPhantomStep);
+  if (isExhausted) return; // Zmęczony gracz nie może wykonać zrywu
+
+  const hasNoCd = !!myPaddle.hasPhantomStep;
+  const dashCost = hasNoCd ? 15 : 25; // -40% kosztu energii przy Widmowym Kroku
+  if ((myPaddle.dashTimer === 0 || hasNoCd) && myPaddle.stamina >= dashCost) {
+    myPaddle.stamina -= dashCost;
+    myPaddle.dashTimer = hasNoCd ? 16 : 14;
     SFX.play('dash');
-    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 12);
+
+    // spd_3: po dashu 35% szans na zryw: +25% prędkości na 0,5 s (cooldown 1,5 s)
+    if (myPaddle.hasDashSurge) {
+      const now = performance.now();
+      if (!myPaddle.lastDashSurgeTime || now - myPaddle.lastDashSurgeTime >= 1500) {
+        if (Math.random() < 0.35) {
+          myPaddle.lastDashSurgeTime = now;
+          myPaddle.dashSurgeTimer = 30; // 0.5s przy 60 fps
+          showBanner('⚡ ZRYW! +25% PRĘDKOŚCI', '#00d2ff', 25);
+          addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff', 14);
+        }
+      }
+    }
+
+    const pColor = hasNoCd ? '#00d2ff' : myPaddle.color;
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, pColor, hasNoCd ? 20 : 12);
+    if (hasNoCd) {
+      addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
+    }
 
     if (controlMode === 'mouse') {
       const targetY = mouseY - myPaddle.h / 2;
       const diff = targetY - myPaddle.y;
       const dir = Math.abs(diff) > 4 ? Math.sign(diff) : (Math.sign(BALL.y - (myPaddle.y + myPaddle.h / 2)) || 1);
-      myPaddle.y += dir * 28;
+      myPaddle.y += dir * (hasNoCd ? 42 : 30);
       myPaddle.vy = dir * (myPaddle.speed * 2.8);
       enforceTeamPaddleConstraints();
     }
@@ -3698,22 +6054,68 @@ function triggerLocalDash(myPaddle) {
 }
 
 function triggerLocalSmash(myPaddle) {
-  if (myPaddle && myPaddle.smashCharge === 0 && myPaddle.stamina >= 40) {
-    myPaddle.stamina -= 40;
+  if (myPaddle && myPaddle.smashCharge === 0 && myPaddle.stamina >= 50) {
+    myPaddle.stamina -= 50;
     myPaddle.smashCharge = 25;
   }
 }
 
 function stepBallMotion() {
   if (Math.abs(BALL.spin) > 0.05) {
-    BALL.vy += BALL.spin * 0.045;
+    const curveRate = BALL.hasSpiralPhantom ? (0.045 + Math.sin(tickCounter * 0.22) * 0.035) : 0.045;
+    BALL.vy += BALL.spin * curveRate;
     const signX = Math.sign(BALL.vx) || 1;
     const maxVy = BALL.speed * 0.82;
     BALL.vy = Math.max(-maxVy, Math.min(maxVy, BALL.vy));
     BALL.vx = signX * Math.sqrt(Math.max(1.5, BALL.speed * BALL.speed - BALL.vy * BALL.vy));
-    BALL.spin *= 0.991;
+    // spn_2: +15% czasu trwania rotacji
+    const decayFactor = BALL.hasExtendedSpin ? 0.9922 : 0.991;
+    BALL.spin *= decayFactor;
   } else {
     BALL.spin = 0;
+    BALL.hasSpiralPhantom = false;
+  }
+
+  // spn_5 / SMASH: Sterowanie lotem: przez 0.6s ruch paletki lub LPM/PPM koryguje tor lotu piłki
+  if (BALL.flightControlTimer > 0) {
+    BALL.flightControlTimer--;
+    const ctrlPad = paddles[BALL.flightControlPaddleId];
+    const isLocalCtrl = ctrlPad && ctrlPad.isLocal;
+    const isSteerActive = isLocalCtrl ? (isRightMouseDown || isLeftMouseDown) : (ctrlPad && (ctrlPad.isRightMouseDown || ctrlPad.isLeftMouseDown));
+    const targetAimY = isLocalCtrl ? mouseY : (ctrlPad && ctrlPad.targetMouseY !== undefined ? ctrlPad.targetMouseY : (ctrlPad ? ctrlPad.y + ctrlPad.h / 2 : BALL.y));
+
+    if (isSteerActive) {
+      // Przy smashu sterowanie aktywnie zużywa dodatkową staminę
+      if (BALL.isSmashFlight && ctrlPad) {
+        if (ctrlPad.stamina > 0) {
+          ctrlPad.stamina = Math.max(0, ctrlPad.stamina - 0.7);
+        } else {
+          BALL.flightControlTimer = 0; // Brak energii kończy sterowanie smashem
+        }
+      }
+
+      const diffY = targetAimY - BALL.y;
+      if (Math.abs(diffY) > 6) {
+        const steerStrength = BALL.isSmashFlight ? 0.52 : 0.42;
+        BALL.vy += Math.sign(diffY) * steerStrength;
+      }
+      const dirX = Math.sign(BALL.vx) || 1;
+      const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
+      BALL.vx = (BALL.vx / curLen) * BALL.speed;
+      BALL.vy = (BALL.vy / curLen) * BALL.speed;
+      if (Math.abs(BALL.vx) < BALL.speed * 0.4) {
+        BALL.vx = dirX * (BALL.speed * 0.4);
+        BALL.vy = Math.sign(BALL.vy) * Math.sqrt(Math.max(0, BALL.speed * BALL.speed - BALL.vx * BALL.vx));
+      }
+      const pColor = BALL.isSmashFlight ? (BALL.isMeteor ? '#ff4500' : '#f5b041') : '#c084fc';
+      if (Math.random() < 0.45) addParticles(BALL.x, BALL.y, pColor, 2);
+    } else if (ctrlPad && Math.abs(ctrlPad.vy) > 0.4) {
+      BALL.vy += Math.sign(ctrlPad.vy) * 0.14;
+      const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
+      BALL.vx = (BALL.vx / curLen) * BALL.speed;
+      BALL.vy = (BALL.vy / curLen) * BALL.speed;
+      if (Math.random() < 0.2) addParticles(BALL.x, BALL.y, BALL.isSmashFlight ? '#f5b041' : '#a855f7', 1);
+    }
   }
 
   BALL.x += BALL.vx;
@@ -3725,35 +6127,110 @@ function predictLocalGuestBounce(myPaddle) {
   BALL.x = dir === 1 ? myPaddle.x + myPaddle.w + BALL.r : myPaddle.x - BALL.r;
   lastLocalGuestHitTime = performance.now();
   hostTargetBall = null;
+  BALL.lastHitPaddle = myPaddle;
+  BALL.lastHitTeam = myPaddle.team;
+  BALL.ricochetCount = 0;
+
+  // def_4 Parry: odbicie w ostatniej chwili tłumi o 30% i daje +1 prędkości
+  let isParried = false;
+  if (myPaddle.hasParry && (BALL.isSmashed || BALL.speed > 7.0)) {
+    BALL.speed = Math.max(INITIAL_BALL_SPEED, (BALL.speed * 0.70) + 1.0);
+    BALL.isSmashed = false;
+    BALL.plasmaBurn = false;
+    BALL.isMeteor = false;
+    isParried = true;
+    showBanner('⚔️ PARRY! (-30% +1 SPD)', '#10b981', 35);
+    SFX.play('wall');
+    addShockwave(BALL.x, BALL.y, '#10b981');
+    addParticles(BALL.x, BALL.y, '#10b981', 14);
+  }
+
+  // def_3 Syfon: +10 energii za odbicie
+  if (myPaddle.hasSyphon) {
+    myPaddle.stamina = Math.min(myPaddle.maxStamina || 100, myPaddle.stamina + 10);
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff88', 8);
+  }
+
+  // pwr_4 Rozgrzanie: każde trafienie daje stos (max 3), reset po punkcie
+  if (myPaddle.hasWarmup) {
+    myPaddle.warmupStacks = Math.min(3, (myPaddle.warmupStacks || 0) + 1);
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#ff7700', 8);
+  }
+
+  const isSmash = myPaddle.smashCharge > 0;
+  myPaddle.smashCharge = 0;
+
+  // spn_5 Sterowanie lotem oraz SMASH
+  if (myPaddle.hasFlightControl || isSmash) {
+    BALL.flightControlTimer = 36;
+    BALL.flightControlPaddleId = myPaddle.id;
+    BALL.isSmashFlight = isSmash;
+  } else {
+    BALL.isSmashFlight = false;
+  }
+
+  // spn_4 Singularność (raz na 18s)
+  if (myPaddle.hasSingularity) {
+    const now = performance.now();
+    if (!myPaddle.lastSingularityTime || now - myPaddle.lastSingularityTime >= 18000) {
+      myPaddle.lastSingularityTime = now;
+      BALL.singularityArmed = true;
+      BALL.singularityOwnerTeam = myPaddle.team;
+      showBanner('🌌 SINGULARNOŚĆ PRZYGOTOWANA!', '#a855f7', 35);
+    }
+  }
+
+  BALL.hasExtendedSpin = !!myPaddle.hasExtendedSpin;
 
   const collidePoint = (BALL.y - (myPaddle.y + myPaddle.h / 2)) / (myPaddle.h / 2);
   const clampedPoint = Math.max(-1, Math.min(1, collidePoint));
   const angle = clampedPoint * (Math.PI / 3.6);
 
-  const isSmash = myPaddle.smashCharge > 0;
-  myPaddle.smashCharge = 0;
-
+  // Liniowa siła rotacji (spn_1: 1.12, spn_2: 1.22)
   const rawSpin = (myPaddle.vy * 0.32 * myPaddle.spinMult) + (clampedPoint * 0.45 * (myPaddle.spinMult - 0.8));
-  BALL.spin = Math.max(-2.8, Math.min(2.8, rawSpin));
-  const isHeavySpin = Math.abs(BALL.spin) >= 1.3;
+  BALL.spin = Math.max(-3.5, Math.min(3.5, rawSpin));
+  const isHeavySpin = Math.abs(BALL.spin) >= 1.2;
 
-  if (isSmash) {
-    BALL.speed = Math.min(BALL.speed + 1.15 * myPaddle.smashMult, MAX_SMASH_SPEED);
+  let warmupBonus = 0;
+  if (myPaddle.hasWarmup && myPaddle.warmupStacks > 0) {
+    warmupBonus = myPaddle.warmupStacks * 0.08;
+  }
+  const effectiveSmashMult = myPaddle.smashMult + warmupBonus;
+
+  // pwr_5 Meteor (przy 3 stosach, 16.5 px/f, ogień, spowolnienie 30% na 1.2s)
+  const isMeteor = isSmash && myPaddle.hasMeteor && myPaddle.warmupStacks === 3;
+  if (isMeteor) {
+    BALL.speed = 16.5;
+    BALL.isMeteor = true;
     BALL.isSmashed = true;
+    BALL.plasmaBurn = true;
     SFX.play('smash');
-    triggerShake(11, 6);
+    triggerShake(16, 10);
+    addShockwave(BALL.x, BALL.y, '#ff4500');
+    addParticles(BALL.x, BALL.y, '#ff4500', 30);
+    showBanner('☄️ METEOR! (16.5 px/f)', '#ff4500', 50);
+  } else if (isSmash) {
+    BALL.speed = Math.min(MAX_SMASH_SPEED, BALL.speed + 1.15 * effectiveSmashMult);
+    BALL.isSmashed = true;
+    BALL.isMeteor = false;
+    SFX.play('smash');
+    triggerShake(10, 5);
     addShockwave(BALL.x, BALL.y, '#f5b041');
     addParticles(BALL.x, BALL.y, '#f5b041', 16);
-    showBanner('SMASH!', myPaddle.color, 40);
+    showBanner('SMASH!', '#f5b041', 40);
   } else {
-    BALL.speed = Math.min(BALL.speed + 0.18, MAX_NORMAL_SPEED);
+    if (!isParried) {
+      BALL.speed = Math.min(BALL.speed + 0.18, MAX_NORMAL_SPEED);
+    }
     BALL.isSmashed = false;
+    BALL.isMeteor = false;
+    BALL.plasmaBurn = false;
     const hitSfx = isHeavySpin ? 'spinHit' : 'hit';
-    const fxColor = isHeavySpin ? '#b845ff' : myPaddle.color;
+    const fxColor = isHeavySpin ? '#a855f7' : myPaddle.color;
     SFX.play(hitSfx);
     addShockwave(BALL.x, BALL.y, fxColor);
-    addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 12 : 7);
-    if (isHeavySpin) showBanner('CURVEBALL!', '#b845ff', 35);
+    addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 14 : 7);
+    if (isHeavySpin) showBanner(myPaddle.hasSingularityCurve ? '🌌 SINGULARITY CURVE!' : (myPaddle.hasSpinMastery ? '🌀 VORTEX BREAK!' : 'CURVEBALL!'), '#b845ff', 35);
   }
 
   BALL.vx = dir * BALL.speed * Math.cos(angle);
@@ -3761,79 +6238,67 @@ function predictLocalGuestBounce(myPaddle) {
 }
 
 function handleArenaCollisions(prevX, prevY) {
-  if (selectedArena === 'hex') {
-    const C = HEX_CORNER_SIZE;
+  if (selectedArena === 'vortex') {
+    VORTEX.angle += 0.045;
+    // Płynne, hipnotyzujące przemieszczanie się wiru wokół centrum
+    VORTEX.x = W / 2 + Math.cos(Date.now() * 0.0012) * 75;
+    VORTEX.y = H / 2 + Math.sin(Date.now() * 0.0018) * 55;
 
-    // 1. Lewy górny róg (Top-Left): x + y <= C + BALL.r
-    if (BALL.x + BALL.y <= C + BALL.r) {
-      const dot = (BALL.vx + BALL.vy) * 0.7071;
-      if (dot < 0) {
-        const newVx = -BALL.vy;
-        const newVy = -BALL.vx;
-        BALL.vx = newVx;
-        BALL.vy = newVy;
-        const excess = (C + BALL.r) - (BALL.x + BALL.y);
-        BALL.x += excess * 0.5 + 2;
-        BALL.y += excess * 0.5 + 2;
-        SFX.play('wall');
-        addShockwave(BALL.x, BALL.y, '#00f0ff');
-        addParticles(BALL.x, BALL.y, '#00f0ff', 10);
-        triggerShake(5, 3);
-        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#00f0ff' } });
+    if (BALL.vortexCurved > 0) BALL.vortexCurved--;
+
+    const dx = BALL.x - VORTEX.x;
+    const dy = BALL.y - VORTEX.y;
+    const dist = Math.hypot(dx, dy);
+
+    // Gdy piłka przelatuje przez powiększony wir (płynny przelot bez gwałtownego odbicia czy teleportu)
+    if (dist < VORTEX.pullRange) {
+      // Siła oddziaływania: rośnie w miarę zbliżania się do jądra wiru
+      const influence = Math.pow(1 - dist / VORTEX.pullRange, 1.2);
+
+      // Wyznaczenie kierunku zawirowania: zależnie od pionowego przesunięcia piłki względem środka wiru
+      let swirlDir = 1;
+      if (Math.abs(dy) > 2) {
+        swirlDir = dy < 0 ? -1 : 1; // Przelot górą podkręca w górę, dołem podkręca w dół
+      } else {
+        swirlDir = Math.sign(BALL.vy) || 1;
       }
-    }
-    // 2. Prawy górny róg (Top-Right): (W - x) + y <= C + BALL.r
-    if ((W - BALL.x) + BALL.y <= C + BALL.r) {
-      const dot = (-BALL.vx + BALL.vy) * 0.7071;
-      if (dot < 0) {
-        const newVx = BALL.vy;
-        const newVy = BALL.vx;
-        BALL.vx = newVx;
-        BALL.vy = newVy;
-        const excess = (C + BALL.r) - ((W - BALL.x) + BALL.y);
-        BALL.x -= excess * 0.5 + 2;
-        BALL.y += excess * 0.5 + 2;
-        SFX.play('wall');
-        addShockwave(BALL.x, BALL.y, '#ff0055');
-        addParticles(BALL.x, BALL.y, '#ff0055', 10);
-        triggerShake(5, 3);
-        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#ff0055' } });
+
+      // 1. Nadanie piłce rotacji (spin): piłka przelatuje przez wir i po wylocie zaczyna mocno skręcać w łuk!
+      BALL.spin = Math.max(-3.6, Math.min(3.6, BALL.spin + swirlDir * influence * 0.28));
+
+      // 2. Delikatne, aerodynamiczne zakrzywienie toru w trakcie samego przelotu (bez nagłego skoku)
+      BALL.vy += swirlDir * influence * 0.18;
+
+      // Utrzymanie stabilnej prędkości
+      const curSpd = Math.hypot(BALL.vx, BALL.vy);
+      if (curSpd > 0.1) {
+        BALL.vx = (BALL.vx / curSpd) * BALL.speed;
+        BALL.vy = (BALL.vy / curSpd) * BALL.speed;
       }
-    }
-    // 3. Lewy dolny róg (Bottom-Left): x + (H - y) <= C + BALL.r
-    if (BALL.x + (H - BALL.y) <= C + BALL.r) {
-      const dot = (BALL.vx - BALL.vy) * 0.7071;
-      if (dot < 0) {
-        const newVx = BALL.vy;
-        const newVy = BALL.vx;
-        BALL.vx = newVx;
-        BALL.vy = newVy;
-        const excess = (C + BALL.r) - (BALL.x + (H - BALL.y));
-        BALL.x += excess * 0.5 + 2;
-        BALL.y -= excess * 0.5 + 2;
-        SFX.play('wall');
-        addShockwave(BALL.x, BALL.y, '#00f0ff');
-        addParticles(BALL.x, BALL.y, '#00f0ff', 10);
-        triggerShake(5, 3);
-        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#00f0ff' } });
+
+      // Efekt wizualny: fioletowe cząsteczki zawirowania powietrza
+      if (Math.random() < 0.4) {
+        addParticles(BALL.x, BALL.y, '#b845ff', 1);
       }
-    }
-    // 4. Prawy dolny róg (Bottom-Right): (W - x) + (H - y) <= C + BALL.r
-    if ((W - BALL.x) + (H - BALL.y) <= C + BALL.r) {
-      const dot = (-BALL.vx - BALL.vy) * 0.7071;
-      if (dot < 0) {
-        const newVx = -BALL.vy;
-        const newVy = -BALL.vx;
-        BALL.vx = newVx;
-        BALL.vy = newVy;
-        const excess = (C + BALL.r) - ((W - BALL.x) + (H - BALL.y));
-        BALL.x -= excess * 0.5 + 2;
-        BALL.y -= excess * 0.5 + 2;
-        SFX.play('wall');
-        addShockwave(BALL.x, BALL.y, '#ff0055');
-        addParticles(BALL.x, BALL.y, '#ff0055', 10);
-        triggerShake(5, 3);
-        sendFX({ sfx: 'wall', wave: { x: BALL.x, y: BALL.y, c: '#ff0055' } });
+
+      // Sygnał dźwiękowy, shockwave oraz leciutkie przyspieszenie o ~5 km/h (+0.4 px/frame)
+      if (dist < 40 && (!BALL.vortexCurved || BALL.vortexCurved <= 0)) {
+        BALL.vortexCurved = 45; // cooldown na trigger efektu
+        
+        // Leciutkie przyspieszenie o 5 km/h (1 px/f = 12.5 km/h => 5 km/h = 0.4 px/f)
+        BALL.speed = Math.min(18.0, BALL.speed + 0.4);
+        const curLen = Math.hypot(BALL.vx, BALL.vy);
+        if (curLen > 0.1) {
+          BALL.vx = (BALL.vx / curLen) * BALL.speed;
+          BALL.vy = (BALL.vy / curLen) * BALL.speed;
+        }
+
+        SFX.play('spinHit');
+        triggerShake(3, 2);
+        addShockwave(VORTEX.x, VORTEX.y, '#b845ff');
+        addParticles(BALL.x, BALL.y, '#b845ff', 10);
+        showBanner('🌀 WIR: +5 KM/H!', '#b845ff', 30);
+        sendFX({ sfx: 'spinHit', wave: { x: VORTEX.x, y: VORTEX.y, c: '#b845ff' }, part: { x: BALL.x, y: BALL.y, c: '#b845ff', n: 10 }, banner: { txt: '🌀 WIR: +5 KM/H!', c: '#b845ff' } });
       }
     }
   }
@@ -3880,11 +6345,57 @@ function update() {
   const myPaddle = getLocalPaddle();
 
   if (myPaddle) {
-    myPaddle.stamina = Math.min(100, myPaddle.stamina + 0.35);
+    let regenRate = myPaddle.staminaRegen || 0.50;
+    myPaddle.stamina = Math.min(myPaddle.maxStamina || 100, myPaddle.stamina + regenRate);
     if (myPaddle.dashTimer > 0) myPaddle.dashTimer--;
     if (myPaddle.smashCharge > 0) myPaddle.smashCharge--;
 
-    const maxStep = myPaddle.speed * (myPaddle.dashTimer > 0 ? (controlMode === 'mouse' ? 2.8 : 2.1) : 1);
+    // spd_3: zryw po dashu
+    if (myPaddle.dashSurgeTimer > 0) myPaddle.dashSurgeTimer--;
+
+    // spd_4: losowy burst prędkości co 8-14s na 2.5s ze zmianą koloru
+    if (myPaddle.hasSpeedBurst) {
+      if (typeof myPaddle.speedBurstNext !== 'number') {
+        myPaddle.speedBurstNext = 480 + Math.floor(Math.random() * 360);
+      }
+      if (myPaddle.speedBurstNext > 0) {
+        myPaddle.speedBurstNext--;
+        if (myPaddle.speedBurstNext <= 0) {
+          myPaddle.speedBurstTimer = 150; // 2.5s = 150 klatek
+          const burstColors = ['#00d2ff', '#ff0055', '#ffe600', '#00ff88', '#a855f7', '#ff7700', '#00ffff'];
+          myPaddle.speedBurstColor = burstColors[Math.floor(Math.random() * burstColors.length)];
+          myPaddle.speedBurstNext = 480 + Math.floor(Math.random() * 360);
+          showBanner('🌈 SZYBKI BŁYSK! +35% PRĘDKOŚCI', myPaddle.speedBurstColor, 40);
+          addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.speedBurstColor, 18);
+          SFX.play('upgrade');
+        }
+      }
+      if (myPaddle.speedBurstTimer > 0) {
+        myPaddle.speedBurstTimer--;
+        if (Math.random() < 0.25) {
+          addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.speedBurstColor || '#00d2ff', 1);
+        }
+      }
+    }
+
+    // BALANS ZWINNOŚCI: łączny bonus prędkości max +45% (stały + zryw + burst nie sumują się powyżej)
+    let speedBonus = myPaddle.staticSpeedBonus || 0;
+    if (myPaddle.dashSurgeTimer > 0) speedBonus += 0.25;
+    if (myPaddle.speedBurstTimer > 0) speedBonus += 0.35;
+    speedBonus = Math.min(0.45, speedBonus);
+
+    const effectiveSpeed = (myPaddle.baseSpeed || 6.8) * (1 + speedBonus);
+    myPaddle.speed = effectiveSpeed;
+
+    const isExhausted = (myPaddle.stamina < 20 && !myPaddle.hasPhantomStep);
+    const fatigueMult = isExhausted ? 0.72 : 1.0;
+    if (isExhausted && Math.random() < 0.2) {
+      addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#8b949e', 1);
+    }
+
+    const slowMult = myPaddle.slowTimer > 0 ? (myPaddle.slowFactor || 0.70) : 1.0;
+    if (myPaddle.slowTimer > 0) myPaddle.slowTimer--;
+    const maxStep = (myPaddle.speed * fatigueMult * slowMult) * (myPaddle.dashTimer > 0 ? (controlMode === 'mouse' ? 2.8 : 2.1) : 1);
 
     if (controlMode === 'keyboard') {
       let moveDir = 0;
@@ -3930,7 +6441,21 @@ function update() {
 
   BALL.spinAngle += BALL.spin * 0.14;
 
-  if (isHost) {
+  if (isServing) {
+    const srvPad = paddles[servingPaddleId] || paddles[0];
+    if (srvPad) {
+      const targetX = srvPad.team === 1 ? srvPad.x + srvPad.w + BALL.r + 4 : srvPad.x - BALL.r - 4;
+      const targetY = Math.max(BALL.r + 8, Math.min(H - BALL.r - 8, srvPad.y + srvPad.h / 2));
+      BALL.x = targetX;
+      BALL.y += (targetY - BALL.y) * 0.42;
+    }
+    serveTimer--;
+    if (srvPad && srvPad.isBot && serveTimer <= 55) {
+      executeServe(false);
+    } else if (serveTimer <= 0) {
+      executeServe(false);
+    }
+  } else if (isHost) {
     if (countdownTimer > 0) {
       countdownTimer--;
     } else {
@@ -3950,12 +6475,14 @@ function update() {
         if (obstacle.timer <= 0) obstacle = null;
       }
 
-      if (!powerupOrb && Math.random() < 0.0008) {
+      // Bardzo rzadki respawn bonusu +1 UP na arenie
+      if (!powerupOrb && rallyHits >= 3 && Math.random() < 0.00008) {
         powerupOrb = {
           x: W / 2 + (Math.random() - 0.5) * 180,
           y: 70 + Math.random() * (H - 140),
-          r: 14, timer: 360
+          r: 15, timer: 360
         };
+        showBanner('⭐ RZADKI BONUS: +1 UP!', '#f5b041', 50);
       }
       if (powerupOrb) {
         powerupOrb.timer--;
@@ -3987,6 +6514,27 @@ function update() {
 
       stepBallMotion();
 
+      // spn_4: Singularność: raz na 18 s piłka w połowie boiska gwałtownie skręca w przeciwną stronę (ok. 25°)
+      if (BALL.singularityArmed) {
+        const crossedCenter = (BALL.singularityOwnerTeam === 1 && prevBallX < W / 2 && BALL.x >= W / 2) ||
+                              (BALL.singularityOwnerTeam === 2 && prevBallX > W / 2 && BALL.x <= W / 2);
+        if (crossedCenter) {
+          BALL.singularityArmed = false;
+          const curAngle = Math.atan2(BALL.vy, BALL.vx);
+          const turnDir = (BALL.vy >= 0 ? -1 : 1);
+          const newAngle = curAngle + turnDir * (25 * Math.PI / 180);
+          BALL.vx = BALL.speed * Math.cos(newAngle);
+          BALL.vy = BALL.speed * Math.sin(newAngle);
+          BALL.spin = turnDir * 2.2;
+          addShockwave(BALL.x, BALL.y, '#a855f7');
+          addParticles(BALL.x, BALL.y, '#a855f7', 22);
+          triggerShake(10, 5);
+          showBanner('🌌 SINGULARNOŚĆ!', '#a855f7', 45);
+          SFX.play('spinHit');
+          sendFX({ sfx: 'spinHit', wave: { x: BALL.x, y: BALL.y, c: '#a855f7' }, part: { x: BALL.x, y: BALL.y, c: '#a855f7', n: 22 }, banner: { txt: '🌌 SINGULARNOŚĆ!', c: '#a855f7' } });
+        }
+      }
+
       BALL.trail.push({ x: BALL.x, y: BALL.y });
       if (BALL.trail.length > 11) BALL.trail.shift();
 
@@ -3994,7 +6542,30 @@ function update() {
       if (BALL.y - BALL.r <= 0) {
         BALL.y = BALL.r;
         BALL.vy = Math.abs(BALL.vy);
-        if (Math.abs(BALL.spin) > 0.4) {
+        const lastHitter = BALL.lastHitPaddle;
+
+        // pwr_3: Rykoszet: odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)
+        if (lastHitter && lastHitter.hasRicochet && (BALL.ricochetCount || 0) < 2) {
+          BALL.ricochetCount = (BALL.ricochetCount || 0) + 1;
+          BALL.speed = Math.min(16.5, BALL.speed * 1.12);
+          const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
+          BALL.vx = (BALL.vx / curLen) * BALL.speed;
+          BALL.vy = (BALL.vy / curLen) * BALL.speed;
+          addParticles(BALL.x, BALL.y, '#ff3366', 10);
+          showBanner(`💥 RYKOSZET (${BALL.ricochetCount}/2): +12%`, '#ff3366', 25);
+        } else if (BALL.plasmaBurn) {
+          BALL.speed = Math.min(16.5, BALL.speed * 1.25);
+          addParticles(BALL.x, BALL.y, '#ff4500', 9);
+          showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
+        }
+
+        // spn_3: Bumerang: 35% szans, że odbicie od ściany odświeży rotację piłki (bez uciążliwego banneru)
+        if (lastHitter && lastHitter.hasBoomerang && Math.random() < 0.35) {
+          BALL.spin = -BALL.spin;
+          addParticles(BALL.x, BALL.y, '#a855f7', 12);
+          SFX.play('spinHit');
+          sendFX({ sfx: 'spinHit', part: { x: BALL.x, y: BALL.y, c: '#a855f7', n: 12 } });
+        } else if (Math.abs(BALL.spin) > 0.4) {
           BALL.vy = Math.max(1.8, BALL.vy + Math.abs(BALL.spin) * 0.25);
           BALL.spin *= -0.55;
           addParticles(BALL.x, BALL.y, '#b845ff', 8);
@@ -4007,7 +6578,30 @@ function update() {
       } else if (BALL.y + BALL.r >= H) {
         BALL.y = H - BALL.r;
         BALL.vy = -Math.abs(BALL.vy);
-        if (Math.abs(BALL.spin) > 0.4) {
+        const lastHitter = BALL.lastHitPaddle;
+
+        // pwr_3: Rykoszet: odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)
+        if (lastHitter && lastHitter.hasRicochet && (BALL.ricochetCount || 0) < 2) {
+          BALL.ricochetCount = (BALL.ricochetCount || 0) + 1;
+          BALL.speed = Math.min(16.5, BALL.speed * 1.12);
+          const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
+          BALL.vx = (BALL.vx / curLen) * BALL.speed;
+          BALL.vy = (BALL.vy / curLen) * BALL.speed;
+          addParticles(BALL.x, BALL.y, '#ff3366', 10);
+          showBanner(`💥 RYKOSZET (${BALL.ricochetCount}/2): +12%`, '#ff3366', 25);
+        } else if (BALL.plasmaBurn) {
+          BALL.speed = Math.min(16.5, BALL.speed * 1.25);
+          addParticles(BALL.x, BALL.y, '#ff4500', 9);
+          showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
+        }
+
+        // spn_3: Bumerang: 35% szans, że odbicie od ściany odświeży rotację piłki (bez uciążliwego banneru)
+        if (lastHitter && lastHitter.hasBoomerang && Math.random() < 0.35) {
+          BALL.spin = -BALL.spin;
+          addParticles(BALL.x, BALL.y, '#a855f7', 12);
+          SFX.play('spinHit');
+          sendFX({ sfx: 'spinHit', part: { x: BALL.x, y: BALL.y, c: '#a855f7', n: 12 } });
+        } else if (Math.abs(BALL.spin) > 0.4) {
           BALL.vy = Math.min(-1.8, BALL.vy - Math.abs(BALL.spin) * 0.25);
           BALL.spin *= -0.55;
           addParticles(BALL.x, BALL.y, '#b845ff', 8);
@@ -4045,7 +6639,7 @@ function update() {
           rallyHits = wallScore;
 
           if (wallScore > wallRecordAtStart) {
-            localStorage.setItem(WALL_RECORD_KEY, wallScore);
+            safeSetStorage(WALL_RECORD_KEY, wallScore);
             const rEl = document.getElementById('wallRecordBadge');
             if (rEl) rEl.textContent = `🏆 REKORD: ${wallScore}`;
             if (!hasBeatenWallRecord && wallRecordAtStart > 0) {
@@ -4055,10 +6649,14 @@ function update() {
             }
           }
 
-          if (wallScore % 10 === 0) {
-            upgradePoints++;
-            updateStatDisplay();
-            showBanner(`${wallScore} ODBIĆ! +1 UP`, '#f5b041', 65);
+          if (wallScore >= 200 && wallScore % 100 === 0) {
+            showBanner(`🔥 ${wallScore} ODBIĆ! +15 XP!`, '#f5b041', 85);
+            SFX.play('upgrade');
+          } else if (wallScore === 140) {
+            showBanner(`🧱 140 ODBIĆ! +2 XP [MAX 20 XP]`, '#00f0ff', 75);
+            SFX.play('upgrade');
+          } else if (wallScore < 140 && wallScore % 20 === 0 && wallScore > 0) {
+            showBanner(`🧱 ${wallScore} ODBIĆ! +3 XP`, '#00f0ff', 75);
             SFX.play('upgrade');
           } else {
             SFX.play('hit');
@@ -4071,7 +6669,21 @@ function update() {
         }
 
         if (BALL.x < -15) {
-          onWallArcadeGameOver();
+          // def_5: Tarcza Egidy ratuje piłkę raz na mecz/set i odnawia 40 energii
+          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && p.aegisReady);
+          if (defender) {
+            defender.aegisReady = false;
+            BALL.x = defender.x + defender.w + BALL.r + 6;
+            BALL.vx = Math.abs(BALL.vx) || BALL.speed;
+            defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
+            triggerShake(14, 8);
+            SFX.play('upgrade');
+            addShockwave(defender.x + defender.w / 2, BALL.y, '#10b981');
+            addParticles(defender.x + defender.w / 2, BALL.y, '#10b981', 28);
+            showBanner('🔰 TARCZA EGIDY OCZYŚCIŁA PUNKT! +40 ENERGII', '#10b981', 65);
+          } else {
+            onWallArcadeGameOver();
+          }
         }
       }
 
@@ -4105,16 +6717,18 @@ function update() {
         let hitPaddleState = p;
 
         if (p.isLocal || p.isBot) {
-          if ((impactY + BALL.r >= p.y && impactY - BALL.r <= p.y + p.h) ||
-              (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h)) {
+          const magExtra = p.hasMagneticTip ? 14 : 0;
+          if ((impactY + BALL.r >= p.y - magExtra && impactY - BALL.r <= p.y + p.h + magExtra) ||
+              (BALL.y + BALL.r >= p.y - magExtra && BALL.y - BALL.r <= p.y + p.h + magExtra)) {
             hitDetected = true;
           }
         } else {
           const rewound = getRewoundPaddleForGuest(p);
-          const currentHit = (impactY + BALL.r >= p.y && impactY - BALL.r <= p.y + p.h) ||
-                             (BALL.y + BALL.r >= p.y && BALL.y - BALL.r <= p.y + p.h);
-          const rewoundHit = (impactY + BALL.r >= rewound.y && impactY - BALL.r <= rewound.y + p.h) ||
-                             (BALL.y + BALL.r >= rewound.y && BALL.y - BALL.r <= rewound.y + p.h);
+          const magExtra = p.hasMagneticTip ? 14 : 0;
+          const currentHit = (impactY + BALL.r >= p.y - magExtra && impactY - BALL.r <= p.y + p.h + magExtra) ||
+                             (BALL.y + BALL.r >= p.y - magExtra && BALL.y - BALL.r <= p.y + p.h + magExtra);
+          const rewoundHit = (impactY + BALL.r >= rewound.y - magExtra && impactY - BALL.r <= rewound.y + p.h + magExtra) ||
+                             (BALL.y + BALL.r >= rewound.y - magExtra && BALL.y - BALL.r <= rewound.y + p.h + magExtra);
 
           if (rewoundHit || currentHit) {
             hitDetected = true;
@@ -4138,11 +6752,40 @@ function update() {
 
       if (!isWallArcade) {
         if (BALL.x < -15) {
-          teamScores[2]++;
-          onGoalScored(2);
+          // def_5: Tarcza Egidy odbija piłkę i daje +40 energii (raz na mecz/set)
+          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && p.aegisReady);
+          if (defender) {
+            defender.aegisReady = false;
+            BALL.x = defender.x + defender.w + BALL.r + 6;
+            BALL.vx = Math.abs(BALL.vx) || BALL.speed;
+            defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
+            triggerShake(14, 8);
+            SFX.play('upgrade');
+            addShockwave(defender.x + defender.w / 2, BALL.y, '#10b981');
+            addParticles(defender.x + defender.w / 2, BALL.y, '#10b981', 28);
+            showBanner('🔰 TARCZA EGIDY OCZYŚCIŁA PUNKT! +40 ENERGII', '#10b981', 65);
+            sendFX({ sfx: 'upgrade', wave: { x: defender.x + defender.w / 2, y: BALL.y, c: '#10b981' }, part: { x: defender.x + defender.w / 2, y: BALL.y, c: '#10b981', n: 28 }, banner: { txt: '🔰 TARCZA EGIDY!', c: '#10b981' } });
+          } else {
+            teamScores[2]++;
+            onGoalScored(2);
+          }
         } else if (BALL.x > W + 15) {
-          teamScores[1]++;
-          onGoalScored(1);
+          const defender = paddles.find(p => p.team === 2 && p.hasAegisShield && p.aegisReady);
+          if (defender) {
+            defender.aegisReady = false;
+            BALL.x = defender.x - BALL.r - 6;
+            BALL.vx = -Math.abs(BALL.vx) || -BALL.speed;
+            defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
+            triggerShake(14, 8);
+            SFX.play('upgrade');
+            addShockwave(defender.x + defender.w / 2, BALL.y, '#10b981');
+            addParticles(defender.x + defender.w / 2, BALL.y, '#10b981', 28);
+            showBanner('🔰 TARCZA EGIDY OCZYŚCIŁA PUNKT! +40 ENERGII', '#10b981', 65);
+            sendFX({ sfx: 'upgrade', wave: { x: defender.x + defender.w / 2, y: BALL.y, c: '#10b981' }, part: { x: defender.x + defender.w / 2, y: BALL.y, c: '#10b981', n: 28 }, banner: { txt: '🔰 TARCZA EGIDY!', c: '#10b981' } });
+          } else {
+            teamScores[1]++;
+            onGoalScored(1);
+          }
         }
       }
     }
@@ -4252,7 +6895,10 @@ function update() {
         hits: rallyHits,
         s1: teamScores[1],
         s2: teamScores[2],
-        arena: selectedArena
+        arena: selectedArena,
+        fct: BALL.flightControlTimer,
+        fcp: BALL.flightControlPaddleId,
+        smf: BALL.isSmashFlight
       });
     } else if (myPaddle) {
       sendFast({
@@ -4262,7 +6908,9 @@ function update() {
         py: Math.round(myPaddle.y * 10) / 10,
         pvy: Math.round(myPaddle.vy * 100) / 100,
         stam: Math.round(myPaddle.stamina),
-        smashCharge: myPaddle.smashCharge
+        smashCharge: myPaddle.smashCharge,
+        rmb: (isRightMouseDown || isLeftMouseDown),
+        targetY: Math.round(mouseY)
       });
     }
   }
@@ -4272,58 +6920,147 @@ function handlePaddleHit(paddle, dir) {
   BALL.x = dir === 1 ? paddle.x + paddle.w + BALL.r : paddle.x - BALL.r;
   rallyHits++;
   const padId = paddle.id;
+  BALL.lastHitPaddle = paddle;
+  BALL.lastHitTeam = paddle.team;
+  BALL.ricochetCount = 0; // reset rykoszetów po odbiciu od paletki
 
-  if (rallyHits === 10 && !rallyRewarded) {
-    rallyRewarded = true;
-    upgradePoints++;
-    updateStatDisplay();
-    showBanner('10+ COMBO! +1 UP', '#f5b041', 70);
-    SFX.play('upgrade');
+  // def_4 Parry: odbicie w ostatniej chwili tłumi o 30% i daje +1 prędkości
+  let isParried = false;
+  if (paddle.hasParry && (BALL.isSmashed || BALL.speed > 7.0)) {
+    BALL.speed = Math.max(INITIAL_BALL_SPEED, (BALL.speed * 0.70) + 1.0);
+    BALL.isSmashed = false;
+    BALL.plasmaBurn = false;
+    BALL.isMeteor = false;
+    isParried = true;
+    showBanner('⚔️ PARRY! (-30% +1 SPD)', '#10b981', 35);
+    SFX.play('wall');
+    addShockwave(BALL.x, BALL.y, '#10b981');
+    addParticles(BALL.x, BALL.y, '#10b981', 14);
   }
+
+  // def_3 Syfon: każde udane odbicie daje +10 energii
+  if (paddle.hasSyphon) {
+    paddle.stamina = Math.min(paddle.maxStamina || 100, paddle.stamina + 10);
+    addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff88', 8);
+  }
+
+  // pwr_4 Rozgrzanie: trafienie daje stos (max 3), każdy to +8% smasha (reset po punkcie)
+  if (paddle.hasWarmup) {
+    paddle.warmupStacks = Math.min(3, (paddle.warmupStacks || 0) + 1);
+    addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#ff7700', 8);
+  }
+
+  const isSmash = paddle.smashCharge > 0;
+  paddle.smashCharge = 0;
+
+  // spn_5 Sterowanie lotem oraz SMASH (aktywuje kółko kontroli lotu)
+  if (paddle.hasFlightControl || isSmash) {
+    BALL.flightControlTimer = 36;
+    BALL.flightControlPaddleId = paddle.id;
+    BALL.isSmashFlight = isSmash;
+  } else {
+    BALL.isSmashFlight = false;
+  }
+
+  // spn_4 Singularność: raz na 18 s przygotowuje skręt w połowie boiska
+  if (paddle.hasSingularity) {
+    const now = performance.now();
+    if (!paddle.lastSingularityTime || now - paddle.lastSingularityTime >= 18000) {
+      paddle.lastSingularityTime = now;
+      BALL.singularityArmed = true;
+      BALL.singularityOwnerTeam = paddle.team;
+      showBanner('🌌 SINGULARNOŚĆ PRZYGOTOWANA!', '#a855f7', 35);
+    }
+  }
+
+  // spn_2: Czas trwania rotacji (+15%)
+  BALL.hasExtendedSpin = !!paddle.hasExtendedSpin;
 
   const collidePoint = (BALL.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
   const clampedPoint = Math.max(-1, Math.min(1, collidePoint));
   const angle = clampedPoint * (Math.PI / 3.6);
 
-  const isSmash = paddle.smashCharge > 0;
-  paddle.smashCharge = 0;
-
+  // Liniowa siła rotacji (spn_1: 1.12, spn_2: 1.22)
   const rawSpin = (paddle.vy * 0.32 * paddle.spinMult) + (clampedPoint * 0.45 * (paddle.spinMult - 0.8));
-  BALL.spin = Math.max(-2.8, Math.min(2.8, rawSpin));
-  const isHeavySpin = Math.abs(BALL.spin) >= 1.3;
+  BALL.spin = Math.max(-3.5, Math.min(3.5, rawSpin));
+  const isHeavySpin = Math.abs(BALL.spin) >= 1.2;
 
-  if (isSmash) {
-    BALL.speed = Math.min(BALL.speed + 1.15 * paddle.smashMult, MAX_SMASH_SPEED);
+  let warmupBonus = 0;
+  if (paddle.hasWarmup && paddle.warmupStacks > 0) {
+    warmupBonus = paddle.warmupStacks * 0.08;
+  }
+  const effectiveSmashMult = paddle.smashMult + warmupBonus;
+
+  // pwr_5 Meteor: przy 3 stosach smash leci 16.5 px/f z ogniem, rywal spowolniony o 30% na 1,2 s
+  const isMeteor = isSmash && paddle.hasMeteor && paddle.warmupStacks === 3;
+
+  if (isMeteor) {
+    BALL.speed = 16.5;
+    BALL.isMeteor = true;
     BALL.isSmashed = true;
+    BALL.plasmaBurn = true;
     SFX.play('smash');
-    triggerShake(11, 6);
-    addShockwave(BALL.x, BALL.y, '#f5b041');
-    addParticles(BALL.x, BALL.y, '#f5b041', 16);
-    showBanner('SMASH!', paddle.color, 40);
+    triggerShake(16, 10);
+    addShockwave(BALL.x, BALL.y, '#ff4500');
+    addParticles(BALL.x, BALL.y, '#ff4500', 30);
+    const smashTxt = '☄️ METEOR! (16.5 px/f)';
+    showBanner(smashTxt, '#ff4500', 50);
+
+    // Spowolnienie rywali o 30% na 1.2s (72 klatki)
+    paddles.forEach(p => {
+      if (p && p.team !== paddle.team) {
+        p.slowTimer = 72;
+        p.slowFactor = 0.70;
+        addParticles(p.x + p.w / 2, p.y + p.h / 2, '#ff0055', 8);
+      }
+    });
+
     sendFX({
       pad: padId,
-      sfx: 'smash', shake: [11, 6],
+      sfx: 'smash', shake: [16, 10],
+      wave: { x: BALL.x, y: BALL.y, c: '#ff4500' },
+      part: { x: BALL.x, y: BALL.y, c: '#ff4500', n: 30 },
+      banner: { txt: smashTxt, c: '#ff4500' },
+      slow: paddle.team
+    });
+  } else if (isSmash) {
+    BALL.speed = Math.min(MAX_SMASH_SPEED, BALL.speed + 1.15 * effectiveSmashMult);
+    BALL.isSmashed = true;
+    BALL.isMeteor = false;
+    SFX.play('smash');
+    triggerShake(10, 5);
+    addShockwave(BALL.x, BALL.y, '#f5b041');
+    addParticles(BALL.x, BALL.y, '#f5b041', 16);
+    showBanner('SMASH!', '#f5b041', 40);
+    sendFX({
+      pad: padId,
+      sfx: 'smash', shake: [10, 5],
       wave: { x: BALL.x, y: BALL.y, c: '#f5b041' },
       part: { x: BALL.x, y: BALL.y, c: '#f5b041', n: 16 },
-      banner: { txt: 'SMASH!', c: paddle.color }
+      banner: { txt: 'SMASH!', c: '#f5b041' }
     });
   } else {
-    BALL.speed = Math.min(BALL.speed + 0.18, MAX_NORMAL_SPEED);
+    if (!isParried) {
+      BALL.speed = Math.min(BALL.speed + 0.18, MAX_NORMAL_SPEED);
+    }
     BALL.isSmashed = false;
+    BALL.isMeteor = false;
+    BALL.plasmaBurn = false;
     const hitSfx = isHeavySpin ? 'spinHit' : 'hit';
-    const fxColor = isHeavySpin ? '#b845ff' : paddle.color;
+    const fxColor = isHeavySpin ? '#a855f7' : paddle.color;
     SFX.play(hitSfx);
     addShockwave(BALL.x, BALL.y, fxColor);
-    addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 12 : 7);
+    addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 14 : 7);
 
-    if (isHeavySpin) showBanner('CURVEBALL!', '#b845ff', 35);
+    const bannerTxt = isHeavySpin ? '🌀 ROTACJA!' : null;
+    if (bannerTxt) showBanner(bannerTxt, '#a855f7', 30);
 
     sendFX({
       pad: padId,
       sfx: hitSfx,
       wave: { x: BALL.x, y: BALL.y, c: fxColor },
-      part: { x: BALL.x, y: BALL.y, c: fxColor, n: isHeavySpin ? 12 : 7 },
-      banner: isHeavySpin ? { txt: 'CURVEBALL!', c: '#b845ff' } : null
+      part: { x: BALL.x, y: BALL.y, c: fxColor, n: isHeavySpin ? 14 : 7 },
+      banner: bannerTxt ? { txt: bannerTxt, c: '#a855f7' } : null
     });
   }
 
@@ -4348,17 +7085,9 @@ function onGoalScored(scoringTeam) {
     scorerPadId
   });
 
-  const hostPad = getLocalPaddle();
-  if (hostPad && hostPad.team === scoringTeam && teamScores[scoringTeam] % 2 === 0) {
-    if (scorerPadId === hostPad.id || !is2v2) {
-      upgradePoints++;
-      updateStatDisplay();
-    }
-  }
-
   updateHudScore();
   checkVictoryCondition();
-  if (!matchOver) resetBall(true);
+  if (!matchOver) resetBall(true, scoringTeam === 1 ? 2 : 1);
 }
 
 function onWallArcadeGameOver() {
@@ -4369,7 +7098,7 @@ function onWallArcadeGameOver() {
 
   const isNewRec = wallScore > wallRecordAtStart && (wallRecordAtStart > 0 || wallScore >= 3);
   if (wallScore > wallRecordAtStart) {
-    localStorage.setItem(WALL_RECORD_KEY, wallScore);
+    safeSetStorage(WALL_RECORD_KEY, wallScore);
   }
   const finalBest = Math.max(wallRecordAtStart, wallScore);
 
@@ -4383,6 +7112,8 @@ function onWallArcadeGameOver() {
   sub.textContent = `WYNIK: ${wallScore} • REKORD: ${finalBest}`;
   if (rematchBtn) rematchBtn.textContent = 'ZAGRAJ ZNOWU';
   modal.style.display = 'flex';
+
+  awardAccountRewards(false, isNewRec);
 }
 
 /* ==========================================
@@ -4475,45 +7206,65 @@ function render() {
     ctx.restore();
   }
 
-  // ELEMENTY ARENY: HEX-ARENA (ŚCIĘTE SKOŚNE NAROŻNIKI 45°)
-  if (selectedArena === 'hex') {
+  // ELEMENTY ARENY: VORTEX (KOSMICZNY WIR GRAWITACYJNY)
+  if (selectedArena === 'vortex') {
     ctx.save();
-    const C = HEX_CORNER_SIZE;
-    ctx.shadowColor = '#00f0ff';
-    ctx.shadowBlur = 14;
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 3;
-    ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+    ctx.translate(VORTEX.x, VORTEX.y);
 
-    const corners = [
-      [[0, 0], [C, 0], [0, C]],
-      [[W, 0], [W - C, 0], [W, C]],
-      [[0, H], [C, H], [0, H - C]],
-      [[W, H], [W - C, H], [W, H - C]]
-    ];
+    // 1. Zewnętrzny horyzont grawitacyjny (pole przyciągania - powiększone)
+    const pullPulse = 0.10 + Math.sin(Date.now() * 0.005) * 0.05;
+    ctx.strokeStyle = `rgba(184, 69, 255, ${pullPulse})`;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 10]);
+    ctx.beginPath();
+    ctx.arc(0, 0, VORTEX.pullRange, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-    corners.forEach(pts => {
+    // 2. Spiralne ramiona dysku akrecyjnego (powiększone)
+    ctx.save();
+    ctx.rotate(VORTEX.angle);
+    for (let arm = 0; arm < 4; arm++) {
+      ctx.rotate(Math.PI / 2);
       ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      ctx.lineTo(pts[1][0], pts[1][1]);
-      ctx.lineTo(pts[2][0], pts[2][1]);
-      ctx.closePath();
-      ctx.fill();
-
-      // Linia odbicia
-      ctx.beginPath();
-      ctx.moveTo(pts[1][0], pts[1][1]);
-      ctx.lineTo(pts[2][0], pts[2][1]);
+      ctx.strokeStyle = arm % 2 === 0 ? 'rgba(184, 69, 255, 0.55)' : 'rgba(0, 240, 255, 0.45)';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = arm % 2 === 0 ? '#b845ff' : '#00f0ff';
+      ctx.shadowBlur = 15;
+      ctx.moveTo(10, 0);
+      ctx.bezierCurveTo(28, 14, 48, 32, 68, 42);
       ctx.stroke();
+    }
+    ctx.restore();
 
-      // Cyber punkty węzłowe
-      ctx.fillStyle = '#00f0ff';
-      ctx.beginPath();
-      ctx.arc(pts[1][0], pts[1][1], 3.5, 0, Math.PI * 2);
-      ctx.arc(pts[2][0], pts[2][1], 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
-    });
+    // 3. Poświata horyzontu zdarzeń (powiększona)
+    const coreGrad = ctx.createRadialGradient(0, 0, 6, 0, 0, 48);
+    coreGrad.addColorStop(0, '#ffffff');
+    coreGrad.addColorStop(0.35, '#b845ff');
+    coreGrad.addColorStop(0.7, 'rgba(184, 69, 255, 0.45)');
+    coreGrad.addColorStop(1, 'rgba(184, 69, 255, 0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 48, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Czarny rdzeń osobliwości (Singularity - powiększony)
+    ctx.fillStyle = '#06070d';
+    ctx.beginPath();
+    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#b845ff';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#b845ff';
+    ctx.shadowBlur = 18;
+    ctx.stroke();
+
+    // Mikro-pulsar w środku
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 0, 4, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
@@ -4614,13 +7365,55 @@ function render() {
 
   const drawPaddle = (p) => {
     const isCharging = p.smashCharge > 0;
-    ctx.shadowColor = isCharging ? '#f5b041' : p.color;
-    ctx.shadowBlur = isCharging ? 24 : 14;
-    ctx.fillStyle = isCharging ? '#f5b041' : p.color;
+    let padColor = p.color;
+    if (p.speedBurstTimer > 0 && p.speedBurstColor) {
+      padColor = p.speedBurstColor;
+    } else if (isCharging) {
+      padColor = '#f5b041';
+    }
+
+    ctx.shadowColor = isCharging ? '#f5b041' : (p.speedBurstTimer > 0 ? padColor : (p.hasPhantomStep ? '#00d2ff' : p.color));
+    ctx.shadowBlur = isCharging ? 24 : (p.speedBurstTimer > 0 ? 22 : (p.hasPhantomStep ? 18 : 14));
+    ctx.fillStyle = padColor;
     drawRoundedRect(ctx, p.x, p.y, p.w, p.h, 6);
 
     ctx.fillStyle = '#ffffff';
     drawRoundedRect(ctx, p.x + 3, p.y + 8, p.w - 6, p.h - 16, 3);
+
+    // EFEKTY WIZUALNE TALENTÓW NA PALETCE:
+    // 1. Tarcza Egidy (aktywna, gotowa do ratunku tarcza)
+    if (p.hasAegisShield && p.aegisReady) {
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(p.x - 3, p.y - 3, p.w + 6, p.h + 6);
+    }
+    // 2. Widmowy Krok (Zwinność Poz. 5)
+    if (p.hasPhantomStep && (p.dashTimer > 0 || Math.abs(p.vy) > 3.0)) {
+      ctx.strokeStyle = 'rgba(0, 210, 255, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const trailX = p.team === 1 ? p.x - 5 : p.x + p.w + 5;
+      ctx.moveTo(trailX, p.y + 6);
+      ctx.lineTo(trailX, p.y + p.h - 6);
+      ctx.stroke();
+    }
+    // 3. Rozgrzanie (Siła Poz. 4: stosy 1..3)
+    if (p.hasWarmup && p.warmupStacks > 0) {
+      ctx.fillStyle = p.warmupStacks === 3 ? '#ff3300' : '#ff7700';
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 8;
+      for (let s = 0; s < p.warmupStacks; s++) {
+        ctx.beginPath();
+        const dotY = p.y + p.h / 2 + (s - 1) * 8;
+        ctx.arc(p.x + p.w / 2, dotY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    if (p.stamina < 20 && !p.hasPhantomStep) {
+      ctx.strokeStyle = 'rgba(255, 0, 85, 0.65)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(p.x - 2, p.y - 2, p.w + 4, p.h + 4);
+    }
     ctx.shadowBlur = 0;
 
     if (p.isLocal) {
@@ -4654,7 +7447,9 @@ function render() {
     const ratio = i / BALL.trail.length;
     ctx.beginPath();
     ctx.arc(t.x, t.y, BALL.r * ratio, 0, Math.PI * 2);
-    if (BALL.isSmashed) {
+    if (BALL.isMeteor) {
+      ctx.fillStyle = `rgba(255, 69, 0, ${ratio * 0.75})`;
+    } else if (BALL.isSmashed) {
       ctx.fillStyle = `rgba(245, 176, 65, ${ratio * 0.45})`;
     } else if (hasSpin) {
       ctx.fillStyle = `rgba(184, 69, 255, ${ratio * 0.38})`;
@@ -4681,11 +7476,66 @@ function render() {
 
   ctx.beginPath();
   ctx.arc(BALL.x, BALL.y, BALL.r, 0, Math.PI * 2);
-  ctx.fillStyle = BALL.isSmashed ? '#f5b041' : '#ffffff';
-  ctx.shadowColor = BALL.isSmashed ? '#f5b041' : (hasSpin ? '#b845ff' : '#00f0ff');
-  ctx.shadowBlur = BALL.isSmashed ? 22 : 14;
+  ctx.fillStyle = BALL.isMeteor ? '#ff3300' : (BALL.isSmashed ? '#f5b041' : '#ffffff');
+  ctx.shadowColor = BALL.isMeteor ? '#ff4500' : (BALL.isSmashed ? '#f5b041' : (hasSpin ? '#b845ff' : '#00f0ff'));
+  ctx.shadowBlur = BALL.isMeteor ? 26 : (BALL.isSmashed ? 22 : 14);
   ctx.fill();
   ctx.shadowBlur = 0;
+
+  // KÓŁKO KONTROLI LOTU (FLIGHT CONTROL RETICLE: Rotacja lub Smash)
+  if (BALL.flightControlTimer > 0) {
+    const ctrlPad = paddles[BALL.flightControlPaddleId];
+    const isLocalCtrl = ctrlPad && ctrlPad.isLocal;
+    const isSteerActive = isLocalCtrl ? (isRightMouseDown || isLeftMouseDown) : (ctrlPad && (ctrlPad.isRightMouseDown || ctrlPad.isLeftMouseDown));
+    const isSmashReticle = !!BALL.isSmashFlight;
+
+    ctx.save();
+    ctx.translate(BALL.x, BALL.y);
+    const rot = performance.now() * (isSteerActive ? 0.014 : 0.006);
+    ctx.rotate(rot);
+
+    const ringRadius = BALL.r + 9 + (isSteerActive ? Math.sin(performance.now() * 0.02) * 2 : 0);
+    const mainColor = isSmashReticle ? (BALL.isMeteor ? '#ff4500' : '#f5b041') : '#c084fc';
+    const activeColor = isSmashReticle ? (BALL.isMeteor ? '#ff6600' : '#fbbf24') : '#f0abfc';
+
+    ctx.strokeStyle = isSteerActive ? activeColor : mainColor;
+    ctx.lineWidth = isSteerActive ? 2.5 : 1.8;
+    ctx.shadowColor = isSteerActive ? activeColor : mainColor;
+    ctx.shadowBlur = isSteerActive ? 22 : 12;
+
+    // 3 segmentowe łuki tworzące obracający się pierścień celowniczy
+    for (let a = 0; a < 3; a++) {
+      const startAngle = a * (Math.PI * 2 / 3);
+      const endAngle = startAngle + (Math.PI * 2 / 3) * 0.72;
+      ctx.beginPath();
+      ctx.arc(0, 0, ringRadius, startAngle, endAngle);
+      ctx.stroke();
+    }
+
+    if (isSteerActive) {
+      // Wewnętrzny świecący rdzeń gdy aktywne jest sterowanie LPM lub PPM
+      ctx.beginPath();
+      ctx.arc(0, 0, BALL.r + 3.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Dyskretna linia celowania w stronę kursora przy wciśniętym LPM lub PPM
+    if (isSteerActive && isLocalCtrl) {
+      ctx.save();
+      ctx.strokeStyle = isSmashReticle ? 'rgba(245, 176, 65, 0.65)' : 'rgba(240, 171, 252, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(BALL.x, BALL.y);
+      ctx.lineTo(BALL.x + BALL.vx * 3.5, mouseY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+  }
 
   if (bannerTimer > 0) {
     ctx.font = '900 24px Orbitron';
@@ -4695,6 +7545,122 @@ function render() {
     ctx.shadowBlur = 15;
     ctx.fillText(bannerText, W / 2, 72);
     ctx.shadowBlur = 0;
+  }
+
+  if (isServing) {
+    const srvPad = paddles[servingPaddleId] || paddles[0];
+    if (srvPad) {
+      const dir = srvPad.team === 1 ? 1 : -1;
+      const relY = (BALL.y - H / 2) / (H / 2);
+      const motionCut = (srvPad.vy || 0) * 0.035;
+      let aimAngle = Math.max(-0.46, Math.min(0.46, (relY * -0.24) + motionCut));
+
+      const vx = dir * Math.cos(aimAngle);
+      const vy = Math.sin(aimAngle);
+
+      const maxDist = 440;
+      const yTop = BALL.r + 3;
+      const yBot = H - BALL.r - 3;
+
+      let p0 = { x: BALL.x, y: BALL.y };
+      let pBounce = null;
+      let pEnd = null;
+
+      if (vy < -0.001) {
+        const t = (p0.y - yTop) / (-vy);
+        if (t > 0 && t < maxDist) {
+          pBounce = { x: p0.x + vx * t, y: yTop };
+          const rem = maxDist - t;
+          pEnd = { x: pBounce.x + vx * rem, y: pBounce.y + (-vy) * rem };
+        } else {
+          pEnd = { x: p0.x + vx * maxDist, y: p0.y + vy * maxDist };
+        }
+      } else if (vy > 0.001) {
+        const t = (yBot - p0.y) / vy;
+        if (t > 0 && t < maxDist) {
+          pBounce = { x: p0.x + vx * t, y: yBot };
+          const rem = maxDist - t;
+          pEnd = { x: pBounce.x + vx * rem, y: pBounce.y + (-vy) * rem };
+        } else {
+          pEnd = { x: p0.x + vx * maxDist, y: p0.y + vy * maxDist };
+        }
+      } else {
+        pEnd = { x: p0.x + vx * maxDist, y: p0.y };
+      }
+
+      ctx.save();
+      const laserColor = srvPad.color;
+      const dashAnim = -(Date.now() * 0.045) % 20;
+
+      // 1. ZEWNĘTRZNA NEONOWA POŚWIATA WIĄZKI LASEROWEJ
+      ctx.strokeStyle = laserColor;
+      ctx.shadowColor = laserColor;
+      ctx.shadowBlur = 14;
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([12, 7]);
+      ctx.lineDashOffset = dashAnim;
+
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      if (pBounce) {
+        ctx.lineTo(pBounce.x, pBounce.y);
+        ctx.lineTo(pEnd.x, pEnd.y);
+      } else {
+        ctx.lineTo(pEnd.x, pEnd.y);
+      }
+      ctx.stroke();
+
+      // 2. WEWNĘTRZNY BIAŁY RDZEŃ FOTONOWY
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.4;
+      ctx.shadowBlur = 4;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 3. ROZBŁYSK NA ODBICIU OD BANDY
+      if (pBounce) {
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = laserColor;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(pBounce.x, pBounce.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 4. HOLOGRAFICZNY CELOWNIK LASEROWY NA KOŃCU WIĄZKI
+      const retPulse = Math.sin(Date.now() * 0.015) * 2;
+      ctx.strokeStyle = laserColor;
+      ctx.shadowColor = laserColor;
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pEnd.x, pEnd.y, 6 + retPulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(pEnd.x, pEnd.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5. ENERGETYCZNA AURA WOKÓŁ PIŁKI
+      const ballPulse = Math.sin(Date.now() * 0.018) * 3;
+      ctx.strokeStyle = laserColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(BALL.x, BALL.y, BALL.r + 3 + ballPulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 6. NAPIS SERWISU
+      if (srvPad.isLocal) {
+        ctx.font = '900 12px Orbitron';
+        ctx.fillStyle = '#f5b041';
+        ctx.shadowColor = '#f5b041';
+        ctx.shadowBlur = 10;
+        ctx.textAlign = 'center';
+        ctx.fillText('SERWIS [KLIK / SPACJA]', W / 2, H / 2 - 20);
+      }
+      ctx.restore();
+    }
   }
 
   if (countdownTimer > 0) {
@@ -4767,11 +7733,21 @@ window.addEventListener('keydown', e => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab'].includes(e.code) && gameActive) {
     e.preventDefault();
   }
+
+  if (gameActive && !matchPaused && isServing) {
+    const srvPad = paddles[servingPaddleId];
+    if (srvPad && srvPad.isLocal && (e.code === 'Space' || e.code === 'Enter')) {
+      executeServe(true);
+      return;
+    }
+  }
+
   if (gameActive && !matchPaused) {
-    if (e.code === 'Digit1') upgradeStat('spin');
-    if (e.code === 'Digit2') upgradeStat('speed');
+    if (e.code === 'Digit1') upgradeStat('speed');
+    if (e.code === 'Digit2') upgradeStat('size');
     if (e.code === 'Digit3') upgradeStat('smash');
-    if (e.code === 'Digit4') upgradeStat('size');
+    if (e.code === 'Digit4') upgradeStat('spin');
+    if (e.code === 'Digit5') upgradeStat('stamina');
   }
 });
 
@@ -4787,16 +7763,63 @@ window.addEventListener('mousemove', e => {
 });
 
 window.addEventListener('mousedown', e => {
-  if (!gameActive || matchOver || matchPaused || controlMode !== 'mouse') return;
-  if (e.target.tagName === 'BUTTON') return;
+  if (!gameActive || matchOver || matchPaused) return;
+  if (e.target.closest && e.target.closest('button, a, input, select, textarea, label, .action-btn, .clean-btn, .talent-card, .tree-modal-box, .modal-box, #upgradesPanel, #talentTreeModal, #pauseModal, #victoryModal')) {
+    return;
+  }
+
+  if (e.button === 2) {
+    isRightMouseDown = true;
+  }
+  if (e.button === 0) {
+    isLeftMouseDown = true;
+  }
+
+  if (isServing) {
+    const srvPad = paddles[servingPaddleId];
+    if (srvPad && srvPad.isLocal) {
+      executeServe(true);
+      return;
+    }
+  }
 
   const myPaddle = getLocalPaddle();
-  if (e.button === 0) {
-    triggerLocalSmash(myPaddle);
-  } else if (e.button === 2) {
+  const isFlightActive = (BALL.flightControlTimer > 0 && myPaddle && BALL.flightControlPaddleId === myPaddle.id);
+
+  if (e.button === 2) {
     e.preventDefault();
-    triggerLocalDash(myPaddle);
+    // Gdy aktywne jest sterowanie lotem piłki (spn_5 lub SMASH), PPM steruje torem piłki (nie zużywa staminy na dash)
+    if (isFlightActive) {
+      return;
+    }
+    if (controlMode === 'mouse') {
+      triggerLocalDash(myPaddle);
+    }
+    return;
   }
+
+  if (controlMode !== 'mouse') return;
+
+  if (e.button === 0) {
+    // Gdy aktywne jest sterowanie lotem piłki (spn_5 lub SMASH), LPM steruje torem lotu zamiast odpalać kolejnego smasha
+    if (isFlightActive) {
+      return;
+    }
+    triggerLocalSmash(myPaddle);
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (e.button === 2) {
+    isRightMouseDown = false;
+  }
+  if (e.button === 0) {
+    isLeftMouseDown = false;
+  }
+});
+window.addEventListener('blur', () => {
+  isRightMouseDown = false;
+  isLeftMouseDown = false;
 });
 
 /* OBSŁUGA EKRANÓW DOTYKOWYCH (SMARTFONY / TABLETY) */
@@ -4810,7 +7833,23 @@ function handleTouchPaddle(e) {
     mouseY = Math.max(0, Math.min(H, (touch.clientY - rect.top) * scaleY));
     controlMode = 'mouse';
   }
+  if (BALL.flightControlTimer > 0) {
+    isRightMouseDown = true;
+    isLeftMouseDown = true;
+  }
+
+  if (isServing) {
+    const srvPad = paddles[servingPaddleId];
+    if (srvPad && srvPad.isLocal) {
+      executeServe(true);
+    }
+  }
 }
+
+canvas.addEventListener('touchend', () => {
+  isRightMouseDown = false;
+  isLeftMouseDown = false;
+});
 
 canvas.addEventListener('touchstart', handleTouchPaddle, { passive: true });
 canvas.addEventListener('touchmove', handleTouchPaddle, { passive: true });
@@ -4821,22 +7860,38 @@ const touchSmashBtn = document.getElementById('touchSmashBtn');
 if (touchDashBtn) {
   touchDashBtn.addEventListener('touchstart', e => {
     e.preventDefault();
-    triggerLocalDash(getLocalPaddle());
+    if (isServing) {
+      executeServe(true);
+    } else {
+      triggerLocalDash(getLocalPaddle());
+    }
   }, { passive: false });
   touchDashBtn.addEventListener('click', e => {
     e.preventDefault();
-    triggerLocalDash(getLocalPaddle());
+    if (isServing) {
+      executeServe(true);
+    } else {
+      triggerLocalDash(getLocalPaddle());
+    }
   });
 }
 
 if (touchSmashBtn) {
   touchSmashBtn.addEventListener('touchstart', e => {
     e.preventDefault();
-    triggerLocalSmash(getLocalPaddle());
+    if (isServing) {
+      executeServe(true);
+    } else {
+      triggerLocalSmash(getLocalPaddle());
+    }
   }, { passive: false });
   touchSmashBtn.addEventListener('click', e => {
     e.preventDefault();
-    triggerLocalSmash(getLocalPaddle());
+    if (isServing) {
+      executeServe(true);
+    } else {
+      triggerLocalSmash(getLocalPaddle());
+    }
   });
 }
 
@@ -4846,6 +7901,9 @@ document.addEventListener('click', e => {
     e.target.blur();
   }
 });
+
+// Inicjalizacja trwałego systemu kont graczy i drzewka talentów
+initAccountSystem();
 </script>
 </body>
 </html>
