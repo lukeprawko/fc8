@@ -961,8 +961,8 @@
     background: rgba(245, 176, 65, 0.35);
   }
 
-  /* MODAL KOŃCA MECZU I ROZŁĄCZENIA GRACZA */
-  #victoryModal, #disconnectModal {
+  /* MODAL KOŃCA MECZU, ROZŁĄCZENIA I PAUZY */
+  #victoryModal, #disconnectModal, #pauseModal {
     display: none;
     position: absolute;
     inset: 0;
@@ -977,15 +977,27 @@
     text-align: center;
     padding: 20px;
   }
-  #victoryModal h2, #disconnectModal h2 {
+  #victoryModal h2, #disconnectModal h2, #pauseModal h2 {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(24px, 5vw, 36px);
     margin-bottom: 8px;
   }
-  #victoryModal p, #disconnectModal p {
+  #victoryModal p, #disconnectModal p, #pauseModal p {
     font-size: clamp(14px, 3.5vw, 18px);
     color: #8b949e;
     margin-bottom: 22px;
+  }
+  .wall-rec-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #f5b041;
+    letter-spacing: 1.5px;
+    background: rgba(245, 176, 65, 0.12);
+    border: 1px solid rgba(245, 176, 65, 0.35);
+    padding: 6px 14px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(245, 176, 65, 0.2);
   }
   .modal-actions {
     display: flex;
@@ -1465,6 +1477,7 @@
 
       <div class="util-btns">
         <button type="button" class="icon-btn" id="ctrlSwitchBtn" onclick="toggleInGameControl()">⌨️ KLAWIATURA</button>
+        <button type="button" class="icon-btn" id="pauseBtn" onclick="togglePauseGame()" title="Pauza (ESC / P)">⏸️</button>
         <button type="button" class="icon-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
       </div>
     </div>
@@ -1494,6 +1507,17 @@
         <p id="disconnectSub">Gracz X rozłączył się</p>
         <div class="modal-actions">
           <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">POWRÓT DO MENU</button>
+        </div>
+      </div>
+
+      <!-- MODAL PAUZY W GRZE (SOLO / ŚCIANA) -->
+      <div id="pauseModal">
+        <h2 style="color: var(--p1);">PAUZA</h2>
+        <p id="pauseSub">Gra została wstrzymana</p>
+        <div class="modal-actions" style="flex-direction: column; width: 220px; gap: 8px;">
+          <button type="button" class="action-btn btn-host" onclick="togglePauseGame(false)">▶ WZNÓW</button>
+          <button type="button" class="action-btn btn-play-solo" onclick="restartCurrentMatch()">🔄 RESTART</button>
+          <button type="button" class="action-btn" style="background:#21262d;" onclick="returnToMenu()">MENU GŁÓWNE</button>
         </div>
       </div>
     </div>
@@ -1557,6 +1581,7 @@ let bumpers = [
 
 function selectArena(name) {
   selectedArena = name;
+  if (name === 'pinball') obstacle = null;
   ['tokio', 'hex', 'pinball'].forEach(a => {
     const el = document.getElementById('arena-' + a);
     if (el) el.classList.toggle('active', a === name);
@@ -1818,33 +1843,44 @@ function setupHudElements() {
   if (isWallArcade) {
     document.getElementById('hudMember0').classList.remove('hidden');
     document.getElementById('hudMember1').classList.add('hidden');
-    document.getElementById('hudMember2').classList.remove('hidden');
-    document.getElementById('hudMember3').classList.add('hidden');
+    document.getElementById('hudBoxRight').classList.add('hidden');
+
+    let recBadge = document.getElementById('wallRecordBadge');
+    if (!recBadge) {
+      recBadge = document.createElement('div');
+      recBadge.id = 'wallRecordBadge';
+      recBadge.className = 'wall-rec-badge';
+      hud.appendChild(recBadge);
+    }
+    recBadge.classList.remove('hidden');
 
     document.getElementById('hudNick0').textContent = paddles[0] ? paddles[0].nick : myName;
-    const bestScore = parseInt(localStorage.getItem(WALL_RECORD_KEY) || '0', 10);
-    document.getElementById('hudNick2').textContent = `REKORD: ${bestScore}`;
-    document.getElementById('hudScore').textContent = 'HITS: 0';
-  } else if (!is2v2) {
-    document.getElementById('hudMember0').classList.remove('hidden');
-    document.getElementById('hudMember1').classList.add('hidden');
-    document.getElementById('hudMember2').classList.remove('hidden');
-    document.getElementById('hudMember3').classList.add('hidden');
-
-    document.getElementById('hudNick0').textContent = paddles[0] ? paddles[0].nick : 'GRACZ 1';
-    document.getElementById('hudNick2').textContent = paddles[1] ? paddles[1].nick : 'GRACZ 2';
+    updateHudScore();
   } else {
-    document.getElementById('hudMember0').classList.remove('hidden');
-    document.getElementById('hudMember1').classList.remove('hidden');
-    document.getElementById('hudMember2').classList.remove('hidden');
-    document.getElementById('hudMember3').classList.add('hidden');
-    document.getElementById('hudMember3').classList.remove('hidden');
+    document.getElementById('hudBoxRight').classList.remove('hidden');
+    const recBadge = document.getElementById('wallRecordBadge');
+    if (recBadge) recBadge.classList.add('hidden');
 
-    const formatHudNick = (prefix, p) => `${prefix}: ${p.isBot ? '🤖 ' : ''}${p.nick}`;
-    document.getElementById('hudNick0').textContent = formatHudNick('1A', paddles[0]);
-    document.getElementById('hudNick1').textContent = formatHudNick('1B', paddles[1]);
-    document.getElementById('hudNick2').textContent = formatHudNick('2A', paddles[2]);
-    document.getElementById('hudNick3').textContent = formatHudNick('2B', paddles[3]);
+    if (!is2v2) {
+      document.getElementById('hudMember0').classList.remove('hidden');
+      document.getElementById('hudMember1').classList.add('hidden');
+      document.getElementById('hudMember2').classList.remove('hidden');
+      document.getElementById('hudMember3').classList.add('hidden');
+
+      document.getElementById('hudNick0').textContent = paddles[0] ? paddles[0].nick : 'GRACZ 1';
+      document.getElementById('hudNick2').textContent = paddles[1] ? paddles[1].nick : 'GRACZ 2';
+    } else {
+      document.getElementById('hudMember0').classList.remove('hidden');
+      document.getElementById('hudMember1').classList.remove('hidden');
+      document.getElementById('hudMember2').classList.remove('hidden');
+      document.getElementById('hudMember3').classList.remove('hidden');
+
+      const formatHudNick = (prefix, p) => `${prefix}: ${p.isBot ? '🤖 ' : ''}${p.nick}`;
+      document.getElementById('hudNick0').textContent = formatHudNick('1A', paddles[0]);
+      document.getElementById('hudNick1').textContent = formatHudNick('1B', paddles[1]);
+      document.getElementById('hudNick2').textContent = formatHudNick('2A', paddles[2]);
+      document.getElementById('hudNick3').textContent = formatHudNick('2B', paddles[3]);
+    }
   }
 }
 
@@ -1925,7 +1961,7 @@ animateMenuBg();
    ========================================== */
 const SFX = {
   ctx: null,
-  muted: false,
+  muted: localStorage.getItem('pong_muted') === '1',
   init() {
     try {
       if (!this.ctx) {
@@ -2200,15 +2236,22 @@ const SFX = {
   }
 };
 
+function updateMuteButtonUI() {
+  const el = document.getElementById('muteBtn');
+  if (el) el.textContent = SFX.muted ? '🔇' : '🔊';
+}
+
 function toggleMute() {
   SFX.muted = !SFX.muted;
-  document.getElementById('muteBtn').textContent = SFX.muted ? '🔇' : '🔊';
+  try { localStorage.setItem('pong_muted', SFX.muted ? '1' : '0'); } catch (e) {}
+  updateMuteButtonUI();
   if (SFX.muted) {
     SFX.stopMusic();
   } else if (gameActive && !matchPaused) {
     SFX.startMusic();
   }
 }
+updateMuteButtonUI();
 
 /* ==========================================
    5. STEROWANIE, SPA POWRÓT DO MENU I KOPIOWANIE KODU
@@ -2275,6 +2318,12 @@ function returnToMenu() {
 
   document.getElementById('victoryModal').style.display = 'none';
   document.getElementById('disconnectModal').style.display = 'none';
+  const pauseModal = document.getElementById('pauseModal');
+  if (pauseModal) pauseModal.style.display = 'none';
+  const recBadge = document.getElementById('wallRecordBadge');
+  if (recBadge) recBadge.classList.add('hidden');
+  const hudBoxRight = document.getElementById('hudBoxRight');
+  if (hudBoxRight) hudBoxRight.classList.remove('hidden');
   document.getElementById('gameWrapper').style.display = 'none';
 
   document.getElementById('menu').style.display = 'flex';
@@ -2287,6 +2336,39 @@ function returnToMenu() {
   selectedSwapSlot = null;
   currentRoomCode = '';
   setStatus('');
+}
+
+function togglePauseGame(forceState) {
+  if (!gameActive || matchOver) return;
+  if (!isSinglePlayer && !isWallArcade) {
+    showBanner('PAUZA TYLKO W TRYBACH SOLO!', '#ff0055', 60);
+    return;
+  }
+
+  matchPaused = (typeof forceState === 'boolean') ? forceState : !matchPaused;
+  const modal = document.getElementById('pauseModal');
+  if (modal) modal.style.display = matchPaused ? 'flex' : 'none';
+
+  if (matchPaused) {
+    SFX.stopMusic();
+  } else {
+    lastFrameTime = performance.now();
+    if (!SFX.muted) SFX.startMusic();
+  }
+}
+
+function restartCurrentMatch() {
+  const modal = document.getElementById('pauseModal');
+  if (modal) modal.style.display = 'none';
+  matchPaused = false;
+  if (isWallArcade) {
+    startWallArcade();
+  } else if (isSinglePlayer) {
+    if (is2v2) startSolo2v2Match();
+    else startSingleplayer();
+  } else {
+    resetMatch();
+  }
 }
 function selectControl(mode) {
   controlMode = mode;
@@ -3519,9 +3601,6 @@ function updateAI(botPaddle) {
   targetY = Math.max(minZoneY, Math.min(maxZoneY, targetY));
 
   const diff = targetY - botPaddle.y;
-  let moveDir = 0;
-  if (Math.abs(diff) > 6) moveDir = diff > 0 ? 1 : -1;
-
   let curSpeed = botPaddle.speed;
 
   if (shouldChase && distToMyGoalLine < 220 && Math.abs(diff) > 68 && botPaddle.stamina >= 35 && botPaddle.dashTimer === 0) {
@@ -3545,7 +3624,13 @@ function updateAI(botPaddle) {
     }
   }
 
-  botPaddle.vy = moveDir * curSpeed;
+  // Płynne dojeżdżanie do celu (proportional damping - likwiduje drganie/jittering bota)
+  if (Math.abs(diff) < 1.0) {
+    botPaddle.vy = 0;
+  } else {
+    const step = Math.sign(diff) * Math.min(Math.abs(diff), curSpeed);
+    botPaddle.vy = step;
+  }
   botPaddle.y = Math.max(minZoneY, Math.min(maxZoneY, botPaddle.y + botPaddle.vy));
 }
 
@@ -3571,7 +3656,14 @@ function addShockwave(x, y, color) {
 }
 
 function updateHudScore() {
-  document.getElementById('hudScore').textContent = `${teamScores[1]} : ${teamScores[2]}`;
+  if (isWallArcade) {
+    document.getElementById('hudScore').textContent = `SERIA: ${wallScore}`;
+    const bestScore = Math.max(wallRecordAtStart, wallScore);
+    const recEl = document.getElementById('wallRecordBadge');
+    if (recEl) recEl.textContent = `🏆 REKORD: ${bestScore}`;
+  } else {
+    document.getElementById('hudScore').textContent = `${teamScores[1]} : ${teamScores[2]}`;
+  }
 }
 
 function updateHudStaminaBars() {
@@ -3590,9 +3682,18 @@ function updateHudStaminaBars() {
 function triggerLocalDash(myPaddle) {
   if (myPaddle && myPaddle.dashTimer === 0 && myPaddle.stamina >= 35) {
     myPaddle.stamina -= 35;
-    myPaddle.dashTimer = 11;
+    myPaddle.dashTimer = 12;
     SFX.play('dash');
-    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 10);
+    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, myPaddle.color, 12);
+
+    if (controlMode === 'mouse') {
+      const targetY = mouseY - myPaddle.h / 2;
+      const diff = targetY - myPaddle.y;
+      const dir = Math.abs(diff) > 4 ? Math.sign(diff) : (Math.sign(BALL.y - (myPaddle.y + myPaddle.h / 2)) || 1);
+      myPaddle.y += dir * 28;
+      myPaddle.vy = dir * (myPaddle.speed * 2.8);
+      enforceTeamPaddleConstraints();
+    }
   }
 }
 
@@ -3783,7 +3884,7 @@ function update() {
     if (myPaddle.dashTimer > 0) myPaddle.dashTimer--;
     if (myPaddle.smashCharge > 0) myPaddle.smashCharge--;
 
-    const maxStep = myPaddle.speed * (myPaddle.dashTimer > 0 ? 2.1 : 1);
+    const maxStep = myPaddle.speed * (myPaddle.dashTimer > 0 ? (controlMode === 'mouse' ? 2.8 : 2.1) : 1);
 
     if (controlMode === 'keyboard') {
       let moveDir = 0;
@@ -3833,7 +3934,7 @@ function update() {
     if (countdownTimer > 0) {
       countdownTimer--;
     } else {
-      if (!obstacle && Math.random() < 0.001) {
+      if (selectedArena !== 'pinball' && !isWallArcade && !obstacle && Math.random() < 0.001) {
         obstacle = {
           x: W / 2 - 9,
           y: 70 + Math.random() * (H - 220),
@@ -3945,8 +4046,8 @@ function update() {
 
           if (wallScore > wallRecordAtStart) {
             localStorage.setItem(WALL_RECORD_KEY, wallScore);
-            const rEl = document.getElementById('hudNick2');
-            if (rEl) rEl.textContent = `REKORD: ${wallScore}`;
+            const rEl = document.getElementById('wallRecordBadge');
+            if (rEl) rEl.textContent = `🏆 REKORD: ${wallScore}`;
             if (!hasBeatenWallRecord && wallRecordAtStart > 0) {
               hasBeatenWallRecord = true;
               showBanner('NOWY REKORD!', '#f5b041', 70);
@@ -4320,6 +4421,35 @@ function render() {
   ctx.stroke();
   ctx.setLineDash([]);
 
+  // ⚡ LICZNIK PRĘDKOŚCI PIŁKI (SPEEDOMETER W CZASIE RZECZYWISTYM)
+  const ballCurSpeed = Math.hypot(BALL.vx, BALL.vy) || BALL.speed || 6.0;
+  const currentKmh = Math.round(ballCurSpeed * 12.5);
+  const isSuperFast = currentKmh >= 135 || BALL.isSmashed;
+  const spdW = 108;
+  const spdH = 20;
+  const spdX = W / 2 - spdW / 2;
+  const spdY = H - 25;
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(5, 8, 15, 0.8)';
+  ctx.strokeStyle = isSuperFast ? '#f5b041' : 'rgba(0, 240, 255, 0.35)';
+  ctx.lineWidth = 1.5;
+  if (isSuperFast) {
+    ctx.shadowColor = '#f5b041';
+    ctx.shadowBlur = 12;
+  }
+  drawRoundedRect(ctx, spdX, spdY, spdW, spdH, 10);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.font = '800 10.5px Orbitron';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = isSuperFast ? '#f5b041' : '#00f0ff';
+  ctx.shadowBlur = 0;
+  ctx.fillText(`${isSuperFast ? '🔥' : '⚡'} ${currentKmh} KM/H`, W / 2, spdY + spdH / 2 + 1);
+  ctx.restore();
+
   if (rallyHits >= 3) {
     ctx.font = '900 46px Orbitron';
     ctx.textAlign = 'center';
@@ -4623,6 +4753,14 @@ window.addEventListener('keydown', e => {
 
   if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
     document.activeElement.blur();
+  }
+
+  if (e.code === 'Escape' || e.code === 'KeyP') {
+    if (gameActive && !matchOver) {
+      e.preventDefault();
+      togglePauseGame();
+      return;
+    }
   }
 
   keys[e.code] = true;
