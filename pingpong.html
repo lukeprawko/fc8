@@ -810,6 +810,265 @@
     line-height: 1.25;
   }
 
+  /* PRZYCISK PANELU ADMINA W PROFILU */
+  .btn-admin-panel {
+    width: 100%;
+    margin-top: 5px;
+    background: rgba(245, 176, 65, 0.12);
+    border: 1px solid rgba(245, 176, 65, 0.45);
+    border-radius: 8px;
+    color: #f5b041;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 7px 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(245, 176, 65, 0.18);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-admin-panel:hover {
+    background: rgba(245, 176, 65, 0.25);
+    border-color: #f5b041;
+    box-shadow: 0 0 20px rgba(245, 176, 65, 0.45);
+    transform: translateY(-1px);
+    color: #fff;
+  }
+  .btn-admin-panel svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  /* MODAL PANELU ADMINISTRATORA (FIREBASE CLOUD) */
+  #adminPanelModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 14, 0.94);
+    backdrop-filter: blur(16px);
+    z-index: 1000000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .admin-modal-box {
+    background: #090e1a;
+    border: 1.5px solid rgba(245, 176, 65, 0.4);
+    box-shadow: 0 25px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(245, 176, 65, 0.15);
+    border-radius: 16px;
+    width: 95vw;
+    max-width: 640px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: adminPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes adminPop {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .admin-modal-header {
+    padding: 14px 20px;
+    background: #0d1424;
+    border-bottom: 1px solid rgba(245, 176, 65, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .admin-modal-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .admin-modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    color: #f5b041;
+    text-shadow: 0 0 10px rgba(245, 176, 65, 0.4);
+  }
+  .admin-modal-close {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .admin-modal-close:hover {
+    color: #fff;
+    border-color: #f5b041;
+  }
+  .admin-modal-body {
+    padding: 18px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .admin-info-banner {
+    background: rgba(245, 176, 65, 0.08);
+    border: 1px solid rgba(245, 176, 65, 0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: #cbd5e1;
+    line-height: 1.45;
+  }
+  .admin-info-banner strong {
+    color: #f5b041;
+  }
+  .admin-toggles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .admin-toggle-tile {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .admin-toggle-tile:hover {
+    border-color: rgba(245, 176, 65, 0.4);
+    background: rgba(15, 23, 42, 0.95);
+  }
+  .admin-toggle-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: #e2e8f0;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .admin-switch-input {
+    accent-color: #f5b041;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .admin-sliders-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .admin-slider-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .admin-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: #94a3b8;
+  }
+  .admin-slider-val {
+    color: #00f0ff;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .admin-range-input {
+    width: 100%;
+    accent-color: #00f0ff;
+    cursor: pointer;
+  }
+  .admin-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .btn-admin-quick {
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: #00f0ff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 8px 6px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .btn-admin-quick:hover {
+    background: rgba(0, 240, 255, 0.2);
+    border-color: #00f0ff;
+  }
+  .admin-footer-actions {
+    padding: 12px 20px;
+    background: #0d1424;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    gap: 10px;
+  }
+  .btn-admin-save {
+    flex: 2;
+    background: linear-gradient(135deg, #f5b041 0%, #e67e22 100%);
+    color: #04060c;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(245, 176, 65, 0.35);
+    transition: all 0.2s;
+  }
+  .btn-admin-save:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(245, 176, 65, 0.5);
+  }
+  .btn-admin-reset-powers {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 10px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-admin-reset-powers:hover {
+    background: rgba(255, 51, 102, 0.15);
+    border-color: #ff3366;
+    color: #ff3366;
+  }
+
 
   /* =========================================================================
      MODAL DRZEWKA ROZWOJU - CZYSTY, PRZESTRZENNY DESIGN ESPORTOWY
@@ -2195,6 +2454,11 @@
               <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
               <span>DRZEWKO TALENTÓW</span>
             </button>
+
+            <button type="button" class="btn-admin-panel" id="btnAdminPanel" onclick="openAdminPanelModal()" title="Panel kontrolny administratora (Firebase)">
+              <svg viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"/></svg>
+              <span>👑 PANEL ADMINA</span>
+            </button>
           </div>
 
           <!-- WIDOK LOGOWANIA / REJESTRACJI FIREBASE -->
@@ -2503,6 +2767,88 @@
 
 </div>
 
+
+<!-- MODAL PANELU ADMINISTRATORA (FIREBASE CLOUD) -->
+<div id="adminPanelModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-header">
+      <div class="admin-modal-title-row">
+        <span class="admin-modal-title">👑 PANEL ADMINISTRATORA (FIREBASE CLOUD)</span>
+      </div>
+      <button type="button" class="admin-modal-close" onclick="closeAdminPanelModal()" title="Zamknij panel">✕</button>
+    </div>
+
+    <div class="admin-modal-body">
+      <div class="admin-info-banner">
+        <strong>Autoryzowany Administrator:</strong> <span id="adminNickDisplay">GRACZ</span><br>
+        Uprawnienia są weryfikowane przez <strong>Google Firebase Firestore</strong>. Każda zmiana zapisuje się bezpośrednio do Twojego dokumentu w chmurze!
+      </div>
+
+      <div class="admin-toggles-grid">
+        <label class="admin-toggle-tile">
+          <span class="admin-toggle-label">⚡ Wszystkie Talenty</span>
+          <input type="checkbox" id="admToggleAllTalents" class="admin-switch-input">
+        </label>
+        <label class="admin-toggle-tile">
+          <span class="admin-toggle-label">🔋 Nieskończona Stamina</span>
+          <input type="checkbox" id="admToggleInfStamina" class="admin-switch-input">
+        </label>
+        <label class="admin-toggle-tile">
+          <span class="admin-toggle-label">🛡️ God Mode (Tarcza)</span>
+          <input type="checkbox" id="admToggleGodMode" class="admin-switch-input">
+        </label>
+        <label class="admin-toggle-tile">
+          <span class="admin-toggle-label">☄️ Ognisty Smash</span>
+          <input type="checkbox" id="admToggleGoldSmash" class="admin-switch-input">
+        </label>
+      </div>
+
+      <div class="admin-sliders-grid">
+        <div class="admin-slider-card">
+          <div class="admin-slider-header">
+            <span>MNOŻNIK PRĘDKOŚCI PALETKI</span>
+            <span class="admin-slider-val" id="admValSpeed">1.0x</span>
+          </div>
+          <input type="range" id="admRangeSpeed" class="admin-range-input" min="1.0" max="2.2" step="0.1" value="1.0" oninput="document.getElementById('admValSpeed').textContent = this.value + 'x';">
+        </div>
+
+        <div class="admin-slider-card">
+          <div class="admin-slider-header">
+            <span>MNOŻNIK SIŁY SMASHA</span>
+            <span class="admin-slider-val" id="admValSmash">1.0x</span>
+          </div>
+          <input type="range" id="admRangeSmash" class="admin-range-input" min="1.0" max="2.5" step="0.1" value="1.0" oninput="document.getElementById('admValSmash').textContent = this.value + 'x';">
+        </div>
+
+        <div class="admin-slider-card">
+          <div class="admin-slider-header">
+            <span>DŁUGOŚĆ PALETKI (WYSOKOŚĆ)</span>
+            <span class="admin-slider-val" id="admValPaddle">Domyślna</span>
+          </div>
+          <input type="range" id="admRangePaddle" class="admin-range-input" min="80" max="140" step="5" value="80" oninput="document.getElementById('admValPaddle').textContent = this.value + ' px';">
+        </div>
+      </div>
+
+      <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:#f5b041; letter-spacing:0.8px; margin-top:2px;">
+        SZYBKIE PRZYZNANIE ZASOBÓW:
+      </div>
+      <div class="admin-quick-actions">
+        <button type="button" class="btn-admin-quick" onclick="adminQuickAddSp(50)">+50 SP</button>
+        <button type="button" class="btn-admin-quick" onclick="adminQuickAddXp(10000)">+10 000 XP</button>
+        <button type="button" class="btn-admin-quick" onclick="adminQuickSetMaxLvl()">MAX POZIOM (50)</button>
+      </div>
+
+      <div style="font-size:10.5px; color:#64748b; line-height:1.4; padding: 4px 2px;">
+        💡 <em>Wskazówka:</em> W konsoli Firebase Firestore w kolekcji <code>players</code> możesz również bezpośrednio w dokumencie wpisać <code>isAdmin: true</code>, <code>allTalents: true</code>, <code>sp: 999</code> lub <code>infiniteStamina: true</code>.
+      </div>
+    </div>
+
+    <div class="admin-footer-actions">
+      <button type="button" class="btn-admin-save" onclick="saveAdminSettings()">💾 ZAPISZ I SYNCHRONIZUJ W BAZIE</button>
+      <button type="button" class="btn-admin-reset-powers" onclick="resetAdminPowers()">🔄 RESET MOCY</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DRZEWKA TALENTÓW (NOWOCZESNY DESIGN, 4 ŚCIEŻKI ROZWOJU Z KONDUTORAMI MOCY I ZAKŁADKAMI) -->
 <div id="talentTreeModal">
@@ -2949,10 +3295,80 @@ function getLevelProgress(totalExp) {
   }
 }
 
+/* =========================================================================
+   ZABEZPIECZENIE ANTY-CHEAT I SUMA KONTROLNA PROFILU LOKALNEGO (INTEGRITY)
+   ========================================================================= */
+const CP_SEC_KEY = 'CYBERPONG_V2_INTEGRITY_SALT_#8892';
+
+function hashString(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c64e6d;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+
+function computeProfileChecksum(data) {
+  if (!data) return '';
+  const normTalents = Object.keys(data.talents || {}).filter(k => data.talents[k]).sort().join(',');
+  const rawString = `${data.nick || ''}:${data.exp || 0}:${data.sp || 0}:${data.spentSp || 0}:${data.freeResets || 0}:${normTalents}:${data.isAdmin ? 1 : 0}:${data.allTalents ? 1 : 0}:${data.infiniteStamina ? 1 : 0}:${data.godMode ? 1 : 0}:${data.adminToken || ''}:${CP_SEC_KEY}`;
+  return hashString(rawString);
+}
+
+function b64EncodeUnicode(str) {
+  try {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+  } catch (e) {
+    return str;
+  }
+}
+
+function b64DecodeUnicode(str) {
+  try {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  } catch (e) {
+    return str;
+  }
+}
+
+function encodeProfileEnvelope(prof) {
+  const sig = computeProfileChecksum(prof);
+  const jsonStr = JSON.stringify(prof);
+  const b64 = b64EncodeUnicode(jsonStr);
+  return JSON.stringify({ v: 2, sig, p: b64 });
+}
+
+function decodeProfileEnvelope(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.p && parsed.sig) {
+      const decodedStr = b64DecodeUnicode(parsed.p);
+      const prof = JSON.parse(decodedStr);
+      const expectedSig = computeProfileChecksum(prof);
+      return { prof, isTampered: (parsed.sig !== expectedSig) };
+    }
+    // Obsługa legacy formatu
+    if (parsed && typeof parsed === 'object') {
+      return { prof: parsed, isTampered: false, isLegacy: true };
+    }
+  } catch (e) {
+    return { prof: null, isTampered: true };
+  }
+  return null;
+}
+
 function getPlayerProfile() {
   try {
     const raw = localStorage.getItem(PLAYER_PROFILE_KEY);
-    let prof = raw ? JSON.parse(raw) : null;
+    const decoded = decodeProfileEnvelope(raw);
+    let prof = decoded ? decoded.prof : null;
+    const isTampered = decoded ? decoded.isTampered : false;
+
     if (!prof || typeof prof !== 'object') {
       const oldNick = localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER') || 'GRACZ';
       prof = {
@@ -2965,8 +3381,50 @@ function getPlayerProfile() {
         talents: { root: true },
         stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 }
       };
-      localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof));
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
+
+    // Wykrycie próby manipulacji w pliku lokalnym / DevTools:
+    if (isTampered) {
+      console.warn('🛡️ [CyberPong Anti-Tamper] Wykryto niezgodność sumy kontrolnej profilu lokalnego!');
+      if (fbAuth && fbAuth.currentUser && fbDb) {
+        fbDb.collection('players').doc(fbAuth.currentUser.uid).get().then(snap => {
+          if (snap.exists) applyCloudProfileToLocal(snap.data(), fbAuth.currentUser.uid);
+        }).catch(() => {});
+      } else {
+        // Sanityzacja danych offline:
+        prof.isAdmin = false;
+        prof.adminToken = null;
+        prof.allTalents = false;
+        prof.infiniteStamina = false;
+        prof.godMode = false;
+        if (typeof prof.exp !== 'number' || prof.exp < 0) prof.exp = 0;
+        const prog = getLevelProgress(prof.exp);
+        prof.level = prog.level;
+        let calcSpent = 0;
+        for (const tKey in prof.talents) {
+          if (prof.talents[tKey] && SKILL_TREE_NODES[tKey]) calcSpent += SKILL_TREE_NODES[tKey].cost;
+        }
+        prof.spentSp = calcSpent;
+        const totalSpDue = 2 + (prof.level - 1);
+        prof.sp = Math.max(0, totalSpDue - calcSpent);
+        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+        showBanner('🛡️ Wykryto manipulację plikiem — przywrócono stan bezpieczny!', '#ff3366', 70);
+      }
+    }
+
+    // Walidacja autentyczności tokena administratora:
+    if (prof.isAdmin) {
+      const expectedToken = (fbAuth && fbAuth.currentUser) ? hashString(fbAuth.currentUser.uid + CP_SEC_KEY) : prof.adminToken;
+      if (!prof.adminToken || (fbAuth && fbAuth.currentUser && prof.adminToken !== expectedToken)) {
+        prof.isAdmin = false;
+        prof.adminToken = null;
+        prof.allTalents = false;
+        prof.infiniteStamina = false;
+        prof.godMode = false;
+      }
+    }
+
     if (!prof.nick) prof.nick = 'GRACZ';
     if (!prof.talents || typeof prof.talents !== 'object') prof.talents = {};
     prof.talents.root = true;
@@ -2992,19 +3450,25 @@ function getPlayerProfile() {
     prof.spentSp = calcSpent;
 
     if (typeof prof.exp !== 'number') prof.exp = 0;
-    // Wyznaczenie aktualnego poziomu i postępu XP
     const prog = getLevelProgress(prof.exp);
-    prof.level = prog.level;
+    if (!prof.isAdmin || !prof.level) {
+      prof.level = prog.level;
+    }
 
     // 2 punkty SP na start (lvl 1) + 1 punkt SP za każdy kolejny poziom
     const totalSpDue = 2 + (prof.level - 1);
     const totalSpAcquired = (prof.spentSp || 0) + (prof.sp || 0);
-    if (totalSpAcquired !== totalSpDue && (prof.spentSp || 0) === 0 && prof.level === 1) {
-      prof.sp = totalSpDue;
-      try { localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof)); } catch (e) {}
-    } else if (totalSpAcquired < totalSpDue) {
-      prof.sp = totalSpDue - (prof.spentSp || 0);
-      try { localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof)); } catch (e) {}
+    if (!prof.isAdmin) {
+      if (totalSpAcquired !== totalSpDue && (prof.spentSp || 0) === 0 && prof.level === 1) {
+        prof.sp = totalSpDue;
+        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+      } else if (totalSpAcquired < totalSpDue) {
+        prof.sp = totalSpDue - (prof.spentSp || 0);
+        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+      } else if (totalSpAcquired > totalSpDue) {
+        prof.sp = Math.max(0, totalSpDue - (prof.spentSp || 0));
+        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+      }
     }
 
     if (typeof prof.sp !== 'number') prof.sp = 2;
@@ -3029,7 +3493,9 @@ function getPlayerProfile() {
 function syncProfileToCloud(prof) {
   if (fbAuth && fbAuth.currentUser && fbDb) {
     try {
-      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(prof, { merge: true }).catch(err => {
+      const payload = { ...prof };
+      delete payload.adminToken;
+      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { merge: true }).catch(err => {
         console.warn('Błąd synchronizacji chmury Firestore:', err);
       });
     } catch (e) {}
@@ -3039,7 +3505,7 @@ function syncProfileToCloud(prof) {
 function savePlayerProfile(prof) {
   if (!prof) return;
   try {
-    localStorage.setItem(PLAYER_PROFILE_KEY, JSON.stringify(prof));
+    localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
     if (prof.nick) {
       myName = prof.nick;
       localStorage.setItem(NICK_STORAGE_KEY, prof.nick);
@@ -3066,7 +3532,7 @@ function updateAccountUI() {
   if (nickDisplay) nickDisplay.textContent = prof.nick || 'GRACZ';
 
   const prog = getLevelProgress(prof.exp || 0);
-  const lvl = prog.level;
+  const lvl = prof.level || prog.level;
   const inLevel = prog.currentExp;
   const neededExp = prog.neededExp;
   const pct = prog.pct;
@@ -3094,9 +3560,21 @@ function updateAccountUI() {
 
   const syncStatus = document.getElementById('accountSyncStatus');
   if (syncStatus) {
-    const isOnline = isUserLoggedInOnline();
-    syncStatus.textContent = isOnline ? '☁️ ONLINE' : '💾 LOKALNIE';
-    syncStatus.style.color = isOnline ? '#00ff88' : '#8b949e';
+    if (prof.isAdmin) {
+      syncStatus.textContent = prof.adminBadge || '👑 ADMIN';
+      syncStatus.style.color = '#f5b041';
+      syncStatus.style.textShadow = '0 0 10px rgba(245, 176, 65, 0.6)';
+    } else {
+      const isOnline = isUserLoggedInOnline();
+      syncStatus.textContent = isOnline ? '☁️ ONLINE' : '💾 LOKALNIE';
+      syncStatus.style.color = isOnline ? '#00ff88' : '#8b949e';
+      syncStatus.style.textShadow = 'none';
+    }
+  }
+
+  const adminBtn = document.getElementById('btnAdminPanel');
+  if (adminBtn) {
+    adminBtn.style.display = prof.isAdmin ? 'flex' : 'none';
   }
 
   const modalSp = document.getElementById('modalSpCounter');
@@ -3263,7 +3741,7 @@ async function handleFirebaseLogin() {
       const snap = await fbDb.collection('players').doc(cred.user.uid).get();
       if (snap.exists) {
         const cloudProf = snap.data();
-        savePlayerProfile(cloudProf);
+        applyCloudProfileToLocal(cloudProf, cred.user.uid);
       } else {
         const localProf = getPlayerProfile();
         localProf.nick = nick;
@@ -3293,6 +3771,39 @@ async function handleFirebaseLogin() {
   }
 }
 
+function applyCloudProfileToLocal(cloudProf, uid) {
+  if (!cloudProf) return;
+  const current = getPlayerProfile();
+  const merged = {
+    ...current,
+    ...cloudProf
+  };
+
+  const isCloudAdmin = !!(cloudProf.isAdmin === true || cloudProf.role === 'admin');
+  if (isCloudAdmin) {
+    merged.isAdmin = true;
+    merged.adminToken = hashString((uid || (fbAuth && fbAuth.currentUser ? fbAuth.currentUser.uid : '')) + CP_SEC_KEY);
+    merged.allTalents = !!cloudProf.allTalents;
+    merged.infiniteStamina = !!cloudProf.infiniteStamina;
+    merged.godMode = !!cloudProf.godMode;
+    merged.goldSmash = !!cloudProf.goldSmash;
+    merged.customSpeedMult = typeof cloudProf.customSpeedMult === 'number' ? cloudProf.customSpeedMult : (merged.customSpeedMult || 1.0);
+    merged.customSmashMult = typeof cloudProf.customSmashMult === 'number' ? cloudProf.customSmashMult : (merged.customSmashMult || 1.0);
+    merged.customPaddleHeight = typeof cloudProf.customPaddleHeight === 'number' ? cloudProf.customPaddleHeight : (merged.customPaddleHeight || null);
+    merged.adminBadge = cloudProf.adminBadge || '👑 ADMIN';
+    showBanner(`👑 WITAJ, ADMINISTRATORZE ${merged.nick || ''}!`, '#f5b041', 75);
+  } else {
+    merged.isAdmin = false;
+    merged.adminToken = null;
+    merged.allTalents = false;
+    merged.infiniteStamina = false;
+    merged.godMode = false;
+  }
+
+  savePlayerProfile(merged);
+  applyStatsToLocalPlayer();
+}
+
 function initAccountSystem() {
   const prof = getPlayerProfile();
   myName = prof.nick;
@@ -3309,7 +3820,7 @@ function initAccountSystem() {
           fbDb.collection('players').doc(user.uid).get().then(snap => {
             if (snap.exists) {
               const cloudData = snap.data();
-              savePlayerProfile(cloudData);
+              applyCloudProfileToLocal(cloudData, user.uid);
             }
           }).catch(err => {
             console.warn('Auth state sync error:', err);
@@ -3329,7 +3840,9 @@ function requireAndSavePlayerNick() {
 
 function isTalentNodeUnlocked(nodeId, acc) {
   if (nodeId === 'root' || !nodeId) return true;
-  if (!acc || !acc.talents) return false;
+  if (!acc) return false;
+  if (acc.isAdmin && acc.allTalents) return true;
+  if (!acc.talents) return false;
   if (acc.talents[nodeId]) return true;
   const node = SKILL_TREE_NODES[nodeId];
   if (node && node.legacyIds) {
@@ -3352,20 +3865,142 @@ function closeTalentTreeModal() {
   if (modal) modal.style.display = 'none';
 }
 
-// Zamykanie modala po kliknięciu w tło poza okienkiem
+function openAdminPanelModal() {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) {
+    showBanner('⛔ Brak uprawnień administratora w bazie danych Firebase!', '#ff0055', 60);
+    return;
+  }
+  const modal = document.getElementById('adminPanelModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  const nickEl = document.getElementById('adminNickDisplay');
+  if (nickEl) nickEl.textContent = prof.nick || 'GRACZ';
+
+  const tAll = document.getElementById('admToggleAllTalents');
+  if (tAll) tAll.checked = !!prof.allTalents;
+  const tInf = document.getElementById('admToggleInfStamina');
+  if (tInf) tInf.checked = !!prof.infiniteStamina;
+  const tGod = document.getElementById('admToggleGodMode');
+  if (tGod) tGod.checked = !!prof.godMode;
+  const tGold = document.getElementById('admToggleGoldSmash');
+  if (tGold) tGold.checked = !!prof.goldSmash;
+
+  const rSpd = document.getElementById('admRangeSpeed');
+  if (rSpd) {
+    rSpd.value = prof.customSpeedMult || 1.0;
+    const vSpd = document.getElementById('admValSpeed');
+    if (vSpd) vSpd.textContent = rSpd.value + 'x';
+  }
+  const rSmash = document.getElementById('admRangeSmash');
+  if (rSmash) {
+    rSmash.value = prof.customSmashMult || 1.0;
+    const vSmash = document.getElementById('admValSmash');
+    if (vSmash) vSmash.textContent = rSmash.value + 'x';
+  }
+  const rPad = document.getElementById('admRangePaddle');
+  if (rPad) {
+    rPad.value = prof.customPaddleHeight || 80;
+    const vPad = document.getElementById('admValPaddle');
+    if (vPad) vPad.textContent = (prof.customPaddleHeight ? prof.customPaddleHeight + ' px' : 'Domyślna');
+  }
+}
+
+function closeAdminPanelModal() {
+  const modal = document.getElementById('adminPanelModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function saveAdminSettings() {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) return;
+
+  prof.allTalents = document.getElementById('admToggleAllTalents') ? document.getElementById('admToggleAllTalents').checked : false;
+  prof.infiniteStamina = document.getElementById('admToggleInfStamina') ? document.getElementById('admToggleInfStamina').checked : false;
+  prof.godMode = document.getElementById('admToggleGodMode') ? document.getElementById('admToggleGodMode').checked : false;
+  prof.goldSmash = document.getElementById('admToggleGoldSmash') ? document.getElementById('admToggleGoldSmash').checked : false;
+
+  const spd = document.getElementById('admRangeSpeed');
+  if (spd) prof.customSpeedMult = parseFloat(spd.value) || 1.0;
+  const sm = document.getElementById('admRangeSmash');
+  if (sm) prof.customSmashMult = parseFloat(sm.value) || 1.0;
+  const pad = document.getElementById('admRangePaddle');
+  if (pad) prof.customPaddleHeight = parseInt(pad.value, 10) || null;
+
+  savePlayerProfile(prof);
+  applyStatsToLocalPlayer();
+  closeAdminPanelModal();
+  SFX.play('upgrade');
+  showBanner('💾 Zapisano moce administratora do bazy Firebase!', '#00ff88', 70);
+}
+
+function resetAdminPowers() {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) return;
+  prof.allTalents = false;
+  prof.infiniteStamina = false;
+  prof.godMode = false;
+  prof.goldSmash = false;
+  prof.customSpeedMult = 1.0;
+  prof.customSmashMult = 1.0;
+  prof.customPaddleHeight = null;
+  savePlayerProfile(prof);
+  applyStatsToLocalPlayer();
+  openAdminPanelModal();
+  showBanner('🔄 Zresetowano moce do wartości domyślnych', '#8b949e', 50);
+}
+
+function adminQuickAddSp(amount = 50) {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) return;
+  prof.sp = (prof.sp || 0) + amount;
+  savePlayerProfile(prof);
+  showBanner(`⚡ Dodano +${amount} SP dla Admina!`, '#f5b041', 50);
+}
+
+function adminQuickAddXp(amount = 10000) {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) return;
+  prof.exp = (prof.exp || 0) + amount;
+  const prog = getLevelProgress(prof.exp);
+  prof.level = prog.level;
+  savePlayerProfile(prof);
+  showBanner(`🌟 Dodano +${amount} XP dla Admina!`, '#f5b041', 50);
+}
+
+function adminQuickSetMaxLvl() {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) return;
+  prof.level = 50;
+  prof.exp = 250000;
+  prof.sp = (prof.sp || 0) + 50;
+  savePlayerProfile(prof);
+  showBanner('👑 Ustawiono maksymalny poziom (LVL 50)!', '#f5b041', 50);
+}
+
+// Zamykanie modali po kliknięciu w tło poza okienkiem
 document.addEventListener('click', e => {
-  const modal = document.getElementById('talentTreeModal');
-  if (modal && e.target === modal) {
+  const treeModal = document.getElementById('talentTreeModal');
+  if (treeModal && e.target === treeModal) {
     closeTalentTreeModal();
+  }
+  const admModal = document.getElementById('adminPanelModal');
+  if (admModal && e.target === admModal) {
+    closeAdminPanelModal();
   }
 });
 
-// Zamykanie modala klawiszem ESC
+// Zamykanie modali klawiszem ESC
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    const modal = document.getElementById('talentTreeModal');
-    if (modal && modal.style.display === 'flex') {
+    const treeModal = document.getElementById('talentTreeModal');
+    if (treeModal && treeModal.style.display === 'flex') {
       closeTalentTreeModal();
+    }
+    const admModal = document.getElementById('adminPanelModal');
+    if (admModal && admModal.style.display === 'flex') {
+      closeAdminPanelModal();
     }
   }
 });
@@ -4716,19 +5351,58 @@ function applyStatsToLocalPlayer() {
   p.staminaRegen = staminaRegenVal;
   p.maxStamina = maxStaminaVal;
 
+  // Zastosowanie uprawnień i modyfikatorów Administratora (z bazy danych Firebase Firestore)
+  if (acc && acc.isAdmin) {
+    p.isAdmin = true;
+    if (acc.infiniteStamina) {
+      p.infiniteStamina = true;
+      p.stamina = p.maxStamina || 100;
+    }
+    if (acc.godMode) {
+      p.godMode = true;
+      p.hasAegisShield = true;
+      p.aegisReady = true;
+    }
+    if (acc.goldSmash) {
+      p.goldSmash = true;
+      p.hasMeteor = true;
+      p.smashMult = Math.max(p.smashMult, 1.45);
+    }
+    if (typeof acc.customSpeedMult === 'number' && acc.customSpeedMult > 0) {
+      p.speed *= acc.customSpeedMult;
+    }
+    if (typeof acc.customSmashMult === 'number' && acc.customSmashMult > 0) {
+      p.smashMult *= acc.customSmashMult;
+    }
+    if (typeof acc.customPaddleHeight === 'number' && acc.customPaddleHeight > 0) {
+      p.h = acc.customPaddleHeight;
+    }
+  }
+
   enforceTeamPaddleConstraints();
   sendStatsUpdate();
 }
 
 function applyNetworkStatsToPaddle(p, d) {
   if (!p || !d) return;
-  if (typeof d.h === 'number') p.h = d.h;
-  if (typeof d.speed === 'number') p.speed = d.speed;
-  if (typeof d.baseSpeed === 'number') p.baseSpeed = d.baseSpeed;
-  if (typeof d.staticSpeedBonus === 'number') p.staticSpeedBonus = d.staticSpeedBonus;
-  if (typeof d.spinMult === 'number') p.spinMult = d.spinMult;
-  if (typeof d.smashMult === 'number') p.smashMult = d.smashMult;
-  if (typeof d.maxStamina === 'number') p.maxStamina = d.maxStamina;
+
+  // Zabezpieczenie anty-cheat w multiplayerze P2P (sztywne granice dopuszczalnych parametrów)
+  const maxAllowedSpeed = 12.8;   // Maksymalna dozwolona prędkość z drzewka
+  const minAllowedSpeed = 4.0;
+  const maxAllowedHeight = 105;   // Maksymalna długość paletki z drzewka (90px + bufor)
+  const minAllowedHeight = 35;
+  const maxAllowedSmash = 1.65;   // Maksymalny mnożnik smasha z drzewka
+  const maxAllowedSpin = 1.35;    // Maksymalny mnożnik rotacji z drzewka
+  const maxAllowedStamina = 135;  // Maksymalna stamina z drzewka
+
+  p.h = Math.max(minAllowedHeight, Math.min(maxAllowedHeight, Number(d.h) || getBasePaddleHeight()));
+  p.speed = Math.max(minAllowedSpeed, Math.min(maxAllowedSpeed, Number(d.speed) || 6.8));
+  p.baseSpeed = Math.max(minAllowedSpeed, Math.min(10, Number(d.baseSpeed) || 6.8));
+  p.staticSpeedBonus = Math.max(0, Math.min(0.5, Number(d.staticSpeedBonus) || 0));
+  p.spinMult = Math.max(0.5, Math.min(maxAllowedSpin, Number(d.spinMult) || 1.0));
+  p.smashMult = Math.max(0.5, Math.min(maxAllowedSmash, Number(d.smashMult) || 1.0));
+  p.maxStamina = Math.max(50, Math.min(maxAllowedStamina, Number(d.maxStamina) || 100));
+
   p.hasDashSurge = !!d.hasDashSurge;
   p.hasSpeedBurst = !!d.hasSpeedBurst;
   p.hasPhantomStep = !!d.hasPhantomStep;
@@ -6059,13 +6733,15 @@ function updateHudStaminaBars() {
 
 function triggerLocalDash(myPaddle) {
   if (!myPaddle) return;
-  const isExhausted = (myPaddle.stamina < 20 && !myPaddle.hasPhantomStep);
+  const isExhausted = (myPaddle.stamina < 20 && !myPaddle.hasPhantomStep && !myPaddle.infiniteStamina);
   if (isExhausted) return; // Zmęczony gracz nie może wykonać zrywu
 
-  const hasNoCd = !!myPaddle.hasPhantomStep;
+  const hasNoCd = !!myPaddle.hasPhantomStep || !!myPaddle.isAdmin;
   const dashCost = hasNoCd ? 15 : 25; // -40% kosztu energii przy Widmowym Kroku
-  if ((myPaddle.dashTimer === 0 || hasNoCd) && myPaddle.stamina >= dashCost) {
-    myPaddle.stamina -= dashCost;
+  if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina)) {
+    if (!myPaddle.infiniteStamina) {
+      myPaddle.stamina -= dashCost;
+    }
     myPaddle.dashTimer = hasNoCd ? 16 : 14;
     SFX.play('dash');
 
@@ -6100,8 +6776,10 @@ function triggerLocalDash(myPaddle) {
 }
 
 function triggerLocalSmash(myPaddle) {
-  if (myPaddle && myPaddle.smashCharge === 0 && myPaddle.stamina >= 50) {
-    myPaddle.stamina -= 50;
+  if (myPaddle && myPaddle.smashCharge === 0 && (myPaddle.stamina >= 50 || myPaddle.infiniteStamina)) {
+    if (!myPaddle.infiniteStamina) {
+      myPaddle.stamina -= 50;
+    }
     myPaddle.smashCharge = 25;
   }
 }
@@ -6131,9 +6809,11 @@ function stepBallMotion() {
     const targetAimY = isLocalCtrl ? mouseY : (ctrlPad && ctrlPad.targetMouseY !== undefined ? ctrlPad.targetMouseY : (ctrlPad ? ctrlPad.y + ctrlPad.h / 2 : BALL.y));
 
     if (isSteerActive) {
-      // Przy smashu sterowanie aktywnie zużywa dodatkową staminę
+      // Przy smashu sterowanie aktywnie zużywa dodatkową staminę (chyba że włączona nieskończona stamina)
       if (BALL.isSmashFlight && ctrlPad) {
-        if (ctrlPad.stamina > 0) {
+        if (ctrlPad.infiniteStamina) {
+          // Admin infinite stamina
+        } else if (ctrlPad.stamina > 0) {
           ctrlPad.stamina = Math.max(0, ctrlPad.stamina - 0.7);
         } else {
           BALL.flightControlTimer = 0; // Brak energii kończy sterowanie smashem
@@ -6716,10 +7396,10 @@ function update() {
         }
 
         if (BALL.x < -15) {
-          // def_5: Tarcza Egidy ratuje piłkę raz na mecz/set i odnawia 40 energii
-          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && p.aegisReady);
+          // def_5: Tarcza Egidy ratuje piłkę raz na mecz/set i odnawia 40 energii (lub perm w God Mode)
+          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && (p.aegisReady || p.godMode));
           if (defender) {
-            defender.aegisReady = false;
+            if (!defender.godMode) defender.aegisReady = false;
             BALL.x = defender.x + defender.w + BALL.r + 6;
             BALL.vx = Math.abs(BALL.vx) || BALL.speed;
             defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
@@ -6799,10 +7479,10 @@ function update() {
 
       if (!isWallArcade) {
         if (BALL.x < -15) {
-          // def_5: Tarcza Egidy odbija piłkę i daje +40 energii (raz na mecz/set)
-          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && p.aegisReady);
+          // def_5: Tarcza Egidy odbija piłkę i daje +40 energii (raz na mecz/set lub perm w God Mode)
+          const defender = paddles.find(p => p.team === 1 && p.hasAegisShield && (p.aegisReady || p.godMode));
           if (defender) {
-            defender.aegisReady = false;
+            if (!defender.godMode) defender.aegisReady = false;
             BALL.x = defender.x + defender.w + BALL.r + 6;
             BALL.vx = Math.abs(BALL.vx) || BALL.speed;
             defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
@@ -6817,9 +7497,9 @@ function update() {
             onGoalScored(2);
           }
         } else if (BALL.x > W + 15) {
-          const defender = paddles.find(p => p.team === 2 && p.hasAegisShield && p.aegisReady);
+          const defender = paddles.find(p => p.team === 2 && p.hasAegisShield && (p.aegisReady || p.godMode));
           if (defender) {
-            defender.aegisReady = false;
+            if (!defender.godMode) defender.aegisReady = false;
             BALL.x = defender.x - BALL.r - 6;
             BALL.vx = -Math.abs(BALL.vx) || -BALL.speed;
             defender.stamina = Math.min(defender.maxStamina || 100, defender.stamina + 40);
@@ -7812,7 +8492,7 @@ window.addEventListener('mousemove', e => {
 
 window.addEventListener('mousedown', e => {
   if (!gameActive || matchOver || matchPaused) return;
-  if (e.target.closest && e.target.closest('button, a, input, select, textarea, label, .action-btn, .clean-btn, .talent-card, .tree-modal-box, .modal-box, #upgradesPanel, #talentTreeModal, #pauseModal, #victoryModal')) {
+  if (e.target.closest && e.target.closest('button, a, input, select, textarea, label, .action-btn, .clean-btn, .talent-card, .tree-modal-box, .modal-box, #upgradesPanel, #talentTreeModal, #adminPanelModal, .admin-modal-box, #pauseModal, #victoryModal')) {
     return;
   }
 
