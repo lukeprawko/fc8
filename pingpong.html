@@ -3415,27 +3415,20 @@ function getPlayerProfile() {
 
     // Walidacja autentyczności tokena administratora:
     if (prof.isAdmin) {
-      const isOwnerNick = !!(prof.nick && prof.nick.toLowerCase() === 'fledrychu');
       const expectedToken = (fbAuth && fbAuth.currentUser)
         ? hashString(fbAuth.currentUser.uid + CP_SEC_KEY)
-        : hashString((prof.nick || '') + CP_SEC_KEY);
+        : null;
 
-      if (!prof.adminToken) {
-        if (isOwnerNick) {
-          prof.adminToken = expectedToken;
-        } else {
-          prof.isAdmin = false;
-        }
-      } else if (prof.adminToken !== expectedToken) {
-        if (isOwnerNick) {
-          prof.adminToken = expectedToken;
-        } else {
-          prof.isAdmin = false;
-          prof.adminToken = null;
-          prof.allTalents = false;
-          prof.infiniteStamina = false;
-          prof.godMode = false;
-        }
+      if (!expectedToken || prof.adminToken !== expectedToken) {
+        prof.isAdmin = false;
+        prof.adminToken = null;
+        prof.allTalents = false;
+        prof.infiniteStamina = false;
+        prof.godMode = false;
+        prof.goldSmash = false;
+        prof.customSpeedMult = 1.0;
+        prof.customSmashMult = 1.0;
+        prof.customPaddleHeight = null;
       }
     }
 
@@ -3507,23 +3500,22 @@ function getPlayerProfile() {
 function syncProfileToCloud(prof) {
   if (fbAuth && fbAuth.currentUser && fbDb) {
     try {
-      const isOwner = !!(prof && ((prof.nick && prof.nick.toLowerCase() === 'fledrychu') || prof.isAdmin));
       const payload = { ...prof };
       delete payload.adminToken;
-      if (isOwner) {
-        payload.isAdmin = true;
-        payload.allTalents = (payload.allTalents !== undefined) ? !!payload.allTalents : false;
-        payload.infiniteStamina = (payload.infiniteStamina !== undefined) ? !!payload.infiniteStamina : false;
-        payload.godMode = (payload.godMode !== undefined) ? !!payload.godMode : false;
-        payload.goldSmash = (payload.goldSmash !== undefined) ? !!payload.goldSmash : true;
-        payload.customSpeedMult = typeof payload.customSpeedMult === 'number' ? payload.customSpeedMult : 1.0;
-        payload.customSmashMult = typeof payload.customSmashMult === 'number' ? payload.customSmashMult : 1.0;
-        payload.customPaddleHeight = typeof payload.customPaddleHeight === 'number' ? payload.customPaddleHeight : 80;
-        payload.adminBadge = payload.adminBadge || '👑 ADMIN';
-      }
+      // Pola konfiguracyjne w bazie Firestore - domyślnie false, aby opcja istniała w Firebase Console
+      payload.isAdmin = (typeof prof.isAdmin === 'boolean') ? prof.isAdmin : false;
+      payload.allTalents = (typeof prof.allTalents === 'boolean') ? prof.allTalents : false;
+      payload.infiniteStamina = (typeof prof.infiniteStamina === 'boolean') ? prof.infiniteStamina : false;
+      payload.godMode = (typeof prof.godMode === 'boolean') ? prof.godMode : false;
+      payload.goldSmash = (typeof prof.goldSmash === 'boolean') ? prof.goldSmash : false;
+      payload.customSpeedMult = typeof prof.customSpeedMult === 'number' ? prof.customSpeedMult : 1.0;
+      payload.customSmashMult = typeof prof.customSmashMult === 'number' ? prof.customSmashMult : 1.0;
+      payload.customPaddleHeight = typeof prof.customPaddleHeight === 'number' ? prof.customPaddleHeight : 80;
+      payload.adminBadge = prof.adminBadge || '👑 ADMIN';
       payload.updatedAt = Date.now();
+
       fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { merge: true }).then(() => {
-        console.log('☁️ [Firestore] Zsynchronizowano profil gracza i atrybuty administratora');
+        console.log('☁️ [Firestore] Zsynchronizowano profil gracza w chmurze');
       }).catch(err => {
         console.warn('Błąd synchronizacji chmury Firestore:', err);
       });
@@ -3810,29 +3802,31 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     ...cloudProf
   };
 
-  const isOwner = !!((cloudProf.nick && cloudProf.nick.toLowerCase() === 'fledrychu') ||
-                     (current && current.nick && current.nick.toLowerCase() === 'fledrychu') ||
-                     cloudProf.isAdmin === true ||
-                     cloudProf.role === 'admin');
+  // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
+  const isCloudAdmin = !!(cloudProf.isAdmin === true || cloudProf.role === 'admin');
 
-  if (isOwner) {
+  if (isCloudAdmin) {
     merged.isAdmin = true;
     merged.adminToken = hashString((uid || (fbAuth && fbAuth.currentUser ? fbAuth.currentUser.uid : '')) + CP_SEC_KEY);
-    merged.allTalents = (cloudProf.allTalents !== undefined) ? !!cloudProf.allTalents : !!merged.allTalents;
-    merged.infiniteStamina = (cloudProf.infiniteStamina !== undefined) ? !!cloudProf.infiniteStamina : !!merged.infiniteStamina;
-    merged.godMode = (cloudProf.godMode !== undefined) ? !!cloudProf.godMode : !!merged.godMode;
-    merged.goldSmash = (cloudProf.goldSmash !== undefined) ? !!cloudProf.goldSmash : (merged.goldSmash !== undefined ? !!merged.goldSmash : true);
-    merged.customSpeedMult = typeof cloudProf.customSpeedMult === 'number' ? cloudProf.customSpeedMult : (typeof merged.customSpeedMult === 'number' ? merged.customSpeedMult : 1.0);
-    merged.customSmashMult = typeof cloudProf.customSmashMult === 'number' ? cloudProf.customSmashMult : (typeof merged.customSmashMult === 'number' ? merged.customSmashMult : 1.0);
-    merged.customPaddleHeight = typeof cloudProf.customPaddleHeight === 'number' ? cloudProf.customPaddleHeight : (typeof merged.customPaddleHeight === 'number' ? merged.customPaddleHeight : 80);
-    merged.adminBadge = cloudProf.adminBadge || merged.adminBadge || '👑 ADMIN';
-    showBanner(`👑 WITAJ, ADMINISTRATORZE ${merged.nick || ''}!`, '#f5b041', 75);
+    merged.allTalents = !!cloudProf.allTalents;
+    merged.infiniteStamina = !!cloudProf.infiniteStamina;
+    merged.godMode = !!cloudProf.godMode;
+    merged.goldSmash = !!cloudProf.goldSmash;
+    merged.customSpeedMult = typeof cloudProf.customSpeedMult === 'number' ? cloudProf.customSpeedMult : 1.0;
+    merged.customSmashMult = typeof cloudProf.customSmashMult === 'number' ? cloudProf.customSmashMult : 1.0;
+    merged.customPaddleHeight = typeof cloudProf.customPaddleHeight === 'number' ? cloudProf.customPaddleHeight : 80;
+    merged.adminBadge = cloudProf.adminBadge || '👑 ADMIN';
+    showBanner(`👑 TRYB ADMINA AKTYWNY (${merged.nick || ''})!`, '#f5b041', 75);
   } else {
     merged.isAdmin = false;
     merged.adminToken = null;
     merged.allTalents = false;
     merged.infiniteStamina = false;
     merged.godMode = false;
+    merged.goldSmash = false;
+    merged.customSpeedMult = 1.0;
+    merged.customSmashMult = 1.0;
+    merged.customPaddleHeight = null;
   }
 
   // Zapis do localStorage z poprawną sumą kontrolną
@@ -3845,9 +3839,9 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     }
   } catch (e) {}
 
-  // Jeśli profil z chmury nie zawiera jeszcze pól administratora dla FledRychu,
-  // natychmiast zapisz je do Firebase Firestore, aby pojawiły się w Firebase Console!
-  if (isOwner && (cloudProf.isAdmin === undefined || cloudProf.allTalents === undefined || cloudProf.godMode === undefined)) {
+  // Jeśli w dokumencie w Firestore brakuje jeszcze pól opcji administratora,
+  // uzupełnij je w bazie (z domyślnym isAdmin: false), aby opcja była widoczna w konsoli Firebase
+  if (cloudProf.isAdmin === undefined || cloudProf.godMode === undefined) {
     syncProfileToCloud(merged);
   } else if (!fromSnapshot) {
     syncProfileToCloud(merged);
@@ -3879,12 +3873,12 @@ function initAccountSystem() {
             if (snap && snap.exists) {
               const cloudData = snap.data();
               applyCloudProfileToLocal(cloudData, user.uid, true);
-              // Automatyczna inicjalizacja pól w bazie Firestore dla FledRychu jeśli brakuje w dokumencie:
-              if ((cloudData.nick && cloudData.nick.toLowerCase() === 'fledrychu') && (cloudData.isAdmin === undefined || cloudData.godMode === undefined)) {
+              // Automatyczna inicjalizacja pól opcji w bazie Firestore jeśli ich brakuje:
+              if (cloudData.isAdmin === undefined || cloudData.godMode === undefined) {
                 syncProfileToCloud(getPlayerProfile());
               }
             } else if (snap && !snap.exists) {
-              // Nowy dokument gracza - wyślij aktualny profil
+              // Nowy dokument gracza - wyślij profil z polami konfiguracyjnymi
               syncProfileToCloud(getPlayerProfile());
             }
           }, err => {
