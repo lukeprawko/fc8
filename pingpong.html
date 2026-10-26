@@ -1486,17 +1486,18 @@
   .node-content-card {
     background: #0d1424;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 13px 18px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   }
   .node-content-card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    background: #111a2f;
+    border-color: rgba(255, 255, 255, 0.2);
+    background: #111b30;
+    transform: translateX(2px);
   }
   @media (max-width: 640px) {
     .node-content-card {
@@ -1510,16 +1511,38 @@
     }
   }
 
+  .card-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(var(--accent-rgb), 0.12);
+    border: 1px solid var(--accent-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.15);
+  }
+  .roadmap-node-row.locked .card-icon-badge {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    opacity: 0.55;
+    filter: grayscale(80%);
+  }
+
   /* KARTA: ODBLOKOWANA */
   .roadmap-node-row.unlocked .node-content-card {
-    background: rgba(var(--accent-rgb), 0.04);
+    background: rgba(var(--accent-rgb), 0.05);
     border: 1px solid var(--accent-border);
+    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.12);
   }
 
   /* KARTA: DOSTĘPNA DO KUPNA */
   .roadmap-node-row.available .node-content-card {
-    background: rgba(245, 158, 11, 0.03);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.04);
+    border: 1px solid rgba(245, 158, 11, 0.35);
   }
 
   /* KARTA: ZABLOKOWANA */
@@ -1545,24 +1568,49 @@
   .card-top-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 2px;
   }
   .card-tier-label {
     font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 800;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: #64748b;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2.5px 7px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
   .roadmap-node-row.unlocked .card-tier-label {
     color: var(--accent);
+    border-color: var(--accent-border);
+    background: rgba(var(--accent-rgb), 0.1);
   }
   .roadmap-node-row.available .card-tier-label {
     color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.08);
   }
   .roadmap-node-row.legend-tier .card-tier-label {
     color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+
+  .card-title-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #f1f5f9;
+  }
+  .roadmap-node-row.unlocked .card-title-label {
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4);
+  }
+  .roadmap-node-row.available .card-title-label {
+    color: #fbbf24;
   }
 
   /* OPIS BENEFITU */
@@ -3066,36 +3114,36 @@ const SKILL_TREE_BRANCHES = [
     name: 'ZWINNOŚĆ',
     icon: '🏃',
     color: '#00d2ff',
-    desc: 'Tempo i zrywy (max +45% łącznego bonusu)',
+    desc: 'Błyskawiczne tempo, częstszy Dash i kinetyczny impet',
     nodes: [
       {
         id: 'spd_1', tier: 1, cost: 2, req: null,
-        icon: '⚡', type: 'stat',
-        benefit: '+8% prędkości paletki',
+        title: 'Lekka Paletka', icon: '⚡', type: 'stat',
+        benefit: '+10% stałej prędkości paletki',
         legacyIds: ['speed_1', 'spd_1']
       },
       {
         id: 'spd_2', tier: 2, cost: 4, req: 'spd_1',
-        icon: '💨', type: 'stat',
-        benefit: '+14% prędkości łącznie',
+        title: 'Szybki Zryw', icon: '💨', type: 'stat',
+        benefit: 'Dash odnawia się o 35% szybciej i zużywa 25% mniej energii',
         legacyIds: ['speed_2', 'spd_2']
       },
       {
         id: 'spd_3', tier: 3, cost: 6, req: 'spd_2',
-        icon: '🚀', type: 'skill',
-        benefit: 'Po dashu 35% szans na zryw: +25% prędkości na 0,5 s (cooldown 1,5 s)',
+        title: 'Kinetyczny Zryw', icon: '🚀', type: 'skill',
+        benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +25% prędkości',
         legacyIds: ['speed_3', 'spd_3']
       },
       {
         id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
-        icon: '🌈', type: 'skill',
-        benefit: 'Co 8–14 s paletka zmienia kolor i dostaje +35% prędkości na 2,5 s',
+        title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
+        benefit: 'Każde odbicie w wymianie daje +6% prędkości; przy 4 odbiciach kolejny Dash jest darmowy',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
         id: 'spd_5', tier: 5, cost: 10, req: 'spd_4',
-        icon: '👻', type: 'legend',
-        benefit: 'Stałe +18% prędkości, dash bez cooldownu i o 40% mniejszy koszt energii',
+        title: 'Widmowy Krok', icon: '👻', type: 'legend',
+        benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
       }
     ]
@@ -3105,36 +3153,36 @@ const SKILL_TREE_BRANCHES = [
     name: 'SIŁA',
     icon: '💥',
     color: '#ff3366',
-    desc: 'Moc uderzeń i rykoszety (reset po punkcie)',
+    desc: 'Czysta siła uderzeń, przyspieszające rykoszety i odrzut',
     nodes: [
       {
         id: 'pwr_1', tier: 1, cost: 2, req: null,
-        icon: '💥', type: 'stat',
-        benefit: '+10% siły smasha',
+        title: 'Mocny Smash', icon: '💥', type: 'stat',
+        benefit: '+15% siły uderzenia Smash',
         legacyIds: ['force_1', 'atk_1', 'pwr_1']
       },
       {
         id: 'pwr_2', tier: 2, cost: 4, req: 'pwr_1',
-        icon: '🔥', type: 'stat',
-        benefit: '+18% siły smasha łącznie',
+        title: 'Cieplny Impuls', icon: '🔥', type: 'stat',
+        benefit: '+25% siły Smasha łącznie i o 40% szybsze ładowanie ścięcia',
         legacyIds: ['force_2', 'atk_2', 'pwr_2']
       },
       {
         id: 'pwr_3', tier: 3, cost: 6, req: 'pwr_2',
-        icon: '⚡', type: 'skill',
-        benefit: 'Odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)',
+        title: 'Ścienny Rykoszet', icon: '⚡', type: 'skill',
+        benefit: 'Odbicie piłki od ściany nie zwalnia, lecz przyspiesza piłkę o +15%',
         legacyIds: ['force_3', 'atk_3', 'pwr_3']
       },
       {
         id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
-        icon: '🌋', type: 'skill',
-        benefit: 'Każde trafienie daje stos (max 3), każdy to +8% siły smasha (reset po punkcie)',
+        title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
+        benefit: 'Twój Smash odpycha paletkę rywala w tył o 15 px i wywołuje falę uderzeniową',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
         id: 'pwr_5', tier: 5, cost: 10, req: 'pwr_4',
-        icon: '☄️', type: 'legend',
-        benefit: 'Przy 3 stosach smash leci 16.5 px/f z ogniem, a rywal jest spowolniony o 30% na 1,2 s',
+        title: 'Meteor Smash', icon: '☄️', type: 'legend',
+        benefit: 'Smash zamienia piłkę w płonący meteor o maksymalnej prędkości 16.5 px/f',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
       }
     ]
@@ -3144,36 +3192,36 @@ const SKILL_TREE_BRANCHES = [
     name: 'ROTACJA',
     icon: '🌀',
     color: '#a855f7',
-    desc: 'Kontrola toru i rotacja piłki',
+    desc: 'Zakrzywianie toru lotu, ostre kąty i sterowanie piłką',
     nodes: [
       {
         id: 'spn_1', tier: 1, cost: 2, req: null,
-        icon: '🌀', type: 'stat',
-        benefit: '+12% siły podkręcania',
+        title: 'Podkręcenie', icon: '🌀', type: 'stat',
+        benefit: '+15% siły podkręcania piłki',
         legacyIds: ['spin_1', 'spn_1']
       },
       {
         id: 'spn_2', tier: 2, cost: 4, req: 'spn_1',
-        icon: '🌪️', type: 'stat',
-        benefit: '+22% podkręcania łącznie i +15% czasu trwania rotacji',
+        title: 'Cyber Rotacja', icon: '🌪️', type: 'stat',
+        benefit: '+25% rotacji łącznie, a łuk skrętu utrzymuje się o 50% dłużej',
         legacyIds: ['spin_2', 'spn_2']
       },
       {
         id: 'spn_3', tier: 3, cost: 6, req: 'spn_2',
-        icon: '🪃', type: 'skill',
-        benefit: '35% szans, że odbicie od ściany odświeży rotację piłki',
+        title: 'Bumerang Ścienny', icon: '🪃', type: 'skill',
+        benefit: 'Odbicie podkręconej piłki od ściany zacieśnia jej zakręt zamiast go kasować',
         legacyIds: ['spin_3', 'spn_3']
       },
       {
         id: 'spn_4', tier: 4, cost: 7, req: 'spn_3',
-        icon: '🌌', type: 'skill',
-        benefit: 'Raz na 18 s piłka w połowie boiska gwałtownie skręca w przeciwną stronę (ok. 25°)',
+        title: 'Zakręt Grawitacyjny', icon: '🌌', type: 'skill',
+        benefit: 'Kliknięcie PPM przy uderzeniu nadaje piłce nagły, ostry zygzak w locie',
         legacyIds: ['spin_4', 'spn_4']
       },
       {
         id: 'spn_5', tier: 5, cost: 10, req: 'spn_4',
-        icon: '🎛️', type: 'legend',
-        benefit: 'Przez 0,6 s po uderzeniu widzisz kółko kontroli: przytrzymaj LPM lub PPM, aby sterować lotem piłki myszką',
+        title: 'Kontrola Lotu', icon: '🎛️', type: 'legend',
+        benefit: 'Trzymając LPM lub PPM przez 0,6 s po uderzeniu, sterujesz torem piłki myszką',
         legacyIds: ['spin_5', 'spn_5', 'spn_6']
       }
     ]
@@ -3183,36 +3231,36 @@ const SKILL_TREE_BRANCHES = [
     name: 'OBRONA',
     icon: '🛡️',
     color: '#10b981',
-    desc: 'Długość paletki, energia i tarcza (1/set)',
+    desc: 'Większy zasięg paletki, absorpcja energii, parowanie i tarcza',
     nodes: [
       {
         id: 'def_1', tier: 1, cost: 2, req: null,
-        icon: '🛡️', type: 'stat',
-        benefit: '+6 px długości paletki',
+        title: 'Dłuższa Paletka', icon: '🛡️', type: 'stat',
+        benefit: '+8 px długości paletki (łatwiejsze odbicia)',
         legacyIds: ['def_1']
       },
       {
         id: 'def_2', tier: 2, cost: 4, req: 'def_1',
-        icon: '🔋', type: 'stat',
-        benefit: '+10 px długości łącznie i +20 maks. energii',
+        title: 'Zwiększona Bateria', icon: '🔋', type: 'stat',
+        benefit: '+14 px długości paletki łącznie oraz +25 maks. energii',
         legacyIds: ['def_2', 'stm_1', 'stm_2']
       },
       {
         id: 'def_3', tier: 3, cost: 6, req: 'def_2',
-        icon: '🔌', type: 'skill',
-        benefit: 'Każde udane odbicie daje +10 energii',
+        title: 'Kinetyczny Reaktor', icon: '🔌', type: 'skill',
+        benefit: 'Zatrzymanie szybkiej piłki lub smasha natychmiast odnawia +25 energii',
         legacyIds: ['def_3', 'stm_3']
       },
       {
         id: 'def_4', tier: 4, cost: 7, req: 'def_3',
-        icon: '⚔️', type: 'skill',
-        benefit: 'Odbicie w ostatniej chwili tłumi uderzenie o 30% i daje +1 prędkości',
+        title: 'Cyber Parry', icon: '⚔️', type: 'skill',
+        benefit: 'Odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak',
         legacyIds: ['def_4', 'stm_4']
       },
       {
         id: 'def_5', tier: 5, cost: 10, req: 'def_4',
-        icon: '🔰', type: 'legend',
-        benefit: 'Raz na set, gdy piłka minie paletkę, tarcza odbija ją z powrotem i daje +40 energii',
+        title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
+        benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
       }
     ]
@@ -3220,13 +3268,14 @@ const SKILL_TREE_BRANCHES = [
 ];
 
 const SKILL_TREE_NODES = {
-  root: { id: 'root', branch: 'root', tier: 0, type: 'root', name: 'Start', benefit: 'Start', cost: 0, req: null }
+  root: { id: 'root', branch: 'root', tier: 0, type: 'root', name: 'Start', title: 'Start', benefit: 'Start', cost: 0, req: null }
 };
 SKILL_TREE_BRANCHES.forEach(b => {
   b.nodes.forEach(n => {
     n.branch = b.id;
     n.color = b.color;
-    n.name = n.benefit;
+    n.title = n.title || n.benefit;
+    n.name = n.title;
     n.stat = n.benefit;
     SKILL_TREE_NODES[n.id] = n;
   });
@@ -4284,6 +4333,7 @@ function renderSkillTreeGraph() {
     }
 
     const formattedDesc = formatTalentBenefit(node.benefit);
+    const nodeTitle = node.title || node.name || `Poziom ${node.tier}`;
 
     const row = document.createElement('div');
     row.className = `roadmap-node-row ${rowState} ${isLegend ? 'legend-tier' : ''}`;
@@ -4292,9 +4342,11 @@ function renderSkillTreeGraph() {
         <div class="node-circle" title="Poziom ${node.tier}">${circleSymbol}</div>
       </div>
       <div class="node-content-card">
+        <div class="card-icon-badge" title="${nodeTitle}">${node.icon}</div>
         <div class="card-left-info">
           <div class="card-top-row">
             <span class="card-tier-label">${tierLabel}</span>
+            <span class="card-title-label">${nodeTitle}</span>
           </div>
           <div class="card-benefit-text">${formattedDesc}</div>
         </div>
@@ -5359,12 +5411,11 @@ function applyStatsToLocalPlayer() {
   // 1. Gałąź Zwinności:
   let staticSpeedBonus = 0;
   p.hasPhantomStep = isTalentNodeUnlocked('spd_5', acc);
+  p.hasFastDash = isTalentNodeUnlocked('spd_2', acc);
   if (p.hasPhantomStep) {
-    staticSpeedBonus = 0.32; // +14% (spd_2) + +18% (spd_5) = +32%
-  } else if (isTalentNodeUnlocked('spd_2', acc)) {
-    staticSpeedBonus = 0.14; // +14% łącznie
+    staticSpeedBonus = 0.30; // +10% (spd_1) + +20% (spd_5) = +30%
   } else if (isTalentNodeUnlocked('spd_1', acc)) {
-    staticSpeedBonus = 0.08; // +8%
+    staticSpeedBonus = 0.10; // +10%
   }
   p.staticSpeedBonus = staticSpeedBonus;
   p.hasDashSurge = isTalentNodeUnlocked('spd_3', acc);
@@ -5372,20 +5423,20 @@ function applyStatsToLocalPlayer() {
 
   // 2. Gałąź Siły:
   if (isTalentNodeUnlocked('pwr_2', acc)) {
-    smashMultVal = 1.18; // +18% łącznie
+    smashMultVal = 1.25; // +25% łącznie
   } else if (isTalentNodeUnlocked('pwr_1', acc)) {
-    smashMultVal = 1.10; // +10%
+    smashMultVal = 1.15; // +15%
   }
   p.hasRicochet = isTalentNodeUnlocked('pwr_3', acc);
   p.hasWarmup = isTalentNodeUnlocked('pwr_4', acc);
   p.hasMeteor = isTalentNodeUnlocked('pwr_5', acc);
 
-  // 3. Gałąź Rotacji (bonusy dodawane liniowo, nie mnożone):
+  // 3. Gałąź Rotacji:
   p.hasExtendedSpin = isTalentNodeUnlocked('spn_2', acc);
   if (p.hasExtendedSpin) {
-    spinMultVal = 1.22; // +22% łącznie
+    spinMultVal = 1.25; // +25% łącznie
   } else if (isTalentNodeUnlocked('spn_1', acc)) {
-    spinMultVal = 1.12; // +12%
+    spinMultVal = 1.15; // +15%
   }
   p.hasBoomerang = isTalentNodeUnlocked('spn_3', acc);
   p.hasSingularity = isTalentNodeUnlocked('spn_4', acc);
@@ -5393,10 +5444,10 @@ function applyStatsToLocalPlayer() {
 
   // 4. Gałąź Obrony:
   if (isTalentNodeUnlocked('def_2', acc)) {
-    heightVal += 10; // +10px łącznie
-    maxStaminaVal += 20; // +20 max staminy (120)
+    heightVal += 14; // +14px łącznie
+    maxStaminaVal += 25; // +25 max staminy (125)
   } else if (isTalentNodeUnlocked('def_1', acc)) {
-    heightVal += 6; // +6px długości
+    heightVal += 8; // +8px długości
   }
   p.hasSyphon = isTalentNodeUnlocked('def_3', acc);
   p.hasParry = isTalentNodeUnlocked('def_4', acc);
@@ -6498,7 +6549,12 @@ function resetBall(withCountdown = true, servingTeam = 1) {
   rallyRewarded = false;
   obstacle = null;
   countdownTimer = 0;
-  paddles.forEach(p => { p.warmupStacks = 0; });
+  BALL.isHeavyPlasma = false;
+  paddles.forEach(p => {
+    p.warmupStacks = 0;
+    p.rallyHits = 0;
+    p.freeDashReady = false;
+  });
 
   if (isWallArcade) {
     servingPaddleId = 0;
@@ -6793,33 +6849,24 @@ function updateHudStaminaBars() {
 function triggerLocalDash(myPaddle) {
   if (!myPaddle) return;
   const isExhausted = (myPaddle.stamina < 20 && !myPaddle.hasPhantomStep && !myPaddle.infiniteStamina);
-  if (isExhausted) return; // Zmęczony gracz nie może wykonać zrywu
+  if (isExhausted && !myPaddle.freeDashReady) return; // Zmęczony gracz nie może wykonać zrywu, chyba że ma darmowy Overdrive
 
   const hasNoCd = !!myPaddle.hasPhantomStep || !!myPaddle.isAdmin;
-  const dashCost = hasNoCd ? 15 : 25; // -40% kosztu energii przy Widmowym Kroku
-  if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina)) {
-    if (!myPaddle.infiniteStamina) {
+  const isFastDash = !!myPaddle.hasFastDash;
+  const dashCost = myPaddle.freeDashReady ? 0 : (hasNoCd ? 15 : (isFastDash ? 18 : 25));
+  if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina || myPaddle.freeDashReady)) {
+    if (myPaddle.freeDashReady) {
+      myPaddle.freeDashReady = false;
+      showBanner('⚡ OVERDRIVE DASH! (DARMOWY)', '#00d2ff', 25);
+    } else if (!myPaddle.infiniteStamina) {
       myPaddle.stamina -= dashCost;
     }
-    myPaddle.dashTimer = hasNoCd ? 16 : 14;
+    myPaddle.dashTimer = hasNoCd ? 16 : (isFastDash ? 9 : 14);
     SFX.play('dash');
-
-    // spd_3: po dashu 35% szans na zryw: +25% prędkości na 0,5 s (cooldown 1,5 s)
-    if (myPaddle.hasDashSurge) {
-      const now = performance.now();
-      if (!myPaddle.lastDashSurgeTime || now - myPaddle.lastDashSurgeTime >= 1500) {
-        if (Math.random() < 0.35) {
-          myPaddle.lastDashSurgeTime = now;
-          myPaddle.dashSurgeTimer = 30; // 0.5s przy 60 fps
-          showBanner('⚡ ZRYW! +25% PRĘDKOŚCI', '#00d2ff', 25);
-          addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff', 14);
-        }
-      }
-    }
 
     const pColor = hasNoCd ? '#00d2ff' : myPaddle.color;
     addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, pColor, hasNoCd ? 20 : 12);
-    if (hasNoCd) {
+    if (hasNoCd || isFastDash) {
       addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
     }
 
@@ -6916,27 +6963,66 @@ function predictLocalGuestBounce(myPaddle) {
   BALL.lastHitTeam = myPaddle.team;
   BALL.ricochetCount = 0;
 
-  // def_4 Parry: odbicie w ostatniej chwili tłumi o 30% i daje +1 prędkości
+  // Odrzut Ciężkiej Plazmy (pwr_4) jeśli przeciwnik uderzył z tą mocą
+  if (BALL.isHeavyPlasma) {
+    BALL.isHeavyPlasma = false;
+    const pushDir = Math.sign(myPaddle.y - H / 2) || 1;
+    myPaddle.y = Math.max(10, Math.min(H - myPaddle.h - 10, myPaddle.y + pushDir * 16));
+    addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#ff3366');
+    showBanner('🔨 CIĘŻKA PLAZMA! ODRZUT', '#ff3366', 35);
+    SFX.play('wall');
+  }
+
+  // def_4 Cyber Parry: odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak (+25% SPD)
   let isParried = false;
   if (myPaddle.hasParry && (BALL.isSmashed || BALL.speed > 7.0)) {
-    BALL.speed = Math.max(INITIAL_BALL_SPEED, (BALL.speed * 0.70) + 1.0);
+    BALL.speed = Math.max(INITIAL_BALL_SPEED, BALL.speed * 1.25);
     BALL.isSmashed = false;
     BALL.plasmaBurn = false;
     BALL.isMeteor = false;
     isParried = true;
-    showBanner('⚔️ PARRY! (-30% +1 SPD)', '#10b981', 35);
+    showBanner('⚔️ CYBER PARRY! KONTRATAK (+25% SPD)', '#10b981', 40);
     SFX.play('wall');
     addShockwave(BALL.x, BALL.y, '#10b981');
-    addParticles(BALL.x, BALL.y, '#10b981', 14);
+    addParticles(BALL.x, BALL.y, '#10b981', 18);
   }
 
-  // def_3 Syfon: +10 energii za odbicie
+  // def_3 Kinetyczny Reaktor: zatrzymanie szybkiej piłki lub smasha odnawia +25 energii i resetuje Dash
   if (myPaddle.hasSyphon) {
-    myPaddle.stamina = Math.min(myPaddle.maxStamina || 100, myPaddle.stamina + 10);
-    addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff88', 8);
+    const isFast = (BALL.isSmashed || BALL.speed > 6.8);
+    const gain = isFast ? 25 : 10;
+    myPaddle.stamina = Math.min(myPaddle.maxStamina || 100, myPaddle.stamina + gain);
+    if (isFast) {
+      myPaddle.dashTimer = 0; // Natychmiastowy reset Dasha
+      showBanner('🔋 KINETYCZNY REAKTOR! +25 ENERGII', '#00ff9d', 30);
+      addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff9d', 14);
+    } else {
+      addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff9d', 6);
+    }
   }
 
-  // pwr_4 Rozgrzanie: każde trafienie daje stos (max 3), reset po punkcie
+  // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
+  if (myPaddle.hasDashSurge && myPaddle.dashTimer > 0) {
+    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
+    addShockwave(BALL.x, BALL.y, '#00d2ff');
+    addParticles(BALL.x, BALL.y, '#00d2ff', 16);
+    showBanner('🚀 KINETYCZNY ZRYW! (+25% SPD)', '#00d2ff', 35);
+    SFX.play('dash');
+  }
+
+  // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
+  if (myPaddle.hasSpeedBurst) {
+    myPaddle.rallyHits = (myPaddle.rallyHits || 0) + 1;
+    if (myPaddle.rallyHits >= 4 && !myPaddle.freeDashReady) {
+      myPaddle.freeDashReady = true;
+      showBanner('⚡ TRYB OVERDRIVE! DARMOWY DASH', '#00d2ff', 40);
+      addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
+      addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff', 18);
+      SFX.play('upgrade');
+    }
+  }
+
+  // pwr_4 Rozgrzanie: trafienie daje stos do Meteora
   if (myPaddle.hasWarmup) {
     myPaddle.warmupStacks = Math.min(3, (myPaddle.warmupStacks || 0) + 1);
     addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#ff7700', 8);
@@ -6944,6 +7030,12 @@ function predictLocalGuestBounce(myPaddle) {
 
   const isSmash = myPaddle.smashCharge > 0;
   myPaddle.smashCharge = 0;
+
+  // pwr_4 Ciężka Plazma: smash ładuje falę odrzutu rywala
+  if (isSmash && myPaddle.hasWarmup) {
+    BALL.isHeavyPlasma = true;
+    addParticles(BALL.x, BALL.y, '#ff3366', 10);
+  }
 
   // spn_5 Sterowanie lotem: aktywne wyłącznie po odblokowaniu poziomu 5 w drzewku
   if (myPaddle.hasFlightControl) {
@@ -7330,24 +7422,24 @@ function update() {
         BALL.vy = Math.abs(BALL.vy);
         const lastHitter = BALL.lastHitPaddle;
 
-        // pwr_3: Rykoszet: odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)
+        // pwr_3: Ścienny Rykoszet: odbicie piłki od ściany dodaje +15% prędkości (limit +2 na piłkę)
         if (lastHitter && lastHitter.hasRicochet && (BALL.ricochetCount || 0) < 2) {
           BALL.ricochetCount = (BALL.ricochetCount || 0) + 1;
-          BALL.speed = Math.min(16.5, BALL.speed * 1.12);
+          BALL.speed = Math.min(16.5, BALL.speed * 1.15);
           const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
           BALL.vx = (BALL.vx / curLen) * BALL.speed;
           BALL.vy = (BALL.vy / curLen) * BALL.speed;
           addParticles(BALL.x, BALL.y, '#ff3366', 10);
-          showBanner(`💥 RYKOSZET (${BALL.ricochetCount}/2): +12%`, '#ff3366', 25);
+          showBanner(`⚡ ŚCIENNY RYKOSZET (${BALL.ricochetCount}/2): +15%`, '#ff3366', 25);
         } else if (BALL.plasmaBurn) {
           BALL.speed = Math.min(16.5, BALL.speed * 1.25);
           addParticles(BALL.x, BALL.y, '#ff4500', 9);
           showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
         }
 
-        // spn_3: Bumerang: 35% szans, że odbicie od ściany odświeży rotację piłki (bez uciążliwego banneru)
-        if (lastHitter && lastHitter.hasBoomerang && Math.random() < 0.35) {
-          BALL.spin = -BALL.spin;
+        // spn_3: Bumerang Ścienny: odbicie podkręconej piłki od ściany zacieśnia zakręt
+        if (lastHitter && lastHitter.hasBoomerang && Math.abs(BALL.spin) > 0.05) {
+          BALL.spin = -BALL.spin * 1.25;
           addParticles(BALL.x, BALL.y, '#a855f7', 12);
           SFX.play('spinHit');
           sendFX({ sfx: 'spinHit', part: { x: BALL.x, y: BALL.y, c: '#a855f7', n: 12 } });
@@ -7366,24 +7458,24 @@ function update() {
         BALL.vy = -Math.abs(BALL.vy);
         const lastHitter = BALL.lastHitPaddle;
 
-        // pwr_3: Rykoszet: odbicie piłki od ściany dodaje +12% prędkości (limit +2 na piłkę)
+        // pwr_3: Ścienny Rykoszet: odbicie piłki od ściany dodaje +15% prędkości (limit +2 na piłkę)
         if (lastHitter && lastHitter.hasRicochet && (BALL.ricochetCount || 0) < 2) {
           BALL.ricochetCount = (BALL.ricochetCount || 0) + 1;
-          BALL.speed = Math.min(16.5, BALL.speed * 1.12);
+          BALL.speed = Math.min(16.5, BALL.speed * 1.15);
           const curLen = Math.hypot(BALL.vx, BALL.vy) || 1;
           BALL.vx = (BALL.vx / curLen) * BALL.speed;
           BALL.vy = (BALL.vy / curLen) * BALL.speed;
           addParticles(BALL.x, BALL.y, '#ff3366', 10);
-          showBanner(`💥 RYKOSZET (${BALL.ricochetCount}/2): +12%`, '#ff3366', 25);
+          showBanner(`⚡ ŚCIENNY RYKOSZET (${BALL.ricochetCount}/2): +15%`, '#ff3366', 25);
         } else if (BALL.plasmaBurn) {
           BALL.speed = Math.min(16.5, BALL.speed * 1.25);
           addParticles(BALL.x, BALL.y, '#ff4500', 9);
           showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
         }
 
-        // spn_3: Bumerang: 35% szans, że odbicie od ściany odświeży rotację piłki (bez uciążliwego banneru)
-        if (lastHitter && lastHitter.hasBoomerang && Math.random() < 0.35) {
-          BALL.spin = -BALL.spin;
+        // spn_3: Bumerang Ścienny: odbicie podkręconej piłki od ściany zacieśnia zakręt
+        if (lastHitter && lastHitter.hasBoomerang && Math.abs(BALL.spin) > 0.05) {
+          BALL.spin = -BALL.spin * 1.25;
           addParticles(BALL.x, BALL.y, '#a855f7', 12);
           SFX.play('spinHit');
           sendFX({ sfx: 'spinHit', part: { x: BALL.x, y: BALL.y, c: '#a855f7', n: 12 } });
@@ -7710,27 +7802,66 @@ function handlePaddleHit(paddle, dir) {
   BALL.lastHitTeam = paddle.team;
   BALL.ricochetCount = 0; // reset rykoszetów po odbiciu od paletki
 
-  // def_4 Parry: odbicie w ostatniej chwili tłumi o 30% i daje +1 prędkości
+  // Odrzut Ciężkiej Plazmy (pwr_4) jeśli przeciwnik uderzył z tą mocą
+  if (BALL.isHeavyPlasma) {
+    BALL.isHeavyPlasma = false;
+    const pushDir = Math.sign(paddle.y - H / 2) || 1;
+    paddle.y = Math.max(10, Math.min(H - paddle.h - 10, paddle.y + pushDir * 16));
+    addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#ff3366');
+    showBanner('🔨 CIĘŻKA PLAZMA! ODRZUT', '#ff3366', 35);
+    SFX.play('wall');
+  }
+
+  // def_4 Cyber Parry: odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak (+25% SPD)
   let isParried = false;
   if (paddle.hasParry && (BALL.isSmashed || BALL.speed > 7.0)) {
-    BALL.speed = Math.max(INITIAL_BALL_SPEED, (BALL.speed * 0.70) + 1.0);
+    BALL.speed = Math.max(INITIAL_BALL_SPEED, BALL.speed * 1.25);
     BALL.isSmashed = false;
     BALL.plasmaBurn = false;
     BALL.isMeteor = false;
     isParried = true;
-    showBanner('⚔️ PARRY! (-30% +1 SPD)', '#10b981', 35);
+    showBanner('⚔️ CYBER PARRY! KONTRATAK (+25% SPD)', '#10b981', 40);
     SFX.play('wall');
     addShockwave(BALL.x, BALL.y, '#10b981');
-    addParticles(BALL.x, BALL.y, '#10b981', 14);
+    addParticles(BALL.x, BALL.y, '#10b981', 18);
   }
 
-  // def_3 Syfon: każde udane odbicie daje +10 energii
+  // def_3 Kinetyczny Reaktor: zatrzymanie szybkiej piłki lub smasha odnawia +25 energii i resetuje Dash
   if (paddle.hasSyphon) {
-    paddle.stamina = Math.min(paddle.maxStamina || 100, paddle.stamina + 10);
-    addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff88', 8);
+    const isFast = (BALL.isSmashed || BALL.speed > 6.8);
+    const gain = isFast ? 25 : 10;
+    paddle.stamina = Math.min(paddle.maxStamina || 100, paddle.stamina + gain);
+    if (isFast) {
+      paddle.dashTimer = 0; // Natychmiastowy reset Dasha
+      showBanner('🔋 KINETYCZNY REAKTOR! +25 ENERGII', '#00ff9d', 30);
+      addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff9d', 14);
+    } else {
+      addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff9d', 6);
+    }
   }
 
-  // pwr_4 Rozgrzanie: trafienie daje stos (max 3), każdy to +8% smasha (reset po punkcie)
+  // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
+  if (paddle.hasDashSurge && paddle.dashTimer > 0) {
+    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
+    addShockwave(BALL.x, BALL.y, '#00d2ff');
+    addParticles(BALL.x, BALL.y, '#00d2ff', 16);
+    showBanner('🚀 KINETYCZNY ZRYW! (+25% SPD)', '#00d2ff', 35);
+    SFX.play('dash');
+  }
+
+  // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
+  if (paddle.hasSpeedBurst) {
+    paddle.rallyHits = (paddle.rallyHits || 0) + 1;
+    if (paddle.rallyHits >= 4 && !paddle.freeDashReady) {
+      paddle.freeDashReady = true;
+      showBanner('⚡ TRYB OVERDRIVE! DARMOWY DASH', '#00d2ff', 40);
+      addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff');
+      addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff', 18);
+      SFX.play('upgrade');
+    }
+  }
+
+  // pwr_4 Rozgrzanie: trafienie daje stos do Meteora
   if (paddle.hasWarmup) {
     paddle.warmupStacks = Math.min(3, (paddle.warmupStacks || 0) + 1);
     addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#ff7700', 8);
@@ -7738,6 +7869,12 @@ function handlePaddleHit(paddle, dir) {
 
   const isSmash = paddle.smashCharge > 0;
   paddle.smashCharge = 0;
+
+  // pwr_4 Ciężka Plazma: smash ładuje falę odrzutu rywala
+  if (isSmash && paddle.hasWarmup) {
+    BALL.isHeavyPlasma = true;
+    addParticles(BALL.x, BALL.y, '#ff3366', 10);
+  }
 
   // spn_5 Sterowanie lotem: aktywne wyłącznie po odblokowaniu poziomu 5 w drzewku
   if (paddle.hasFlightControl) {
