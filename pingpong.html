@@ -2579,9 +2579,9 @@
               <span>BOT RYWAL</span>
             </div>
             <div class="ai-tiers">
-              <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">ŁATWY</button>
-              <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">ŚREDNI</button>
-              <button type="button" class="tier-btn" id="ai-hard" onclick="setAiTier('hard')">PRO</button>
+              <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">🟢 NOWICJUSZ</button>
+              <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">🟡 WETERAN</button>
+              <button type="button" class="tier-btn" id="ai-hard" onclick="setAiTier('hard')">🔴 CYBER-BOSS</button>
             </div>
           </div>
 
@@ -2592,9 +2592,9 @@
               <span>SOJUSZNIK</span>
             </div>
             <div class="ai-tiers">
-              <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">ŁATWY</button>
-              <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">ŚREDNI</button>
-              <button type="button" class="tier-btn ally-tier" id="ally-hard" onclick="setAllyAiTier('hard')">PRO</button>
+              <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">🟢 NOWICJUSZ</button>
+              <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">🟡 WETERAN</button>
+              <button type="button" class="tier-btn ally-tier" id="ally-hard" onclick="setAllyAiTier('hard')">🔴 CYBER-BOSS</button>
             </div>
           </div>
 
@@ -3059,14 +3059,14 @@ let enemyAiLevel = 'medium';
 let allyAiLevel = 'medium';
 
 const BOT_TIER_NAMES = {
-  easy: 'BOT REKRUT',
+  easy: 'BOT NOWICJUSZ',
   medium: 'BOT WETERAN',
-  hard: 'BOT PRO'
+  hard: 'CYBER-BOSS'
 };
 const BOT_TIER_LABELS_PL = {
-  easy: 'ŁATWY',
-  medium: 'ŚREDNI',
-  hard: 'PRO'
+  easy: 'NOWICJUSZ',
+  medium: 'WETERAN',
+  hard: 'CYBER-BOSS'
 };
 
 let teamScores = { 1: 0, 2: 0 };
@@ -3594,6 +3594,25 @@ function getCurrentAccount() {
 
 function saveCurrentAccount(acc) {
   savePlayerProfile(acc);
+}
+
+function grantExp(amount, reason = '') {
+  const acc = getCurrentAccount();
+  if (!acc || amount <= 0) return;
+  const oldProg = getLevelProgress(acc.exp || 0);
+  const oldLvl = oldProg.level;
+  acc.exp = (acc.exp || 0) + amount;
+  const newProg = getLevelProgress(acc.exp || 0);
+  const newLvl = newProg.level;
+  if (newLvl > oldLvl) {
+    const spEarned = newLvl - oldLvl;
+    acc.level = newLvl;
+    acc.sp = (acc.sp || 0) + spEarned;
+    showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${spEarned} SP!`, '#00ff88', 95);
+    SFX.play('upgrade');
+    triggerShake(6, 4);
+  }
+  saveCurrentAccount(acc);
 }
 
 function updateAccountUI() {
@@ -4539,8 +4558,8 @@ let servingPaddleId = 0;
 let serveTimer = 0;
 let bannerText = '', bannerTimer = 0, bannerColor = '#00f0ff';
 
-let upgradePoints = 0;
-const stats = { speed: 1, size: 1, smash: 1, spin: 1, stamina: 1 };
+let hitStopFrames = 0;
+let floatingTexts = [];
 let rallyHits = 0;
 let rallyRewarded = false;
 
@@ -4588,6 +4607,8 @@ function createPaddleObj({ id, team, slot, x, y, h, color, nick, isBot = false, 
     isBot,
     botTier,
     aiNoiseSeed: id * 1.73 + 0.5,
+    reactionTimer: 0,
+    targetBallY: y,
     isLocal,
     targetY: y,
     targetVy: 0,
@@ -4838,6 +4859,24 @@ const SFX = {
         gain.gain.setValueAtTime(0.22, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
         osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'heavyHit' || type === 'parry') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(170, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.25);
+        gain.gain.setValueAtTime(0.46, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
+        try {
+          const subOsc = this.ctx.createOscillator();
+          const subGain = this.ctx.createGain();
+          subOsc.type = 'sine';
+          subOsc.frequency.setValueAtTime(95, now);
+          subOsc.frequency.exponentialRampToValueAtTime(25, now + 0.22);
+          subGain.gain.setValueAtTime(0.42, now);
+          subGain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+          subOsc.connect(subGain); subGain.connect(this.ctx.destination);
+          subOsc.start(now); subOsc.stop(now + 0.22);
+        } catch (e) {}
       } else if (type === 'spinHit') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(240, now);
@@ -5286,78 +5325,30 @@ function showBanner(text, color = '#00f0ff', duration = 65) {
 }
 
 /* ==========================================
-   6. SYSTEM ULEPSZEŃ (RPG) - 5 POZIOMÓW & MASTERY
+   6. GAME FEEL: HIT-STOP I FLOATING TEXT (RPG POPUPS)
    ========================================== */
-function getUpgradeCost(lvl) {
-  if (lvl === 1) return 2;
-  if (lvl === 2) return 2;
-  if (lvl === 3) return 3;
-  if (lvl === 4) return 4;
-  return 999;
+function triggerHitStop(frames = 3) {
+  hitStopFrames = Math.max(hitStopFrames, frames);
 }
 
-function upgradeStat(type) {
-  const currentLvl = stats[type];
-  if (currentLvl >= 5) return;
-  const cost = getUpgradeCost(currentLvl);
-  if (upgradePoints < cost) return;
-
-  upgradePoints -= cost;
-  stats[type]++;
-  SFX.play('upgrade');
-
-  if (stats[type] === 5) {
-    const statNames = {
-      speed: 'NITRO SZYBKOŚĆ',
-      size: 'IMPERIUM ROZMIARU',
-      smash: 'METEOR SMASH',
-      spin: 'KWANTOWY VORTEX',
-      stamina: 'OVERCHARGE DYNAMO'
-    };
-    showBanner(`🌟 MASTERY: ${statNames[type] || type.toUpperCase()}!`, '#f5b041', 95);
-    triggerShake(9, 5);
-    addShockwave(W / 2, H / 2, '#f5b041');
-    addParticles(W / 2, H / 2, '#f5b041', 25);
-  }
-
-  updateStatDisplay();
-  applyStatsToLocalPlayer();
+function addFloatingText(x, y, text, color = '#00f0ff') {
+  floatingTexts.push({
+    x: Math.max(35, Math.min(W - 35, x)),
+    y: Math.max(30, Math.min(H - 20, y)),
+    text,
+    color,
+    life: 45,
+    maxLife: 45,
+    vy: -1.15,
+    vx: (Math.random() - 0.5) * 0.4
+  });
+  if (floatingTexts.length > 25) floatingTexts.shift();
 }
 
-function updateStatDisplay() {
-  const ptsEl = document.getElementById('ptsDisplay');
-  if (ptsEl) ptsEl.textContent = upgradePoints;
-
-  const renderStat = (type, btnId) => {
-    const lvl = stats[type];
-    const dotsWrap = document.getElementById('dots-' + type);
-    if (!dotsWrap) return;
-    dotsWrap.innerHTML = '';
-    for (let i = 1; i <= 5; i++) {
-      const d = document.createElement('div');
-      d.className = 'dot' + (i <= lvl ? ' active' : '') + (i === 5 && lvl >= 5 ? ' mastery' : '');
-      dotsWrap.appendChild(d);
-    }
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    if (lvl >= 5) {
-      btn.textContent = 'MAX 🌟';
-      btn.disabled = true;
-      btn.classList.add('mastery');
-    } else {
-      btn.classList.remove('mastery');
-      const cost = getUpgradeCost(lvl);
-      btn.textContent = `+${cost}`;
-      btn.disabled = upgradePoints < cost;
-    }
-  };
-
-  renderStat('speed', 'btnSpeed');
-  renderStat('size', 'btnSize');
-  renderStat('smash', 'btnSmash');
-  renderStat('spin', 'btnSpin');
-  renderStat('stamina', 'btnStamina');
-}
+// Bezpieczne atrapy po dawnym systemie ulepszeń (dla wstecznej zgodności)
+function updateStatDisplay() {}
+function upgradeStat(type) {}
+function getUpgradeCost() { return 0; }
 
 function enforceTeamPaddleConstraints() {
   for (let i = 0; i < paddles.length; i++) {
@@ -6368,9 +6359,8 @@ function handleGuestIncomingData(d) {
     if (!myPaddle) return;
     const granted = (d.padId === myPaddle.id || (!is2v2 && d.team === myPaddle.team));
     if (granted) {
-      upgradePoints++;
-      updateStatDisplay();
-      showBanner('+1 UP', '#f5b041', 65);
+      grantExp(35, 'ORB');
+      addFloatingText(myPaddle.x, myPaddle.y - 14, '⭐ +35 XP!', '#f5b041');
     }
     return;
   }
@@ -6516,7 +6506,6 @@ function startGame(slotsData = null) {
 
   gameActive = true;
   updateHudScore();
-  updateStatDisplay();
   applyStatsToLocalPlayer();
   resetBall(true);
   startPingLoop();
@@ -6565,7 +6554,7 @@ function resetBall(withCountdown = true, servingTeam = 1) {
   }
 
   isServing = true;
-  serveTimer = 90; // Szybki, dynamiczny timer (~1.5s max)
+  serveTimer = 28; // Błyskawiczny serwis (~0.45s max - natychmiastowa akcja!)
 
   const srvPad = paddles[servingPaddleId] || paddles[0];
   if (srvPad) {
@@ -6688,14 +6677,15 @@ function updateAI(botPaddle) {
   if (!botPaddle) return;
 
   const tier = botPaddle.botTier || 'medium';
+  // 3 wyraziste poziomy trudności: Nowicjusz, Weteran, Cyber-Boss
   const cfg = {
-    easy:   { speed: 4.5, reactDist: W * 0.50, err: 26, smashChance: 0.12, dashChance: 0.01 },
-    medium: { speed: 6.1, reactDist: W * 0.65, err: 12, smashChance: 0.45, dashChance: 0.03 },
-    hard:   { speed: 7.6, reactDist: W * 0.82, err: 4,  smashChance: 0.75, dashChance: 0.08 }
-  }[tier];
+    easy:   { speed: 4.6, reactDist: W * 0.52, err: 28, smashChance: 0.0,  dashChance: 0.0,  reactionDelay: 12, staminaRegen: 0.35, cutSpin: false },
+    medium: { speed: 6.2, reactDist: W * 0.72, err: 11, smashChance: 0.48, dashChance: 0.07, reactionDelay: 5,  staminaRegen: 0.40, cutSpin: false },
+    hard:   { speed: 7.9, reactDist: W * 0.92, err: 2,  smashChance: 0.85, dashChance: 0.16, reactionDelay: 0,  staminaRegen: 0.50, cutSpin: true }
+  }[tier] || { speed: 6.2, reactDist: W * 0.72, err: 11, smashChance: 0.48, dashChance: 0.07, reactionDelay: 5, staminaRegen: 0.40, cutSpin: false };
 
   botPaddle.speed = cfg.speed;
-  botPaddle.stamina = Math.min(100, botPaddle.stamina + 0.35);
+  botPaddle.stamina = Math.min(100, botPaddle.stamina + cfg.staminaRegen);
   if (botPaddle.smashCharge > 0) botPaddle.smashCharge--;
   if (botPaddle.dashTimer > 0) botPaddle.dashTimer--;
 
@@ -6711,6 +6701,17 @@ function updateAI(botPaddle) {
   const ballApproaching = isLeftTeam ? (BALL.vx < 0) : (BALL.vx > 0);
   const distToMyGoalLine = isLeftTeam ? (BALL.x - botPaddle.x) : (botPaddle.x - BALL.x);
   const inReactRange = distToMyGoalLine >= -10 && distToMyGoalLine <= cfg.reactDist;
+
+  // Humanizacja czasu reakcji: boty o niższych poziomach nie aktualizują celu natychmiastowo
+  if (botPaddle.reactionTimer === undefined) botPaddle.reactionTimer = 0;
+  if (botPaddle.targetBallY === undefined) botPaddle.targetBallY = BALL.y;
+
+  if (botPaddle.reactionTimer <= 0) {
+    botPaddle.targetBallY = BALL.y;
+    botPaddle.reactionTimer = cfg.reactionDelay;
+  } else {
+    botPaddle.reactionTimer--;
+  }
 
   let homeY = H / 2 - botPaddle.h / 2;
   let minZoneY = 10;
@@ -6748,7 +6749,13 @@ function updateAI(botPaddle) {
   let targetY = homeY;
   if (shouldChase) {
     const offset = Math.sin(performance.now() * 0.004 + botPaddle.aiNoiseSeed) * cfg.err;
-    targetY = BALL.y - botPaddle.h / 2 + offset;
+    targetY = botPaddle.targetBallY - botPaddle.h / 2 + offset;
+
+    // Cyber-Boss: agresywne podkręcanie piłki (dynamiczny spin cut krawędzią paletki)
+    if (cfg.cutSpin && distToMyGoalLine < 85 && Math.abs(BALL.y - (botPaddle.y + botPaddle.h / 2)) < 40) {
+      const cutDir = (botPaddle.y < H / 2) ? 1 : -1;
+      targetY += cutDir * (botPaddle.h * 0.32);
+    }
   }
 
   if (maxZoneY < minZoneY) maxZoneY = minZoneY;
@@ -6761,7 +6768,7 @@ function updateAI(botPaddle) {
     curSpeed *= (botPaddle.slowFactor || 0.70);
   }
 
-  if (shouldChase && distToMyGoalLine < 220 && Math.abs(diff) > 68 && botPaddle.stamina >= 35 && botPaddle.dashTimer === 0) {
+  if (shouldChase && distToMyGoalLine < 240 && Math.abs(diff) > 55 && botPaddle.stamina >= 35 && botPaddle.dashTimer === 0) {
     if (Math.random() < cfg.dashChance) {
       botPaddle.stamina -= 35;
       botPaddle.dashTimer = 10;
@@ -6775,7 +6782,7 @@ function updateAI(botPaddle) {
   }
   if (botPaddle.dashTimer > 0) curSpeed *= 2.0;
 
-  if (shouldChase && distToMyGoalLine < 105 && Math.abs(diff) < 45 && botPaddle.stamina >= 50 && botPaddle.smashCharge === 0) {
+  if (shouldChase && distToMyGoalLine < 115 && Math.abs(diff) < 48 && botPaddle.stamina >= 50 && botPaddle.smashCharge === 0) {
     if (Math.random() < cfg.smashChance) {
       botPaddle.stamina -= 50;
       botPaddle.smashCharge = 22;
@@ -6857,7 +6864,7 @@ function triggerLocalDash(myPaddle) {
   if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina || myPaddle.freeDashReady)) {
     if (myPaddle.freeDashReady) {
       myPaddle.freeDashReady = false;
-      showBanner('⚡ OVERDRIVE DASH! (DARMOWY)', '#00d2ff', 25);
+      addFloatingText(myPaddle.x, myPaddle.y - 14, '⚡ OVERDRIVE DASH!', '#00d2ff');
     } else if (!myPaddle.infiniteStamina) {
       myPaddle.stamina -= dashCost;
     }
@@ -6969,8 +6976,10 @@ function predictLocalGuestBounce(myPaddle) {
     const pushDir = Math.sign(myPaddle.y - H / 2) || 1;
     myPaddle.y = Math.max(10, Math.min(H - myPaddle.h - 10, myPaddle.y + pushDir * 16));
     addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#ff3366');
-    showBanner('🔨 CIĘŻKA PLAZMA! ODRZUT', '#ff3366', 35);
-    SFX.play('wall');
+    addFloatingText(myPaddle.x, myPaddle.y - 12, '🔨 ODRZUT!', '#ff3366');
+    triggerHitStop(2);
+    triggerShake(8, 4);
+    SFX.play('heavyHit');
   }
 
   // def_4 Cyber Parry: odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak (+25% SPD)
@@ -6981,8 +6990,10 @@ function predictLocalGuestBounce(myPaddle) {
     BALL.plasmaBurn = false;
     BALL.isMeteor = false;
     isParried = true;
-    showBanner('⚔️ CYBER PARRY! KONTRATAK (+25% SPD)', '#10b981', 40);
-    SFX.play('wall');
+    addFloatingText(myPaddle.x, myPaddle.y - 14, '⚔️ PARRY! +25%', '#10b981');
+    triggerHitStop(3);
+    triggerShake(12, 6);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#10b981');
     addParticles(BALL.x, BALL.y, '#10b981', 18);
   }
@@ -6994,7 +7005,7 @@ function predictLocalGuestBounce(myPaddle) {
     myPaddle.stamina = Math.min(myPaddle.maxStamina || 100, myPaddle.stamina + gain);
     if (isFast) {
       myPaddle.dashTimer = 0; // Natychmiastowy reset Dasha
-      showBanner('🔋 KINETYCZNY REAKTOR! +25 ENERGII', '#00ff9d', 30);
+      addFloatingText(myPaddle.x, myPaddle.y - 12, '🔋 +25 ENERGII', '#00ff9d');
       addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff9d', 14);
     } else {
       addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00ff9d', 6);
@@ -7006,7 +7017,7 @@ function predictLocalGuestBounce(myPaddle) {
     BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
-    showBanner('🚀 KINETYCZNY ZRYW! (+25% SPD)', '#00d2ff', 35);
+    addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
     SFX.play('dash');
   }
 
@@ -7015,7 +7026,7 @@ function predictLocalGuestBounce(myPaddle) {
     myPaddle.rallyHits = (myPaddle.rallyHits || 0) + 1;
     if (myPaddle.rallyHits >= 4 && !myPaddle.freeDashReady) {
       myPaddle.freeDashReady = true;
-      showBanner('⚡ TRYB OVERDRIVE! DARMOWY DASH', '#00d2ff', 40);
+      addFloatingText(myPaddle.x, myPaddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
       addParticles(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff', 18);
       SFX.play('upgrade');
@@ -7082,20 +7093,22 @@ function predictLocalGuestBounce(myPaddle) {
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    SFX.play('smash');
-    triggerShake(16, 10);
+    triggerHitStop(4);
+    triggerShake(16, 9);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
-    showBanner('☄️ METEOR! (16.5 px/f)', '#ff4500', 50);
+    addFloatingText(BALL.x, BALL.y - 16, '☄️ METEOR!', '#ff4500');
   } else if (isSmash) {
     BALL.speed = Math.min(MAX_SMASH_SPEED, BALL.speed + 1.15 * effectiveSmashMult);
     BALL.isSmashed = true;
     BALL.isMeteor = false;
-    SFX.play('smash');
-    triggerShake(10, 5);
+    triggerHitStop(2);
+    triggerShake(9, 5);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#f5b041');
     addParticles(BALL.x, BALL.y, '#f5b041', 16);
-    showBanner('SMASH!', '#f5b041', 40);
+    addFloatingText(BALL.x, BALL.y - 14, '💥 SMASH!', '#f5b041');
   } else {
     if (!isParried) {
       BALL.speed = Math.min(BALL.speed + 0.18, MAX_NORMAL_SPEED);
@@ -7108,7 +7121,7 @@ function predictLocalGuestBounce(myPaddle) {
     SFX.play(hitSfx);
     addShockwave(BALL.x, BALL.y, fxColor);
     addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 14 : 7);
-    if (isHeavySpin) showBanner(myPaddle.hasSingularityCurve ? '🌌 SINGULARITY CURVE!' : (myPaddle.hasSpinMastery ? '🌀 VORTEX BREAK!' : 'CURVEBALL!'), '#b845ff', 35);
+    if (isHeavySpin) addFloatingText(BALL.x, BALL.y - 12, '🌀 VORTEX!', '#b845ff');
   }
 
   BALL.vx = dir * BALL.speed * Math.cos(angle);
@@ -7328,7 +7341,7 @@ function update() {
       BALL.y += (targetY - BALL.y) * 0.42;
     }
     serveTimer--;
-    if (srvPad && srvPad.isBot && serveTimer <= 55) {
+    if (srvPad && srvPad.isBot && serveTimer <= 16) {
       executeServe(false);
     } else if (serveTimer <= 0) {
       executeServe(false);
@@ -7353,14 +7366,14 @@ function update() {
         if (obstacle.timer <= 0) obstacle = null;
       }
 
-      // Bardzo rzadki respawn bonusu +1 UP na arenie
+      // Bardzo rzadki respawn bonusu XP na arenie
       if (!powerupOrb && rallyHits >= 3 && Math.random() < 0.00008) {
         powerupOrb = {
           x: W / 2 + (Math.random() - 0.5) * 180,
           y: 70 + Math.random() * (H - 140),
           r: 15, timer: 360
         };
-        showBanner('⭐ RZADKI BONUS: +1 UP!', '#f5b041', 50);
+        addFloatingText(powerupOrb.x, powerupOrb.y - 12, '⭐ BONUS XP!', '#f5b041');
       }
       if (powerupOrb) {
         powerupOrb.timer--;
@@ -7371,9 +7384,8 @@ function update() {
           const hostPad = getLocalPaddle();
 
           if (hostPad && (hostPad.id === scorerPadId || (!is2v2 && hostPad.team === scoringTeam))) {
-            upgradePoints++;
-            updateStatDisplay();
-            showBanner('+1 UP', '#f5b041', 65);
+            grantExp(35, 'ORB');
+            addFloatingText(powerupOrb.x, powerupOrb.y - 12, '⭐ +35 XP!', '#f5b041');
           }
           broadcastReliable({ t: 'upAward', team: scoringTeam, padId: scorerPadId });
 
@@ -7430,11 +7442,11 @@ function update() {
           BALL.vx = (BALL.vx / curLen) * BALL.speed;
           BALL.vy = (BALL.vy / curLen) * BALL.speed;
           addParticles(BALL.x, BALL.y, '#ff3366', 10);
-          showBanner(`⚡ ŚCIENNY RYKOSZET (${BALL.ricochetCount}/2): +15%`, '#ff3366', 25);
+          addFloatingText(BALL.x, BALL.y - 12, '⚡ RYKOSZET +15%!', '#ff3366');
         } else if (BALL.plasmaBurn) {
           BALL.speed = Math.min(16.5, BALL.speed * 1.25);
           addParticles(BALL.x, BALL.y, '#ff4500', 9);
-          showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
+          addFloatingText(BALL.x, BALL.y - 12, '🔥 PLAZMA +25%!', '#ff4500');
         }
 
         // spn_3: Bumerang Ścienny: odbicie podkręconej piłki od ściany zacieśnia zakręt
@@ -7466,11 +7478,11 @@ function update() {
           BALL.vx = (BALL.vx / curLen) * BALL.speed;
           BALL.vy = (BALL.vy / curLen) * BALL.speed;
           addParticles(BALL.x, BALL.y, '#ff3366', 10);
-          showBanner(`⚡ ŚCIENNY RYKOSZET (${BALL.ricochetCount}/2): +15%`, '#ff3366', 25);
+          addFloatingText(BALL.x, BALL.y - 12, '⚡ RYKOSZET +15%!', '#ff3366');
         } else if (BALL.plasmaBurn) {
           BALL.speed = Math.min(16.5, BALL.speed * 1.25);
           addParticles(BALL.x, BALL.y, '#ff4500', 9);
-          showBanner('🔥 PLASMA RICOCHET! (+25%)', '#ff4500', 25);
+          addFloatingText(BALL.x, BALL.y - 12, '🔥 PLAZMA +25%!', '#ff4500');
         }
 
         // spn_3: Bumerang Ścienny: odbicie podkręconej piłki od ściany zacieśnia zakręt
@@ -7747,6 +7759,15 @@ function update() {
   if (shakeTime > 0) shakeTime--;
   if (bannerTimer > 0) bannerTimer--;
 
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const ft = floatingTexts[i];
+    ft.x += ft.vx;
+    ft.y += ft.vy;
+    ft.vy *= 0.96;
+    ft.life--;
+    if (ft.life <= 0) floatingTexts.splice(i, 1);
+  }
+
   if (!isSinglePlayer && (tickCounter % 2 === 0)) {
     if (isHost) {
       const packedPaddles = paddles.map(p => ({
@@ -7808,8 +7829,10 @@ function handlePaddleHit(paddle, dir) {
     const pushDir = Math.sign(paddle.y - H / 2) || 1;
     paddle.y = Math.max(10, Math.min(H - paddle.h - 10, paddle.y + pushDir * 16));
     addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#ff3366');
-    showBanner('🔨 CIĘŻKA PLAZMA! ODRZUT', '#ff3366', 35);
-    SFX.play('wall');
+    addFloatingText(paddle.x, paddle.y - 12, '🔨 ODRZUT!', '#ff3366');
+    triggerHitStop(2);
+    triggerShake(8, 4);
+    SFX.play('heavyHit');
   }
 
   // def_4 Cyber Parry: odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak (+25% SPD)
@@ -7820,8 +7843,10 @@ function handlePaddleHit(paddle, dir) {
     BALL.plasmaBurn = false;
     BALL.isMeteor = false;
     isParried = true;
-    showBanner('⚔️ CYBER PARRY! KONTRATAK (+25% SPD)', '#10b981', 40);
-    SFX.play('wall');
+    addFloatingText(paddle.x, paddle.y - 14, '⚔️ PARRY! +25%', '#10b981');
+    triggerHitStop(3);
+    triggerShake(12, 6);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#10b981');
     addParticles(BALL.x, BALL.y, '#10b981', 18);
   }
@@ -7833,7 +7858,7 @@ function handlePaddleHit(paddle, dir) {
     paddle.stamina = Math.min(paddle.maxStamina || 100, paddle.stamina + gain);
     if (isFast) {
       paddle.dashTimer = 0; // Natychmiastowy reset Dasha
-      showBanner('🔋 KINETYCZNY REAKTOR! +25 ENERGII', '#00ff9d', 30);
+      addFloatingText(paddle.x, paddle.y - 12, '🔋 +25 ENERGII', '#00ff9d');
       addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff9d', 14);
     } else {
       addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00ff9d', 6);
@@ -7845,7 +7870,7 @@ function handlePaddleHit(paddle, dir) {
     BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
-    showBanner('🚀 KINETYCZNY ZRYW! (+25% SPD)', '#00d2ff', 35);
+    addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
     SFX.play('dash');
   }
 
@@ -7854,7 +7879,7 @@ function handlePaddleHit(paddle, dir) {
     paddle.rallyHits = (paddle.rallyHits || 0) + 1;
     if (paddle.rallyHits >= 4 && !paddle.freeDashReady) {
       paddle.freeDashReady = true;
-      showBanner('⚡ TRYB OVERDRIVE! DARMOWY DASH', '#00d2ff', 40);
+      addFloatingText(paddle.x, paddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff');
       addParticles(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff', 18);
       SFX.play('upgrade');
@@ -7923,12 +7948,13 @@ function handlePaddleHit(paddle, dir) {
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    SFX.play('smash');
-    triggerShake(16, 10);
+    triggerHitStop(4);
+    triggerShake(16, 9);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
-    const smashTxt = '☄️ METEOR! (16.5 px/f)';
-    showBanner(smashTxt, '#ff4500', 50);
+    const smashTxt = '☄️ METEOR!';
+    addFloatingText(BALL.x, BALL.y - 16, smashTxt, '#ff4500');
 
     // Spowolnienie rywali o 30% na 1.2s (72 klatki)
     paddles.forEach(p => {
@@ -7951,11 +7977,12 @@ function handlePaddleHit(paddle, dir) {
     BALL.speed = Math.min(MAX_SMASH_SPEED, BALL.speed + 1.15 * effectiveSmashMult);
     BALL.isSmashed = true;
     BALL.isMeteor = false;
-    SFX.play('smash');
-    triggerShake(10, 5);
+    triggerHitStop(2);
+    triggerShake(9, 5);
+    SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#f5b041');
     addParticles(BALL.x, BALL.y, '#f5b041', 16);
-    showBanner('SMASH!', '#f5b041', 40);
+    addFloatingText(BALL.x, BALL.y - 14, '💥 SMASH!', '#f5b041');
     sendFX({
       pad: padId,
       sfx: 'smash', shake: [10, 5],
@@ -7976,15 +8003,14 @@ function handlePaddleHit(paddle, dir) {
     addShockwave(BALL.x, BALL.y, fxColor);
     addParticles(BALL.x, BALL.y, fxColor, isHeavySpin ? 14 : 7);
 
-    const bannerTxt = isHeavySpin ? '🌀 ROTACJA!' : null;
-    if (bannerTxt) showBanner(bannerTxt, '#a855f7', 30);
+    if (isHeavySpin) addFloatingText(BALL.x, BALL.y - 12, '🌀 VORTEX!', '#b845ff');
 
     sendFX({
       pad: padId,
       sfx: hitSfx,
       wave: { x: BALL.x, y: BALL.y, c: fxColor },
       part: { x: BALL.x, y: BALL.y, c: fxColor, n: isHeavySpin ? 14 : 7 },
-      banner: bannerTxt ? { txt: bannerTxt, c: '#a855f7' } : null
+      banner: isHeavySpin ? { txt: '🌀 VORTEX!', c: '#a855f7' } : null
     });
   }
 
@@ -8461,14 +8487,57 @@ function render() {
     }
   }
 
-  if (bannerTimer > 0) {
-    ctx.font = '900 24px Orbitron';
+  // Dynamiczny Floating Text (RPG popups nad paletkami i piłką)
+  if (floatingTexts.length > 0) {
+    ctx.save();
+    ctx.font = '800 12.5px Orbitron, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillStyle = bannerColor;
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < floatingTexts.length; i++) {
+      const ft = floatingTexts[i];
+      const alpha = Math.max(0, Math.min(1, ft.life / 16));
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = ft.color;
+      ctx.shadowColor = ft.color;
+      ctx.shadowBlur = 8;
+      ctx.fillText(ft.text, ft.x, ft.y);
+    }
+    ctx.restore();
+  }
+
+  // Dyskretna pigułka powiadomień meczowych na samej górze (poza torem lotu piłki)
+  if (bannerTimer > 0 && bannerText) {
+    ctx.save();
+    ctx.font = '800 12.5px Orbitron, sans-serif';
+    const textMetrics = ctx.measureText(bannerText);
+    const pillW = Math.max(140, textMetrics.width + 36);
+    const pillH = 26;
+    const pillX = W / 2 - pillW / 2;
+    const pillY = 14;
+    const alpha = Math.min(1, bannerTimer / 12);
+    ctx.globalAlpha = alpha;
+
+    ctx.fillStyle = 'rgba(6, 11, 20, 0.92)';
+    ctx.strokeStyle = bannerColor;
+    ctx.lineWidth = 1.5;
     ctx.shadowColor = bannerColor;
-    ctx.shadowBlur = 15;
-    ctx.fillText(bannerText, W / 2, 72);
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 10;
+
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(pillX, pillY, pillW, pillH, 13);
+    } else {
+      ctx.rect(pillX, pillY, pillW, pillH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = bannerColor;
+    ctx.shadowBlur = 6;
+    ctx.fillText(bannerText, W / 2, pillY + pillH / 2);
+    ctx.restore();
   }
 
   if (isServing) {
@@ -8622,6 +8691,15 @@ function gameLoop(timestamp) {
   lastFrameTime = timestamp;
 
   if (frameTime > 250) frameTime = 250;
+
+  // Hit-stop: zamrożenie symulacji fizyki na 2-4 klatki przy potężnym Smashu / Cyber Parry
+  if (hitStopFrames > 0) {
+    hitStopFrames--;
+    render();
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
   accumulator += frameTime;
 
   while (accumulator >= FIXED_DT) {
@@ -8664,14 +8742,6 @@ window.addEventListener('keydown', e => {
       executeServe(true);
       return;
     }
-  }
-
-  if (gameActive && !matchPaused) {
-    if (e.code === 'Digit1') upgradeStat('speed');
-    if (e.code === 'Digit2') upgradeStat('size');
-    if (e.code === 'Digit3') upgradeStat('smash');
-    if (e.code === 'Digit4') upgradeStat('spin');
-    if (e.code === 'Digit5') upgradeStat('stamina');
   }
 });
 
