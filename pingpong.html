@@ -1576,11 +1576,24 @@
     gap: 16px;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    user-select: none;
   }
   .node-content-card:hover {
     border-color: rgba(255, 255, 255, 0.2);
     background: #111b30;
     transform: translateX(2px);
+  }
+  .node-content-card.can-buy-card {
+    border-color: rgba(245, 158, 11, 0.55);
+    background: rgba(245, 158, 11, 0.07);
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+  }
+  .node-content-card.can-buy-card:hover {
+    border-color: #fbbf24;
+    background: rgba(245, 158, 11, 0.14);
+    transform: translateX(4px);
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.3);
   }
   @media (max-width: 640px) {
     .node-content-card {
@@ -1775,6 +1788,45 @@
     background: #fbbf24;
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5);
+  }
+  .roadmap-action-btn.need-sp-btn {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+  }
+  .roadmap-action-btn.need-sp-btn:hover {
+    background: rgba(245, 158, 11, 0.18);
+    border-color: #fbbf24;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+  }
+  .roadmap-action-btn.locked-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+  }
+  .roadmap-action-btn.locked-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #e2e8f0;
+    transform: translateY(-1px);
+  }
+  .btn-tree-admin-sp {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    color: #f59e0b;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-tree-admin-sp:hover {
+    background: #f59e0b;
+    color: #0b0f19;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
   }
 
   /* STYLIZACJA ZMĘCZENIA (FATIGUE) NA PASKU STAMINY */
@@ -3032,6 +3084,7 @@
         </div>
       </div>
       <div class="tree-header-actions">
+        <button type="button" class="btn-tree-admin-sp" id="btnTreeAdminSp" onclick="adminQuickAddSp(10)" style="display:none;" title="Dodaj natychmiast +10 SP (tylko Admin)">⚡ +10 SP (ADMIN)</button>
         <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET DRZEWKA (DARMOWY)</button>
         <button type="button" class="btn-tree-close" onclick="closeTalentTreeModal()" title="Zamknij okno drzewka">✕ ZAMKNIJ</button>
       </div>
@@ -3686,7 +3739,15 @@ function getPlayerProfile() {
 
     if (typeof prof.exp !== 'number') prof.exp = 0;
     const prog = getLevelProgress(prof.exp);
-    prof.level = prog.level;
+    const storedLvl = Number(prof.level);
+    if (Number.isFinite(storedLvl) && storedLvl > prog.level) {
+      prof.level = Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(storedLvl)));
+      let cumXp = 0;
+      for (let l = 1; l < prof.level; l++) cumXp += getXpRequiredForLevel(l);
+      prof.exp = Math.max(prof.exp, cumXp);
+    } else {
+      prof.level = prog.level;
+    }
 
     // Zbalansowane przeliczanie należnych punktów SP:
     // Upewnij się, że gracz ma przynajmniej tyle SP, ile wynika z poziomu (i zachowaj punkty zdobyte z wygranych meczów)
@@ -3740,6 +3801,7 @@ function savePlayerProfile(prof) {
   prof.exp = Number.isFinite(numericExp) ? Math.min(MAX_ACCOUNT_EXP, Math.max(0, Math.floor(numericExp))) : 0;
   const numericLevel = Number(prof.level);
   prof.level = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : getLevelProgress(prof.exp).level;
+  prof.updatedAt = Date.now();
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
     if (prof.nick) {
@@ -4062,18 +4124,20 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
 
   // Globalny Sezon 3 / Reset Bazy w chmurze Firebase (Wipe do LVL 1)
   if (cloudProf.resetVersion !== 3) {
-    console.log('☁️ [Firestore Migration] Wykryto starszą wersję konta w chmurze — resetowanie do LVL 1 (Sezon 3)...');
-    merged.level = 1;
-    merged.exp = 0;
-    merged.sp = 1;
-    merged.spentSp = 0;
-    merged.freeResets = 1;
+    console.log('☁️ [Firestore Migration] Wykryto starszą wersję konta w chmurze — synchronizacja do Sezonu 3...');
+    const targetLvl = (typeof cloudProf.level === 'number' && cloudProf.level > 1) ? Math.floor(cloudProf.level) : 1;
+    merged.level = targetLvl;
+    let cumXp = 0;
+    for (let l = 1; l < targetLvl; l++) cumXp += getXpRequiredForLevel(l);
+    merged.exp = Math.max(cloudProf.exp || 0, cumXp);
     merged.talents = { root: true };
+    merged.spentSp = 0;
+    merged.sp = calculateTotalSpForLevel(targetLvl);
     merged.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     merged.resetVersion = 3;
     merged.updatedAt = Date.now();
     syncProfileToCloud(merged);
-    showBanner('🔄 RESTART SEZONU 3: Wszystkie konta zresetowane do LVL 1!', '#00f0ff', 85);
+    showBanner(`🔄 SYNCHRONIZACJA SEZONU 3 (LVL ${targetLvl})!`, '#00f0ff', 75);
   }
 
   // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
@@ -4145,6 +4209,15 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     }
   } else {
     merged.level = getLevelProgress(merged.exp).level;
+  }
+
+  // Połącz talenty: upewnij się, że lokalnie odblokowane talenty nie zostaną skasowane przez opóźniony snapshot
+  if (fromSnapshot && localProf && localProf.talents && typeof localProf.talents === 'object') {
+    merged.talents = {
+      ...localProf.talents,
+      ...(merged.talents || {}),
+      root: true
+    };
   }
 
   // Przelicz wydane punkty i należne SP z chmury, aby bilans był zawsze w 100% spójny
@@ -4634,10 +4707,52 @@ document.addEventListener('keydown', e => {
   }
 });
 
+function handleTalentNodeClick(nodeId) {
+  const node = SKILL_TREE_NODES[nodeId];
+  if (!node) return;
+  const acc = getCurrentAccount();
+  if (!acc) return;
+
+  const isUnlocked = isTalentNodeUnlocked(node.id, acc);
+  const isReqMet = !node.req || isTalentNodeUnlocked(node.req, acc);
+  const currentSp = acc.sp || 0;
+  const canAfford = currentSp >= node.cost;
+
+  // 1. Już odblokowany
+  if (isUnlocked) {
+    if (typeof SFX !== 'undefined') SFX.play('click');
+    showBanner(`✓ Talent "${node.title || node.name}" jest już w pełni odblokowany i aktywny!`, '#00d2ff', 50);
+    return;
+  }
+
+  // 2. Wymaga wcześniejszego poziomu
+  if (!isReqMet) {
+    const reqNode = SKILL_TREE_NODES[node.req];
+    const reqName = reqNode ? (reqNode.title || `Poziom ${reqNode.tier}`) : `Poziom ${node.tier - 1}`;
+    if (typeof SFX !== 'undefined') SFX.play('wallHit');
+    triggerShake(4, 2);
+    showBanner(`🔒 Wymagane wcześniejsze odblokowanie: ${reqName} (Poziom ${node.tier - 1})!`, '#ff3366', 75);
+    return;
+  }
+
+  // 3. Brak wystarczającej liczby punktów SP
+  if (!canAfford) {
+    const missing = node.cost - currentSp;
+    if (typeof SFX !== 'undefined') SFX.play('wallHit');
+    triggerShake(4, 2);
+    showBanner(`⚡ Brak punktów SP! Wymagane: ${node.cost} SP, posiadasz: ${currentSp} SP (brakuje ${missing} SP). Awansuj poziom konta w grze lub odbijaj na ściance!`, '#f59e0b', 85);
+    return;
+  }
+
+  // 4. Sukces - zakup talentu
+  buyTalent(node.id);
+}
+
 function buyTalent(nodeId) {
   const node = SKILL_TREE_NODES[nodeId];
   if (!node) return;
   const acc = getCurrentAccount();
+  if (!acc) return;
   if (isTalentNodeUnlocked(node.id, acc)) return;
   if (node.req && !isTalentNodeUnlocked(node.req, acc)) return;
   if ((acc.sp || 0) < node.cost) return;
@@ -4646,13 +4761,16 @@ function buyTalent(nodeId) {
   if (!acc.talents) acc.talents = {};
   acc.talents[node.id] = true;
   acc.spentSp = (acc.spentSp || 0) + node.cost;
+  acc.updatedAt = Date.now();
 
   saveCurrentAccount(acc);
-  SFX.play('upgrade');
+  if (typeof SFX !== 'undefined') SFX.play('upgrade');
   triggerShake(5, 3);
   renderSkillTreeGraph();
   applyStatsToLocalPlayer();
   updateAccountUI();
+
+  showBanner(`🌟 ODBLOKOWANO: ${node.title || node.name}! (${node.cost} SP)`, '#00ff88', 80);
 }
 
 function handleResetTalents() {
@@ -4664,32 +4782,30 @@ function handleResetTalents() {
   const currentSp = acc.sp || 0;
   const refundSp = Math.max(totalSpDue, spent + currentSp);
 
-  // Sprawdź czy gracz ma jakiekolwiek odblokowane talenty poza rootem
   const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
-  if (!hasTalents && spent === 0 && currentSp >= refundSp) {
-    alert('Wszystkie punkty SP są już gotowe do ponownego wydania!');
+  if (!hasTalents && spent === 0) {
+    showBanner('Wszystkie punkty SP są już gotowe do rozdania!', '#00d2ff', 50);
     return;
   }
 
-  const confirmMsg = `Czy na pewno chcesz zresetować drzewko talentów?\n\n• Zwrócone zostanie: ${refundSp} SP do ponownego rozdania\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
-  if (!confirm(confirmMsg)) return;
+  const confirmMsg = `Czy na pewno chcesz zresetować drzewko specjalizacji?\n\n• Zwrócone zostanie: ${refundSp} SP do ponownego rozdania\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
+  if (typeof confirm === 'function' && !confirm(confirmMsg)) return;
 
   // Pełny, bezwarunkowy reset do stanu czystego
   acc.talents = { root: true };
   acc.spentSp = 0;
   acc.sp = refundSp;
-  acc.freeResets = 999; // Zawsze darmowy, nielimitowany reset
+  acc.freeResets = 999;
+  acc.updatedAt = Date.now();
 
   saveCurrentAccount(acc);
-  SFX.play('upgrade');
+  if (typeof SFX !== 'undefined') SFX.play('upgrade');
   triggerShake(5, 3);
   renderSkillTreeGraph();
   applyStatsToLocalPlayer();
   updateAccountUI();
 
-  if (typeof showBanner === 'function') {
-    showBanner(`Drzewko talentów zresetowane! Dostępne: ${refundSp} SP.`, '#00ff88', 80);
-  }
+  showBanner(`Drzewko specjalizacji zresetowane! Dostępne: ${refundSp} SP do ponownego wydania.`, '#00ff88', 80);
 }
 
 let currentTreeFilter = 'speed';
@@ -4722,6 +4838,11 @@ function renderSkillTreeGraph() {
   const spCounter = document.getElementById('modalSpCounter');
   const spentCounter = document.getElementById('modalSpentCounter');
   const resetBtn = document.getElementById('btnTreeReset');
+  const admSpBtn = document.getElementById('btnTreeAdminSp');
+
+  if (admSpBtn) {
+    admSpBtn.style.display = (acc && acc.isAdmin) ? 'inline-block' : 'none';
+  }
 
   let totalUnlocked = 0;
   const branchStats = {};
@@ -4831,13 +4952,13 @@ function renderSkillTreeGraph() {
       actionHtml = `<span class="roadmap-pill unlocked">✓ Odblokowane</span>`;
     } else if (isReqMet) {
       if (canAfford) {
-        actionHtml = `<button type="button" class="roadmap-action-btn can-buy" onclick="buyTalent('${node.id}')">Odblokuj (${node.cost} SP)</button>`;
+        actionHtml = `<button type="button" class="roadmap-action-btn can-buy" onclick="event.stopPropagation(); handleTalentNodeClick('${node.id}')">Odblokuj (${node.cost} SP)</button>`;
       } else {
         const missing = node.cost - (acc.sp || 0);
-        actionHtml = `<span class="roadmap-pill need-sp">${node.cost} SP (brak ${missing})</span>`;
+        actionHtml = `<button type="button" class="roadmap-action-btn need-sp-btn" onclick="event.stopPropagation(); handleTalentNodeClick('${node.id}')" title="Brak ${missing} SP - kliknij, aby sprawdzić">${node.cost} SP (brak ${missing})</button>`;
       }
     } else {
-      actionHtml = `<span class="roadmap-pill locked">${node.cost} SP • Wymaga poz. ${node.tier - 1}</span>`;
+      actionHtml = `<button type="button" class="roadmap-action-btn locked-btn" onclick="event.stopPropagation(); handleTalentNodeClick('${node.id}')" title="Wymaga poz. ${node.tier - 1} - kliknij, aby sprawdzić">🔒 ${node.cost} SP • Wymaga poz. ${node.tier - 1}</button>`;
     }
 
     const formattedDesc = formatTalentBenefit(node.benefit);
@@ -4849,7 +4970,7 @@ function renderSkillTreeGraph() {
       <div class="node-rail-point">
         <div class="node-circle" title="Poziom ${node.tier}">${circleSymbol}</div>
       </div>
-      <div class="node-content-card">
+      <div class="node-content-card ${canAfford && rowState === 'available' ? 'can-buy-card' : ''}" onclick="handleTalentNodeClick('${node.id}')" title="${canAfford && rowState === 'available' ? 'Kliknij, aby odblokować talent (' + node.cost + ' SP)' : (isUnlocked ? 'Talent aktywny' : 'Kliknij, aby sprawdzić wymagania')}">
         <div class="card-icon-badge" title="${nodeTitle}">${node.icon}</div>
         <div class="card-left-info">
           <div class="card-top-row">
@@ -4873,6 +4994,16 @@ function renderSkillTreeGraph() {
 function renderTalentTreeUI() {
   renderSkillTreeGraph();
 }
+
+window.buyTalent = buyTalent;
+window.handleTalentNodeClick = handleTalentNodeClick;
+window.handleResetTalents = handleResetTalents;
+window.filterTreeBranch = filterTreeBranch;
+window.openTalentTreeModal = openTalentTreeModal;
+window.closeTalentTreeModal = closeTalentTreeModal;
+window.renderSkillTreeGraph = renderSkillTreeGraph;
+window.renderTalentTreeUI = renderTalentTreeUI;
+window.adminQuickAddSp = adminQuickAddSp;
 
 function calculateWallXp(score, isRecord = false) {
   const s = Math.max(0, score || 0);
