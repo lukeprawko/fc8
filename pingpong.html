@@ -660,22 +660,32 @@
     z-index: 2;
   }
 
+  .account-card-btns-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+  }
+
   .btn-talent-tree {
     background: rgba(13, 20, 36, 0.9);
     border: 1.5px solid rgba(0, 240, 255, 0.45);
     border-radius: 10px;
-    padding: 8px 14px;
+    padding: 8px 10px;
     color: #ffffff;
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 900;
-    letter-spacing: 1.2px;
+    letter-spacing: 0.8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
   }
   .btn-talent-tree:hover {
     background: rgba(0, 240, 255, 0.16);
@@ -694,6 +704,45 @@
   .btn-talent-tree:hover svg {
     fill: #00f0ff;
     filter: drop-shadow(0 0 6px #00f0ff);
+  }
+
+  .btn-promo-code {
+    background: rgba(184, 69, 255, 0.12);
+    border: 1.5px solid rgba(184, 69, 255, 0.45);
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: #e9d5ff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .btn-promo-code:hover {
+    background: rgba(184, 69, 255, 0.25);
+    border-color: #b845ff;
+    box-shadow: 0 0 16px rgba(184, 69, 255, 0.4);
+    transform: translateY(-1px);
+    color: #fff;
+  }
+  .btn-promo-code svg {
+    width: 15px;
+    height: 15px;
+    fill: #c084fc;
+    filter: drop-shadow(0 0 4px rgba(192, 132, 252, 0.5));
+    transition: fill 0.2s;
+  }
+  .btn-promo-code:hover svg {
+    fill: #fff;
+    filter: drop-shadow(0 0 6px #b845ff);
   }
 
   /* MODUŁ LOGOWANIA / REJESTRACJI FIREBASE */
@@ -1149,6 +1198,128 @@
     background: rgba(255, 51, 102, 0.15);
     border-color: #ff3366;
     color: #ff3366;
+  }
+
+  /* MODAL KODÓW PROMOCYJNYCH / REKOMPENSATY */
+  #promoCodeModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 14, 0.94);
+    backdrop-filter: blur(14px);
+    z-index: 1000000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .promo-modal-box {
+    width: 100%;
+    max-width: 440px;
+    background: linear-gradient(180deg, #0e1526 0%, #080c16 100%);
+    border: 1.5px solid rgba(184, 69, 255, 0.4);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(184, 69, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .promo-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(184, 69, 255, 0.06);
+  }
+  .promo-modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #c084fc;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .promo-modal-close {
+    background: transparent;
+    border: none;
+    color: #8b949e;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+  .promo-modal-close:hover {
+    color: #fff;
+  }
+  .promo-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .promo-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  .promo-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1.5px solid rgba(184, 69, 255, 0.35);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s;
+  }
+  .promo-input:focus {
+    border-color: #b845ff;
+    box-shadow: 0 0 16px rgba(184, 69, 255, 0.35);
+  }
+  .btn-promo-submit {
+    background: linear-gradient(135deg, #b845ff, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    padding: 0 16px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(184, 69, 255, 0.4);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-promo-submit:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+    box-shadow: 0 0 22px rgba(184, 69, 255, 0.6);
+  }
+  .promo-feedback {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    min-height: 16px;
+    line-height: 1.3;
+  }
+  .promo-redeemed-info {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 10.5px;
+    color: #94a3b8;
+    line-height: 1.4;
   }
 
 
@@ -2578,18 +2749,24 @@
             </div>
 
             <!-- Pasek poziomu i EXP -->
-            <div class="account-level-row" onclick="handlePromptModifyExp()" style="cursor: pointer;" title="Kliknij tutaj, aby zmienić EXP (poziom i punkty SP przeliczą się natychmiast!)">
+            <div class="account-level-row">
               <div class="account-lvl-badge" id="accLevelDisplay">LVL 1</div>
-              <div class="account-exp-bar-wrap" title="Kliknij, aby zmienić ilość EXP">
+              <div class="account-exp-bar-wrap">
                 <div class="account-exp-bar-fill" id="accExpBarFill" style="width: 0%;"></div>
                 <div class="account-exp-bar-label" id="accExpDisplay">0 / 35 XP</div>
               </div>
             </div>
 
-            <button type="button" class="btn-talent-tree" onclick="openTalentTreeModal()" title="Otwórz drzewko rozwoju postaci">
-              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              <span>DRZEWKO TALENTÓW</span>
-            </button>
+            <div class="account-card-btns-row">
+              <button type="button" class="btn-talent-tree" onclick="openTalentTreeModal()" title="Otwórz drzewko rozwoju postaci">
+                <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                <span>DRZEWKO</span>
+              </button>
+              <button type="button" class="btn-promo-code" onclick="openPromoCodeModal()" title="Odbierz nagrody za kody promocyjne">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.65-.5-.65C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1h-2.22l.8-1.07c.3-.39.78-.63 1.42-.63zM9 4c.64 0 1.12.24 1.42.63L11.22 6H9c-.55 0-1-.45-1-1s.45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76V14h2V8.76L15.38 12 17 10.83 14.92 8H20v6z"/></svg>
+                <span>KOD PROMO</span>
+              </button>
+            </div>
 
             <button type="button" class="btn-admin-panel" id="btnAdminPanel" onclick="openAdminPanelModal()" title="Panel kontrolny administratora (Firebase)">
               <svg viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"/></svg>
@@ -2994,6 +3171,46 @@
         <button type="button" class="btn-admin-quick" onclick="adminQuickSetMaxLvl()">MAX POZIOM (50)</button>
       </div>
 
+      <!-- KODY PROMOCYJNE I REKOMPENSATY -->
+      <div class="admin-exp-card" style="margin-top: 10px; border-color: rgba(184, 69, 255, 0.45); background: rgba(184, 69, 255, 0.05);">
+        <div class="admin-slider-header">
+          <span style="color: #c084fc;">🎁 KODY PROMOCYJNE (DLA WYBRANYCH)</span>
+          <span class="admin-slider-val" style="color: #c084fc;">REKOMPENSATA</span>
+        </div>
+        <div style="font-size: 10px; color: #94a3b8; line-height: 1.4; margin: 4px 0 8px;">
+          Tajne kody rekompensaty po resecie bazy. Przekaż je tylko wybranym graczom:
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid rgba(184, 69, 255, 0.25); border-radius: 6px; padding: 6px 10px;">
+            <div>
+              <strong style="color: #00ff88; font-family:'Orbitron'; font-size: 11px;">REKOMPENSATA2026</strong>
+              <div style="font-size: 9px; color: #8b949e;">+350 XP (awans na ~4 LVL) oraz +5 SP</div>
+            </div>
+            <button type="button" class="btn-admin-exp-pill" style="border-color: #00ff88; color: #00ff88; padding: 4px 8px;" onclick="navigator.clipboard.writeText('REKOMPENSATA2026'); showBanner('📋 Skopiowano kod REKOMPENSATA2026!', '#00ff88', 50);">KOPIUJ</button>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid rgba(184, 69, 255, 0.25); border-radius: 6px; padding: 6px 10px;">
+            <div>
+              <strong style="color: #c084fc; font-family:'Orbitron'; font-size: 11px;">VIP-RESTART</strong>
+              <div style="font-size: 9px; color: #8b949e;">+600 XP (awans na ~6 LVL) oraz +8 SP</div>
+            </div>
+            <button type="button" class="btn-admin-exp-pill" style="border-color: #c084fc; color: #c084fc; padding: 4px 8px;" onclick="navigator.clipboard.writeText('VIP-RESTART'); showBanner('📋 Skopiowano kod VIP-RESTART!', '#c084fc', 50);">KOPIUJ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEZON 2 & GLOBALNY RESET BAZY -->
+      <div style="margin-top: 10px; padding: 10px; background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.35); border-radius: 8px;">
+        <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:#ff0055; letter-spacing:0.8px; margin-bottom: 6px;">
+          ⚠️ GLOBALNY WIPE BAZY (SEZON 2):
+        </div>
+        <button type="button" class="btn-admin-wipe" onclick="adminWipeAllPlayersToLevel1()" style="width: 100%; background: linear-gradient(135deg, rgba(255, 0, 85, 0.25), rgba(150, 0, 50, 0.35)); border: 1px solid #ff0055; border-radius: 6px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; padding: 8px; cursor: pointer; transition: all 0.2s;">
+          💥 ZRESETUJ WSZYSTKIE KONTA W BAZIE DO LVL 1
+        </button>
+        <div style="font-size: 9.5px; color: #8b949e; margin-top: 5px; line-height: 1.3;">
+          Resetuje poziom (LVL 1), EXP (0), SP (1) oraz drzewko talentów dla każdego gracza w kolekcji Firestore. Statusy administratorów i nicki zostają zachowane!
+        </div>
+      </div>
+
       <div style="font-size:10.5px; color:#64748b; line-height:1.4; padding: 4px 2px;">
         💡 <em>Wskazówka:</em> W konsoli Firebase Firestore w kolekcji <code>players</code> możesz również bezpośrednio w dokumencie wpisać <code>isAdmin: true</code>, <code>allTalents: true</code>, <code>sp: 999</code> lub <code>infiniteStamina: true</code>.
       </div>
@@ -3006,6 +3223,35 @@
   </div>
 </div>
 
+<!-- MODAL KODÓW PROMOCYJNYCH / REKOMPENSATY -->
+<div id="promoCodeModal">
+  <div class="promo-modal-box">
+    <div class="promo-modal-header">
+      <div class="promo-modal-title">
+        <span>🎁 KODY PROMOCYJNE & REKOMPENSATY</span>
+      </div>
+      <button type="button" class="promo-modal-close" onclick="closePromoCodeModal()" title="Zamknij okno">✕</button>
+    </div>
+
+    <div class="promo-modal-body">
+      <div style="font-size: 11px; color: #94a3b8; line-height: 1.45;">
+        Wpisz unikalny kod promocyjny, aby odebrać specjalną rekompensatę lub bonus (EXP oraz punkty SP). Każdy kod można aktywować <strong>tylko raz na konto</strong>!
+      </div>
+
+      <div class="promo-input-row">
+        <input type="text" id="promoCodeInput" class="promo-input" placeholder="WPISZ KOD PROMOCYJNY..." maxlength="24" onkeydown="if(event.key==='Enter')handlePromoSubmit()">
+        <button type="button" class="btn-promo-submit" onclick="handlePromoSubmit()">ODBIERZ</button>
+      </div>
+
+      <div class="promo-feedback" id="promoCodeFeedback"></div>
+
+      <div class="promo-redeemed-info" id="promoRedeemedList">
+        <!-- Renderowane dynamicznie -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DRZEWKA TALENTÓW (NOWOCZESNY DESIGN, 4 ŚCIEŻKI ROZWOJU Z KONDUTORAMI MOCY I ZAKŁADKAMI) -->
 <div id="talentTreeModal">
   <div class="tree-modal-box">
@@ -3014,7 +3260,7 @@
         <span class="tree-modal-title">⚡ DRZEWKO SPECJALIZACJI</span>
         <div class="tree-header-stats">
           <span class="tree-sp-counter" id="modalSpCounter">⚡ 0 SP</span>
-          <span class="tree-spent-counter" id="modalSpentCounter">Wydano: 0 / 64 SP</span>
+          <span class="tree-spent-counter" id="modalSpentCounter">Wydano: 0 / 100 SP</span>
         </div>
       </div>
       <div class="tree-header-actions">
@@ -3231,25 +3477,25 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['speed_1', 'spd_1']
       },
       {
-        id: 'spd_2', tier: 2, cost: 2, req: 'spd_1',
+        id: 'spd_2', tier: 2, cost: 3, req: 'spd_1',
         title: 'Szybki Zryw', icon: '💨', type: 'stat',
         benefit: 'Dash odnawia się o 35% szybciej i zużywa 25% mniej energii',
         legacyIds: ['speed_2', 'spd_2']
       },
       {
-        id: 'spd_3', tier: 3, cost: 3, req: 'spd_2',
+        id: 'spd_3', tier: 3, cost: 5, req: 'spd_2',
         title: 'Kinetyczny Zryw', icon: '🚀', type: 'skill',
         benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +25% prędkości',
         legacyIds: ['speed_3', 'spd_3']
       },
       {
-        id: 'spd_4', tier: 4, cost: 4, req: 'spd_3',
+        id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
         title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
         benefit: 'Każde odbicie w wymianie daje +6% prędkości; przy 4 odbiciach kolejny Dash jest darmowy',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
-        id: 'spd_5', tier: 5, cost: 6, req: 'spd_4',
+        id: 'spd_5', tier: 5, cost: 9, req: 'spd_4',
         title: 'Widmowy Krok', icon: '👻', type: 'legend',
         benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
@@ -3270,25 +3516,25 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['force_1', 'atk_1', 'pwr_1']
       },
       {
-        id: 'pwr_2', tier: 2, cost: 2, req: 'pwr_1',
+        id: 'pwr_2', tier: 2, cost: 3, req: 'pwr_1',
         title: 'Cieplny Impuls', icon: '🔥', type: 'stat',
         benefit: '+25% siły Smasha łącznie i o 40% szybsze ładowanie ścięcia',
         legacyIds: ['force_2', 'atk_2', 'pwr_2']
       },
       {
-        id: 'pwr_3', tier: 3, cost: 3, req: 'pwr_2',
+        id: 'pwr_3', tier: 3, cost: 5, req: 'pwr_2',
         title: 'Ścienny Rykoszet', icon: '⚡', type: 'skill',
         benefit: 'Odbicie piłki od ściany nie zwalnia, lecz przyspiesza piłkę o +15%',
         legacyIds: ['force_3', 'atk_3', 'pwr_3']
       },
       {
-        id: 'pwr_4', tier: 4, cost: 4, req: 'pwr_3',
+        id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
         title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
         benefit: 'Twój Smash odpycha paletkę rywala w tył o 15 px i wywołuje falę uderzeniową',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
-        id: 'pwr_5', tier: 5, cost: 6, req: 'pwr_4',
+        id: 'pwr_5', tier: 5, cost: 9, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
         benefit: 'Smash zamienia piłkę w płonący meteor o maksymalnej prędkości 16.5 px/f',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
@@ -3309,25 +3555,25 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['spin_1', 'spn_1']
       },
       {
-        id: 'spn_2', tier: 2, cost: 2, req: 'spn_1',
+        id: 'spn_2', tier: 2, cost: 3, req: 'spn_1',
         title: 'Cyber Rotacja', icon: '🌪️', type: 'stat',
         benefit: '+25% rotacji łącznie, a łuk skrętu utrzymuje się o 50% dłużej',
         legacyIds: ['spin_2', 'spn_2']
       },
       {
-        id: 'spn_3', tier: 3, cost: 3, req: 'spn_2',
+        id: 'spn_3', tier: 3, cost: 5, req: 'spn_2',
         title: 'Bumerang Ścienny', icon: '🪃', type: 'skill',
         benefit: 'Odbicie podkręconej piłki od ściany zacieśnia jej zakręt zamiast go kasować',
         legacyIds: ['spin_3', 'spn_3']
       },
       {
-        id: 'spn_4', tier: 4, cost: 4, req: 'spn_3',
+        id: 'spn_4', tier: 4, cost: 7, req: 'spn_3',
         title: 'Zakręt Grawitacyjny', icon: '🌌', type: 'skill',
         benefit: 'Kliknięcie PPM przy uderzeniu nadaje piłce nagły, ostry zygzak w locie',
         legacyIds: ['spin_4', 'spn_4']
       },
       {
-        id: 'spn_5', tier: 5, cost: 6, req: 'spn_4',
+        id: 'spn_5', tier: 5, cost: 9, req: 'spn_4',
         title: 'Kontrola Lotu', icon: '🎛️', type: 'legend',
         benefit: 'Trzymając LPM lub PPM przez 0,6 s po uderzeniu, sterujesz torem piłki myszką',
         legacyIds: ['spin_5', 'spn_5', 'spn_6']
@@ -3348,25 +3594,25 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['def_1']
       },
       {
-        id: 'def_2', tier: 2, cost: 2, req: 'def_1',
+        id: 'def_2', tier: 2, cost: 3, req: 'def_1',
         title: 'Zwiększona Bateria', icon: '🔋', type: 'stat',
         benefit: '+14 px długości paletki łącznie oraz +25 maks. energii',
         legacyIds: ['def_2', 'stm_1', 'stm_2']
       },
       {
-        id: 'def_3', tier: 3, cost: 3, req: 'def_2',
+        id: 'def_3', tier: 3, cost: 5, req: 'def_2',
         title: 'Kinetyczny Reaktor', icon: '🔌', type: 'skill',
         benefit: 'Zatrzymanie szybkiej piłki lub smasha natychmiast odnawia +25 energii',
         legacyIds: ['def_3', 'stm_3']
       },
       {
-        id: 'def_4', tier: 4, cost: 4, req: 'def_3',
+        id: 'def_4', tier: 4, cost: 7, req: 'def_3',
         title: 'Cyber Parry', icon: '⚔️', type: 'skill',
         benefit: 'Odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak',
         legacyIds: ['def_4', 'stm_4']
       },
       {
-        id: 'def_5', tier: 5, cost: 6, req: 'def_4',
+        id: 'def_5', tier: 5, cost: 9, req: 'def_4',
         title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
         benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
@@ -3474,6 +3720,33 @@ function getLevelProgress(totalExp) {
   }
 }
 
+function createDefaultProfile(nick = 'GRACZ') {
+  const cleanNick = (nick || 'GRACZ').trim() || 'GRACZ';
+  return {
+    nick: cleanNick,
+    level: 1,
+    exp: 0,
+    sp: 1,
+    spentSp: 0,
+    freeResets: 1,
+    talents: { root: true },
+    stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
+    redeemedCodes: [],
+    resetVersion: 2,
+    isAdmin: false,
+    allTalents: false,
+    infiniteStamina: false,
+    godMode: false,
+    goldSmash: false,
+    customSpeedMult: 1.0,
+    customSmashMult: 1.0,
+    customPaddleHeight: null,
+    adminBadge: null,
+    adminToken: null,
+    updatedAt: Date.now()
+  };
+}
+
 /* =========================================================================
    ZABEZPIECZENIE ANTY-CHEAT I SUMA KONTROLNA PROFILU LOKALNEGO (INTEGRITY)
    ========================================================================= */
@@ -3494,7 +3767,8 @@ function hashString(str) {
 function computeProfileChecksum(data) {
   if (!data) return '';
   const normTalents = Object.keys(data.talents || {}).filter(k => data.talents[k]).sort().join(',');
-  const rawString = `${data.nick || ''}:${data.exp || 0}:${data.sp || 0}:${data.spentSp || 0}:${data.freeResets || 0}:${normTalents}:${data.isAdmin ? 1 : 0}:${data.allTalents ? 1 : 0}:${data.infiniteStamina ? 1 : 0}:${data.godMode ? 1 : 0}:${data.adminToken || ''}:${CP_SEC_KEY}`;
+  const normCodes = (Array.isArray(data.redeemedCodes) ? data.redeemedCodes : []).slice().sort().join(',');
+  const rawString = `${data.nick || ''}:${data.exp || 0}:${data.sp || 0}:${data.spentSp || 0}:${data.freeResets || 0}:${normTalents}:${normCodes}:${data.resetVersion || 1}:${data.isAdmin ? 1 : 0}:${data.allTalents ? 1 : 0}:${data.infiniteStamina ? 1 : 0}:${data.godMode ? 1 : 0}:${data.adminToken || ''}:${CP_SEC_KEY}`;
   return hashString(rawString);
 }
 
@@ -3550,16 +3824,23 @@ function getPlayerProfile() {
 
     if (!prof || typeof prof !== 'object') {
       const oldNick = localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER') || 'GRACZ';
-      prof = {
-        nick: oldNick,
-        level: 1,
-        exp: 0,
-        sp: 1,
-        spentSp: 0,
-        freeResets: 1,
-        talents: { root: true },
-        stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 }
-      };
+      prof = createDefaultProfile(oldNick);
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+    }
+
+    // Globalny Sezon 2 / Reset Bazy (Wipe do LVL 1)
+    if (prof.resetVersion !== 2) {
+      console.log('🔄 [CyberPong] Reset profilu do LVL 1 (Sezon 2 / Wipe bazy)');
+      prof.level = 1;
+      prof.exp = 0;
+      prof.sp = 1;
+      prof.spentSp = 0;
+      prof.freeResets = 1;
+      prof.talents = { root: true };
+      prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+      prof.redeemedCodes = Array.isArray(prof.redeemedCodes) ? prof.redeemedCodes : [];
+      prof.resetVersion = 2;
+      prof.updatedAt = Date.now();
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
@@ -3652,18 +3933,11 @@ function getPlayerProfile() {
     if (!prof.stats || typeof prof.stats !== 'object') {
       prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     }
+    if (!Array.isArray(prof.redeemedCodes)) prof.redeemedCodes = [];
+    prof.resetVersion = 2;
     return prof;
   } catch (e) {
-    return {
-      nick: 'GRACZ',
-      level: 1,
-      exp: 0,
-      sp: 1,
-      spentSp: 0,
-      freeResets: 1,
-      talents: { root: true },
-      stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 }
-    };
+    return createDefaultProfile('GRACZ');
   }
 }
 
@@ -3672,6 +3946,8 @@ function syncProfileToCloud(prof) {
     try {
       const payload = { ...prof };
       delete payload.adminToken;
+      payload.redeemedCodes = Array.isArray(prof.redeemedCodes) ? prof.redeemedCodes : [];
+      payload.resetVersion = 2;
       // Pola konfiguracyjne w bazie Firestore - domyślnie false, aby opcja istniała w Firebase Console
       payload.isAdmin = (typeof prof.isAdmin === 'boolean') ? prof.isAdmin : false;
       payload.allTalents = (typeof prof.allTalents === 'boolean') ? prof.allTalents : false;
@@ -3830,9 +4106,32 @@ async function handleFirebaseLogout() {
   } catch (e) {
     console.warn('Błąd wylogowywania:', e);
   }
+
+  // Zamknij okna administratora i drzewka talentów
+  closeAdminPanelModal();
+  closeTalentTreeModal();
+
+  // Całkowite odizolowanie danych konta: przywrócenie czystego profilu domyślnego dla gościa (LVL 1, 0 EXP, 1 SP)
+  const guestProf = createDefaultProfile('GRACZ');
+  try {
+    localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(guestProf));
+    localStorage.setItem(NICK_STORAGE_KEY, 'GRACZ');
+    localStorage.setItem('CYBERPONG_CURRENT_USER', 'GRACZ');
+  } catch (e) {}
+
+  myName = 'GRACZ';
+  applyStatsToLocalPlayer();
   updateAccountUI();
+
+  const nickIn = document.getElementById('accAuthNick');
+  const passIn = document.getElementById('accAuthPass');
+  const fbFeedback = document.getElementById('accAuthFeedback');
+  if (nickIn) nickIn.value = '';
+  if (passIn) passIn.value = '';
+  if (fbFeedback) fbFeedback.textContent = '';
+
   toggleAccountAuthView(true);
-  showBanner('Wylogowano z konta', '#8b949e', 50);
+  showBanner('🚪 Wylogowano z konta — profil zresetowany do stanu gościa (LVL 1)', '#8b949e', 50);
 }
 
 function handleAccountSwitchClick() {
@@ -3881,16 +4180,13 @@ async function handleFirebaseRegister() {
   try {
     const email = nickToEmail(nick);
     const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
-    const currentLocal = getPlayerProfile();
-    const newProf = {
-      ...currentLocal,
-      nick: nick,
-      updatedAt: Date.now()
-    };
+    // Całkowita izolacja danych — każde nowo rejestrowane konto zaczyna jako czysty profil (LVL 1, 0 EXP, 1 SP)
+    const newProf = createDefaultProfile(nick);
     if (fbDb) {
       await fbDb.collection('players').doc(cred.user.uid).set(newProf);
     }
     savePlayerProfile(newProf);
+    applyCloudProfileToLocal(newProf, cred.user.uid);
     if (fbFeedback) {
       fbFeedback.style.color = '#00ff88';
       fbFeedback.textContent = '✓ Zarejestrowano pomyślnie!';
@@ -3899,7 +4195,7 @@ async function handleFirebaseRegister() {
       toggleAccountAuthView(false);
     }, 800);
     SFX.play('upgrade');
-    showBanner(`☁️ ZAREJESTROWANO: ${nick}!`, '#00ff88', 60);
+    showBanner(`☁️ NOWE KONTO ZAREJESTROWANE: ${nick}! (LVL 1)`, '#00ff88', 60);
   } catch (err) {
     console.error('Firebase Register Error:', err);
     if (fbFeedback) {
@@ -3955,10 +4251,10 @@ async function handleFirebaseLogin() {
         const cloudProf = snap.data();
         applyCloudProfileToLocal(cloudProf, cred.user.uid);
       } else {
-        const localProf = getPlayerProfile();
-        localProf.nick = nick;
-        await fbDb.collection('players').doc(cred.user.uid).set(localProf);
-        savePlayerProfile(localProf);
+        const freshProf = createDefaultProfile(nick);
+        await fbDb.collection('players').doc(cred.user.uid).set(freshProf);
+        savePlayerProfile(freshProf);
+        applyCloudProfileToLocal(freshProf, cred.user.uid);
       }
     }
     if (fbFeedback) {
@@ -3985,11 +4281,34 @@ async function handleFirebaseLogin() {
 
 function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   if (!cloudProf) return;
-  const current = getPlayerProfile();
+  const base = createDefaultProfile(cloudProf.nick || 'GRACZ');
   const merged = {
-    ...current,
-    ...cloudProf
+    ...base,
+    ...cloudProf,
+    redeemedCodes: Array.isArray(cloudProf.redeemedCodes) ? cloudProf.redeemedCodes : [],
+    talents: (cloudProf.talents && typeof cloudProf.talents === 'object')
+      ? { ...cloudProf.talents, root: true }
+      : { root: true },
+    stats: (cloudProf.stats && typeof cloudProf.stats === 'object')
+      ? { ...base.stats, ...cloudProf.stats }
+      : { ...base.stats }
   };
+
+  // Globalny Sezon 2 / Reset Bazy w chmurze Firebase (Wipe do LVL 1)
+  if (cloudProf.resetVersion !== 2) {
+    console.log('☁️ [Firestore Migration] Wykryto starszą wersję konta w chmurze — resetowanie do LVL 1...');
+    merged.level = 1;
+    merged.exp = 0;
+    merged.sp = 1;
+    merged.spentSp = 0;
+    merged.freeResets = 1;
+    merged.talents = { root: true };
+    merged.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    merged.resetVersion = 2;
+    merged.updatedAt = Date.now();
+    syncProfileToCloud(merged);
+    showBanner('🔄 RESTART SEZONU: Konto zresetowane do LVL 1! Użyj kodu rekompensaty.', '#00f0ff', 85);
+  }
 
   // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
   const isCloudAdmin = !!(cloudProf.isAdmin === true || cloudProf.role === 'admin');
@@ -4091,12 +4410,26 @@ function initAccountSystem() {
                 syncProfileToCloud(getPlayerProfile());
               }
             } else if (snap && !snap.exists) {
-              // Nowy dokument gracza - wyślij profil z polami konfiguracyjnymi
-              syncProfileToCloud(getPlayerProfile());
+              // Nowy dokument gracza w chmurze - wyślij czysty profil początkowy
+              const freshProf = createDefaultProfile(user.displayName || 'GRACZ');
+              fbDb.collection('players').doc(user.uid).set(freshProf).catch(console.warn);
+              applyCloudProfileToLocal(freshProf, user.uid, true);
             }
           }, err => {
             console.warn('Auth state realtime snapshot error:', err);
           });
+        }
+      } else {
+        // Użytkownik nie jest zalogowany w Firebase
+        const local = getPlayerProfile();
+        if (local && (local.isAdmin || local.adminToken)) {
+          local.isAdmin = false;
+          local.adminToken = null;
+          local.allTalents = false;
+          local.infiniteStamina = false;
+          local.godMode = false;
+          local.goldSmash = false;
+          savePlayerProfile(local);
         }
       }
       updateAccountUI();
@@ -4250,6 +4583,12 @@ function setAccountExp(targetExp, reason = 'Ręczna modyfikacja EXP') {
   const acc = getCurrentAccount();
   if (!acc) return null;
 
+  if (!acc.isAdmin) {
+    console.warn('⛔ [CyberPong Security] Próba modyfikacji EXP przez nieuprawnionego użytkownika!');
+    showBanner('⛔ Tylko Administrator może modyfikować poziom i EXP!', '#ff0055', 65);
+    return null;
+  }
+
   const oldProg = getLevelProgress(acc.exp || 0);
   const oldLvl = oldProg.level;
 
@@ -4299,11 +4638,15 @@ function setAccountExp(targetExp, reason = 'Ręczna modyfikacja EXP') {
 
 function handlePromptModifyExp() {
   const acc = getCurrentAccount();
+  if (!acc || !acc.isAdmin) {
+    showBanner('⛔ Tylko Administrator może modyfikować poziom i EXP!', '#ff0055', 65);
+    return;
+  }
   const currentExp = acc ? (acc.exp || 0) : 0;
   const currentLvl = acc ? (acc.level || 1) : 1;
   const currentSp = acc ? (acc.sp || 0) : 0;
 
-  const msg = `⚡ SZYBKA MODYFIKACJA EXP I POZIOMU\n\nObecny stan: LVL ${currentLvl} • ${currentExp} XP • ${currentSp} SP\n\nWpisz nową wartość EXP (np. 150) lub dodaj/odejmij (np. +100, -50):`;
+  const msg = `👑 MODYFIKACJA EXP I POZIOMU (ADMIN)\n\nObecny stan: LVL ${currentLvl} • ${currentExp} XP • ${currentSp} SP\n\nWpisz nową wartość EXP (np. 150) lub dodaj/odejmij (np. +100, -50):`;
   const res = prompt(msg, currentExp);
   if (res === null || res.trim() === '') return;
 
@@ -4317,7 +4660,7 @@ function handlePromptModifyExp() {
     if (!isNaN(parsed) && parsed >= 0) targetExp = parsed;
   }
 
-  setAccountExp(targetExp, 'Szybka edycja paska EXP');
+  setAccountExp(targetExp, 'Admin edycja paska EXP');
 }
 
 function adminApplyDirectExp() {
@@ -4346,15 +4689,261 @@ function adminQuickSetMaxLvl() {
   showBanner('👑 Ustawiono maksymalny poziom (LVL 50) i odblokowano pełne SP!', '#f5b041', 85);
 }
 
-// Globalne funkcje konsolowe dostępne bezpośrednio z DevTools:
-window.setExp = function(xp) { return setAccountExp(xp, 'Console setExp'); };
-window.addExp = function(xp) { const a = getCurrentAccount(); return setAccountExp((a ? a.exp || 0 : 0) + xp, 'Console addExp'); };
+// Globalne funkcje konsolowe dostępne bezpośrednio z DevTools (zabezpieczone - tylko dla Admina):
+window.setExp = function(xp) {
+  const a = getCurrentAccount();
+  if (!a || !a.isAdmin) {
+    console.warn('⛔ Tylko Administrator może modyfikować EXP!');
+    return null;
+  }
+  return setAccountExp(xp, 'Console setExp');
+};
+window.addExp = function(xp) {
+  const a = getCurrentAccount();
+  if (!a || !a.isAdmin) {
+    console.warn('⛔ Tylko Administrator może modyfikować EXP!');
+    return null;
+  }
+  return setAccountExp((a ? a.exp || 0 : 0) + xp, 'Console addExp');
+};
 window.setLevel = function(targetLvl) {
+  const a = getCurrentAccount();
+  if (!a || !a.isAdmin) {
+    console.warn('⛔ Tylko Administrator może modyfikować poziom!');
+    return null;
+  }
   let sum = 0;
   for (let l = 1; l < targetLvl; l++) sum += getXpRequiredForLevel(l);
   return setAccountExp(sum, `Console setLevel(${targetLvl})`);
 };
 window.setAccountExp = setAccountExp;
+
+/* =========================================================================
+   SYSTEM KODÓW PROMOCYJNYCH / REKOMPENSATY ORAZ GLOBALNY RESET BAZY (SEZON 2)
+   ========================================================================= */
+const PROMO_CODES = {
+  'REKOMPENSATA2026': {
+    exp: 350,
+    sp: 5,
+    name: 'Oficjalna Rekompensata Sezonowa',
+    desc: '+350 XP (awans na ~LVL 4-5) oraz +5 darmowych punktów SP!'
+  },
+  'REKOMPENSATA': {
+    exp: 350,
+    sp: 5,
+    name: 'Oficjalna Rekompensata Sezonowa',
+    desc: '+350 XP oraz +5 darmowych punktów SP!'
+  },
+  'VIP-RESTART': {
+    exp: 600,
+    sp: 8,
+    name: 'Pakiet VIP Restart',
+    desc: '+600 XP (awans na ~LVL 6) oraz +8 punktów SP!'
+  },
+  'CYBER-RESET': {
+    exp: 250,
+    sp: 4,
+    name: 'Bonus Restartu',
+    desc: '+250 XP oraz +4 punkty SP!'
+  }
+};
+
+function redeemPromoCode(inputCode) {
+  const code = (inputCode || '').trim().toUpperCase();
+  const feedbackEl = document.getElementById('promoCodeFeedback');
+
+  if (!code) {
+    if (feedbackEl) {
+      feedbackEl.style.color = '#ff0055';
+      feedbackEl.textContent = 'Wpisz kod promocyjny!';
+    }
+    return false;
+  }
+
+  const promo = PROMO_CODES[code];
+  if (!promo) {
+    if (feedbackEl) {
+      feedbackEl.style.color = '#ff0055';
+      feedbackEl.textContent = 'Nieprawidłowy lub nieaktywny kod promocyjny!';
+    }
+    SFX.play('wallHit');
+    return false;
+  }
+
+  const acc = getCurrentAccount();
+  if (!acc) return false;
+
+  acc.redeemedCodes = Array.isArray(acc.redeemedCodes) ? acc.redeemedCodes : [];
+  if (acc.redeemedCodes.includes(code)) {
+    if (feedbackEl) {
+      feedbackEl.style.color = '#f5b041';
+      feedbackEl.textContent = 'Ten kod został już aktywowany na Twoim koncie!';
+    }
+    SFX.play('wallHit');
+    return false;
+  }
+
+  acc.redeemedCodes.push(code);
+  const expBonus = promo.exp || 0;
+  const spBonus = promo.sp || 0;
+
+  if (expBonus > 0) {
+    const oldProg = getLevelProgress(acc.exp || 0);
+    const oldLvl = oldProg.level;
+    acc.exp = (acc.exp || 0) + expBonus;
+    const newProg = getLevelProgress(acc.exp);
+    const newLvl = newProg.level;
+    acc.level = newLvl;
+
+    if (newLvl > oldLvl) {
+      const spGained = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
+      acc.sp = (acc.sp || 0) + spGained;
+    }
+  }
+
+  if (spBonus > 0) {
+    acc.sp = (acc.sp || 0) + spBonus;
+  }
+
+  saveCurrentAccount(acc);
+  updateAccountUI();
+  applyStatsToLocalPlayer();
+  renderSkillTreeGraph();
+
+  if (feedbackEl) {
+    feedbackEl.style.color = '#00ff88';
+    feedbackEl.textContent = `✓ Sukces! Odebrano: +${expBonus} XP oraz +${spBonus} SP!`;
+  }
+
+  const inp = document.getElementById('promoCodeInput');
+  if (inp) inp.value = '';
+
+  updatePromoRedeemedDisplay();
+  SFX.play('upgrade');
+  triggerShake(8, 4);
+  showBanner(`🎁 KOD ZREALIZOWANY: +${expBonus} XP i +${spBonus} SP!`, '#00ff88', 90);
+  return true;
+}
+
+function handlePromoSubmit() {
+  const inp = document.getElementById('promoCodeInput');
+  const code = inp ? inp.value.trim() : '';
+  redeemPromoCode(code);
+}
+
+function openPromoCodeModal() {
+  const modal = document.getElementById('promoCodeModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  const inp = document.getElementById('promoCodeInput');
+  if (inp) {
+    inp.value = '';
+    inp.focus();
+  }
+  const fb = document.getElementById('promoCodeFeedback');
+  if (fb) fb.textContent = '';
+  updatePromoRedeemedDisplay();
+}
+
+function closePromoCodeModal() {
+  const modal = document.getElementById('promoCodeModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updatePromoRedeemedDisplay() {
+  const el = document.getElementById('promoRedeemedList');
+  if (!el) return;
+  const acc = getCurrentAccount();
+  const codes = (acc && Array.isArray(acc.redeemedCodes)) ? acc.redeemedCodes : [];
+  if (codes.length === 0) {
+    el.innerHTML = '<span style="color:#64748b;">Brak aktywowanych kodów na tym koncie.</span>';
+  } else {
+    el.innerHTML = '<span style="color:#00ff88; font-weight:800;">Aktywowane kody:</span> ' + codes.map(c => `<span style="display:inline-block; padding:2px 7px; background:rgba(184,69,255,0.18); border:1px solid rgba(184,69,255,0.4); border-radius:5px; font-weight:800; color:#e9d5ff; font-family:'Orbitron'; font-size:10px; margin:2px;">${c}</span>`).join(' ');
+  }
+}
+
+async function adminWipeAllPlayersToLevel1() {
+  const prof = getPlayerProfile();
+  if (!prof.isAdmin) {
+    showBanner('⛔ Tylko Administrator może zresetować bazę graczy!', '#ff0055', 65);
+    return;
+  }
+
+  const confirmMsg = '⚠️ UWAGA: GLOBALNY WIPE BAZY (SEZON 2)!\n\nCzy na pewno chcesz zresetować WSZYSTKIE konta w bazie Firestore do Poziomu 1 (0 EXP, 1 SP, czyste drzewko)?\n\nUprawnienia Administratora i nicki graczy zostaną nienaruszone.\n\nCzy chcesz kontynuować?';
+  if (!confirm(confirmMsg)) return;
+
+  if (!fbDb) {
+    alert('Brak połączenia z bazą Firestore!');
+    return;
+  }
+
+  showBanner('⏳ Resetowanie wszystkich kont w chmurze...', '#00f0ff', 60);
+
+  try {
+    const snap = await fbDb.collection('players').get();
+    if (snap.empty) {
+      showBanner('Baza danych graczy jest pusta.', '#8b949e', 50);
+      return;
+    }
+
+    const batch = fbDb.batch();
+    let count = 0;
+
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const cleanUpdate = {
+        level: 1,
+        exp: 0,
+        sp: 1,
+        spentSp: 0,
+        freeResets: 1,
+        talents: { root: true },
+        stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
+        resetVersion: 2,
+        updatedAt: Date.now()
+      };
+      if (data.isAdmin) cleanUpdate.isAdmin = true;
+      if (data.role) cleanUpdate.role = data.role;
+      if (data.adminBadge) cleanUpdate.adminBadge = data.adminBadge;
+      if (data.nick) cleanUpdate.nick = data.nick;
+      if (data.adminToken) cleanUpdate.adminToken = data.adminToken;
+      if (Array.isArray(data.redeemedCodes)) cleanUpdate.redeemedCodes = data.redeemedCodes;
+
+      batch.set(docSnap.ref, cleanUpdate, { merge: true });
+      count++;
+    });
+
+    await batch.commit();
+
+    // Reset obecnego profilu
+    prof.level = 1;
+    prof.exp = 0;
+    prof.sp = 1;
+    prof.spentSp = 0;
+    prof.freeResets = 1;
+    prof.talents = { root: true };
+    prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    prof.resetVersion = 2;
+    prof.updatedAt = Date.now();
+    savePlayerProfile(prof);
+    applyStatsToLocalPlayer();
+    updateAccountUI();
+    renderSkillTreeGraph();
+
+    SFX.play('upgrade');
+    triggerShake(10, 5);
+    showBanner(`💥 SUKCES: Zresetowano ${count} kont w Firestore do LVL 1!`, '#00ff88', 90);
+    alert(`✓ Sukces!\n\nZresetowano ${count} kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 2 rozpoczęty dla wszystkich graczy!`);
+  } catch (err) {
+    console.error('Błąd resetowania bazy:', err);
+    showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
+    alert('Błąd resetowania bazy: ' + (err.message || err));
+  }
+}
+
+window.redeemPromoCode = redeemPromoCode;
+window.openPromoCodeModal = openPromoCodeModal;
+window.closePromoCodeModal = closePromoCodeModal;
 
 // Zamykanie modali po kliknięciu w tło poza okienkiem
 document.addEventListener('click', e => {
@@ -4365,6 +4954,10 @@ document.addEventListener('click', e => {
   const admModal = document.getElementById('adminPanelModal');
   if (admModal && e.target === admModal) {
     closeAdminPanelModal();
+  }
+  const promoModal = document.getElementById('promoCodeModal');
+  if (promoModal && e.target === promoModal) {
+    closePromoCodeModal();
   }
 });
 
@@ -4378,6 +4971,10 @@ document.addEventListener('keydown', e => {
     const admModal = document.getElementById('adminPanelModal');
     if (admModal && admModal.style.display === 'flex') {
       closeAdminPanelModal();
+    }
+    const promoModal = document.getElementById('promoCodeModal');
+    if (promoModal && promoModal.style.display === 'flex') {
+      closePromoCodeModal();
     }
   }
 });
