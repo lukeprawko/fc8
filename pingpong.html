@@ -226,34 +226,34 @@
   /* WIERSZE WYBORU POZIOMU BOTÓW Z IKONĄ */
   .tier-row {
     display: grid;
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: 78px 1fr;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: rgba(8, 12, 22, 0.55);
-    padding: 8px 10px;
+    padding: 7px 8px;
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
   .tier-tag {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     color: #c9d1d9;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.3px;
     white-space: nowrap;
   }
   .tier-tag svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
   }
   .ai-tiers {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 5px;
   }
   .mp-tiers {
     display: grid;
@@ -263,24 +263,24 @@
   .tier-btn {
     background: rgba(6, 9, 16, 0.85);
     border: 1px solid #263147;
-    border-radius: 10px;
-    padding: 8px 4px;
+    border-radius: 9px;
+    padding: 8px 2px;
     color: #8b949e;
     font-family: 'Orbitron', sans-serif;
-    font-size: 10.5px;
+    font-size: 9px;
     font-weight: 800;
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     min-height: 36px;
     box-sizing: border-box;
-    letter-spacing: 0.4px;
+    letter-spacing: 0;
   }
   .tier-btn svg {
     width: 17px;
@@ -1029,6 +1029,81 @@
   .btn-admin-quick:hover {
     background: rgba(0, 240, 255, 0.2);
     border-color: #00f0ff;
+  }
+  .admin-exp-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(245, 176, 65, 0.3);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-exp-ctrl-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+  .admin-exp-input {
+    background: rgba(6, 9, 16, 0.9);
+    border: 1px solid #334155;
+    border-radius: 7px;
+    padding: 7px 10px;
+    color: #f8fafc;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .admin-exp-input:focus {
+    border-color: #f5b041;
+  }
+  .btn-admin-exp-set {
+    background: rgba(245, 176, 65, 0.2);
+    border: 1px solid #f5b041;
+    color: #f5b041;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 7px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-admin-exp-set:hover {
+    background: #f5b041;
+    color: #050811;
+  }
+  .admin-exp-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+  }
+  .btn-admin-exp-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 6px 2px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .btn-admin-exp-pill:hover {
+    border-color: #00f0ff;
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.1);
+  }
+  .btn-admin-exp-pill.exp-reset:hover {
+    border-color: #ff3366;
+    color: #ff3366;
+    background: rgba(255, 51, 102, 0.15);
   }
   .admin-footer-actions {
     padding: 12px 20px;
@@ -2355,19 +2430,22 @@
       font-size: 13px;
     }
     .tier-row {
-      grid-template-columns: 78px 1fr;
-      padding: 4px 6px;
+      grid-template-columns: 66px 1fr;
+      padding: 4px 5px;
+      gap: 4px;
     }
     .tier-tag {
-      font-size: 8px;
+      font-size: 7.5px;
+      gap: 3px;
     }
     .tier-tag svg {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
     }
     .tier-btn {
-      padding: 5px 2px;
-      font-size: 8.5px;
+      padding: 5px 1px;
+      font-size: 7.5px;
+      letter-spacing: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2500,11 +2578,11 @@
             </div>
 
             <!-- Pasek poziomu i EXP -->
-            <div class="account-level-row">
+            <div class="account-level-row" onclick="handlePromptModifyExp()" style="cursor: pointer;" title="Kliknij tutaj, aby zmienić EXP (poziom i punkty SP przeliczą się natychmiast!)">
               <div class="account-lvl-badge" id="accLevelDisplay">LVL 1</div>
-              <div class="account-exp-bar-wrap" title="Punkty doświadczenia do kolejnego poziomu">
+              <div class="account-exp-bar-wrap" title="Kliknij, aby zmienić ilość EXP">
                 <div class="account-exp-bar-fill" id="accExpBarFill" style="width: 0%;"></div>
-                <div class="account-exp-bar-label" id="accExpDisplay">0 / 150 XP</div>
+                <div class="account-exp-bar-label" id="accExpDisplay">0 / 35 XP</div>
               </div>
             </div>
 
@@ -2887,12 +2965,32 @@
         </div>
       </div>
 
+      <!-- KONTROLA EXP I POZIOMU -->
+      <div class="admin-exp-card">
+        <div class="admin-slider-header">
+          <span>⚡ MODYFIKACJA EXP I POZIOMU</span>
+          <span class="admin-slider-val" id="admCurExpLvl">LVL 1 • 0 XP</span>
+        </div>
+        <div class="admin-exp-ctrl-row">
+          <input type="number" id="admExpDirectInput" class="admin-exp-input" min="0" max="999999" placeholder="Wpisz sumę EXP..." onkeydown="if(event.key==='Enter')adminApplyDirectExp()">
+          <button type="button" class="btn-admin-exp-set" onclick="adminApplyDirectExp()">USTAW EXP</button>
+        </div>
+        <div class="admin-exp-quick-grid">
+          <button type="button" class="btn-admin-exp-pill" onclick="adminQuickDeltaExp(50)">+50</button>
+          <button type="button" class="btn-admin-exp-pill" onclick="adminQuickDeltaExp(150)">+150</button>
+          <button type="button" class="btn-admin-exp-pill" onclick="adminQuickDeltaExp(500)">+500</button>
+          <button type="button" class="btn-admin-exp-pill" onclick="adminQuickDeltaExp(2000)">+2k</button>
+          <button type="button" class="btn-admin-exp-pill" onclick="adminQuickDeltaExp(-100)">-100</button>
+          <button type="button" class="btn-admin-exp-pill exp-reset" onclick="adminQuickDeltaExp(-999999)">ZERUJ</button>
+        </div>
+      </div>
+
       <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:#f5b041; letter-spacing:0.8px; margin-top:2px;">
         SZYBKIE PRZYZNANIE ZASOBÓW:
       </div>
       <div class="admin-quick-actions">
+        <button type="button" class="btn-admin-quick" onclick="adminQuickAddSp(25)">+25 SP</button>
         <button type="button" class="btn-admin-quick" onclick="adminQuickAddSp(50)">+50 SP</button>
-        <button type="button" class="btn-admin-quick" onclick="adminQuickAddXp(10000)">+10 000 XP</button>
         <button type="button" class="btn-admin-quick" onclick="adminQuickSetMaxLvl()">MAX POZIOM (50)</button>
       </div>
 
@@ -2916,11 +3014,11 @@
         <span class="tree-modal-title">⚡ DRZEWKO SPECJALIZACJI</span>
         <div class="tree-header-stats">
           <span class="tree-sp-counter" id="modalSpCounter">⚡ 0 SP</span>
-          <span class="tree-spent-counter" id="modalSpentCounter">Wydano: 0 / 116 SP</span>
+          <span class="tree-spent-counter" id="modalSpentCounter">Wydano: 0 / 64 SP</span>
         </div>
       </div>
       <div class="tree-header-actions">
-        <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET (1 DARMOWY)</button>
+        <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET DRZEWKA (DARMOWY)</button>
         <button type="button" class="btn-tree-close" onclick="closeTalentTreeModal()" title="Zamknij okno drzewka">✕ ZAMKNIJ</button>
       </div>
     </div>
@@ -3151,7 +3249,7 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['speed_4', 'spd_4']
       },
       {
-        id: 'spd_5', tier: 5, cost: 5, req: 'spd_4',
+        id: 'spd_5', tier: 5, cost: 6, req: 'spd_4',
         title: 'Widmowy Krok', icon: '👻', type: 'legend',
         benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
@@ -3190,7 +3288,7 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
-        id: 'pwr_5', tier: 5, cost: 5, req: 'pwr_4',
+        id: 'pwr_5', tier: 5, cost: 6, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
         benefit: 'Smash zamienia piłkę w płonący meteor o maksymalnej prędkości 16.5 px/f',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
@@ -3229,7 +3327,7 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['spin_4', 'spn_4']
       },
       {
-        id: 'spn_5', tier: 5, cost: 5, req: 'spn_4',
+        id: 'spn_5', tier: 5, cost: 6, req: 'spn_4',
         title: 'Kontrola Lotu', icon: '🎛️', type: 'legend',
         benefit: 'Trzymając LPM lub PPM przez 0,6 s po uderzeniu, sterujesz torem piłki myszką',
         legacyIds: ['spin_5', 'spn_5', 'spn_6']
@@ -3268,7 +3366,7 @@ const SKILL_TREE_BRANCHES = [
         legacyIds: ['def_4', 'stm_4']
       },
       {
-        id: 'def_5', tier: 5, cost: 5, req: 'def_4',
+        id: 'def_5', tier: 5, cost: 6, req: 'def_4',
         title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
         benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
@@ -3292,6 +3390,7 @@ SKILL_TREE_BRANCHES.forEach(b => {
 });
 
 const TALENTS_DEF = SKILL_TREE_NODES;
+const TOTAL_TREE_SP_COST = Object.values(SKILL_TREE_NODES).reduce((sum, n) => sum + (n.cost || 0), 0);
 
 const PLAYER_PROFILE_KEY = 'CYBERPONG_PLAYER_PROFILE_v2';
 
@@ -3335,19 +3434,19 @@ function calculateTotalSpForLevel(lvl) {
   const l = Math.max(1, lvl || 1);
   // Bazowe 2 punkty SP na start (lvl 1) + 1 SP za każdy kolejny poziom
   let sp = 2 + (l - 1);
-  // Bonusy kamieni milowych (milestones) co 10 poziomów (+2 bonusowe SP na lvl 10, 20, 30, 40, 50)
-  sp += Math.floor(l / 10) * 2;
+  // Bonusy kamieni milowych (milestones) co 10 poziomów (+3 bonusowe SP na lvl 10, 20, 30, 40, 50)
+  sp += Math.floor(l / 10) * 3;
   return sp;
 }
 
 function getXpRequiredForLevel(level) {
-  if (level <= 1) return 50;     // LVL 1 -> 2: 50 XP (szybki, satysfakcjonujący start w 1-2 mecze)
-  if (level === 2) return 85;    // LVL 2 -> 3: 85 XP (~2 mecze)
-  if (level === 3) return 130;   // LVL 3 -> 4: 130 XP (~2-3 mecze)
-  if (level === 4) return 180;   // LVL 4 -> 5: 180 XP (~3 mecze)
-  if (level === 5) return 240;   // LVL 5 -> 6: 240 XP
+  if (level <= 1) return 35;     // LVL 1 -> 2: 35 XP (szybki start - już pierwszy wygrany mecz daje poziom!)
+  if (level === 2) return 65;    // LVL 2 -> 3: 65 XP (~1-2 mecze)
+  if (level === 3) return 105;   // LVL 3 -> 4: 105 XP (~2 mecze)
+  if (level === 4) return 155;   // LVL 4 -> 5: 155 XP (~2-3 mecze)
+  if (level === 5) return 215;   // LVL 5 -> 6: 215 XP
   // Płynna, dynamicznie rosnąca krzywa RPG dla poziomów 6 - 50
-  return Math.round(240 + (level - 5) * 60 + Math.pow(level - 5, 1.22) * 5);
+  return Math.round(215 + (level - 5) * 55 + Math.pow(level - 5, 1.20) * 4.5);
 }
 
 function getLevelProgress(totalExp) {
@@ -3531,18 +3630,15 @@ function getPlayerProfile() {
 
     if (typeof prof.exp !== 'number') prof.exp = 0;
     const prog = getLevelProgress(prof.exp);
-    if (!prof.isAdmin || !prof.level) {
-      prof.level = prog.level;
-    }
+    prof.level = prog.level;
 
-    // Zbalansowane przeliczanie należnych punktów SP (uwzględnia bazowe 2 SP oraz kamienie milowe)
+    // Zbalansowane przeliczanie należnych punktów SP:
+    // Upewnij się, że gracz ma przynajmniej tyle SP, ile wynika z poziomu (i zachowaj punkty zdobyte z wygranych meczów)
     const totalSpDue = calculateTotalSpForLevel(prof.level);
-    if (!prof.isAdmin) {
-      const correctSp = Math.max(0, totalSpDue - (prof.spentSp || 0));
-      if (prof.sp !== correctSp) {
-        prof.sp = correctSp;
-        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
-      }
+    const minExpectedSp = Math.max(0, totalSpDue - (prof.spentSp || 0));
+    if (typeof prof.sp !== 'number' || isNaN(prof.sp) || prof.sp < minExpectedSp) {
+      prof.sp = minExpectedSp;
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
     if (typeof prof.sp !== 'number') prof.sp = 2;
@@ -3689,7 +3785,7 @@ function updateAccountUI() {
   const modalSp = document.getElementById('modalSpCounter');
   if (modalSp) modalSp.textContent = `⚡ ${prof.sp || 0} SP`;
   const modalSpent = document.getElementById('modalSpentCounter');
-  if (modalSpent) modalSpent.textContent = `Wydano: ${prof.spentSp || 0} / 116 SP`;
+  if (modalSpent) modalSpent.textContent = `Wydano: ${prof.spentSp || 0} / ${TOTAL_TREE_SP_COST} SP`;
 }
 
 function isUserLoggedInOnline() {
@@ -3923,9 +4019,15 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     }
   }
   merged.spentSp = calcSpent;
+  if (typeof merged.exp !== 'number') merged.exp = 0;
+  const prog = getLevelProgress(merged.exp);
+  merged.level = prog.level;
   const totalSpDue = calculateTotalSpForLevel(merged.level);
   if (!merged.isAdmin) {
-    merged.sp = Math.max(0, totalSpDue - calcSpent);
+    const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
+    if (typeof merged.sp !== 'number' || isNaN(merged.sp) || merged.sp < minExpectedSp) {
+      merged.sp = minExpectedSp;
+    }
   }
 
   // Zapis do localStorage z poprawną sumą kontrolną
@@ -4068,6 +4170,14 @@ function openAdminPanelModal() {
     const vPad = document.getElementById('admValPaddle');
     if (vPad) vPad.textContent = (prof.customPaddleHeight ? prof.customPaddleHeight + ' px' : 'Domyślna');
   }
+
+  const expInp = document.getElementById('admExpDirectInput');
+  if (expInp) expInp.value = prof.exp || 0;
+  const expLvlEl = document.getElementById('admCurExpLvl');
+  if (expLvlEl) {
+    const prog = getLevelProgress(prof.exp || 0);
+    expLvlEl.textContent = `LVL ${prog.level} • ${prof.exp || 0} XP • ${prof.sp || 0} SP`;
+  }
 }
 
 function closeAdminPanelModal() {
@@ -4114,33 +4224,130 @@ function resetAdminPowers() {
   showBanner('🔄 Zresetowano moce do wartości domyślnych', '#8b949e', 50);
 }
 
-function adminQuickAddSp(amount = 50) {
+function adminQuickAddSp(amount = 25) {
   const prof = getPlayerProfile();
   if (!prof.isAdmin) return;
   prof.sp = (prof.sp || 0) + amount;
   savePlayerProfile(prof);
+  renderSkillTreeGraph();
+  updateAccountUI();
+  const expLvlEl = document.getElementById('admCurExpLvl');
+  if (expLvlEl) {
+    const prog = getLevelProgress(prof.exp || 0);
+    expLvlEl.textContent = `LVL ${prog.level} • ${prof.exp || 0} XP • ${prof.sp || 0} SP`;
+  }
   showBanner(`⚡ Dodano +${amount} SP dla Admina!`, '#f5b041', 50);
 }
 
-function adminQuickAddXp(amount = 10000) {
-  const prof = getPlayerProfile();
-  if (!prof.isAdmin) return;
-  prof.exp = (prof.exp || 0) + amount;
-  const prog = getLevelProgress(prof.exp);
-  prof.level = prog.level;
-  savePlayerProfile(prof);
-  showBanner(`🌟 Dodano +${amount} XP dla Admina!`, '#f5b041', 50);
+function setAccountExp(targetExp, reason = 'Ręczna modyfikacja EXP') {
+  const acc = getCurrentAccount();
+  if (!acc) return null;
+
+  const oldProg = getLevelProgress(acc.exp || 0);
+  const oldLvl = oldProg.level;
+
+  let newExp = parseInt(targetExp, 10);
+  if (isNaN(newExp) || newExp < 0) newExp = 0;
+
+  acc.exp = newExp;
+  const newProg = getLevelProgress(newExp);
+  const newLvl = newProg.level;
+  acc.level = newLvl;
+
+  const totalSpDue = calculateTotalSpForLevel(newLvl);
+  const spent = acc.spentSp || 0;
+  const currentSp = acc.sp || 0;
+
+  if (newLvl > oldLvl) {
+    const spGained = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
+    acc.sp = currentSp + spGained;
+  } else if (newLvl < oldLvl) {
+    acc.sp = Math.max(0, totalSpDue - spent);
+  }
+
+  const minExpected = Math.max(0, totalSpDue - spent);
+  if (acc.sp < minExpected) {
+    acc.sp = minExpected;
+  }
+
+  saveCurrentAccount(acc);
+  updateAccountUI();
+  renderSkillTreeGraph();
+  applyStatsToLocalPlayer();
+
+  const expLvlEl = document.getElementById('admCurExpLvl');
+  if (expLvlEl) {
+    expLvlEl.textContent = `LVL ${acc.level} • ${acc.exp} XP • ${acc.sp} SP`;
+  }
+  const expInp = document.getElementById('admExpDirectInput');
+  if (expInp) {
+    expInp.value = acc.exp;
+  }
+
+  showBanner(`🌟 ZAKTUALIZOWANO: ${newExp} XP • LVL ${acc.level} • ${acc.sp} SP!`, '#00ff88', 85);
+  SFX.play('upgrade');
+  triggerShake(5, 3);
+  return { exp: acc.exp, level: acc.level, sp: acc.sp };
+}
+
+function handlePromptModifyExp() {
+  const acc = getCurrentAccount();
+  const currentExp = acc ? (acc.exp || 0) : 0;
+  const currentLvl = acc ? (acc.level || 1) : 1;
+  const currentSp = acc ? (acc.sp || 0) : 0;
+
+  const msg = `⚡ SZYBKA MODYFIKACJA EXP I POZIOMU\n\nObecny stan: LVL ${currentLvl} • ${currentExp} XP • ${currentSp} SP\n\nWpisz nową wartość EXP (np. 150) lub dodaj/odejmij (np. +100, -50):`;
+  const res = prompt(msg, currentExp);
+  if (res === null || res.trim() === '') return;
+
+  const trimmed = res.trim();
+  let targetExp = currentExp;
+  if (trimmed.startsWith('+') || trimmed.startsWith('-')) {
+    const delta = parseInt(trimmed, 10);
+    if (!isNaN(delta)) targetExp = Math.max(0, currentExp + delta);
+  } else {
+    const parsed = parseInt(trimmed, 10);
+    if (!isNaN(parsed) && parsed >= 0) targetExp = parsed;
+  }
+
+  setAccountExp(targetExp, 'Szybka edycja paska EXP');
+}
+
+function adminApplyDirectExp() {
+  const inp = document.getElementById('admExpDirectInput');
+  if (!inp) return;
+  const val = parseInt(inp.value, 10);
+  if (isNaN(val) || val < 0) {
+    alert('Podaj poprawną liczbę punktów EXP (większą lub równą 0)!');
+    return;
+  }
+  setAccountExp(val, 'Admin Panel direct input');
+}
+
+function adminQuickDeltaExp(delta) {
+  const acc = getCurrentAccount();
+  const cur = acc ? (acc.exp || 0) : 0;
+  setAccountExp(Math.max(0, cur + delta), `Admin Quick Delta ${delta}`);
 }
 
 function adminQuickSetMaxLvl() {
-  const prof = getPlayerProfile();
-  if (!prof.isAdmin) return;
-  prof.level = 50;
-  prof.exp = 250000;
-  prof.sp = (prof.sp || 0) + 50;
-  savePlayerProfile(prof);
-  showBanner('👑 Ustawiono maksymalny poziom (LVL 50)!', '#f5b041', 50);
+  let sum = 0;
+  for (let l = 1; l < 50; l++) {
+    sum += getXpRequiredForLevel(l);
+  }
+  setAccountExp(sum, 'Admin MAX Level 50');
+  showBanner('👑 Ustawiono maksymalny poziom (LVL 50) i odblokowano pełne SP!', '#f5b041', 85);
 }
+
+// Globalne funkcje konsolowe dostępne bezpośrednio z DevTools:
+window.setExp = function(xp) { return setAccountExp(xp, 'Console setExp'); };
+window.addExp = function(xp) { const a = getCurrentAccount(); return setAccountExp((a ? a.exp || 0 : 0) + xp, 'Console addExp'); };
+window.setLevel = function(targetLvl) {
+  let sum = 0;
+  for (let l = 1; l < targetLvl; l++) sum += getXpRequiredForLevel(l);
+  return setAccountExp(sum, `Console setLevel(${targetLvl})`);
+};
+window.setAccountExp = setAccountExp;
 
 // Zamykanie modali po kliknięciu w tło poza okienkiem
 document.addEventListener('click', e => {
@@ -4195,21 +4402,23 @@ function handleResetTalents() {
 
   const totalSpDue = calculateTotalSpForLevel(acc.level);
   const spent = acc.spentSp || 0;
+  const currentSp = acc.sp || 0;
+  const refundSp = Math.max(totalSpDue, spent + currentSp);
 
   // Sprawdź czy gracz ma jakiekolwiek odblokowane talenty poza rootem
   const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
-  if (!hasTalents && spent === 0 && (acc.sp || 0) === totalSpDue) {
+  if (!hasTalents && spent === 0 && currentSp >= refundSp) {
     alert('Wszystkie punkty SP są już gotowe do ponownego wydania!');
     return;
   }
 
-  const confirmMsg = `Czy na pewno chcesz zresetować drzewko talentów?\n\n• Zwrócone zostanie: ${totalSpDue} SP do ponownego rozdania\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
+  const confirmMsg = `Czy na pewno chcesz zresetować drzewko talentów?\n\n• Zwrócone zostanie: ${refundSp} SP do ponownego rozdania\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
   if (!confirm(confirmMsg)) return;
 
   // Pełny, bezwarunkowy reset do stanu czystego
   acc.talents = { root: true };
   acc.spentSp = 0;
-  acc.sp = totalSpDue;
+  acc.sp = refundSp;
   acc.freeResets = 999; // Zawsze darmowy, nielimitowany reset
 
   saveCurrentAccount(acc);
@@ -4220,7 +4429,7 @@ function handleResetTalents() {
   updateAccountUI();
 
   if (typeof showBanner === 'function') {
-    showBanner(`Drzewko talentów zresetowane! Dostępne: ${totalSpDue} SP.`, '#00ff88', 80);
+    showBanner(`Drzewko talentów zresetowane! Dostępne: ${refundSp} SP.`, '#00ff88', 80);
   }
 }
 
@@ -4271,7 +4480,7 @@ function renderSkillTreeGraph() {
   });
 
   if (spCounter) spCounter.textContent = `⚡ ${acc.sp || 0} SP`;
-  if (spentCounter) spentCounter.textContent = `Wydano: ${acc.spentSp || 0} / 60 SP`;
+  if (spentCounter) spentCounter.textContent = `Wydano: ${acc.spentSp || 0} / ${TOTAL_TREE_SP_COST} SP`;
 
   // Aktualizacja przycisku darmowego resetu (zawsze dostępny i darmowy, gdy cokolwiek odblokowano)
   if (resetBtn) {
@@ -4445,6 +4654,7 @@ function awardAccountRewards(isWin, isWallStreak) {
   acc.stats.matches++;
   
   let gainedXp = 0;
+  let winSpEarned = 0;
   let reasonText = 'Ukończony mecz';
 
   if (isWallArcade) {
@@ -4454,8 +4664,12 @@ function awardAccountRewards(isWin, isWallStreak) {
     if (wallScore > (acc.stats.wallRecord || 0)) {
       acc.stats.wallRecord = wallScore;
     }
+    if (isWallStreak || wallScore >= 25) {
+      winSpEarned = 1;
+    }
     if (gainedXp > 0) {
-      showBanner(`🧱 ŚCIANA: +${gainedXp} XP`, '#00f0ff', 75);
+      const spBadgeTxt = winSpEarned > 0 ? ` • +${winSpEarned} SP! ⚡` : '';
+      showBanner(`🧱 ŚCIANA: +${gainedXp} XP${spBadgeTxt}`, '#00f0ff', 75);
     }
   } else {
     // Odczyt goli gracza i przeciwnika
@@ -4473,13 +4687,14 @@ function awardAccountRewards(isWin, isWallStreak) {
       const oppPaddle = paddles.find(p => p && p.team !== myTeam && p.isBot);
       const effectiveTier = (oppPaddle && oppPaddle.botTier) ? oppPaddle.botTier : enemyAiLevel;
       const botTierConfig = {
-        easy:   { base: 14, win: 8,  loss: 6,  diffMult: 2, label: 'ŁATWY' },
-        medium: { base: 24, win: 16, loss: 10, diffMult: 2, label: 'NORMALNY' },
-        hard:   { base: 38, win: 28, loss: 16, diffMult: 3, label: 'ULTRA' }
-      }[effectiveTier] || { base: 24, win: 16, loss: 10, diffMult: 2, label: 'BOT' };
+        easy:   { base: 14, win: 8,  loss: 6,  diffMult: 2, label: 'ŁATWY', winSp: 1 },
+        medium: { base: 24, win: 16, loss: 10, diffMult: 2, label: 'NORMALNY', winSp: 1 },
+        hard:   { base: 38, win: 28, loss: 16, diffMult: 3, label: 'ULTRA', winSp: 2 }
+      }[effectiveTier] || { base: 24, win: 16, loss: 10, diffMult: 2, label: 'BOT', winSp: 1 };
 
       if (isWin) {
         acc.stats.wins++;
+        winSpEarned = botTierConfig.winSp || 1;
         let bonusXp = 0;
         if (isCleanSheet) bonusXp += 12;
         if (isComeback) bonusXp += 8;
@@ -4487,7 +4702,7 @@ function awardAccountRewards(isWin, isWallStreak) {
         gainedXp = botTierConfig.base + botTierConfig.win + (pointDiff * botTierConfig.diffMult) + bonusXp;
         reasonText = `Wygrana z ${botTierConfig.label}!`;
         const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
-        showBanner(`🏆 WYGRANA (${botTierConfig.label}): +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
+        showBanner(`🏆 WYGRANA (${botTierConfig.label}): +${gainedXp} XP • +${winSpEarned} SP! ⚡${cleanTxt}`, '#f5b041', 85);
       } else {
         gainedXp = botTierConfig.base + botTierConfig.loss + (is2v2 ? 4 : 0);
         reasonText = `Mecz z ${botTierConfig.label} (porażka)`;
@@ -4501,11 +4716,12 @@ function awardAccountRewards(isWin, isWallStreak) {
 
       if (isWin) {
         acc.stats.wins++;
+        winSpEarned = 2;
         let bonusXp = isCleanSheet ? 15 : 0;
         gainedXp = baseOnlineXp + winOnlineBonus + (pointDiff * 3) + bonusXp;
         reasonText = is2v2 ? 'Zwycięstwo 2v2 online!' : 'Zwycięstwo 1v1 online!';
         const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
-        showBanner(`🏆 ZWYCIĘSTWO ONLINE: +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
+        showBanner(`🏆 ZWYCIĘSTWO ONLINE: +${gainedXp} XP • +2 SP! ⚡${cleanTxt}`, '#f5b041', 85);
       } else {
         gainedXp = baseOnlineXp + lossOnlineXp;
         reasonText = 'Mecz online z graczem';
@@ -4518,13 +4734,17 @@ function awardAccountRewards(isWin, isWallStreak) {
 
   const newProg = getLevelProgress(acc.exp || 0);
   const newLvl = newProg.level;
-  const spEarned = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
+  const levelSpEarned = Math.max(0, calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl));
+  const totalMatchSp = winSpEarned + levelSpEarned;
+
+  acc.level = newLvl;
+  if (totalMatchSp > 0) {
+    acc.sp = (acc.sp || 0) + totalMatchSp;
+  }
 
   if (newLvl > oldLvl) {
-    acc.level = newLvl;
-    acc.sp = (acc.sp || 0) + spEarned;
     setTimeout(() => {
-      showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${spEarned} SP ODBLOKOWANE!`, '#00ff88', 110);
+      showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${levelSpEarned} SP Z POZIOMU!`, '#00ff88', 110);
       SFX.play('upgrade');
       triggerShake(6, 4);
     }, 1200);
@@ -4538,15 +4758,18 @@ function awardAccountRewards(isWin, isWallStreak) {
   const labelEl = document.getElementById('vicExpLabel');
   const spInfoEl = document.getElementById('vicSpInfo');
 
-  if (xpValEl) xpValEl.textContent = `+${gainedXp} XP`;
+  if (xpValEl) {
+    const spTxt = totalMatchSp > 0 ? ` • +${totalMatchSp} SP ⚡` : '';
+    xpValEl.textContent = `+${gainedXp} XP${spTxt}`;
+  }
   if (barFillEl) barFillEl.style.width = newProg.pct + '%';
   if (labelEl) labelEl.textContent = `LVL ${newProg.level} • ${newProg.currentExp} / ${newProg.neededExp} XP`;
   if (spInfoEl) {
-    if (spEarned > 0) {
-      spInfoEl.textContent = `🌟 AWANS! OTRZYMASZ +${spEarned} PUNKT TALENTU (SP)!`;
+    if (totalMatchSp > 0) {
+      spInfoEl.textContent = `🌟 ZDOBYTO: +${totalMatchSp} SP W TYM MECZU! (Dostępne łącznie: ${acc.sp} SP)`;
       spInfoEl.style.color = '#00ff88';
     } else {
-      spInfoEl.textContent = `⚡ Kolejny punkt talentu (SP) na LVL ${newProg.level + 1} (za 1 poziom)`;
+      spInfoEl.textContent = `⚡ Kolejny poziom LVL ${newProg.level + 1} (za ${newProg.neededExp - newProg.currentExp} XP) da kolejny punkt SP!`;
       spInfoEl.style.color = '#38bdf8';
     }
   }
