@@ -3449,50 +3449,48 @@ function nickToEmail(nick) {
   return 'u_' + clean + '@cyberpong.app';
 }
 
+const MAX_ACCOUNT_LEVEL = 1000;
+const MAX_ACCOUNT_EXP = 1000000000;
+
 function getSpGainedForLevel(lvl) {
-  if (lvl <= 1) return 1;     // Start gry (LVL 1) = 1 SP
-  if (lvl <= 15) return 1;    // Wczesne poziomy (LVL 2–15) = 1 SP za poziom
-  if (lvl <= 30) return 2;    // Średnie poziomy (LVL 16–30) = 2 SP za poziom
-  return 3;                   // Wyższe poziomy (LVL 31–50) = 3 SP za poziom
+  if (lvl <= 1) return 1;
+  if (lvl <= 15) return 1;
+  if (lvl <= 30) return 2;
+  return 3;
 }
 
 function calculateTotalSpForLevel(lvl) {
-  const l = Math.max(1, lvl || 1);
+  const numericLevel = Number(lvl);
+  const l = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : 1;
   let total = 1;
-  for (let i = 2; i <= l; i++) {
-    total += getSpGainedForLevel(i);
-  }
+  for (let i = 2; i <= l; i++) total += getSpGainedForLevel(i);
   return total;
 }
 
 function getXpRequiredForLevel(level) {
-  if (level <= 1) return 35;     // LVL 1 -> 2: 35 XP (szybki start - już pierwszy wygrany mecz daje poziom!)
-  if (level === 2) return 65;    // LVL 2 -> 3: 65 XP (~1-2 mecze)
-  if (level === 3) return 105;   // LVL 3 -> 4: 105 XP (~2 mecze)
-  if (level === 4) return 155;   // LVL 4 -> 5: 155 XP (~2-3 mecze)
-  if (level === 5) return 215;   // LVL 5 -> 6: 215 XP
-  // Płynna, dynamicznie rosnąca krzywa RPG dla poziomów 6 - 50
+  if (level <= 1) return 35;
+  if (level === 2) return 65;
+  if (level === 3) return 105;
+  if (level === 4) return 155;
+  if (level === 5) return 215;
   return Math.round(215 + (level - 5) * 55 + Math.pow(level - 5, 1.20) * 4.5);
 }
-
 function getLevelProgress(totalExp) {
-  let exp = Math.max(0, totalExp || 0);
+  const numericExp = Number(totalExp);
+  let exp = Number.isFinite(numericExp) ? Math.min(MAX_ACCOUNT_EXP, Math.max(0, Math.floor(numericExp))) : 0;
   let lvl = 1;
-  while (true) {
+  while (lvl < MAX_ACCOUNT_LEVEL) {
     const req = getXpRequiredForLevel(lvl);
-    if (exp < req) {
-      return {
-        level: lvl,
-        currentExp: exp,
-        neededExp: req,
-        pct: Math.min(100, Math.max(0, Math.round((exp / req) * 100)))
-      };
+    if (!Number.isFinite(req) || req <= 0 || exp < req) {
+      const needed = Number.isFinite(req) && req > 0 ? req : 1;
+      return { level: lvl, currentExp: exp, neededExp: needed, pct: Math.min(100, Math.max(0, Math.round((exp / needed) * 100))) };
     }
     exp -= req;
     lvl++;
   }
+  const needed = getXpRequiredForLevel(lvl);
+  return { level: lvl, currentExp: Math.min(exp, needed), neededExp: needed, pct: exp >= needed ? 100 : Math.min(100, Math.max(0, Math.round((exp / needed) * 100))) };
 }
-
 function createDefaultProfile(nick = 'GRACZ') {
   const cleanNick = (nick || 'GRACZ').trim() || 'GRACZ';
   return {
@@ -3714,21 +3712,19 @@ function syncProfileToCloud(prof) {
   if (fbAuth && fbAuth.currentUser && fbDb) {
     try {
       const payload = { ...prof };
+      const privilegedFields = ['isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash', 'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'];
       delete payload.adminToken;
+      delete payload.gameData;
       payload.resetVersion = 3;
-      // Pola konfiguracyjne w bazie Firestore - domyślnie false, aby opcja istniała w Firebase Console
-      payload.isAdmin = (typeof prof.isAdmin === 'boolean') ? prof.isAdmin : false;
-      payload.allTalents = (typeof prof.allTalents === 'boolean') ? prof.allTalents : false;
-      payload.infiniteStamina = (typeof prof.infiniteStamina === 'boolean') ? prof.infiniteStamina : false;
-      payload.godMode = (typeof prof.godMode === 'boolean') ? prof.godMode : false;
-      payload.goldSmash = (typeof prof.goldSmash === 'boolean') ? prof.goldSmash : false;
-      payload.customSpeedMult = typeof prof.customSpeedMult === 'number' ? prof.customSpeedMult : 1.0;
-      payload.customSmashMult = typeof prof.customSmashMult === 'number' ? prof.customSmashMult : 1.0;
-      payload.customPaddleHeight = typeof prof.customPaddleHeight === 'number' ? prof.customPaddleHeight : 80;
-      payload.adminBadge = prof.adminBadge || '👑 ADMIN';
+      if (!prof.isAdmin) {
+        privilegedFields.forEach(key => delete payload[key]);
+      } else {
+        payload.isAdmin = true;
+        payload.adminBadge = prof.adminBadge || '👑 ADMIN';
+      }
       payload.updatedAt = Date.now();
 
-      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload).then(() => {
+      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { merge: true }).then(() => {
         console.log('☁️ [Firestore] Zsynchronizowano profil gracza w chmurze');
       }).catch(err => {
         console.warn('Błąd synchronizacji chmury Firestore:', err);
@@ -3738,9 +3734,12 @@ function syncProfileToCloud(prof) {
     }
   }
 }
-
 function savePlayerProfile(prof) {
   if (!prof) return;
+  const numericExp = Number(prof.exp);
+  prof.exp = Number.isFinite(numericExp) ? Math.min(MAX_ACCOUNT_EXP, Math.max(0, Math.floor(numericExp))) : 0;
+  const numericLevel = Number(prof.level);
+  prof.level = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : getLevelProgress(prof.exp).level;
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
     if (prof.nick) {
@@ -3766,7 +3765,7 @@ function grantExp(amount, reason = '') {
   if (!acc || amount <= 0) return;
   const oldProg = getLevelProgress(acc.exp || 0);
   const oldLvl = oldProg.level;
-  acc.exp = (acc.exp || 0) + amount;
+  acc.exp = Math.min(MAX_ACCOUNT_EXP, Math.max(0, Number(acc.exp) || 0) + amount);
   const newProg = getLevelProgress(acc.exp || 0);
   const newLvl = newProg.level;
   if (newLvl > oldLvl) {
@@ -4108,11 +4107,11 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   const localRaw = decodeProfileEnvelope(localStorage.getItem(PLAYER_PROFILE_KEY));
   const localProf = localRaw ? localRaw.prof : null;
 
-  const cloudLvl = (typeof cloudProf.level === 'number' && !isNaN(cloudProf.level) && cloudProf.level >= 1)
-    ? Math.floor(cloudProf.level)
+  const cloudLvl = (typeof cloudProf.level === 'number' && Number.isFinite(cloudProf.level) && cloudProf.level >= 1)
+    ? Math.min(MAX_ACCOUNT_LEVEL, Math.floor(cloudProf.level))
     : null;
-  const cloudExp = (typeof cloudProf.exp === 'number' && !isNaN(cloudProf.exp) && cloudProf.exp >= 0)
-    ? Math.floor(cloudProf.exp)
+  const cloudExp = (typeof cloudProf.exp === 'number' && Number.isFinite(cloudProf.exp) && cloudProf.exp >= 0)
+    ? Math.min(MAX_ACCOUNT_EXP, Math.floor(cloudProf.exp))
     : 0;
 
   merged.exp = cloudExp;
@@ -4188,7 +4187,7 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   } catch (e) {}
 
   // Jeśli w dokumencie w Firestore brakuje jeszcze pól opcji administratora lub wartości uległy wyrównaniu
-  if (cloudProf.isAdmin === undefined || cloudProf.godMode === undefined || merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
+  if (merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
     syncProfileToCloud(merged);
   } else if (!fromSnapshot) {
     syncProfileToCloud(merged);
@@ -4225,10 +4224,7 @@ function initAccountSystem() {
             if (snap && snap.exists) {
               const cloudData = snap.data();
               applyCloudProfileToLocal(cloudData, user.uid, true);
-              // Automatyczna inicjalizacja pól opcji w bazie Firestore jeśli ich brakuje:
-              if (cloudData.isAdmin === undefined || cloudData.godMode === undefined) {
-                syncProfileToCloud(getPlayerProfile());
-              }
+
             } else if (snap && !snap.exists) {
               // Nowy dokument gracza w chmurze - wyślij czysty profil początkowy
               const freshProf = createDefaultProfile(user.displayName || 'GRACZ');
@@ -4556,50 +4552,38 @@ async function adminWipeAllPlayersToLevel1() {
 
   const confirmMsg = '⚠️ UWAGA: GLOBALNY WIPE BAZY (SEZON 3)!\n\nCzy na pewno chcesz zresetować WSZYSTKIE konta w bazie Firestore do Poziomu 1 (0 EXP, 1 SP, czyste drzewko)?\n\nUprawnienia Administratora i nicki graczy zostaną nienaruszone.\n\nCzy chcesz kontynuować?';
   if (!confirm(confirmMsg)) return;
-
   if (!fbDb) {
     alert('Brak połączenia z bazą Firestore!');
     return;
   }
 
   showBanner('⏳ Resetowanie wszystkich kont w chmurze...', '#00f0ff', 60);
-
   try {
-    const snap = await fbDb.collection('players').get();
-    if (snap.empty) {
-      showBanner('Baza danych graczy jest pusta.', '#8b949e', 50);
-      return;
+    const pageSize = 400;
+    let lastDoc = null;
+    let count = 0;
+    while (true) {
+      let query = fbDb.collection('players').orderBy(firebase.firestore.FieldPath.documentId()).limit(pageSize);
+      if (lastDoc) query = query.startAfter(lastDoc);
+      const snap = await query.get();
+      if (snap.empty) break;
+      const batch = fbDb.batch();
+      snap.forEach(docSnap => {
+        const data = docSnap.data() || {};
+        const cleanUpdate = {
+          level: 1, exp: 0, sp: 1, spentSp: 0, freeResets: 1,
+          talents: { root: true }, stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
+          resetVersion: 3, updatedAt: Date.now()
+        };
+        if (typeof data.nick === 'string') cleanUpdate.nick = data.nick.slice(0, 12);
+        batch.set(docSnap.ref, cleanUpdate, { merge: true });
+      });
+      await batch.commit();
+      count += snap.size;
+      lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.size < pageSize) break;
     }
 
-    const batch = fbDb.batch();
-    let count = 0;
-
-    snap.forEach(docSnap => {
-      const data = docSnap.data();
-      const cleanUpdate = {
-        level: 1,
-        exp: 0,
-        sp: 1,
-        spentSp: 0,
-        freeResets: 1,
-        talents: { root: true },
-        stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
-        resetVersion: 3,
-        updatedAt: Date.now()
-      };
-      if (data.isAdmin) cleanUpdate.isAdmin = true;
-      if (data.role) cleanUpdate.role = data.role;
-      if (data.adminBadge) cleanUpdate.adminBadge = data.adminBadge;
-      if (data.nick) cleanUpdate.nick = data.nick;
-      if (data.adminToken) cleanUpdate.adminToken = data.adminToken;
-      
-      batch.set(docSnap.ref, cleanUpdate, { merge: true });
-      count++;
-    });
-
-    await batch.commit();
-
-    // Reset obecnego profilu
     prof.level = 1;
     prof.exp = 0;
     prof.sp = 1;
@@ -4616,16 +4600,14 @@ async function adminWipeAllPlayersToLevel1() {
 
     SFX.play('upgrade');
     triggerShake(10, 5);
-    showBanner(`💥 SUKCES: Zresetowano ${count} kont w Firestore do LVL 1!`, '#00ff88', 90);
-    alert(`✓ Sukces!\n\nZresetowano ${count} kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 3 rozpoczęty dla wszystkich graczy!`);
+    showBanner('💥 SUKCES: Zresetowano ' + count + ' kont w Firestore do LVL 1!', '#00ff88', 90);
+    alert('✓ Sukces!\n\nZresetowano ' + count + ' kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 3 rozpoczęty dla wszystkich graczy!');
   } catch (err) {
     console.error('Błąd resetowania bazy:', err);
     showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
     alert('Błąd resetowania bazy: ' + (err.message || err));
   }
 }
-
-
 // Zamykanie modali po kliknięciu w tło poza okienkiem
 document.addEventListener('click', e => {
   const treeModal = document.getElementById('talentTreeModal');
