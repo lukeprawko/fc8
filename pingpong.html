@@ -2995,7 +2995,6 @@
         <button type="button" class="btn-admin-quick" onclick="adminQuickSetMaxLvl()">MAX POZIOM (50)</button>
       </div>
 
-      <!-- KODY PROMOCYJNE I REKOMPENSATY -->
       <!-- SEZON 3 & GLOBALNY RESET BAZY -->
       <div style="margin-top: 10px; padding: 10px; background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.35); border-radius: 8px;">
         <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:#ff0055; letter-spacing:0.8px; margin-bottom: 6px;">
@@ -4543,119 +4542,10 @@ window.setAccountExp = setAccountExp;
    GLOBALNY RESET BAZY (SEZON 3)
    ========================================================================= */
 
-function redeemPromoCode(inputCode) {
-  const code = (inputCode || '').trim().toUpperCase();
-  const feedbackEl = document.getElementById('promoCodeFeedback');
 
-  if (!code) {
-    if (feedbackEl) {
-      feedbackEl.style.color = '#ff0055';
-      feedbackEl.textContent = 'Wpisz kod promocyjny!';
-    }
-    return false;
-  }
 
-  const promo = PROMO_CODES[code];
-  if (!promo) {
-    if (feedbackEl) {
-      feedbackEl.style.color = '#ff0055';
-      feedbackEl.textContent = 'Nieprawidłowy lub nieaktywny kod promocyjny!';
-    }
-    SFX.play('wallHit');
-    return false;
-  }
 
-  const acc = getCurrentAccount();
-  if (!acc) return false;
 
-  acc.redeemedCodes = Array.isArray(acc.redeemedCodes) ? acc.redeemedCodes : [];
-  if (acc.redeemedCodes.includes(code)) {
-    if (feedbackEl) {
-      feedbackEl.style.color = '#f5b041';
-      feedbackEl.textContent = 'Ten kod został już aktywowany na Twoim koncie!';
-    }
-    SFX.play('wallHit');
-    return false;
-  }
-
-  acc.redeemedCodes.push(code);
-  const expBonus = promo.exp || 0;
-  const spBonus = promo.sp || 0;
-
-  if (expBonus > 0) {
-    const oldProg = getLevelProgress(acc.exp || 0);
-    const oldLvl = oldProg.level;
-    acc.exp = (acc.exp || 0) + expBonus;
-    const newProg = getLevelProgress(acc.exp);
-    const newLvl = newProg.level;
-    acc.level = newLvl;
-
-    if (newLvl > oldLvl) {
-      const spGained = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
-      acc.sp = (acc.sp || 0) + spGained;
-    }
-  }
-
-  if (spBonus > 0) {
-    acc.sp = (acc.sp || 0) + spBonus;
-  }
-
-  saveCurrentAccount(acc);
-  updateAccountUI();
-  applyStatsToLocalPlayer();
-  renderSkillTreeGraph();
-
-  if (feedbackEl) {
-    feedbackEl.style.color = '#00ff88';
-    feedbackEl.textContent = `✓ Sukces! Odebrano: +${expBonus} XP oraz +${spBonus} SP!`;
-  }
-
-  const inp = document.getElementById('promoCodeInput');
-  if (inp) inp.value = '';
-
-  updatePromoRedeemedDisplay();
-  SFX.play('upgrade');
-  triggerShake(8, 4);
-  showBanner(`🎁 KOD ZREALIZOWANY: +${expBonus} XP i +${spBonus} SP!`, '#00ff88', 90);
-  return true;
-}
-
-function handlePromoSubmit() {
-  const inp = document.getElementById('promoCodeInput');
-  const code = inp ? inp.value.trim() : '';
-  redeemPromoCode(code);
-}
-
-function openPromoCodeModal() {
-  const modal = document.getElementById('promoCodeModal');
-  if (!modal) return;
-  modal.style.display = 'flex';
-  const inp = document.getElementById('promoCodeInput');
-  if (inp) {
-    inp.value = '';
-    inp.focus();
-  }
-  const fb = document.getElementById('promoCodeFeedback');
-  if (fb) fb.textContent = '';
-  updatePromoRedeemedDisplay();
-}
-
-function closePromoCodeModal() {
-  const modal = document.getElementById('promoCodeModal');
-  if (modal) modal.style.display = 'none';
-}
-
-function updatePromoRedeemedDisplay() {
-  const el = document.getElementById('promoRedeemedList');
-  if (!el) return;
-  const acc = getCurrentAccount();
-  const codes = (acc && Array.isArray(acc.redeemedCodes)) ? acc.redeemedCodes : [];
-  if (codes.length === 0) {
-    el.innerHTML = '<span style="color:#64748b;">Brak aktywowanych kodów na tym koncie.</span>';
-  } else {
-    el.innerHTML = '<span style="color:#00ff88; font-weight:800;">Aktywowane kody:</span> ' + codes.map(c => `<span style="display:inline-block; padding:2px 7px; background:rgba(184,69,255,0.18); border:1px solid rgba(184,69,255,0.4); border-radius:5px; font-weight:800; color:#e9d5ff; font-family:'Orbitron'; font-size:10px; margin:2px;">${c}</span>`).join(' ');
-  }
-}
 
 async function adminWipeAllPlayersToLevel1() {
   const prof = getPlayerProfile();
@@ -4664,7 +4554,7 @@ async function adminWipeAllPlayersToLevel1() {
     return;
   }
 
-  const confirmMsg = '⚠️ UWAGA: GLOBALNY WIPE BAZY (SEZON 2)!\n\nCzy na pewno chcesz zresetować WSZYSTKIE konta w bazie Firestore do Poziomu 1 (0 EXP, 1 SP, czyste drzewko)?\n\nUprawnienia Administratora i nicki graczy zostaną nienaruszone.\n\nCzy chcesz kontynuować?';
+  const confirmMsg = '⚠️ UWAGA: GLOBALNY WIPE BAZY (SEZON 3)!\n\nCzy na pewno chcesz zresetować WSZYSTKIE konta w bazie Firestore do Poziomu 1 (0 EXP, 1 SP, czyste drzewko)?\n\nUprawnienia Administratora i nicki graczy zostaną nienaruszone.\n\nCzy chcesz kontynuować?';
   if (!confirm(confirmMsg)) return;
 
   if (!fbDb) {
@@ -4694,7 +4584,7 @@ async function adminWipeAllPlayersToLevel1() {
         freeResets: 1,
         talents: { root: true },
         stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
-        resetVersion: 2,
+        resetVersion: 3,
         updatedAt: Date.now()
       };
       if (data.isAdmin) cleanUpdate.isAdmin = true;
@@ -4702,8 +4592,7 @@ async function adminWipeAllPlayersToLevel1() {
       if (data.adminBadge) cleanUpdate.adminBadge = data.adminBadge;
       if (data.nick) cleanUpdate.nick = data.nick;
       if (data.adminToken) cleanUpdate.adminToken = data.adminToken;
-      if (Array.isArray(data.redeemedCodes)) cleanUpdate.redeemedCodes = data.redeemedCodes;
-
+      
       batch.set(docSnap.ref, cleanUpdate, { merge: true });
       count++;
     });
@@ -4718,7 +4607,7 @@ async function adminWipeAllPlayersToLevel1() {
     prof.freeResets = 1;
     prof.talents = { root: true };
     prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
-    prof.resetVersion = 2;
+    prof.resetVersion = 3;
     prof.updatedAt = Date.now();
     savePlayerProfile(prof);
     applyStatsToLocalPlayer();
@@ -4728,7 +4617,7 @@ async function adminWipeAllPlayersToLevel1() {
     SFX.play('upgrade');
     triggerShake(10, 5);
     showBanner(`💥 SUKCES: Zresetowano ${count} kont w Firestore do LVL 1!`, '#00ff88', 90);
-    alert(`✓ Sukces!\n\nZresetowano ${count} kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 2 rozpoczęty dla wszystkich graczy!`);
+    alert(`✓ Sukces!\n\nZresetowano ${count} kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 3 rozpoczęty dla wszystkich graczy!`);
   } catch (err) {
     console.error('Błąd resetowania bazy:', err);
     showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
@@ -4736,9 +4625,6 @@ async function adminWipeAllPlayersToLevel1() {
   }
 }
 
-window.redeemPromoCode = redeemPromoCode;
-window.openPromoCodeModal = openPromoCodeModal;
-window.closePromoCodeModal = closePromoCodeModal;
 
 // Zamykanie modali po kliknięciu w tło poza okienkiem
 document.addEventListener('click', e => {
@@ -4749,10 +4635,6 @@ document.addEventListener('click', e => {
   const admModal = document.getElementById('adminPanelModal');
   if (admModal && e.target === admModal) {
     closeAdminPanelModal();
-  }
-  const promoModal = document.getElementById('promoCodeModal');
-  if (promoModal && e.target === promoModal) {
-    closePromoCodeModal();
   }
 });
 
@@ -4766,10 +4648,6 @@ document.addEventListener('keydown', e => {
     const admModal = document.getElementById('adminPanelModal');
     if (admModal && admModal.style.display === 'flex') {
       closeAdminPanelModal();
-    }
-    const promoModal = document.getElementById('promoCodeModal');
-    if (promoModal && promoModal.style.display === 'flex') {
-      closePromoCodeModal();
     }
   }
 });
