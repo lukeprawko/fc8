@@ -2570,7 +2570,7 @@
                 </div>
               </div>
               <div class="account-top-right">
-                <div class="account-sp-badge" id="accSpDisplay" title="Dostępne punkty umiejętności (SP) do wydania w drzewku talentów">⚡ 2 SP</div>
+                <div class="account-sp-badge" id="accSpDisplay" title="Dostępne punkty umiejętności (SP) do wydania w drzewku talentów">⚡ 1 SP</div>
                 <button type="button" class="btn-acc-switch" onclick="handleAccountSwitchClick()" title="Zaloguj na inne konto / wyloguj z chmury">
                   <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
                 </button>
@@ -3430,13 +3430,20 @@ function nickToEmail(nick) {
   return 'u_' + clean + '@cyberpong.app';
 }
 
+function getSpGainedForLevel(lvl) {
+  if (lvl <= 1) return 1;     // Start gry (LVL 1) = 1 SP
+  if (lvl <= 15) return 1;    // Wczesne poziomy (LVL 2–15) = 1 SP za poziom
+  if (lvl <= 30) return 2;    // Średnie poziomy (LVL 16–30) = 2 SP za poziom
+  return 3;                   // Wyższe poziomy (LVL 31–50) = 3 SP za poziom
+}
+
 function calculateTotalSpForLevel(lvl) {
   const l = Math.max(1, lvl || 1);
-  // Bazowe 2 punkty SP na start (lvl 1) + 1 SP za każdy kolejny poziom
-  let sp = 2 + (l - 1);
-  // Bonusy kamieni milowych (milestones) co 10 poziomów (+3 bonusowe SP na lvl 10, 20, 30, 40, 50)
-  sp += Math.floor(l / 10) * 3;
-  return sp;
+  let total = 1;
+  for (let i = 2; i <= l; i++) {
+    total += getSpGainedForLevel(i);
+  }
+  return total;
 }
 
 function getXpRequiredForLevel(level) {
@@ -3547,7 +3554,7 @@ function getPlayerProfile() {
         nick: oldNick,
         level: 1,
         exp: 0,
-        sp: 2,
+        sp: 1,
         spentSp: 0,
         freeResets: 1,
         talents: { root: true },
@@ -3641,7 +3648,7 @@ function getPlayerProfile() {
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    if (typeof prof.sp !== 'number') prof.sp = 2;
+    if (typeof prof.sp !== 'number') prof.sp = 1;
     if (!prof.stats || typeof prof.stats !== 'object') {
       prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     }
@@ -3651,7 +3658,7 @@ function getPlayerProfile() {
       nick: 'GRACZ',
       level: 1,
       exp: 0,
-      sp: 2,
+      sp: 1,
       spentSp: 0,
       freeResets: 1,
       talents: { root: true },
@@ -4664,7 +4671,8 @@ function awardAccountRewards(isWin, isWallStreak) {
     if (wallScore > (acc.stats.wallRecord || 0)) {
       acc.stats.wallRecord = wallScore;
     }
-    if (isWallStreak || wallScore >= 25) {
+    // Dopiero po min. 40 odbiciach przyznawany jest punkt SP
+    if (wallScore >= 40) {
       winSpEarned = 1;
     }
     if (gainedXp > 0) {
@@ -4683,18 +4691,17 @@ function awardAccountRewards(isWin, isWallStreak) {
     const isComeback = isWin && oppGoals >= 3 && myGoals > oppGoals;
 
     if (isSinglePlayer) {
-      // 2. BOTY: Skalowane nagrody według poziomu trudności (Łatwy, Normalny, Ultra)
+      // 2. BOTY: Skalowane nagrody EXP według poziomu trudności (Łatwy, Normalny, Ultra)
       const oppPaddle = paddles.find(p => p && p.team !== myTeam && p.isBot);
       const effectiveTier = (oppPaddle && oppPaddle.botTier) ? oppPaddle.botTier : enemyAiLevel;
       const botTierConfig = {
-        easy:   { base: 14, win: 8,  loss: 6,  diffMult: 2, label: 'ŁATWY', winSp: 1 },
-        medium: { base: 24, win: 16, loss: 10, diffMult: 2, label: 'NORMALNY', winSp: 1 },
-        hard:   { base: 38, win: 28, loss: 16, diffMult: 3, label: 'ULTRA', winSp: 2 }
-      }[effectiveTier] || { base: 24, win: 16, loss: 10, diffMult: 2, label: 'BOT', winSp: 1 };
+        easy:   { base: 14, win: 8,  loss: 6,  diffMult: 2, label: 'ŁATWY' },
+        medium: { base: 24, win: 16, loss: 10, diffMult: 2, label: 'NORMALNY' },
+        hard:   { base: 38, win: 28, loss: 16, diffMult: 3, label: 'ULTRA' }
+      }[effectiveTier] || { base: 24, win: 16, loss: 10, diffMult: 2, label: 'BOT' };
 
       if (isWin) {
         acc.stats.wins++;
-        winSpEarned = botTierConfig.winSp || 1;
         let bonusXp = 0;
         if (isCleanSheet) bonusXp += 12;
         if (isComeback) bonusXp += 8;
@@ -4702,7 +4709,7 @@ function awardAccountRewards(isWin, isWallStreak) {
         gainedXp = botTierConfig.base + botTierConfig.win + (pointDiff * botTierConfig.diffMult) + bonusXp;
         reasonText = `Wygrana z ${botTierConfig.label}!`;
         const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
-        showBanner(`🏆 WYGRANA (${botTierConfig.label}): +${gainedXp} XP • +${winSpEarned} SP! ⚡${cleanTxt}`, '#f5b041', 85);
+        showBanner(`🏆 WYGRANA (${botTierConfig.label}): +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
       } else {
         gainedXp = botTierConfig.base + botTierConfig.loss + (is2v2 ? 4 : 0);
         reasonText = `Mecz z ${botTierConfig.label} (porażka)`;
@@ -4716,12 +4723,11 @@ function awardAccountRewards(isWin, isWallStreak) {
 
       if (isWin) {
         acc.stats.wins++;
-        winSpEarned = 2;
         let bonusXp = isCleanSheet ? 15 : 0;
         gainedXp = baseOnlineXp + winOnlineBonus + (pointDiff * 3) + bonusXp;
         reasonText = is2v2 ? 'Zwycięstwo 2v2 online!' : 'Zwycięstwo 1v1 online!';
         const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
-        showBanner(`🏆 ZWYCIĘSTWO ONLINE: +${gainedXp} XP • +2 SP! ⚡${cleanTxt}`, '#f5b041', 85);
+        showBanner(`🏆 ZWYCIĘSTWO ONLINE: +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
       } else {
         gainedXp = baseOnlineXp + lossOnlineXp;
         reasonText = 'Mecz online z graczem';
@@ -4744,7 +4750,7 @@ function awardAccountRewards(isWin, isWallStreak) {
 
   if (newLvl > oldLvl) {
     setTimeout(() => {
-      showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${levelSpEarned} SP Z POZIOMU!`, '#00ff88', 110);
+      showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${levelSpEarned} SP! 🌟`, '#00ff88', 110);
       SFX.play('upgrade');
       triggerShake(6, 4);
     }, 1200);
@@ -4766,10 +4772,11 @@ function awardAccountRewards(isWin, isWallStreak) {
   if (labelEl) labelEl.textContent = `LVL ${newProg.level} • ${newProg.currentExp} / ${newProg.neededExp} XP`;
   if (spInfoEl) {
     if (totalMatchSp > 0) {
-      spInfoEl.textContent = `🌟 ZDOBYTO: +${totalMatchSp} SP W TYM MECZU! (Dostępne łącznie: ${acc.sp} SP)`;
+      spInfoEl.textContent = `🌟 ZDOBYTO: +${totalMatchSp} SP! (Dostępne łącznie: ${acc.sp} SP)`;
       spInfoEl.style.color = '#00ff88';
     } else {
-      spInfoEl.textContent = `⚡ Kolejny poziom LVL ${newProg.level + 1} (za ${newProg.neededExp - newProg.currentExp} XP) da kolejny punkt SP!`;
+      const nextGain = getSpGainedForLevel(newProg.level + 1);
+      spInfoEl.textContent = `⚡ Kolejny poziom LVL ${newProg.level + 1} (za ${newProg.neededExp - newProg.currentExp} XP) da +${nextGain} SP!`;
       spInfoEl.style.color = '#38bdf8';
     }
   }
@@ -8090,6 +8097,19 @@ function handlePaddleHit(paddle, dir) {
     grantExp(25, 'WYMIANA x20');
     addFloatingText(W / 2, H / 2 - 25, '⚡ MEGA WYMIANA x20! +25 XP', '#00ff88');
     SFX.play('upgrade');
+  } else if (rallyHits === 40) {
+    const acc = getCurrentAccount();
+    if (acc) {
+      acc.sp = (acc.sp || 0) + 1;
+      saveCurrentAccount(acc);
+      updateAccountUI();
+      renderSkillTreeGraph();
+    }
+    grantExp(40, 'MISTRZOWSKA WYMIANA x40');
+    addFloatingText(W / 2, H / 2 - 35, '🏆 MISTRZOWSKA WYMIANA x40! +1 SP! ⚡', '#00ff88');
+    showBanner('🏆 MISTRZOWSKA WYMIANA (40 ODBIĆ): +1 SP! ⚡', '#00ff88', 90);
+    SFX.play('upgrade');
+    triggerShake(6, 4);
   }
 
   const padId = paddle.id;
