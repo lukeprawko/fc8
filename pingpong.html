@@ -3117,31 +3117,31 @@ const SKILL_TREE_BRANCHES = [
     desc: 'Błyskawiczne tempo, częstszy Dash i kinetyczny impet',
     nodes: [
       {
-        id: 'spd_1', tier: 1, cost: 2, req: null,
+        id: 'spd_1', tier: 1, cost: 1, req: null,
         title: 'Lekka Paletka', icon: '⚡', type: 'stat',
         benefit: '+10% stałej prędkości paletki',
         legacyIds: ['speed_1', 'spd_1']
       },
       {
-        id: 'spd_2', tier: 2, cost: 4, req: 'spd_1',
+        id: 'spd_2', tier: 2, cost: 2, req: 'spd_1',
         title: 'Szybki Zryw', icon: '💨', type: 'stat',
         benefit: 'Dash odnawia się o 35% szybciej i zużywa 25% mniej energii',
         legacyIds: ['speed_2', 'spd_2']
       },
       {
-        id: 'spd_3', tier: 3, cost: 6, req: 'spd_2',
+        id: 'spd_3', tier: 3, cost: 3, req: 'spd_2',
         title: 'Kinetyczny Zryw', icon: '🚀', type: 'skill',
         benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +25% prędkości',
         legacyIds: ['speed_3', 'spd_3']
       },
       {
-        id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
+        id: 'spd_4', tier: 4, cost: 4, req: 'spd_3',
         title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
         benefit: 'Każde odbicie w wymianie daje +6% prędkości; przy 4 odbiciach kolejny Dash jest darmowy',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
-        id: 'spd_5', tier: 5, cost: 10, req: 'spd_4',
+        id: 'spd_5', tier: 5, cost: 5, req: 'spd_4',
         title: 'Widmowy Krok', icon: '👻', type: 'legend',
         benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
@@ -3156,31 +3156,31 @@ const SKILL_TREE_BRANCHES = [
     desc: 'Czysta siła uderzeń, przyspieszające rykoszety i odrzut',
     nodes: [
       {
-        id: 'pwr_1', tier: 1, cost: 2, req: null,
+        id: 'pwr_1', tier: 1, cost: 1, req: null,
         title: 'Mocny Smash', icon: '💥', type: 'stat',
         benefit: '+15% siły uderzenia Smash',
         legacyIds: ['force_1', 'atk_1', 'pwr_1']
       },
       {
-        id: 'pwr_2', tier: 2, cost: 4, req: 'pwr_1',
+        id: 'pwr_2', tier: 2, cost: 2, req: 'pwr_1',
         title: 'Cieplny Impuls', icon: '🔥', type: 'stat',
         benefit: '+25% siły Smasha łącznie i o 40% szybsze ładowanie ścięcia',
         legacyIds: ['force_2', 'atk_2', 'pwr_2']
       },
       {
-        id: 'pwr_3', tier: 3, cost: 6, req: 'pwr_2',
+        id: 'pwr_3', tier: 3, cost: 3, req: 'pwr_2',
         title: 'Ścienny Rykoszet', icon: '⚡', type: 'skill',
         benefit: 'Odbicie piłki od ściany nie zwalnia, lecz przyspiesza piłkę o +15%',
         legacyIds: ['force_3', 'atk_3', 'pwr_3']
       },
       {
-        id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
+        id: 'pwr_4', tier: 4, cost: 4, req: 'pwr_3',
         title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
         benefit: 'Twój Smash odpycha paletkę rywala w tył o 15 px i wywołuje falę uderzeniową',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
-        id: 'pwr_5', tier: 5, cost: 10, req: 'pwr_4',
+        id: 'pwr_5', tier: 5, cost: 5, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
         benefit: 'Smash zamienia piłkę w płonący meteor o maksymalnej prędkości 16.5 px/f',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
@@ -3195,31 +3195,31 @@ const SKILL_TREE_BRANCHES = [
     desc: 'Zakrzywianie toru lotu, ostre kąty i sterowanie piłką',
     nodes: [
       {
-        id: 'spn_1', tier: 1, cost: 2, req: null,
+        id: 'spn_1', tier: 1, cost: 1, req: null,
         title: 'Podkręcenie', icon: '🌀', type: 'stat',
         benefit: '+15% siły podkręcania piłki',
         legacyIds: ['spin_1', 'spn_1']
       },
       {
-        id: 'spn_2', tier: 2, cost: 4, req: 'spn_1',
+        id: 'spn_2', tier: 2, cost: 2, req: 'spn_1',
         title: 'Cyber Rotacja', icon: '🌪️', type: 'stat',
         benefit: '+25% rotacji łącznie, a łuk skrętu utrzymuje się o 50% dłużej',
         legacyIds: ['spin_2', 'spn_2']
       },
       {
-        id: 'spn_3', tier: 3, cost: 6, req: 'spn_2',
+        id: 'spn_3', tier: 3, cost: 3, req: 'spn_2',
         title: 'Bumerang Ścienny', icon: '🪃', type: 'skill',
         benefit: 'Odbicie podkręconej piłki od ściany zacieśnia jej zakręt zamiast go kasować',
         legacyIds: ['spin_3', 'spn_3']
       },
       {
-        id: 'spn_4', tier: 4, cost: 7, req: 'spn_3',
+        id: 'spn_4', tier: 4, cost: 4, req: 'spn_3',
         title: 'Zakręt Grawitacyjny', icon: '🌌', type: 'skill',
         benefit: 'Kliknięcie PPM przy uderzeniu nadaje piłce nagły, ostry zygzak w locie',
         legacyIds: ['spin_4', 'spn_4']
       },
       {
-        id: 'spn_5', tier: 5, cost: 10, req: 'spn_4',
+        id: 'spn_5', tier: 5, cost: 5, req: 'spn_4',
         title: 'Kontrola Lotu', icon: '🎛️', type: 'legend',
         benefit: 'Trzymając LPM lub PPM przez 0,6 s po uderzeniu, sterujesz torem piłki myszką',
         legacyIds: ['spin_5', 'spn_5', 'spn_6']
@@ -3234,31 +3234,31 @@ const SKILL_TREE_BRANCHES = [
     desc: 'Większy zasięg paletki, absorpcja energii, parowanie i tarcza',
     nodes: [
       {
-        id: 'def_1', tier: 1, cost: 2, req: null,
+        id: 'def_1', tier: 1, cost: 1, req: null,
         title: 'Dłuższa Paletka', icon: '🛡️', type: 'stat',
         benefit: '+8 px długości paletki (łatwiejsze odbicia)',
         legacyIds: ['def_1']
       },
       {
-        id: 'def_2', tier: 2, cost: 4, req: 'def_1',
+        id: 'def_2', tier: 2, cost: 2, req: 'def_1',
         title: 'Zwiększona Bateria', icon: '🔋', type: 'stat',
         benefit: '+14 px długości paletki łącznie oraz +25 maks. energii',
         legacyIds: ['def_2', 'stm_1', 'stm_2']
       },
       {
-        id: 'def_3', tier: 3, cost: 6, req: 'def_2',
+        id: 'def_3', tier: 3, cost: 3, req: 'def_2',
         title: 'Kinetyczny Reaktor', icon: '🔌', type: 'skill',
         benefit: 'Zatrzymanie szybkiej piłki lub smasha natychmiast odnawia +25 energii',
         legacyIds: ['def_3', 'stm_3']
       },
       {
-        id: 'def_4', tier: 4, cost: 7, req: 'def_3',
+        id: 'def_4', tier: 4, cost: 4, req: 'def_3',
         title: 'Cyber Parry', icon: '⚔️', type: 'skill',
         benefit: 'Odbicie w ostatniej chwili zamienia Smash rywala w Twój zabójczy kontratak',
         legacyIds: ['def_4', 'stm_4']
       },
       {
-        id: 'def_5', tier: 5, cost: 10, req: 'def_4',
+        id: 'def_5', tier: 5, cost: 5, req: 'def_4',
         title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
         benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
@@ -3321,9 +3321,23 @@ function nickToEmail(nick) {
   return 'u_' + clean + '@cyberpong.app';
 }
 
+function calculateTotalSpForLevel(lvl) {
+  const l = Math.max(1, lvl || 1);
+  // Bazowe 2 punkty SP na start (lvl 1) + 1 SP za każdy kolejny poziom
+  let sp = 2 + (l - 1);
+  // Bonusy kamieni milowych (milestones) co 10 poziomów (+2 bonusowe SP na lvl 10, 20, 30, 40, 50)
+  sp += Math.floor(l / 10) * 2;
+  return sp;
+}
+
 function getXpRequiredForLevel(level) {
-  if (level < 10) return 150;
-  return 150 + (level - 9) * 60;
+  if (level <= 1) return 50;     // LVL 1 -> 2: 50 XP (szybki, satysfakcjonujący start w 1-2 mecze)
+  if (level === 2) return 85;    // LVL 2 -> 3: 85 XP (~2 mecze)
+  if (level === 3) return 130;   // LVL 3 -> 4: 130 XP (~2-3 mecze)
+  if (level === 4) return 180;   // LVL 4 -> 5: 180 XP (~3 mecze)
+  if (level === 5) return 240;   // LVL 5 -> 6: 240 XP
+  // Płynna, dynamicznie rosnąca krzywa RPG dla poziomów 6 - 50
+  return Math.round(240 + (level - 5) * 60 + Math.pow(level - 5, 1.22) * 5);
 }
 
 function getLevelProgress(totalExp) {
@@ -3455,7 +3469,7 @@ function getPlayerProfile() {
           if (prof.talents[tKey] && SKILL_TREE_NODES[tKey]) calcSpent += SKILL_TREE_NODES[tKey].cost;
         }
         prof.spentSp = calcSpent;
-        const totalSpDue = 2 + (prof.level - 1);
+        const totalSpDue = calculateTotalSpForLevel(prof.level);
         prof.sp = Math.max(0, totalSpDue - calcSpent);
         try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
         showBanner('🛡️ Wykryto manipulację plikiem — przywrócono stan bezpieczny!', '#ff3366', 70);
@@ -3511,8 +3525,8 @@ function getPlayerProfile() {
       prof.level = prog.level;
     }
 
-    // 2 punkty SP na start (lvl 1) + 1 punkt SP za każdy kolejny poziom
-    const totalSpDue = 2 + (prof.level - 1);
+    // Zbalansowane przeliczanie należnych punktów SP (uwzględnia bazowe 2 SP oraz kamienie milowe)
+    const totalSpDue = calculateTotalSpForLevel(prof.level);
     const totalSpAcquired = (prof.spentSp || 0) + (prof.sp || 0);
     if (!prof.isAdmin) {
       if (totalSpAcquired !== totalSpDue && (prof.spentSp || 0) === 0 && prof.level === 1) {
@@ -3605,7 +3619,7 @@ function grantExp(amount, reason = '') {
   const newProg = getLevelProgress(acc.exp || 0);
   const newLvl = newProg.level;
   if (newLvl > oldLvl) {
-    const spEarned = newLvl - oldLvl;
+    const spEarned = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
     acc.level = newLvl;
     acc.sp = (acc.sp || 0) + spEarned;
     showBanner(`🆙 AWANS NA POZIOM ${newLvl}! +${spEarned} SP!`, '#00ff88', 95);
@@ -4178,8 +4192,8 @@ function handleResetTalents() {
   acc.talents = { root: true };
   acc.freeResets = 0;
 
-  // Bezpiecznik minimalnego bilansu SP (2 na start + 1 za każdy poziom powyżej 1)
-  const totalSpDue = 2 + (Math.max(1, acc.level || 1) - 1);
+  // Bezpiecznik minimalnego bilansu SP (uwzględnia bazowe 2 SP oraz kamienie milowe)
+  const totalSpDue = calculateTotalSpForLevel(acc.level);
   if (acc.sp < totalSpDue) {
     acc.sp = totalSpDue;
   }
@@ -4389,27 +4403,26 @@ function calculateWallXp(score, isRecord = false) {
   const s = Math.max(0, score || 0);
   if (s <= 0) return 0;
 
-  // Bazowe 2 XP za rozegrany trening (jeśli gracz odbił min. 1 raz)
-  let xp = 2;
+  // Bazowe XP za min. 2 odbicia treningowe
+  let xp = s >= 2 ? 3 : 1;
 
-  // Bonus za pobicie rekordu ściany (+2 XP)
-  if (isRecord) {
-    xp += 2;
+  // Bonus za nowy rekord życiowy na ścianie
+  if (isRecord && s >= 10) {
+    xp += 12;
   }
 
-  // Skalowanie z odbić (+3 XP co 20 odbić, max 20 XP w Fazie 1, a od 200 odbić +15 XP co 100):
-  if (s < 20) {
-    // Płynne XP dla 1-19 odbić, aby gracz nie widział pustego +0 XP (np. 7-13 odbić: +1 XP, 14-19: +2 XP)
-    xp += Math.floor(s / 7);
-  } else if (s <= 140) {
-    // +3 XP za każde pełne 20 odbić (max 20 XP przy 140 odbiciach)
-    xp += Math.min(20, Math.floor(s / 20) * 3);
-  } else if (s < 200) {
-    xp += 20;
+  // Płynna, dynamiczna progresja odbić arkadowych:
+  if (s < 15) {
+    xp += Math.floor(s / 3);
+  } else if (s <= 50) {
+    xp += 5 + Math.floor((s - 15) / 5) * 2;
+  } else if (s <= 100) {
+    xp += 20 + Math.floor((s - 50) / 10) * 4;
+  } else if (s <= 200) {
+    xp += 42 + Math.floor((s - 100) / 20) * 8;
   } else {
-    // Faza 2: od 200 odbić +15 XP co 100 odbić
-    const extraHundreds = Math.floor((s - 100) / 100);
-    xp += 20 + (extraHundreds * 15);
+    // 200+ odbić: kunszt mistrza ściany (+15 XP co 25 odbić)
+    xp += 85 + Math.floor((s - 200) / 25) * 15;
   }
 
   return xp;
@@ -4428,7 +4441,7 @@ function awardAccountRewards(isWin, isWallStreak) {
   let reasonText = 'Ukończony mecz';
 
   if (isWallArcade) {
-    // 1. ŚCIANA: bazowe 2 XP + odbicia (+3 XP co 20 odbić, max 20 XP; od 200 odbić +15 XP co 100)
+    // 1. ŚCIANA: zbalansowana progresja odbić i rekordów
     gainedXp = calculateWallXp(wallScore, isWallStreak);
     reasonText = isWallStreak ? `Nowy rekord ściany (${wallScore} odbić)!` : `Ściana energii (${wallScore} odbić)`;
     if (wallScore > (acc.stats.wallRecord || 0)) {
@@ -4445,30 +4458,46 @@ function awardAccountRewards(isWin, isWallStreak) {
     const myGoals = teamScores[myTeam] || 0;
     const oppGoals = teamScores[oppTeam] || 0;
     const pointDiff = isWin ? Math.max(0, myGoals - oppGoals) : 0;
+    const isCleanSheet = isWin && oppGoals === 0;
+    const isComeback = isWin && oppGoals >= 3 && myGoals > oppGoals;
 
     if (isSinglePlayer) {
-      // 2. BOTY: 10 XP bazowe + różnica punktów + 5 za wina | 2 za loose
-      const baseXp = 10;
+      // 2. BOTY: Skalowane nagrody według poziomu trudności (Nowicjusz, Weteran, Cyber-Boss)
+      const botTierConfig = {
+        easy:   { base: 14, win: 8,  loss: 6,  diffMult: 2, label: 'NOWICJUSZ' },
+        medium: { base: 24, win: 16, loss: 10, diffMult: 2, label: 'WETERAN' },
+        hard:   { base: 38, win: 28, loss: 16, diffMult: 3, label: 'CYBER-BOSS' }
+      }[enemyAiLevel] || { base: 24, win: 16, loss: 10, diffMult: 2, label: 'BOT' };
+
       if (isWin) {
         acc.stats.wins++;
-        gainedXp = baseXp + pointDiff + 5;
-        reasonText = 'Wygrana z botem!';
-        showBanner(`🏆 WYGRANA Z BOTEM! +${gainedXp} XP`, '#f5b041', 85);
+        let bonusXp = 0;
+        if (isCleanSheet) bonusXp += 12;
+        if (isComeback) bonusXp += 8;
+        gainedXp = botTierConfig.base + botTierConfig.win + (pointDiff * botTierConfig.diffMult) + bonusXp;
+        reasonText = `Wygrana z ${botTierConfig.label}!`;
+        const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
+        showBanner(`🏆 WYGRANA (${botTierConfig.label}): +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
       } else {
-        gainedXp = baseXp + 2;
-        reasonText = 'Mecz z botem (porażka)';
-        showBanner(`🤖 MECZ Z BOTEM: +${gainedXp} XP`, '#00f0ff', 75);
+        gainedXp = botTierConfig.base + botTierConfig.loss;
+        reasonText = `Mecz z ${botTierConfig.label} (porażka)`;
+        showBanner(`🤖 MECZ (${botTierConfig.label}): +${gainedXp} XP`, '#00f0ff', 75);
       }
     } else {
-      // 3. LUDZIE (P2P ONLINE): 25 XP bazowe + różnica punktów + 20 za wina | 8 za loose
-      const baseXp = 25;
+      // 3. LUDZIE (P2P ONLINE)
+      const baseOnlineXp = is2v2 ? 40 : 35;
+      const winOnlineBonus = is2v2 ? 35 : 30;
+      const lossOnlineXp = 18;
+
       if (isWin) {
         acc.stats.wins++;
-        gainedXp = baseXp + pointDiff + 20;
-        reasonText = 'Zwycięstwo online!';
-        showBanner(`🏆 ZWYCIĘSTWO ONLINE! +${gainedXp} XP`, '#f5b041', 85);
+        let bonusXp = isCleanSheet ? 15 : 0;
+        gainedXp = baseOnlineXp + winOnlineBonus + (pointDiff * 3) + bonusXp;
+        reasonText = is2v2 ? 'Zwycięstwo 2v2 online!' : 'Zwycięstwo 1v1 online!';
+        const cleanTxt = isCleanSheet ? ' • CZYSTE KONTO 🛡️' : '';
+        showBanner(`🏆 ZWYCIĘSTWO ONLINE: +${gainedXp} XP${cleanTxt}`, '#f5b041', 85);
       } else {
-        gainedXp = baseXp + 8;
+        gainedXp = baseOnlineXp + lossOnlineXp;
         reasonText = 'Mecz online z graczem';
         showBanner(`🌐 MECZ ONLINE: +${gainedXp} XP`, '#00f0ff', 75);
       }
@@ -4479,7 +4508,7 @@ function awardAccountRewards(isWin, isWallStreak) {
 
   const newProg = getLevelProgress(acc.exp || 0);
   const newLvl = newProg.level;
-  const spEarned = newLvl - oldLvl;
+  const spEarned = calculateTotalSpForLevel(newLvl) - calculateTotalSpForLevel(oldLvl);
 
   if (newLvl > oldLvl) {
     acc.level = newLvl;
@@ -4493,7 +4522,7 @@ function awardAccountRewards(isWin, isWallStreak) {
 
   saveCurrentAccount(acc);
 
-  // Aktualizacja okna podsumowania meczu (#victoryModal) - TYLKO +XP, stan poziomu i kolejny punkt SP
+  // Aktualizacja okna podsumowania meczu (#victoryModal) - stan poziomu i kolejny punkt SP
   const xpValEl = document.getElementById('vicXpEarned');
   const barFillEl = document.getElementById('vicExpBarFill');
   const labelEl = document.getElementById('vicExpLabel');
@@ -7818,6 +7847,18 @@ function update() {
 function handlePaddleHit(paddle, dir) {
   BALL.x = dir === 1 ? paddle.x + paddle.w + BALL.r : paddle.x - BALL.r;
   rallyHits++;
+
+  if (rallyHits === 10 && !rallyRewarded) {
+    rallyRewarded = true;
+    grantExp(10, 'WYMIANA x10');
+    addFloatingText(W / 2, H / 2 - 25, '🔥 WYMIANA x10! +10 XP', '#f5b041');
+    SFX.play('upgrade');
+  } else if (rallyHits === 20) {
+    grantExp(25, 'WYMIANA x20');
+    addFloatingText(W / 2, H / 2 - 25, '⚡ MEGA WYMIANA x20! +25 XP', '#00ff88');
+    SFX.play('upgrade');
+  }
+
   const padId = paddle.id;
   BALL.lastHitPaddle = paddle;
   BALL.lastHitTeam = paddle.team;
