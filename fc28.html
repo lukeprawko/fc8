@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CYBERFC 28 — ULTIMATE 2.5D SOCCER</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script defer src="assets/nova-account.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1238,7 +1242,7 @@
   .hidden { display: none !important; }
 </style>
 </head>
-<body>
+<body data-game-key="fc">
 
 <canvas id="bgCanvas"></canvas>
 
@@ -1686,11 +1690,10 @@ function getCardById(id) {
   return PLAYERS_DB.find(c => c.id === id) || PLAYERS_DB[0];
 }
 
-function saveClubData() {
-  try {
-    localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData));
-  } catch (e) {}
+function saveClubData(syncCloud = true) {
+  try { localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData)); } catch (e) {}
   updateMenuClubUI();
+  if (syncCloud && window.NovaAccounts) window.NovaAccounts.saveGameData("fc", clubData);
 }
 
 function loadClubData() {
@@ -2231,13 +2234,14 @@ nickInputEl.addEventListener('input', () => {
 });
 
 function requireAndSavePlayerNick() {
-  const val = nickInputEl.value.trim();
+  const accountProfile = window.NovaAccounts && window.NovaAccounts.getProfile();
+  const val = String((accountProfile && accountProfile.nick) || nickInputEl.value).trim().slice(0, 12);
   if (!val) {
     nickBoxEl.classList.remove('nick-error');
     void nickBoxEl.offsetWidth;
     nickBoxEl.classList.add('nick-error');
     nickInputEl.focus();
-    setStatus('WPISZ SWÓJ NICK NA GÓRZE ABY ZAGRAĆĆ!');
+    setStatus('WPISZ SWÓJ NICK NA GÓRZE ABY ZAGRAĆ!');
     return null;
   }
   clubData.nick = val;
@@ -6323,6 +6327,52 @@ function gameLoop(timestamp = performance.now()) {
 }
 
 loadClubData();
+function restoreAccountClubData(data) {
+  if (!data || typeof data !== "object" || !Array.isArray(data.owned) || !data.lineup) return false;
+  var validIds = new Set(PLAYERS_DB.map(function (card) { return card.id; }));
+  var owned = data.owned.filter(function (id) { return typeof id === "string" && validIds.has(id); });
+  var lineup = { GK: "gk_1", DEF: "def_1", FWD: "fwd_1" };
+  ["GK", "DEF", "FWD"].forEach(function (role) {
+    var card = PLAYERS_DB.find(function (item) { return item.id === data.lineup[role] && item.role === role; });
+    if (card && owned.includes(card.id)) lineup[role] = card.id;
+  });
+  ["gk_1", "def_1", "fwd_1"].forEach(function (id) { if (!owned.includes(id)) owned.push(id); });
+  clubData = {
+    coins: Number.isFinite(data.coins) ? Math.max(0, Math.min(1000000000, Math.floor(data.coins))) : 500,
+    owned: owned, lineup: lineup,
+    nick: typeof data.nick === "string" ? data.nick.slice(0, 12) : (clubData.nick || "GRACZ_1")
+  };
+  saveClubData(false);
+  applySquadStatsToTeam(blueTeam, clubData.lineup);
+  return true;
+}
+document.addEventListener("nova-account-profile", function (event) {
+  var profile = event.detail && event.detail.profile;
+  var uid = event.detail && event.detail.uid;
+  if (!profile || !uid || !window.NovaAccounts) return;
+  var ownerKey = "novaAccountOwner_fc";
+  var previousOwner = "";
+  try { previousOwner = localStorage.getItem(ownerKey) || ""; } catch (e) {}
+  var cloudSave = profile.gameData && profile.gameData.fc;
+  if (cloudSave && restoreAccountClubData(cloudSave)) {
+    if (profile.nick && clubData.nick !== profile.nick) {
+      clubData.nick = String(profile.nick).slice(0, 12);
+      saveClubData(false);
+      window.NovaAccounts.saveGameData("fc", clubData);
+    }
+  } else {
+    if (previousOwner && previousOwner !== uid) {
+      clubData = { nick: String(profile.nick || "GRACZ_1").slice(0, 12), coins: 500, owned: ["gk_1", "def_1", "fwd_1"], lineup: { GK: "gk_1", DEF: "def_1", FWD: "fwd_1" } };
+      saveClubData(false);
+      applySquadStatsToTeam(blueTeam, clubData.lineup);
+    } else if (profile.nick) {
+      clubData.nick = String(profile.nick).slice(0, 12);
+      saveClubData(false);
+    }
+    window.NovaAccounts.saveGameData("fc", clubData);
+  }
+  try { localStorage.setItem(ownerKey, uid); } catch (e) {}
+});
 applySquadStatsToTeam(blueTeam, clubData.lineup);
 
 Object.assign(window, {
