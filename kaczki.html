@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CYBERDUCK 3D: CROSSING</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script defer src="assets/nova-account.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -822,7 +826,7 @@
   .hidden { display: none !important; }
 </style>
 </head>
-<body>
+<body data-game-key="ducks">
 
 <canvas id="bgCanvas"></canvas>
 
@@ -1175,6 +1179,15 @@ let bannerText = '', bannerTimer = 0, bannerColor = '#ffc400';
 
 let upgradePoints = 0;
 const stats = { agi: 1, stam: 1, quack: 1, feather: 1 };
+let duckAccountStats = { matches: 0, wins: 0, bestDistance: 0 };
+try {
+  const saved = JSON.parse(localStorage.getItem("novaDuckStats") || "null");
+  if (saved && typeof saved === "object") duckAccountStats = {
+    matches: Number.isFinite(saved.matches) ? Math.max(0, Math.floor(saved.matches)) : 0,
+    wins: Number.isFinite(saved.wins) ? Math.max(0, Math.floor(saved.wins)) : 0,
+    bestDistance: Number.isFinite(saved.bestDistance) ? Math.max(0, Math.floor(saved.bestDistance)) : 0
+  };
+} catch (e) {}
 
 let particles = [];
 let shockwaves = [];
@@ -1199,7 +1212,8 @@ nickInputEl.addEventListener('input', () => {
 });
 
 function requireAndSavePlayerNick() {
-  const val = nickInputEl.value.trim();
+  const accountProfile = window.NovaAccounts && window.NovaAccounts.getProfile();
+  const val = String((accountProfile && accountProfile.nick) || nickInputEl.value).trim().slice(0, 12);
   if (!val) {
     nickBoxEl.classList.remove('nick-error');
     void nickBoxEl.offsetWidth;
@@ -1211,7 +1225,6 @@ function requireAndSavePlayerNick() {
   try { localStorage.setItem(NICK_STORAGE_KEY, val); } catch (e) {}
   return val;
 }
-
 const PEER_CONFIG = {
   config: {
     iceServers: [
@@ -2708,31 +2721,70 @@ function onDuckReachedFinish(winnerDuck, customReason = null) {
   showVictoryModal(winnerDuck.id, reason);
 }
 
+function recordDuckAccountResult(winnerId) {
+  var localDuck = ducks[localDuckId];
+  duckAccountStats.matches = Math.min(1000000000, duckAccountStats.matches + 1);
+  if (winnerId === localDuckId) duckAccountStats.wins = Math.min(duckAccountStats.matches, duckAccountStats.wins + 1);
+  if (localDuck && Number.isFinite(localDuck.maxRow)) duckAccountStats.bestDistance = Math.max(duckAccountStats.bestDistance, Math.max(0, Math.floor(localDuck.maxRow)));
+  try { localStorage.setItem("novaDuckStats", JSON.stringify(duckAccountStats)); } catch (e) {}
+  if (window.NovaAccounts) window.NovaAccounts.saveGameData("ducks", duckAccountStats);
+}
+
+document.addEventListener("nova-account-profile", function (event) {
+  var profile = event.detail && event.detail.profile;
+  var uid = event.detail && event.detail.uid;
+  if (!profile || !uid || !window.NovaAccounts) return;
+  var ownerKey = "novaAccountOwner_ducks";
+  var previousOwner = "";
+  try { previousOwner = localStorage.getItem(ownerKey) || ""; } catch (e) {}
+  var saved = profile.gameData && profile.gameData.ducks;
+  if (saved && typeof saved === "object") {
+    duckAccountStats = {
+      matches: Number.isFinite(saved.matches) ? Math.min(1000000000, Math.max(0, Math.floor(saved.matches))) : 0,
+      wins: Number.isFinite(saved.wins) ? Math.min(1000000000, Math.max(0, Math.floor(saved.wins))) : 0,
+      bestDistance: Number.isFinite(saved.bestDistance) ? Math.min(1000000000, Math.max(0, Math.floor(saved.bestDistance))) : 0
+    };
+    duckAccountStats.wins = Math.min(duckAccountStats.wins, duckAccountStats.matches);
+    try { localStorage.setItem("novaDuckStats", JSON.stringify(duckAccountStats)); } catch (e) {}
+  } else {
+    if (previousOwner && previousOwner !== uid) duckAccountStats = { matches: 0, wins: 0, bestDistance: 0 };
+    try { localStorage.setItem("novaDuckStats", JSON.stringify(duckAccountStats)); } catch (e) {}
+    window.NovaAccounts.saveGameData("ducks", duckAccountStats);
+  }
+  try { localStorage.setItem(ownerKey, uid); } catch (e) {}
+});
+
 function showVictoryModal(winnerId, reasonText) {
+  if (matchOver) return;
   matchOver = true;
+  recordDuckAccountResult(winnerId);
   SFX.play('win');
-  const winner = ducks[winnerId] || ducks[0];
+  const winner = ducks[winnerId] || ducks[0] || { nick: 'KACZKA', color: '#fff' };
 
   const modal = document.getElementById('victoryModal');
   const title = document.getElementById('winnerTitle');
-  title.textContent = `🏆 ${winner.nick}`;
-  title.style.color = winner.color;
-  document.getElementById('winnerSub').textContent = reasonText;
+  title.textContent = '🏆 ' + String(winner.nick || 'KACZKA');
+  title.style.color = winner.color || '#fff';
+  document.getElementById('winnerSub').textContent = String(reasonText || '');
 
   const listEl = document.getElementById('rankingList');
-  listEl.innerHTML = '';
+  listEl.replaceChildren();
   const sorted = [...ducks].sort((a, b) => b.maxRow - a.maxRow);
   sorted.forEach((d, idx) => {
     const row = document.createElement('div');
     row.className = 'rank-row';
-    row.style.borderColor = d.color;
-    row.innerHTML = `<span style="color:${d.color}">#${idx + 1} ${d.isBot ? '🤖 ' : ''}${d.nick}</span><span>${d.maxRow} M</span>`;
+    row.style.borderColor = d.color || '#fff';
+    const label = document.createElement('span');
+    label.style.color = d.color || '#fff';
+    label.textContent = '#' + (idx + 1) + ' ' + (d.isBot ? '🤖 ' : '') + String(d.nick || 'KACZKA');
+    const distance = document.createElement('span');
+    distance.textContent = String(Math.max(0, Math.floor(Number(d.maxRow) || 0))) + ' M';
+    row.append(label, distance);
     listEl.appendChild(row);
   });
 
   modal.style.display = 'flex';
 }
-
 /* ==========================================
    12. SZTUCZNA INTELIGENCJA KACZEK (BOTY)
    ========================================== */
