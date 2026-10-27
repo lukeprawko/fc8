@@ -4110,34 +4110,42 @@ async function handleFirebaseLogin() {
 
 function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   if (!cloudProf) return;
-  const base = createDefaultProfile(cloudProf.nick || 'GRACZ');
+
+  const localRaw = decodeProfileEnvelope(localStorage.getItem(PLAYER_PROFILE_KEY));
+  const localProf = localRaw ? localRaw.prof : null;
+
+  const base = createDefaultProfile(cloudProf.nick || (localProf ? localProf.nick : 'GRACZ'));
   const merged = {
     ...base,
     ...cloudProf,
-    talents: (cloudProf.talents && typeof cloudProf.talents === 'object')
-      ? { ...cloudProf.talents, root: true }
-      : { root: true },
     stats: (cloudProf.stats && typeof cloudProf.stats === 'object')
       ? { ...base.stats, ...cloudProf.stats }
-      : { ...base.stats }
+      : (localProf && localProf.stats ? { ...base.stats, ...localProf.stats } : { ...base.stats })
   };
 
-  // Globalny Sezon 3 / Reset Bazy w chmurze Firebase (Wipe do LVL 1)
+  // Połącz talenty: każdy talent odblokowany lokalnie lub w chmurze jest ZAWSZE zachowywany!
+  const localTalents = (localProf && localProf.talents && typeof localProf.talents === 'object') ? localProf.talents : {};
+  const cloudTalents = (cloudProf.talents && typeof cloudProf.talents === 'object') ? cloudProf.talents : {};
+  const mergedTalents = {
+    ...cloudTalents,
+    ...localTalents,
+    root: true
+  };
+  merged.talents = mergedTalents;
+
+  // Globalny Sezon 3 / Reset Bazy w chmurze Firebase (Synchronizacja do Sezonu 3 bez kasowania zakupionych talentów)
   if (cloudProf.resetVersion !== 3) {
-    console.log('☁️ [Firestore Migration] Wykryto starszą wersję konta w chmurze — synchronizacja do Sezonu 3...');
-    const targetLvl = (typeof cloudProf.level === 'number' && cloudProf.level > 1) ? Math.floor(cloudProf.level) : 1;
+    console.log('☁️ [Firestore Migration] Synchronizacja konta w chmurze do Sezonu 3...');
+    const targetLvl = (typeof cloudProf.level === 'number' && cloudProf.level > 1)
+      ? Math.floor(cloudProf.level)
+      : (localProf && localProf.level > 1 ? localProf.level : 1);
     merged.level = targetLvl;
     let cumXp = 0;
     for (let l = 1; l < targetLvl; l++) cumXp += getXpRequiredForLevel(l);
-    merged.exp = Math.max(cloudProf.exp || 0, cumXp);
-    merged.talents = { root: true };
-    merged.spentSp = 0;
-    merged.sp = calculateTotalSpForLevel(targetLvl);
-    merged.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    merged.exp = Math.max(cloudProf.exp || 0, (localProf && localProf.exp) || 0, cumXp);
     merged.resetVersion = 3;
     merged.updatedAt = Date.now();
     syncProfileToCloud(merged);
-    showBanner(`🔄 SYNCHRONIZACJA SEZONU 3 (LVL ${targetLvl})!`, '#00f0ff', 75);
   }
 
   // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
@@ -4168,9 +4176,6 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   }
 
   // Dynamiczna synchronizacja poziomu i EXP przy edycji w bazie Firestore:
-  const localRaw = decodeProfileEnvelope(localStorage.getItem(PLAYER_PROFILE_KEY));
-  const localProf = localRaw ? localRaw.prof : null;
-
   const cloudLvl = (typeof cloudProf.level === 'number' && Number.isFinite(cloudProf.level) && cloudProf.level >= 1)
     ? Math.min(MAX_ACCOUNT_LEVEL, Math.floor(cloudProf.level))
     : null;
@@ -4211,43 +4216,42 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     merged.level = getLevelProgress(merged.exp).level;
   }
 
-  // Połącz talenty: upewnij się, że lokalnie odblokowane talenty nie zostaną skasowane przez opóźniony snapshot
-  if (fromSnapshot && localProf && localProf.talents && typeof localProf.talents === 'object') {
-    merged.talents = {
-      ...localProf.talents,
-      ...(merged.talents || {}),
-      root: true
-    };
-  }
-
-  // Przelicz wydane punkty i należne SP z chmury, aby bilans był zawsze w 100% spójny
+  // Przelicz wydane punkty SP na podstawie aktualnie odblokowanych talentów
   let calcSpent = 0;
-  for (const tKey in (merged.talents || {})) {
+  for (const tKey in merged.talents) {
     if (tKey !== 'root' && merged.talents[tKey] && SKILL_TREE_NODES[tKey]) {
       calcSpent += SKILL_TREE_NODES[tKey].cost;
     }
   }
+  merged.spentSp = calcSpent;
 
-  const totalSpDue = calculateTotalSpForLevel(merged.level);
-  if (calcSpent > totalSpDue) {
-    // Poziom w bazie został obniżony poniżej sumy wydanych punktów — bezpieczny reset talentów i zwrot SP
-    merged.talents = { root: true };
-    calcSpent = 0;
-    merged.spentSp = 0;
-    merged.sp = totalSpDue;
+  // Bezpieczne zarządzanie pulą SP:
+  // Jeśli lokalny profil ma nowszą lub równą datę aktualizacji (np. gracz przed chwilą zakupił talent),
+  // nie nadpisuj puli SP starszym stanem z chmury!
+  const localUp = localProf ? (Number(localProf.updatedAt) || 0) : 0;
+  const cloudUp = Number(cloudProf.updatedAt) || 0;
+  const isLocalNewer = localProf && localUp >= cloudUp;
+
+  if (isLocalNewer && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
+    merged.sp = localProf.sp;
+  } else if (typeof cloudProf.sp === 'number' && !isNaN(cloudProf.sp)) {
+    merged.sp = cloudProf.sp;
+  } else if (localProf && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
+    merged.sp = localProf.sp;
   } else {
-    merged.spentSp = calcSpent;
-    const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
-    if (!merged.isAdmin) {
-      if (typeof merged.sp !== 'number' || isNaN(merged.sp) || merged.sp < minExpectedSp) {
-        merged.sp = minExpectedSp;
-      }
-    } else {
-      if (typeof merged.sp !== 'number' || isNaN(merged.sp)) {
-        merged.sp = minExpectedSp;
-      }
-    }
+    const totalSpDue = calculateTotalSpForLevel(merged.level);
+    merged.sp = Math.max(0, totalSpDue - calcSpent);
   }
+
+  // Gwarancja minimalnego bilansu SP wynikającego z poziomu
+  const totalSpDue = calculateTotalSpForLevel(merged.level);
+  const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
+  if (typeof merged.sp !== 'number' || isNaN(merged.sp) || merged.sp < minExpectedSp) {
+    merged.sp = minExpectedSp;
+  }
+
+  merged.updatedAt = Math.max(localUp, cloudUp, Date.now());
+  merged.resetVersion = 3;
 
   // Zapis do localStorage z poprawną sumą kontrolną
   try {
