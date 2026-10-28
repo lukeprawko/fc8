@@ -1240,11 +1240,54 @@
   }
 
   .hidden { display: none !important; }
+
+  /* Nowoczesne okno konta — zastępuje stary sposób wyboru nicku/kodu zapisu */
+  .account-top-btn{background:linear-gradient(135deg,rgba(0,240,255,.18),rgba(184,69,255,.18));border:1px solid rgba(0,240,255,.6);color:#fff;border-radius:14px;padding:12px 16px;font:900 11px Orbitron,sans-serif;cursor:pointer;box-shadow:0 0 18px rgba(0,240,255,.12);transition:.2s;white-space:nowrap}
+  .account-top-btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(0,240,255,.3)}
+  .fc-auth-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,14,.82);backdrop-filter:blur(12px)}
+  .fc-auth-overlay.open{display:flex}
+  .fc-auth-card{width:min(440px,100%);padding:30px;border-radius:24px;background:linear-gradient(145deg,rgba(17,26,45,.98),rgba(7,11,23,.99));border:1px solid rgba(0,240,255,.45);box-shadow:0 0 55px rgba(0,240,255,.16),0 25px 90px #000;position:relative}
+  .fc-auth-kicker{font:800 10px Orbitron,sans-serif;letter-spacing:3px;color:var(--p1);text-transform:uppercase}
+  .fc-auth-title{font:900 clamp(24px,5vw,32px) Orbitron,sans-serif;color:#fff;margin:10px 0 8px}
+  .fc-auth-desc{font-size:13px;color:#aebbd0;line-height:1.6;margin-bottom:22px}
+  .fc-auth-input{box-sizing:border-box;width:100%;margin:7px 0;padding:14px 15px;background:#080e1b;border:1px solid #293851;border-radius:12px;color:#fff;font:700 13px Orbitron,sans-serif;outline:none}
+  .fc-auth-input:focus{border-color:var(--p1);box-shadow:0 0 0 3px rgba(0,240,255,.1)}
+  .fc-auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .fc-auth-action{border:0;border-radius:12px;padding:14px 10px;font:900 11px Orbitron,sans-serif;cursor:pointer;color:#06101a;background:linear-gradient(135deg,#00f0ff,#00c6a7)}
+  .fc-auth-action.secondary{background:linear-gradient(135deg,#b845ff,#6c5ce7);color:white}
+  .fc-auth-status{font-size:12px;line-height:1.5;min-height:20px;margin-top:15px;color:#00f0ff;overflow-wrap:anywhere}
+  .fc-auth-close{position:absolute;right:14px;top:14px;border:1px solid #344258;background:#111a2a;color:white;border-radius:10px;width:34px;height:34px;cursor:pointer}
+  .fc-auth-user{display:flex;align-items:center;gap:8px;font:800 10px Orbitron,sans-serif;color:#9fffe9;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:700px){.account-top-btn{padding:10px;font-size:9px}.fc-auth-card{padding:24px 18px}.fc-auth-user{max-width:100px}}
+
 </style>
+
+<!-- Firebase: logowanie i zapis postępu FC28 w tym samym systemie kont co PingPong -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 </head>
 <body data-game-key="fc">
 
 <canvas id="bgCanvas"></canvas>
+
+<div class="fc-auth-overlay" id="fcAuthOverlay" role="dialog" aria-modal="true" aria-labelledby="fcAuthTitle" onclick="if(event.target===this)closeFcAuth()">
+  <div class="fc-auth-card">
+    <button class="fc-auth-close" type="button" onclick="closeFcAuth()" aria-label="Zamknij">✕</button>
+    <div class="fc-auth-kicker">CYBERFC 28 • ACCOUNT CENTER</div>
+    <h2 class="fc-auth-title" id="fcAuthTitle">Twoje konto</h2>
+    <div class="fc-auth-desc">Zaloguj się lub utwórz konto. Twoje monety, zawodnicy i skład będą przypisane do konta i synchronizowane w chmurze — także na innym urządzeniu.</div>
+    <input class="fc-auth-input" id="fcAuthNick" maxlength="12" autocomplete="username" placeholder="NICK (min. 3 znaki)">
+    <input class="fc-auth-input" id="fcAuthPassword" type="password" autocomplete="current-password" placeholder="HASŁO (min. 6 znaków)" onkeydown="if(event.key==='Enter')fcLogin()">
+    <div class="fc-auth-actions">
+      <button class="fc-auth-action" type="button" onclick="fcLogin()">ZALOGUJ</button>
+      <button class="fc-auth-action secondary" type="button" onclick="fcRegister()">UTWÓRZ KONTO</button>
+    </div>
+    <div class="fc-auth-status" id="fcAuthStatus" aria-live="polite">Dane konta są przechowywane w Firebase.</div>
+    <button type="button" class="top-nav-btn" id="fcLogoutButton" style="display:none;width:100%;justify-content:center;margin-top:10px" onclick="fcLogout()">WYLOGUJ SIĘ</button>
+  </div>
+</div>
 
 <div class="app-layer">
 
@@ -1258,7 +1301,7 @@
     <div class="hub-panel" id="mainPanel">
       <!-- GÓRNY WIERSZ: NICK + MONETY + SKŁAD + KOD ZAPISU -->
       <div class="top-row">
-        <div class="nick-box" id="nickBox" title="Podaj swój nick">
+        <div class="nick-box" id="nickBox" title="Nick konta" style="display:none">
           <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
           <input id="nickInput" maxlength="12" value="GRACZ_1" placeholder="WPISZ SWÓJ NICK" autocomplete="off">
         </div>
@@ -1273,10 +1316,8 @@
           <span>KLUB & RYNEK</span>
         </button>
 
-        <button type="button" class="top-nav-btn" onclick="openSaveCodeModal()">
-          <span>💾</span>
-          <span>KOD ZAPISU</span>
-        </button>
+        <div class="fc-auth-user" id="fcAuthUserLabel">● TRYB GOŚCIA</div>
+        <button type="button" class="account-top-btn" id="fcAccountButton" onclick="openFcAuth()">👤 KONTO / LOGOWANIE</button>
       </div>
 
       <!-- PASEK PODGLĄDU AKTYWNEGO SKŁADU (GK, DEF, FWD) -->
@@ -1511,7 +1552,7 @@
         <h2 id="winnerTitle">KONIEC MECZU!</h2>
         <div style="font-family:'Orbitron'; font-size:32px; font-weight:900; margin:4px 0;" id="winnerSub">0 : 0</div>
         <div id="matchCoinsReward" style="font-family:'Orbitron'; font-size:15px; color:var(--gold); font-weight:900; margin-bottom:6px;">
-          +150 🪙 MONET DO KLUBU!
+          NAGRODA ZA MECZ 🪙
         </div>
         <div class="stats-box">
           <div class="p1-color" id="statShotsBlue">0</div>
@@ -1693,7 +1734,10 @@ function getCardById(id) {
 function saveClubData(syncCloud = true) {
   try { localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData)); } catch (e) {}
   updateMenuClubUI();
-  if (syncCloud && window.NovaAccounts) window.NovaAccounts.saveGameData("fc", clubData);
+  if (syncCloud) {
+    if (typeof fcScheduleCloudSave === 'function') fcScheduleCloudSave();
+    else if (window.NovaAccounts) window.NovaAccounts.saveGameData("fc", clubData);
+  }
 }
 
 function loadClubData() {
@@ -2207,9 +2251,10 @@ const BOT_TIER_LABELS_PL = {
 };
 
 const AI_CONFIG = {
-  easy:   { speedMult: 0.82, reactDelay: 34, passAcc: 0.74, shootDist: 360, slideChance: 0.002, trickChance: 0.006, diveReflex: 0.65 },
-  medium: { speedMult: 0.94, reactDelay: 22, passAcc: 0.88, shootDist: 420, slideChance: 0.006, trickChance: 0.016, diveReflex: 0.85 },
-  hard:   { speedMult: 1.02, reactDelay: 12, passAcc: 0.96, shootDist: 470, slideChance: 0.011, trickChance: 0.032, diveReflex: 0.98 }
+  // Trudność wpływa na szybkość reakcji, jakość decyzji i wykonanie — nie daje botom darmowych statystyk.
+  easy:   { speedMult: 0.86, reactDelay: 30, passAcc: 0.72, shootDist: 300, slideChance: 0.003, trickChance: 0.008, diveReflex: 0.62, vision: 0.70, pressRange: 78, passRisk: 1.35, shotQuality: 0.76, support: 0.78 },
+  medium: { speedMult: 0.96, reactDelay: 19, passAcc: 0.86, shootDist: 355, slideChance: 0.007, trickChance: 0.020, diveReflex: 0.82, vision: 0.88, pressRange: 105, passRisk: 1.00, shotQuality: 0.91, support: 0.94 },
+  hard:   { speedMult: 1.015, reactDelay: 11, passAcc: 0.94, shootDist: 405, slideChance: 0.012, trickChance: 0.036, diveReflex: 0.96, vision: 1.00, pressRange: 132, passRisk: 0.72, shotQuality: 1.00, support: 1.00 }
 };
 
 let peer = null;
@@ -3846,6 +3891,7 @@ class Player {
     this.yellowCards = 0;
     this.redCards = 0;
     this.sentOff = false;
+    this.foulCooldown = 0;
 
     this.animCycle = Math.random() * 10;
     this.isMoving = false;
@@ -4016,6 +4062,7 @@ class Player {
     }
 
     if (this.slideCooldown > 0) this.slideCooldown--;
+    if (this.foulCooldown > 0) this.foulCooldown--;
     if (this.gkDiveCooldown > 0) this.gkDiveCooldown--;
     if (this.lungeTimer > 0) this.lungeTimer--;
     if (this.kickAnimTimer > 0) this.kickAnimTimer--;
@@ -4120,10 +4167,20 @@ class Player {
       }
 
       if (!cleanlyWonBall && !setPiece.active) {
+        // Wślizg jest faulem dopiero przy niebezpiecznym kontakcie z rywalem,
+        // a nie za samo przebiegnięcie blisko niego.
         let opponents = (this.team === 'blue' ? redTeam : blueTeam).filter(p => !p.sentOff);
         for (let opp of opponents) {
-          let distToOpp = Math.hypot(this.x - opp.x, this.y - opp.y);
-          if (distToOpp < 34 && distToBall > 28) {
+          const distToOpp = Math.hypot(this.x - opp.x, this.y - opp.y);
+          if (distToOpp >= 29) continue;
+
+          const ballIsWithVictim = ball.owner === opp;
+          const ballNearTackle = distToBall < tackleReach + 8 && ball.z < 20;
+          const approachToVictim = Math.atan2(opp.y - this.y, opp.x - this.x);
+          const tackleDirectionDiff = Math.abs(normalizeAngle(this.angle - approachToVictim));
+          const dangerousContact = !ballNearTackle || (ballIsWithVictim && distToOpp < 25);
+          // Czyste wejście w piłkę nie jest karane; spóźniony/boczny wślizg może być faulem.
+          if (dangerousContact && (ballIsWithVictim || tackleDirectionDiff > 1.05 || distToOpp < 23)) {
             handleFoul(this, opp);
             return;
           }
@@ -4265,8 +4322,12 @@ class Player {
         this.y = WORLD.height / 2 + Math.sin(a) * 120;
       }
     }
-    this.x = Math.max(WORLD.marginX - 25, Math.min(WORLD.width - WORLD.marginX + 25, this.x));
-    this.y = Math.max(WORLD.marginY - 25, Math.min(WORLD.height - WORLD.marginY + 25, this.y));
+    // Zawodnicy pozostają na boisku — nie mogą wejść za linię bramkową ani do wnętrza bramki.
+    // Zostawiamy niewielki margines, żeby sprite nie przenikał przez linię.
+    const edgeX = Math.max(8, this.radius * 0.55);
+    const edgeY = Math.max(8, this.radius * 0.55);
+    this.x = Math.max(WORLD.marginX + edgeX, Math.min(WORLD.width - WORLD.marginX - edgeX, this.x));
+    this.y = Math.max(WORLD.marginY + edgeY, Math.min(WORLD.height - WORLD.marginY - edgeY, this.y));
   }
 
   runSmartTacticalAI() {
@@ -4340,36 +4401,68 @@ class Player {
       );
       let oppDist = Math.hypot(closestOpp.x - this.x, closestOpp.y - this.y);
 
-      if (distToEnemyGoal < cfg.shootDist && Math.abs(this.y - centerY) < 240 && this.aiDecisionCooldown <= 0) {
-        let enemyGK = oppTeam.find(p => p.role === 'GK');
-        let targetCornerY = (enemyGK && enemyGK.y < centerY) ? centerY + 72 : centerY - 72;
-        let inaccuracy = (1 - cfg.passAcc) * (Math.random() - 0.5) * 140;
-        let shotAngle = Math.atan2((targetCornerY + inaccuracy) - this.y, enemyGoalX - this.x);
-
-        if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
-        const isPS = this.playstyle === 'power_shot';
-        ball.kick(this, shotAngle, isPS ? 19.5 : 16.5, 2.5, 16, isPS);
-        camera.shake = 5;
-        this.aiDecisionCooldown = cfg.reactDelay + 20;
-        return;
+      const enemyGK = oppTeam.find(p => p.role === 'GK');
+      const shootingLane = Math.abs(this.y - centerY) < 255;
+      const shotRange = cfg.shootDist * (0.72 + (this.statSho || 75) / 250);
+      // Strzał tylko wtedy, gdy pozycja i kąt mają sens; słabsi gracze częściej szukają podania.
+      if (distToEnemyGoal < shotRange && shootingLane && this.aiDecisionCooldown <= 0) {
+        const goalDx = Math.abs(enemyGoalX - this.x);
+        const keeperY = enemyGK ? enemyGK.y : centerY;
+        const topGap = Math.abs((centerY - WORLD.goalHeight * 0.34) - keeperY);
+        const bottomGap = Math.abs((centerY + WORLD.goalHeight * 0.34) - keeperY);
+        let targetCornerY = topGap > bottomGap ? centerY - WORLD.goalHeight * 0.34 : centerY + WORLD.goalHeight * 0.34;
+        // Z bliska celuj w dalszy słupek; z daleka strzał jest mniej opłacalny.
+        if (goalDx < 220 && enemyGK) targetCornerY = enemyGK.y < centerY ? centerY + 58 : centerY - 58;
+        const shotStat = Math.max(50, Math.min(99, this.statSho || 75));
+        const baseError = (1 - cfg.passAcc) * 115 + (100 - shotStat) * 0.42;
+        const inaccuracy = (Math.random() - 0.5) * baseError / cfg.shotQuality;
+        const shotAngle = Math.atan2((targetCornerY + inaccuracy) - this.y, enemyGoalX - this.x);
+        const hasBetterPass = oppDist > 95 && distToEnemyGoal > 260 && this.statSho < 82;
+        if (!hasBetterPass || distToEnemyGoal < 220 || Math.random() < 0.22 * cfg.shotQuality) {
+          if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
+          const isPS = this.playstyle === 'power_shot';
+          const isFinesse = this.playstyle === 'finesse_shot';
+          ball.kick(this, shotAngle, isPS ? 19.5 : (isFinesse ? 17.2 : 15.7 + shotStat * 0.012), isFinesse ? 1.8 : 2.5, 16, isPS);
+          camera.shake = 4;
+          this.aiDecisionCooldown = cfg.reactDelay + 17;
+          return;
+        }
       }
 
+      // Wybierz najlepsze podanie na podstawie wolnej przestrzeni, progresu i ryzyka przechwytu.
       let mates = myTeam.filter(p => p !== this && p.role !== 'GK');
+      let bestPass = null;
+      let bestPassScore = -Infinity;
       if (mates.length > 0 && this.aiDecisionCooldown <= 0) {
-        for (let mate of mates) {
-          let mateGainX = (mate.x - this.x) * attackDir;
-          let mateDistToOpp = Math.min(...oppTeam.map(o => Math.hypot(o.x - mate.x, o.y - mate.y)));
-
-          if ((oppDist < 95 && mateDistToOpp > 90) || (mateGainX > 85 && mateDistToOpp > 130)) {
-            let leadX = mate.x + mate.vx * 10 + attackDir * 24;
-            let leadY = mate.y + mate.vy * 10;
-            let passAngle = Math.atan2(leadY - this.y, leadX - this.x);
-            let pSpd = this.playstyle === 'incisive_pass' ? 15.2 : 12.8;
-            ball.kick(this, passAngle, pSpd, 0);
-            this.aiDecisionCooldown = cfg.reactDelay + 18;
-            return;
+        for (const mate of mates) {
+          const mateGainX = (mate.x - this.x) * attackDir;
+          const mateDistToOpp = Math.min(...oppTeam.map(o => Math.hypot(o.x - mate.x, o.y - mate.y)));
+          const passDist = Math.hypot(mate.x - this.x, mate.y - this.y);
+          if (passDist < 65 || passDist > 470) continue;
+          let laneRisk = 0;
+          for (const opp of oppTeam) {
+            const vx = mate.x - this.x, vy = mate.y - this.y;
+            const len2 = vx * vx + vy * vy || 1;
+            const t = Math.max(0, Math.min(1, ((opp.x-this.x)*vx + (opp.y-this.y)*vy) / len2));
+            const d = Math.hypot(opp.x - (this.x + t*vx), opp.y - (this.y + t*vy));
+            if (d < 58) laneRisk += (58-d) / 58;
           }
+          const progress = mateGainX * 0.60;
+          const space = Math.min(150, mateDistToOpp) * 0.48;
+          const distancePenalty = Math.max(0, passDist - 230) * 0.20;
+          const backwardPenalty = mateGainX < -20 ? 48 : 0;
+          const score = progress + space - laneRisk * 95 * cfg.passRisk - distancePenalty - backwardPenalty + Math.random() * (1-cfg.vision) * 24;
+          if (score > bestPassScore) { bestPassScore = score; bestPass = mate; }
         }
+      }
+      if (bestPass && (oppDist < cfg.pressRange || bestPassScore > 92) && this.aiDecisionCooldown <= 0) {
+        const leadX = bestPass.x + bestPass.vx * (5 + cfg.vision * 5) + attackDir * 16;
+        const leadY = bestPass.y + bestPass.vy * (5 + cfg.vision * 5);
+        const passAngle = Math.atan2(leadY - this.y, leadX - this.x);
+        const pSpd = this.playstyle === 'incisive_pass' ? 15.2 : 12.5 + cfg.vision * 0.8;
+        ball.kick(this, passAngle, pSpd, 0);
+        this.aiDecisionCooldown = cfg.reactDelay + 15;
+        return;
       }
 
       if (oppDist < 72 && this.trickTimer === 0 && Math.random() < cfg.trickChance) {
@@ -4409,26 +4502,44 @@ class Player {
     , fieldMates[0]);
 
     if (closestToBall === this) {
-      let predictX = ball.x + ball.vx * 5;
-      let predictY = ball.y + ball.vy * 5;
+      const carrier = ball.owner && ball.owner.team !== this.team ? ball.owner : null;
+      let predictX = ball.x + ball.vx * (3 + cfg.vision * 4);
+      let predictY = ball.y + ball.vy * (3 + cfg.vision * 4);
+      // Gdy przeciwnik ma piłkę, odetnij kierunek do bramki zamiast bezmyślnie biec za piłką.
+      if (carrier) {
+        const ownGoalY = centerY;
+        const dxGoal = ownGoalX - carrier.x;
+        const dyGoal = ownGoalY - carrier.y;
+        const goalLen = Math.hypot(dxGoal, dyGoal) || 1;
+        const interceptX = carrier.x - (dxGoal / goalLen) * (34 + (1-cfg.vision)*24);
+        const interceptY = carrier.y - (dyGoal / goalLen) * (34 + (1-cfg.vision)*24);
+        predictX = interceptX * cfg.vision + predictX * (1-cfg.vision);
+        predictY = interceptY * cfg.vision + predictY * (1-cfg.vision);
+      }
       this.moveTowards(predictX, predictY, 0.98 * cfg.speedMult);
 
-      if (ball.owner && ball.owner.team !== this.team) {
-        let d = Math.hypot(this.x - ball.x, this.y - ball.y);
-        if (d < 44 && ball.owner.trickTimer === 0 && !ball.owner.isShielding && Math.random() < (0.042 * cfg.speedMult)) {
-          ball.owner.stunTimer = 20;
+      if (carrier) {
+        const d = Math.hypot(this.x - carrier.x, this.y - carrier.y);
+        const tackleChance = 0.025 + cfg.vision * 0.045;
+        if (d < 43 && carrier.trickTimer === 0 && !carrier.isShielding && Math.random() < tackleChance) {
+          carrier.stunTimer = 14 + Math.round(cfg.vision * 8);
           ball.owner = this;
           ball.lastTouchTeam = this.team;
           playAndBroadcastSFX('pass');
-        } else if (d > 48 && d < 82 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance) {
+        } else if (d > 47 && d < 78 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance) {
           this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
           this.startSlide();
         }
       }
     } else {
-      let targetX = ownGoalX * 0.46 + ball.x * 0.54;
-      let targetY = centerY * 0.45 + ball.y * 0.55;
-      this.moveTowards(targetX, targetY, 0.90 * cfg.speedMult);
+      // Reszta drużyny ustawia się pomiędzy piłką a własną bramką, z zachowaniem odstępów.
+      const defensiveLineX = ownGoalX * 0.28 + ball.x * 0.72;
+      const roleOffset = this.role === 'DEF' ? -attackDir * 55 : attackDir * 65;
+      let targetX = defensiveLineX + roleOffset;
+      let targetY = centerY + (ball.y - centerY) * (this.role === 'DEF' ? 0.48 : 0.30);
+      targetX = Math.max(WORLD.marginX + 65, Math.min(WORLD.width - WORLD.marginX - 65, targetX));
+      targetY = Math.max(WORLD.marginY + 45, Math.min(WORLD.height - WORLD.marginY - 45, targetY));
+      this.moveTowards(targetX, targetY, (0.88 + cfg.vision * 0.08) * cfg.speedMult);
     }
   }
 
@@ -5138,12 +5249,12 @@ function triggerGoal(msg, color, concedingTeam) {
   // Nagroda monet za strzelonego gola!
   const myTeam = getMyTeamColor();
   if ((myTeam === 'blue' && concedingTeam === 'red') || (myTeam === 'red' && concedingTeam === 'blue')) {
-    clubData.coins += 40;
+    clubData.coins += 20;
     saveClubData();
   }
 
   playAndBroadcastSFX('goal');
-  showTempBanner(msg, `${scoreBlue} : ${scoreRed} (+40 🪙)`, color, 85);
+  showTempBanner(msg, `${scoreBlue} : ${scoreRed} (+20 🪙)`, color, 85);
   camera.shake = 14;
   updateScoreboardUI();
 
@@ -5245,7 +5356,10 @@ function triggerMatchOver() {
   const myTeam = getMyTeamColor();
   const won = (myTeam === 'blue' && scoreBlue > scoreRed) || (myTeam === 'red' && scoreRed > scoreBlue);
   const draw = scoreBlue === scoreRed;
-  const reward = won ? 250 : (draw ? 120 : 75);
+  const baseReward = won ? 180 : (draw ? 90 : 55);
+  const rewardTier = (isSinglePlayer ? enemyAiLevel : 'medium');
+  const rewardMultiplier = rewardTier === 'hard' ? 1.25 : (rewardTier === 'easy' ? 0.80 : 1.0);
+  const reward = Math.round(baseReward * rewardMultiplier);
   clubData.coins += reward;
   saveClubData();
 
@@ -5449,19 +5563,27 @@ function performStandingTackle(player) {
 
 function handleFoul(offender, victim) {
   if (setPiece.active || matchPhase !== 'PLAYING') return;
+  // Krótki cooldown zapobiega naliczaniu kilku fauli za jedno zderzenie.
+  if (offender.foulCooldown > 0) return;
+  offender.foulCooldown = 70;
 
-  victim.stunTimer = 38;
+  victim.stunTimer = 24;
   offender.isSliding = false;
-  camera.shake = 8;
+  offender.slideTimer = 0;
+  camera.shake = 5;
 
   if (offender.team === 'blue') matchStats.foulsBlue++; else matchStats.foulsRed++;
 
-  let angleDiff = Math.abs(normalizeAngle(offender.angle - victim.angle));
-  let fromBehind = angleDiff < 0.85;
+  // Oceniaj, czy obrońca wszedł w rywala od tyłu, zamiast porównywać same kierunki biegu.
+  const victimToOffender = Math.atan2(offender.y - victim.y, offender.x - victim.x);
+  const victimFacingDiff = Math.abs(normalizeAngle(victimToOffender - victim.angle));
+  const fromBehind = victimFacingDiff > 2.15;
+  const recklessSlide = offender.isSliding && Math.hypot(offender.vx, offender.vy) > 4.2;
   let cardGiven = null;
   let cardText = "Rzut wolny!";
 
-  if (fromBehind || victim.isShielding || Math.random() < 0.65) {
+  // Żółta kartka za wejście od tyłu lub niebezpieczny wślizg, a nie losowo przy każdym faulu.
+  if (fromBehind || recklessSlide || (victim.isShielding && Math.random() < 0.20)) {
     offender.yellowCards++;
     cardGiven = '#ffeb3b';
     cardText = `ŻÓŁTA KARTKA (${offender.cardName})!`;
@@ -6326,6 +6448,104 @@ function gameLoop(timestamp = performance.now()) {
   requestAnimationFrame(gameLoop);
 }
 
+// ==================== KONTO FC28 — FIREBASE AUTH + FIRESTORE ====================
+const FC_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCtKxDIKJOWtfGZ2RXTSEHS37SIIRC92g",
+  authDomain: "nova-s-e94ea.firebaseapp.com",
+  projectId: "nova-s-e94ea",
+  storageBucket: "nova-s-e94ea.firebasestorage.app",
+  messagingSenderId: "831762785334",
+  appId: "1:831762785334:web:da4cc29c9ffbfb5a66a497",
+  measurementId: "G-9WF1QJ1V67"
+};
+let fcAuth = null, fcDb = null, fcCurrentUser = null, fcCloudReady = false, fcApplyingCloud = false, fcSaveTimer = null;
+function fcNickToEmail(nick) {
+  const map = {'ą':'a','ć':'c','ę':'e','ł':'l','ń':'n','ó':'o','ś':'s','ź':'z','ż':'z'};
+  let clean = String(nick || '').trim().toLowerCase();
+  Object.keys(map).forEach(k => clean = clean.split(k).join(map[k]));
+  clean = clean.replace(/[^a-z0-9_]/g, '_');
+  return 'u_' + (clean || 'gracz') + '@cyberpong.app';
+}
+function fcSetAuthStatus(message, good=false) {
+  const el=document.getElementById('fcAuthStatus'); if(el){el.textContent=message;el.style.color=good?'#00ff88':'#00f0ff';}
+}
+function openFcAuth(){
+  const overlay=document.getElementById('fcAuthOverlay'); if(overlay)overlay.classList.add('open');
+  const logout=document.getElementById('fcLogoutButton'); if(logout)logout.style.display=fcCurrentUser?'block':'none';
+  const nick=document.getElementById('fcAuthNick'); if(nick&&!fcCurrentUser)nick.focus();
+  if(fcCurrentUser)fcSetAuthStatus('Zalogowano. Postęp jest synchronizowany z chmurą.',true);
+}
+function closeFcAuth(){const overlay=document.getElementById('fcAuthOverlay');if(overlay)overlay.classList.remove('open');}
+function fcUpdateAuthUi(){
+  const label=document.getElementById('fcAuthUserLabel'), btn=document.getElementById('fcAccountButton'), logout=document.getElementById('fcLogoutButton');
+  if(label)label.textContent=fcCurrentUser?'● '+(clubData.nick||'ZALOGOWANO'):'● TRYB GOŚCIA';
+  if(btn)btn.textContent=fcCurrentUser?'👤 MOJE KONTO':'👤 KONTO / LOGOWANIE';
+  if(logout)logout.style.display=fcCurrentUser?'block':'none';
+}
+function fcDefaultClub(nick){return {nick:String(nick||'GRACZ').slice(0,12),coins:500,owned:['gk_1','def_1','fwd_1'],lineup:{GK:'gk_1',DEF:'def_1',FWD:'fwd_1'}};}
+function fcApplyCloudClub(data,nick){
+  if(!data||typeof data!=='object')return false;
+  const validIds=new Set(PLAYERS_DB.map(c=>c.id));
+  const owned=Array.isArray(data.owned)?data.owned.filter(id=>validIds.has(id)):[];
+  ['gk_1','def_1','fwd_1'].forEach(id=>{if(!owned.includes(id))owned.push(id)});
+  const lineup={GK:'gk_1',DEF:'def_1',FWD:'fwd_1'};
+  ['GK','DEF','FWD'].forEach(role=>{const item=PLAYERS_DB.find(c=>c.id===data.lineup?.[role]&&c.role===role);if(item&&owned.includes(item.id))lineup[role]=item.id;});
+  clubData={nick:String(nick||data.nick||'GRACZ').slice(0,12),coins:Number.isFinite(Number(data.coins))?Math.max(0,Math.min(1000000000,Math.floor(Number(data.coins)))):500,owned,lineup};
+  fcApplyingCloud=true; saveClubData(false); fcApplyingCloud=false;
+  const input=document.getElementById('nickInput');if(input)input.value=clubData.nick;
+  if(typeof blueTeam!=='undefined')applySquadStatsToTeam(blueTeam,clubData.lineup);
+  updateMenuClubUI(); return true;
+}
+async function fcSaveCloudNow(){
+  if(!fcCurrentUser||!fcDb||!fcCloudReady||fcApplyingCloud)return;
+  try{
+    const payload={nick:String(clubData.nick||'GRACZ').slice(0,12),coins:Math.max(0,Math.floor(Number(clubData.coins)||0)),owned:Array.isArray(clubData.owned)?clubData.owned:[],lineup:clubData.lineup,updatedAt:Date.now()};
+    // Ten sam dokument players/{uid} co w PingPong; zapisujemy tylko pole gameData.fc i nie nadpisujemy profilu.
+    await fcDb.collection('players').doc(fcCurrentUser.uid).set({gameData:{fc:payload}}, {merge:true});
+  }catch(err){console.warn('FC28 cloud save error:',err);fcSetAuthStatus('Nie udało się zapisać w chmurze: '+(err.message||err));}
+}
+function fcScheduleCloudSave(){if(!fcCurrentUser||!fcCloudReady||fcApplyingCloud)return;clearTimeout(fcSaveTimer);fcSaveTimer=setTimeout(fcSaveCloudNow,350);}
+async function fcLogin(){
+  if(!fcAuth){fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.');return;}
+  const nick=document.getElementById('fcAuthNick').value.trim(),pass=document.getElementById('fcAuthPassword').value;
+  if(!nick){fcSetAuthStatus('Wpisz nick.');return;}if(!pass){fcSetAuthStatus('Wpisz hasło.');return;}
+  fcSetAuthStatus('Logowanie i pobieranie postępu...');
+  try{await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick),pass);}
+  catch(e){fcSetAuthStatus(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Nieprawidłowy nick lub hasło.':(e.message||'Błąd logowania.'));}
+}
+async function fcRegister(){
+  if(!fcAuth){fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.');return;}
+  const nick=document.getElementById('fcAuthNick').value.trim(),pass=document.getElementById('fcAuthPassword').value;
+  if(nick.length<3){fcSetAuthStatus('Nick musi mieć co najmniej 3 znaki.');return;}if(pass.length<6){fcSetAuthStatus('Hasło musi mieć co najmniej 6 znaków.');return;}
+  fcSetAuthStatus('Tworzenie konta...');
+  try{
+    const cred=await fcAuth.createUserWithEmailAndPassword(fcNickToEmail(nick),pass);
+    const initial=fcDefaultClub(nick);
+    await fcDb.collection('players').doc(cred.user.uid).set({nick:initial.nick,gameData:{fc:initial},updatedAt:Date.now()},{merge:true});
+  }catch(e){fcSetAuthStatus(e.code==='auth/email-already-in-use'?'Ten nick jest już zajęty. Zaloguj się na istniejące konto.':(e.message||'Nie udało się utworzyć konta.'));}
+}
+async function fcLogout(){
+  if(!fcAuth)return;
+  try{await fcSaveCloudNow();await fcAuth.signOut();}catch(e){fcSetAuthStatus(e.message||'Błąd wylogowania.');}
+}
+function fcInitAccounts(){
+  try{if(!firebase.apps.length)firebase.initializeApp(FC_FIREBASE_CONFIG);fcAuth=firebase.auth();fcDb=firebase.firestore();}
+  catch(e){console.warn('FC28 Firebase init:',e);fcSetAuthStatus('Nie udało się uruchomić logowania Firebase.');return;}
+  fcAuth.onAuthStateChanged(async user=>{
+    fcCurrentUser=user||null;fcCloudReady=false;fcUpdateAuthUi();
+    if(!user){return;}
+    try{
+      const ref=fcDb.collection('players').doc(user.uid);const snap=await ref.get();
+      if(snap.exists){const profile=snap.data()||{};const saved=profile.gameData&&profile.gameData.fc;
+        if(saved){fcApplyCloudClub(saved,profile.nick||saved.nick||'GRACZ');}
+        else{const fresh=fcDefaultClub(profile.nick||'GRACZ');fcApplyCloudClub(fresh,fresh.nick);await ref.set({gameData:{fc:fresh},updatedAt:Date.now()},{merge:true});}
+      }else{const fresh=fcDefaultClub(user.displayName||'GRACZ');await ref.set({nick:fresh.nick,gameData:{fc:fresh},updatedAt:Date.now()},{merge:true});fcApplyCloudClub(fresh,fresh.nick);}
+      fcCloudReady=true;fcUpdateAuthUi();fcSetAuthStatus('Zalogowano. Monety, zawodnicy i skład zostały wczytane.',true);closeFcAuth();
+    }catch(e){console.error('FC28 profile load:',e);fcSetAuthStatus('Zalogowano, ale nie udało się wczytać zapisu: '+(e.message||e));}
+  });
+}
+window.openFcAuth=openFcAuth;window.closeFcAuth=closeFcAuth;window.fcLogin=fcLogin;window.fcRegister=fcRegister;window.fcLogout=fcLogout;
+
 loadClubData();
 function restoreAccountClubData(data) {
   if (!data || typeof data !== "object" || !Array.isArray(data.owned) || !data.lineup) return false;
@@ -6372,8 +6592,10 @@ document.addEventListener("nova-account-profile", function (event) {
     window.NovaAccounts.saveGameData("fc", clubData);
   }
   try { localStorage.setItem(ownerKey, uid); } catch (e) {}
-});
+});
+
 applySquadStatsToTeam(blueTeam, clubData.lineup);
+fcInitAccounts();
 
 Object.assign(window, {
   setAiTier,
