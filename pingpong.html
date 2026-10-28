@@ -1236,38 +1236,6 @@
     align-items: center;
     gap: 8px;
   }
-  .btn-tree-reset {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    color: #fbbf24;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .btn-tree-reset.available:hover {
-    background: rgba(245, 158, 11, 0.22);
-    border-color: #fbbf24;
-    color: #fff;
-    transform: translateY(-1px);
-  }
-  .btn-tree-reset.disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #64748b;
-    background: transparent;
-  }
-  .btn-tree-reset.used {
-    opacity: 0.4;
-    cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.08);
-    color: #475569;
-    background: transparent;
-  }
   .btn-tree-close {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -3085,7 +3053,6 @@
       </div>
       <div class="tree-header-actions">
         <button type="button" class="btn-tree-admin-sp" id="btnTreeAdminSp" onclick="adminQuickAddSp(10)" style="display:none;" title="Dodaj natychmiast +10 SP (tylko Admin)">⚡ +10 SP (ADMIN)</button>
-        <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET DRZEWKA (DARMOWY)</button>
         <button type="button" class="btn-tree-close" onclick="closeTalentTreeModal()" title="Zamknij okno drzewka">✕ ZAMKNIJ</button>
       </div>
     </div>
@@ -3187,7 +3154,7 @@ const WIN_SCORE = 7;
 const INITIAL_BALL_SPEED = 4.6;
 const MAX_BASE_BALL_SPEED = 10.8;      // 135 km/h bazowy limit zwykłej wymiany
 const MAX_NORMAL_SPEED = 10.8;         // 135 km/h
-const MAX_SMASH_SPEED = 14.5;          // ~180 km/h (standardowy smash)
+const MAX_SMASH_SPEED = 13.8;          // ~180 km/h (standardowy smash)
 const ABSOLUTE_MAX_BALL_SPEED = 16.0;  // 200 km/h twardy limit prędkości po wszystkich ulepszeniach!
 
 const canvas = document.getElementById('stage');
@@ -3311,19 +3278,19 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spd_3', tier: 3, cost: 5, req: 'spd_2',
         title: 'Kinetyczny Zryw', icon: '🚀', type: 'skill',
-        benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +25% prędkości',
+        benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +18% prędkości',
         legacyIds: ['speed_3', 'spd_3']
       },
       {
         id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
         title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
-        benefit: 'Po 4 odbiciach w wymianie kolejny Dash jest darmowy; co 8–14 s losowy Szybki Błysk daje +35% prędkości paletki na 2,5 s',
+        benefit: 'Po 5 odbiciach w wymianie kolejny Dash jest darmowy; co 10–16 s Szybki Błysk daje +25% prędkości paletki na 2 s',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
         id: 'spd_5', tier: 5, cost: 9, req: 'spd_4',
         title: 'Widmowy Krok', icon: '👻', type: 'legend',
-        benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
+        benefit: '+15% prędkości, Dash z bardzo krótkim cooldownem i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
       }
     ]
@@ -3356,13 +3323,13 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
         title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
-        benefit: 'Każde Twoje odbicie ładuje stos Rozgrzania (maks. 3, każdy daje +8% siły Smasha); Smash odpycha paletkę rywala o 16 px',
+        benefit: 'Każde Twoje odbicie ładuje stos Rozgrzania (maks. 3, każdy daje +7% siły Smasha); Smash odpycha paletkę rywala o 14 px',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
         id: 'pwr_5', tier: 5, cost: 9, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
-        benefit: 'Smash przy 3 stosach Rozgrzania zamienia piłkę w płonący meteor 200 km/h i spowalnia rywali o 30% na 1,2 s',
+        benefit: 'Smash przy 3 stosach Rozgrzania zamienia piłkę w meteor 185 km/h i spowalnia rywala o 22% na 0,9 s',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
       }
     ]
@@ -3440,7 +3407,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'def_5', tier: 5, cost: 9, req: 'def_4',
         title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
-        benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
+        benefit: 'Raz na set, gdy piłka minimalnie ominie paletkę, Tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
       }
     ]
@@ -3661,17 +3628,8 @@ function getPlayerProfile() {
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    // Globalny Sezon 3 / Reset Bazy (Wipe do LVL 1)
+    // Migracja wersji profilu bez utraty odblokowanych talentów ani poziomu
     if (prof.resetVersion !== RESET_VERSION) {
-      console.log('🔄 [CyberPong] Reset profilu do stanu startowego (wersja ' + RESET_VERSION + ')');
-      safeSetStorage(WALL_RECORD_KEY, '0');
-      prof.level = 1;
-      prof.exp = 0;
-      prof.sp = START_SP;
-      prof.spentSp = 0;
-      prof.freeResets = 1;
-      prof.talents = { root: true };
-      prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
       prof.resetVersion = RESET_VERSION;
       prof.updatedAt = Date.now();
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
@@ -4120,18 +4078,15 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   let localProf = localRaw ? localRaw.prof : null;
   let forceCloudWrite = false;
 
-  // Lokalny profil innego konta / gościa nie może wpływać na to konto (izolacja kont)
-  if (localProf && localProf.ownerUid !== uid) localProf = null;
-
-  // GLOBALNY RESET: konto z chmury ze starą wersją resetu wraca do stanu startowego.
-  // Lokalne dane NIE są scalane (wcześniej scalanie przywracało stare talenty po resecie).
-  if (cloudProf.resetVersion !== RESET_VERSION) {
-    const wiped = createDefaultProfile(cloudProf.nick || (localProf && localProf.nick) || 'GRACZ');
-    PRIVILEGED_CLOUD_FIELDS.forEach(k => { if (cloudProf[k] !== undefined) wiped[k] = cloudProf[k]; });
-    wiped.updatedAt = Date.now();
-    cloudProf = wiped;
+  // Izolacja kont: profil innego zalogowanego gracza nie może wpływać na to konto.
+  // Jeśli lokalny profil nie miał jeszcze przypisanego UID (np. gra przed zalogowaniem), pozwalamy na scalenie.
+  if (localProf && localProf.ownerUid && uid && localProf.ownerUid !== uid) {
     localProf = null;
-    safeSetStorage(WALL_RECORD_KEY, '0');
+  }
+
+  // Bezpieczna migracja wersji resetu: podnieś do RESET_VERSION bez czyszczenia drzewka ani postępu
+  if (cloudProf.resetVersion !== RESET_VERSION) {
+    cloudProf.resetVersion = RESET_VERSION;
     forceCloudWrite = true;
   }
 
@@ -4144,13 +4099,13 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
       : (localProf && localProf.stats ? { ...base.stats, ...localProf.stats } : { ...base.stats })
   };
 
-  // Połącz talenty: każdy talent odblokowany lokalnie lub w chmurze jest ZAWSZE zachowywany!
+  // TALENTY: PERMANENTNA UNIA!
+  // Każdy talent odblokowany lokalnie lub w chmurze ZAWSZE pozostaje odblokowany.
   const localTalents = (localProf && localProf.talents && typeof localProf.talents === 'object') ? localProf.talents : {};
   const cloudTalents = (cloudProf.talents && typeof cloudProf.talents === 'object') ? cloudProf.talents : {};
-  // Źródłem prawdy jest nowszy zapis (lokalny albo z chmury) — bez łączenia (łączenie dublowało talenty i SP po resecie drzewka)
-  const useLocalTalents = !!localProf && (Number(localProf.updatedAt) || 0) >= (Number(cloudProf.updatedAt) || 0);
   const mergedTalents = {
-    ...(useLocalTalents ? localTalents : cloudTalents),
+    ...cloudTalents,
+    ...localTalents,
     root: true
   };
   merged.talents = mergedTalents;
@@ -4190,74 +4145,47 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     ? Math.min(MAX_ACCOUNT_EXP, Math.floor(cloudProf.exp))
     : 0;
 
-  merged.exp = cloudExp;
+  merged.exp = Math.max(cloudExp, (localProf && typeof localProf.exp === 'number') ? localProf.exp : 0);
 
   if (cloudLvl !== null) {
     const expDerivedLvl = getLevelProgress(merged.exp).level;
-    const levelChangedInCloud = localProf ? (cloudLvl !== localProf.level) : (cloudLvl !== expDerivedLvl);
-    const expChangedInCloud = localProf ? (cloudExp !== localProf.exp) : false;
-
-    if (levelChangedInCloud && !expChangedInCloud) {
-      // W bazie Firestore administrator bezpośrednio ustawił pole 'level'
-      let cumXp = 0;
-      for (let l = 1; l < cloudLvl; l++) {
-        cumXp += getXpRequiredForLevel(l);
-      }
-      merged.exp = cumXp;
-      merged.level = cloudLvl;
-    } else if (expChangedInCloud && !levelChangedInCloud) {
-      // W bazie Firestore administrator bezpośrednio ustawił pole 'exp'
-      merged.level = expDerivedLvl;
-    } else if (cloudLvl !== expDerivedLvl) {
-      // Preferuj poziom podany w bazie Firestore i wyrównaj minimalny EXP
-      let cumXp = 0;
-      for (let l = 1; l < cloudLvl; l++) {
-        cumXp += getXpRequiredForLevel(l);
-      }
-      merged.exp = Math.max(merged.exp, cumXp);
-      merged.level = Math.max(cloudLvl, getLevelProgress(merged.exp).level);
-    } else {
-      merged.level = cloudLvl;
-    }
+    const localLvl = localProf ? (localProf.level || 1) : 1;
+    merged.level = Math.max(cloudLvl, expDerivedLvl, localLvl);
   } else {
-    merged.level = getLevelProgress(merged.exp).level;
+    merged.level = Math.max(getLevelProgress(merged.exp).level, localProf ? (localProf.level || 1) : 1);
   }
 
   // Przelicz wydane punkty SP na podstawie aktualnie odblokowanych talentów
   let calcSpent = 0;
   for (const tKey in merged.talents) {
     if (tKey !== 'root' && merged.talents[tKey] && SKILL_TREE_NODES[tKey]) {
-      calcSpent += SKILL_TREE_NODES[tKey].cost;
+      calcSpent += Number(SKILL_TREE_NODES[tKey].cost) || 0;
     }
   }
   merged.spentSp = calcSpent;
 
   // Bezpieczne zarządzanie pulą SP:
-  // Jeśli lokalny profil ma nowszą lub równą datę aktualizacji (np. gracz przed chwilą zakupił talent),
-  // nie nadpisuj puli SP starszym stanem z chmury!
   const localUp = localProf ? (Number(localProf.updatedAt) || 0) : 0;
   const cloudUp = Number(cloudProf.updatedAt) || 0;
   const isLocalNewer = localProf && localUp >= cloudUp;
+  const totalSpDue = calculateTotalSpForLevel(merged.level);
 
+  let spCandidate;
   if (isLocalNewer && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
-    merged.sp = localProf.sp;
+    spCandidate = localProf.sp;
   } else if (typeof cloudProf.sp === 'number' && !isNaN(cloudProf.sp)) {
-    merged.sp = cloudProf.sp;
+    spCandidate = cloudProf.sp;
   } else if (localProf && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
-    merged.sp = localProf.sp;
+    spCandidate = localProf.sp;
   } else {
-    const totalSpDue = calculateTotalSpForLevel(merged.level);
-    merged.sp = Math.max(0, totalSpDue - calcSpent);
+    spCandidate = Math.max(0, totalSpDue - calcSpent);
   }
 
   // Gwarancja minimalnego bilansu SP wynikającego z poziomu
-  const totalSpDue = calculateTotalSpForLevel(merged.level);
   const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
-  if (typeof merged.sp !== 'number' || isNaN(merged.sp) || merged.sp < minExpectedSp) {
-    merged.sp = minExpectedSp;
-  }
+  merged.sp = Math.max(minExpectedSp, Number(spCandidate) || 0);
 
-  merged.ownerUid = uid || null;
+  merged.ownerUid = uid || (localProf ? localProf.ownerUid : null);
   merged.updatedAt = Math.max(localUp, cloudUp, Date.now());
   merged.resetVersion = RESET_VERSION;
 
@@ -4271,8 +4199,10 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     }
   } catch (e) {}
 
+  const hasNewerTalentsThanCloud = Object.keys(merged.talents).some(k => k !== 'root' && merged.talents[k] && !(cloudProf.talents && cloudProf.talents[k]));
+
   // Jeśli w dokumencie w Firestore brakuje jeszcze pól opcji administratora lub wartości uległy wyrównaniu
-  if (forceCloudWrite || merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
+  if (forceCloudWrite || hasNewerTalentsThanCloud || merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
     syncProfileToCloud(merged);
   } else if (!fromSnapshot) {
     syncProfileToCloud(merged);
@@ -4765,68 +4695,246 @@ function handleTalentNodeClick(nodeId) {
   }
 
   // 4. Sukces - zakup talentu
-  buyTalent(node.id);
+  buyTalent(node);
 }
 
-function buyTalent(nodeId) {
-  const node = SKILL_TREE_NODES[nodeId];
-  if (!node) return;
-  const acc = getCurrentAccount();
-  if (!acc) return;
-  if (isTalentNodeUnlocked(node.id, acc)) return;
-  if (node.req && !isTalentNodeUnlocked(node.req, acc)) return;
-  if ((acc.sp || 0) < node.cost) return;
-
-  acc.sp -= node.cost;
-  if (!acc.talents) acc.talents = {};
-  acc.talents[node.id] = true;
-  acc.spentSp = (acc.spentSp || 0) + node.cost;
-  acc.updatedAt = Date.now();
-
-  saveCurrentAccount(acc);
-  if (typeof SFX !== 'undefined') SFX.play('upgrade');
-  triggerShake(5, 3);
-  renderSkillTreeGraph();
-  applyStatsToLocalPlayer();
-  updateAccountUI();
-
-  showBanner(`🌟 ODBLOKOWANO: ${node.title || node.name}! (${node.cost} SP)`, '#00ff88', 80);
+function getCalculatedSpentSp(acc) {
+  if (!acc || !acc.talents) return 0;
+  let spent = 0;
+  for (const key in acc.talents) {
+    if (key !== 'root' && acc.talents[key] && SKILL_TREE_NODES[key]) {
+      spent += Number(SKILL_TREE_NODES[key].cost) || 0;
+    }
+  }
+  return spent;
 }
 
-function handleResetTalents() {
-  const acc = getCurrentAccount();
-  if (!acc) return;
+function normalizeTalentEconomy(acc) {
+  if (!acc) return null;
+  if (!acc.talents || typeof acc.talents !== 'object') acc.talents = { root: true };
+  acc.talents.root = true;
 
-  const spent = Math.max(0, Number(acc.spentSp) || 0);
-  const currentSp = Math.max(0, Number(acc.sp) || 0);
-  // Zwracamy wyłącznie SP faktycznie wydane na talenty. Nie używamy
-  // puli SP należnej za poziom, bo reset można byłoby powtarzać i
-  // wielokrotnie przyznawać te same punkty.
-  const refundSp = spent;
-
-  const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
-  if (!hasTalents && spent === 0) {
-    showBanner('Wszystkie punkty SP są już gotowe do rozdania!', '#00d2ff', 50);
-    return;
+  // Legacy IDs are migrated before calculating the balance.
+  for (const key in SKILL_TREE_NODES) {
+    const node = SKILL_TREE_NODES[key];
+    if (!node.legacyIds) continue;
+    for (const legacyId of node.legacyIds) {
+      if (acc.talents[legacyId]) acc.talents[node.id] = true;
+    }
   }
 
-  const confirmMsg = `Czy na pewno chcesz zresetować drzewko specjalizacji?\n\n• Zwrócone zostanie: ${refundSp} SP (wydane na talenty)\n• Zachowasz obecne ${currentSp} SP\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
-  if (typeof confirm === 'function' && !confirm(confirmMsg)) return;
+  const spent = getCalculatedSpentSp(acc);
+  const level = getLevelProgress(acc.exp || 0).level;
+  acc.level = level;
+  acc.spentSp = spent;
 
-  // Reset talentów bez tworzenia nowych punktów SP.
-  acc.talents = { root: true };
-  acc.spentSp = 0;
-  acc.sp = currentSp + refundSp;
+  // Never let a stale cloud/local value remove SP earned by the current level.
+  const earned = calculateTotalSpForLevel(level);
+  const minimumAvailable = Math.max(0, earned - spent);
+  const currentSp = Number(acc.sp);
+  acc.sp = Number.isFinite(currentSp) ? Math.max(currentSp, minimumAvailable) : minimumAvailable;
+  return acc;
+}
+
+
+
+// ===== TALENT CLOUD SYNC STATE =====
+const PENDING_TALENT_SYNC_KEY = "pingpong_pending_talent_sync";
+
+function markPendingTalentSync(acc) {
+  try {
+    localStorage.setItem(PENDING_TALENT_SYNC_KEY, JSON.stringify({
+      uid: acc?.uid || acc?.userId || null,
+      profile: JSON.parse(JSON.stringify(acc)),
+      savedAt: Date.now()
+    }));
+  } catch (e) {
+    console.warn("[Talent] Could not mark pending sync:", e);
+  }
+}
+
+function clearPendingTalentSync() {
+  try { localStorage.removeItem(PENDING_TALENT_SYNC_KEY); } catch (_) {}
+}
+
+async function flushPendingTalentSync(account) {
+  try {
+    const raw = localStorage.getItem(PENDING_TALENT_SYNC_KEY);
+    if (!raw) return false;
+    const pending = JSON.parse(raw);
+    if (!pending?.profile) return false;
+
+    const currentUid = account?.uid || account?.userId || null;
+    const pendingUid = pending.uid || null;
+
+    // Never send another user's pending profile into the current account.
+    if (pendingUid && currentUid && pendingUid !== currentUid) return false;
+
+    const profile = {
+      ...pending.profile,
+      ...(account || {}),
+      talents: pending.profile.talents,
+      sp: pending.profile.sp,
+      spentSp: pending.profile.spentSp,
+      updatedAt: Math.max(
+        Number(pending.profile.updatedAt || 0),
+        Number(account?.updatedAt || 0)
+      )
+    };
+
+    if (typeof savePlayerProfile === "function") {
+      await Promise.resolve(savePlayerProfile(profile));
+    } else if (typeof syncProfileToCloud === "function") {
+      await Promise.resolve(syncProfileToCloud(profile));
+    } else {
+      return false;
+    }
+
+    clearPendingTalentSync();
+    return true;
+  } catch (e) {
+    console.warn("[Talent] Pending cloud sync failed:", e);
+    return false;
+  }
+}
+
+// ===== TALENT/FIREBASE TRANSACTIONAL SAVE =====
+function getTalentCost(node) {
+    return Number(node?.cost ?? node?.spCost ?? node?.price ?? 1);
+}
+
+function getTalentState(acc) {
+    if (!acc.talents || typeof acc.talents !== "object") acc.talents = {};
+    acc.talents.root = true;
+    return acc.talents;
+}
+
+function talentSnapshot(acc) {
+    const talents = getTalentState(acc);
+    return JSON.parse(JSON.stringify(talents));
+}
+
+async function saveTalentPurchaseToCloud(acc, nodeId, nextTalents, nextSp, nextSpentSp) {
+    // Prefer the game's existing cloud save function if available.
+    // The important part is that we pass a complete, immutable snapshot
+    // instead of allowing an old onSnapshot value to overwrite the purchase.
+    const payload = {
+        ...acc,
+        talents: nextTalents,
+        sp: nextSp,
+        spentSp: nextSpentSp,
+        updatedAt: Date.now()
+    };
+
+    if (typeof syncProfileToCloud === "function") {
+        await syncProfileToCloud(payload);
+        return true;
+    }
+    if (typeof savePlayerProfile === "function") {
+        const result = await savePlayerProfile(payload);
+        if (result === false) throw new Error("savePlayerProfile returned false");
+        return true;
+    }
+    if (typeof saveProfileToCloud === "function") {
+        await saveProfileToCloud(payload);
+        return true;
+    }
+
+    // No cloud function exposed: local save is still valid.
+    return false;
+}
+
+function queueTalentCloudSync(acc) {
+    try {
+        const copy = JSON.parse(JSON.stringify(acc));
+        copy.updatedAt = Date.now();
+        if (typeof savePlayerProfile === "function") {
+            return Promise.resolve(savePlayerProfile(copy));
+        }
+        if (typeof syncProfileToCloud === "function") {
+            return Promise.resolve(syncProfileToCloud(copy));
+        }
+    } catch (e) {
+        console.warn("[Talent] deferred cloud sync failed:", e);
+    }
+    return Promise.resolve(false);
+}
+
+async function buyTalent(nodeOrId) {
+  const node = (typeof nodeOrId === 'string')
+    ? SKILL_TREE_NODES[nodeOrId]
+    : nodeOrId;
+
+  if (!node || !node.id) {
+    console.warn('[Talent] Nieprawidłowy węzeł talentu:', nodeOrId);
+    return false;
+  }
+
+  const acc = getCurrentAccount();
+  if (!acc) return false;
+
+  normalizeTalentEconomy(acc);
+
+  const id = String(node.id);
+  const cost = Number(node.cost) || 0;
+  const talents = getTalentState(acc);
+
+  if (id === 'root' || talents[id] === true) {
+    return false;
+  }
+
+  // Wymóg wcześniejszego odblokowania w gałęzi
+  if (node.req && !isTalentNodeUnlocked(node.req, acc)) {
+    return false;
+  }
+
+  const currentSp = Number(acc.sp || 0);
+  if (currentSp < cost) {
+    return false;
+  }
+
+  // Tworzenie nowego stanu drzewka
+  const nextTalents = JSON.parse(JSON.stringify(talents));
+  nextTalents[id] = true;
+
+  let nextSpentSp = 0;
+  for (const key of Object.keys(nextTalents)) {
+    if (key !== 'root' && nextTalents[key] === true && SKILL_TREE_NODES[key]) {
+      nextSpentSp += Number(SKILL_TREE_NODES[key].cost) || 0;
+    }
+  }
+
+  acc.talents = nextTalents;
+  acc.sp = Math.max(0, currentSp - cost);
+  acc.spentSp = nextSpentSp;
   acc.updatedAt = Date.now();
 
-  saveCurrentAccount(acc);
-  if (typeof SFX !== 'undefined') SFX.play('upgrade');
-  triggerShake(5, 3);
-  renderSkillTreeGraph();
+  // Natychmiastowy zapis lokalny i synchronizacja z chmurą
+  try {
+    savePlayerProfile(acc);
+    clearPendingTalentSync();
+  } catch (e) {
+    console.warn('[Talent] Błąd zapisu profilu:', e);
+    markPendingTalentSync(acc);
+  }
+
+  // Aktualizacja statystyk i interfejsu
   applyStatsToLocalPlayer();
   updateAccountUI();
 
-  showBanner(`Drzewko specjalizacji zresetowane! Dostępne: ${refundSp} SP do ponownego wydania.`, '#00ff88', 80);
+  if (typeof renderSkillTreeGraph === 'function') {
+    renderSkillTreeGraph();
+  }
+
+  if (typeof SFX !== 'undefined' && SFX.play) {
+    SFX.play('upgrade');
+  }
+  if (typeof triggerShake === 'function') {
+    triggerShake(4, 2);
+  }
+  showBanner(`⚡ Odblokowano talent: ${node.title || node.name || id}!`, '#00ff88', 70);
+
+  return true;
 }
 
 let currentTreeFilter = 'speed';
@@ -4854,11 +4962,10 @@ function formatTalentBenefit(text) {
 }
 
 function renderSkillTreeGraph() {
-  const acc = getCurrentAccount();
+  const acc = normalizeTalentEconomy(getCurrentAccount());
   const container = document.getElementById('simpleTreeContainer');
   const spCounter = document.getElementById('modalSpCounter');
   const spentCounter = document.getElementById('modalSpentCounter');
-  const resetBtn = document.getElementById('btnTreeReset');
   const admSpBtn = document.getElementById('btnTreeAdminSp');
 
   if (admSpBtn) {
@@ -4882,16 +4989,6 @@ function renderSkillTreeGraph() {
 
   if (spCounter) spCounter.textContent = `⚡ ${acc.sp || 0} SP`;
   if (spentCounter) spentCounter.textContent = `Wydano: ${acc.spentSp || 0} / ${TOTAL_TREE_SP_COST} SP`;
-
-  // Aktualizacja przycisku darmowego resetu (zawsze dostępny i darmowy, gdy cokolwiek odblokowano)
-  if (resetBtn) {
-    const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
-    const canReset = hasTalents || (acc.spentSp || 0) > 0;
-    resetBtn.innerHTML = `🔄 RESET DRZEWKA (DARMOWY)`;
-    resetBtn.disabled = !canReset;
-    resetBtn.className = 'btn-tree-reset' + (canReset ? ' available' : ' disabled');
-    resetBtn.title = canReset ? `Zresetuj wszystkie talenty i odzyskaj wydane punkty SP (${acc.spentSp || 0} SP)` : 'Wydaj punkty SP na talenty, aby móc zresetować drzewko';
-  }
 
   // Aktualizacja zakładek (dashboard 4 gałęzi)
   const tabs = document.querySelectorAll('.tree-nav-tab');
@@ -5018,7 +5115,6 @@ function renderTalentTreeUI() {
 
 window.buyTalent = buyTalent;
 window.handleTalentNodeClick = handleTalentNodeClick;
-window.handleResetTalents = handleResetTalents;
 window.filterTreeBranch = filterTreeBranch;
 window.openTalentTreeModal = openTalentTreeModal;
 window.closeTalentTreeModal = closeTalentTreeModal;
@@ -6074,7 +6170,7 @@ function applyStatsToLocalPlayer() {
   p.hasPhantomStep = isTalentNodeUnlocked('spd_5', acc);
   p.hasFastDash = isTalentNodeUnlocked('spd_2', acc);
   if (p.hasPhantomStep) {
-    staticSpeedBonus = 0.30; // +10% (spd_1) + +20% (spd_5) = +30%
+    staticSpeedBonus = 0.25; // +10% (spd_1) + +15% (spd_5) = +25%
   } else if (isTalentNodeUnlocked('spd_1', acc)) {
     staticSpeedBonus = 0.10; // +10%
   }
@@ -7547,6 +7643,7 @@ function triggerLocalDash(myPaddle) {
   if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina || myPaddle.freeDashReady)) {
     if (myPaddle.freeDashReady) {
       myPaddle.freeDashReady = false;
+      myPaddle.rallyHits = 0;
       addFloatingText(myPaddle.x, myPaddle.y - 14, '⚡ OVERDRIVE DASH!', '#00d2ff');
     } else if (!myPaddle.infiniteStamina) {
       myPaddle.stamina -= dashCost;
@@ -7708,7 +7805,7 @@ function predictLocalGuestBounce(myPaddle) {
 
   // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
   if (myPaddle.hasDashSurge && myPaddle.dashTimer > 0) {
-    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
+    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, Math.max(BALL.speed * 1.18, 9.0));
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
     addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
@@ -7718,7 +7815,7 @@ function predictLocalGuestBounce(myPaddle) {
   // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
   if (myPaddle.hasSpeedBurst) {
     myPaddle.rallyHits = (myPaddle.rallyHits || 0) + 1;
-    if (myPaddle.rallyHits >= 4 && !myPaddle.freeDashReady) {
+    if (myPaddle.rallyHits >= 5 && !myPaddle.freeDashReady) {
       myPaddle.freeDashReady = true;
       addFloatingText(myPaddle.x, myPaddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
@@ -7776,19 +7873,19 @@ function predictLocalGuestBounce(myPaddle) {
 
   let warmupBonus = 0;
   if (myPaddle.hasWarmup && myPaddle.warmupStacks > 0) {
-    warmupBonus = myPaddle.warmupStacks * 0.08;
+    warmupBonus = myPaddle.warmupStacks * 0.07;
   }
   const effectiveSmashMult = myPaddle.smashMult + warmupBonus;
 
   // pwr_5 Meteor (przy 3 stosach, 200 km/h = 16.0 px/f, ogień, spowolnienie 30% na 1.2s)
   const isMeteor = isSmash && myPaddle.hasMeteor && myPaddle.warmupStacks === 3;
   if (isMeteor) {
-    BALL.speed = ABSOLUTE_MAX_BALL_SPEED;
+    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, 14.8);
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    triggerHitStop(4);
-    triggerShake(16, 9);
+    triggerHitStop(3);
+    triggerShake(12, 7);
     SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
@@ -8583,7 +8680,7 @@ function handlePaddleHit(paddle, dir) {
 
   // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
   if (paddle.hasDashSurge && paddle.dashTimer > 0) {
-    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
+    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, Math.max(BALL.speed * 1.18, 9.0));
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
     addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
@@ -8593,7 +8690,7 @@ function handlePaddleHit(paddle, dir) {
   // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
   if (paddle.hasSpeedBurst) {
     paddle.rallyHits = (paddle.rallyHits || 0) + 1;
-    if (paddle.rallyHits >= 4 && !paddle.freeDashReady) {
+    if (paddle.rallyHits >= 5 && !paddle.freeDashReady) {
       paddle.freeDashReady = true;
       addFloatingText(paddle.x, paddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff');
@@ -8652,7 +8749,7 @@ function handlePaddleHit(paddle, dir) {
 
   let warmupBonus = 0;
   if (paddle.hasWarmup && paddle.warmupStacks > 0) {
-    warmupBonus = paddle.warmupStacks * 0.08;
+    warmupBonus = paddle.warmupStacks * 0.07;
   }
   const effectiveSmashMult = paddle.smashMult + warmupBonus;
 
@@ -8660,12 +8757,12 @@ function handlePaddleHit(paddle, dir) {
   const isMeteor = isSmash && paddle.hasMeteor && paddle.warmupStacks === 3;
 
   if (isMeteor) {
-    BALL.speed = ABSOLUTE_MAX_BALL_SPEED;
+    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, 14.8);
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    triggerHitStop(4);
-    triggerShake(16, 9);
+    triggerHitStop(3);
+    triggerShake(12, 7);
     SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
@@ -9614,6 +9711,28 @@ document.addEventListener('click', e => {
 
 // Inicjalizacja trwałego systemu kont graczy i drzewka talentów
 initAccountSystem();
+
+// ===== TALENT SYNC AFTER LOGIN =====
+const PENDING_TALENT_AUTH_HOOK = true;
+try {
+  if (typeof firebase !== "undefined" && firebase.auth) {
+    firebase.auth().onAuthStateChanged(async function(user) {
+      if (!user) return;
+      try {
+        const acc = (typeof getCurrentAccount === "function") ? getCurrentAccount() : null;
+        await flushPendingTalentSync({
+          ...(acc || {}),
+          uid: user.uid
+        });
+      } catch (e) {
+        console.warn("[Talent] post-login sync failed:", e);
+      }
+    });
+  }
+} catch (e) {
+  console.warn("[Talent] auth sync hook unavailable:", e);
+}
+
 </script>
 </body>
 </html>
