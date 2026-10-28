@@ -8,7 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script defer src="assets/nova-account.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1652,11 +1651,20 @@ const PLAYSTYLES = {
     desc: 'Błyskawiczne zwody 360°, tęcze i elastico z gwiezdną smugą oszałamiającą obrońców.'
   },
   finesse_shot: {
-    name: 'STRZAŁ ROGALIK+',
-    icon: '💫',
-    color: '#ffb300',
-    desc: 'Techniczne uderzenie ze świdrującą rotacją piłki w samo okienko bramki.'
-  }
+    name: 'STRZAŁ ROGALIK+', icon: '💫', color: '#ffb300',
+    desc: 'Techniczne uderzenie z rotacją; wyższa celność strzałów po skosie.'
+  },
+  first_touch: { name: 'MIĘKKIE PRZYJĘCIE+', icon: '🧲', color: '#55e6c1', desc: 'Piłka zostaje bliżej zawodnika po przyjęciu; łatwiej utrzymać kontrolę pod presją.' },
+  tiki_taka: { name: 'TIKI-TAKA+', icon: '🔺', color: '#74b9ff', desc: 'Szybsze, dokładniejsze krótkie podania i lepsza gra na jeden kontakt.' },
+  pinged_pass: { name: 'MOCNE PODANIE+', icon: '📡', color: '#a29bfe', desc: 'Szybkie podania na dalszą odległość z mniejszą utratą dokładności.' },
+  technical_dribble: { name: 'TECHNICZNE PROWADZENIE+', icon: '🪄', color: '#fd79a8', desc: 'Zawodnik ciaśniej prowadzi piłkę i sprawniej zmienia kierunek.' },
+  bruiser: { name: 'TWARDY ZAWODNIK+', icon: '💪', color: '#e17055', desc: 'Większa siła w starciach bark w bark i trudniej odebrać mu piłkę.' },
+  relentless: { name: 'NIEUSTĘPLIWOŚĆ+', icon: '🔋', color: '#00cec9', desc: 'Wolniej traci kondycję podczas sprintu i szybciej odzyskuje siły.' },
+  aerial_threat: { name: 'GRA GŁOWĄ+', icon: '🦅', color: '#fab1a0', desc: 'Lepsza kontrola przy górnych piłkach i mocniejsze zagrania z powietrza.' },
+  long_ball: { name: 'DŁUGIE PODANIE+', icon: '🛰️', color: '#6c5ce7', desc: 'Celniejsze przerzuty i podania za linię obrony.' },
+  press_proven: { name: 'PRESSING+', icon: '🔥', color: '#ff7675', desc: 'Skuteczniejszy doskok do rywala i lepsza wytrzymałość w pressingu.' },
+  block: { name: 'BLOK+', icon: '🛡️', color: '#b2bec3', desc: 'Większa szansa na zablokowanie strzału i przecięcie toru piłki.' },
+  dead_ball: { name: 'STAŁE FRAGMENTY+', icon: '🎯', color: '#ffeaa7', desc: 'Dokładniejsze uderzenia i podania przy rzutach wolnych oraz rożnych.' }
 };
 
 const PLAYERS_DB = [
@@ -1675,11 +1683,11 @@ const PLAYERS_DB = [
 
   // ================= OBROŃCY / POMOCNICY (DEF) =================
   { id: 'def_1', name: 'NOWAK', role: 'DEF', ovr: 71, pac: 70, sho: 58, def: 72, price: 0, playstyle: null, skin: '#ffdbac', hair: '#4e342e' },
-  { id: 'def_2', name: 'BEDNAREK', role: 'DEF', ovr: 77, pac: 73, sho: 60, def: 78, price: 140, playstyle: null, skin: '#ffdbac', hair: '#2c1b18' },
+  { id: 'def_2', name: 'BEDNAREK', role: 'DEF', ovr: 77, pac: 73, sho: 60, def: 78, price: 140, playstyle: 'bruiser', skin: '#ffdbac', hair: '#2c1b18' },
   { id: 'def_3', name: 'ZALEWSKI', role: 'DEF', ovr: 78, pac: 85, sho: 69, def: 73, price: 180, playstyle: 'rapid_step', skin: '#f1c27d', hair: '#111111' },
-  { id: 'def_4', name: 'CASH', role: 'DEF', ovr: 80, pac: 86, sho: 71, def: 79, price: 240, playstyle: null, skin: '#ffdbac', hair: '#4e342e' },
-  { id: 'def_5', name: 'KIWIOR', role: 'DEF', ovr: 81, pac: 81, sho: 70, def: 82, price: 270, playstyle: null, skin: '#f1c27d', hair: '#2c1b18' },
-  { id: 'def_6', name: 'GVARDIOL', role: 'DEF', ovr: 83, pac: 82, sho: 68, def: 84, price: 380, playstyle: null, skin: '#ffdbac', hair: '#1a1a1a' },
+  { id: 'def_4', name: 'CASH', role: 'DEF', ovr: 80, pac: 86, sho: 71, def: 79, price: 240, playstyle: 'relentless', skin: '#ffdbac', hair: '#4e342e' },
+  { id: 'def_5', name: 'KIWIOR', role: 'DEF', ovr: 81, pac: 81, sho: 70, def: 82, price: 270, playstyle: 'block', skin: '#f1c27d', hair: '#2c1b18' },
+  { id: 'def_6', name: 'GVARDIOL', role: 'DEF', ovr: 83, pac: 82, sho: 68, def: 84, price: 380, playstyle: 'first_touch', skin: '#ffdbac', hair: '#1a1a1a' },
   { id: 'def_7', name: 'RÜDIGER', role: 'DEF', ovr: 86, pac: 84, sho: 62, def: 88, price: 600, playstyle: 'intercept_wall', skin: '#6d4c41', hair: '#111111' },
   { id: 'def_8', name: 'SALIBA', role: 'DEF', ovr: 87, pac: 84, sho: 64, def: 89, price: 680, playstyle: 'intercept_wall', skin: '#6d4c41', hair: '#111111' },
   { id: 'def_9', name: 'THEO HERNANDEZ', role: 'DEF', ovr: 87, pac: 95, sho: 75, def: 84, price: 780, playstyle: 'rapid_step', skin: '#f1c27d', hair: '#1a1a1a' },
@@ -1695,12 +1703,12 @@ const PLAYERS_DB = [
 
   // ================= NAPASTNICY (FWD) =================
   { id: 'fwd_1', name: 'KAMASZ', role: 'FWD', ovr: 68, pac: 68, sho: 66, def: 52, price: 0, playstyle: null, skin: '#ffdbac', hair: '#4e342e' },
-  { id: 'fwd_2', name: 'ZIELIŃSKI', role: 'FWD', ovr: 75, pac: 76, sho: 74, def: 65, price: 0, playstyle: null, skin: '#e0ac69', hair: '#111111' },
+  { id: 'fwd_2', name: 'ZIELIŃSKI', role: 'FWD', ovr: 75, pac: 76, sho: 74, def: 65, price: 0, playstyle: 'tiki_taka', skin: '#e0ac69', hair: '#111111' },
   { id: 'fwd_3', name: 'URBAŃSKI', role: 'FWD', ovr: 76, pac: 79, sho: 73, def: 62, price: 120, playstyle: null, skin: '#ffdbac', hair: '#2c1b18' },
-  { id: 'fwd_4', name: 'ŚWIDERSKI', role: 'FWD', ovr: 78, pac: 78, sho: 79, def: 60, price: 160, playstyle: null, skin: '#ffdbac', hair: '#3e2723' },
-  { id: 'fwd_5', name: 'MILIK', role: 'FWD', ovr: 80, pac: 77, sho: 82, def: 62, price: 230, playstyle: null, skin: '#f1c27d', hair: '#2c1b18' },
-  { id: 'fwd_6', name: 'SZYMAŃSKI', role: 'FWD', ovr: 81, pac: 82, sho: 80, def: 68, price: 260, playstyle: null, skin: '#ffdbac', hair: '#4e342e' },
-  { id: 'fwd_7', name: 'PIĄTEK', role: 'FWD', ovr: 82, pac: 82, sho: 83, def: 68, price: 300, playstyle: null, skin: '#ffdbac', hair: '#3e2723' },
+  { id: 'fwd_4', name: 'ŚWIDERSKI', role: 'FWD', ovr: 78, pac: 78, sho: 79, def: 60, price: 160, playstyle: 'aerial_threat', skin: '#ffdbac', hair: '#3e2723' },
+  { id: 'fwd_5', name: 'MILIK', role: 'FWD', ovr: 80, pac: 77, sho: 82, def: 62, price: 230, playstyle: 'aerial_threat', skin: '#f1c27d', hair: '#2c1b18' },
+  { id: 'fwd_6', name: 'SZYMAŃSKI', role: 'FWD', ovr: 81, pac: 82, sho: 80, def: 68, price: 260, playstyle: 'technical_dribble', skin: '#ffdbac', hair: '#4e342e' },
+  { id: 'fwd_7', name: 'PIĄTEK', role: 'FWD', ovr: 82, pac: 82, sho: 83, def: 68, price: 300, playstyle: 'bruiser', skin: '#ffdbac', hair: '#3e2723' },
   { id: 'fwd_8', name: 'LAMINE YAMAL', role: 'FWD', ovr: 86, pac: 91, sho: 83, def: 65, price: 680, playstyle: 'trickster', skin: '#8d5524', hair: '#111111' },
   { id: 'fwd_9', name: 'COLE PALMER', role: 'FWD', ovr: 87, pac: 86, sho: 88, def: 68, price: 720, playstyle: 'finesse_shot', skin: '#ffdbac', hair: '#4e342e' },
   { id: 'fwd_10', name: 'MUSIALA', role: 'FWD', ovr: 88, pac: 90, sho: 85, def: 70, price: 780, playstyle: 'trickster', skin: '#c68642', hair: '#111111' },
@@ -1736,7 +1744,6 @@ function saveClubData(syncCloud = true) {
   updateMenuClubUI();
   if (syncCloud) {
     if (typeof fcScheduleCloudSave === 'function') fcScheduleCloudSave();
-    else if (window.NovaAccounts) window.NovaAccounts.saveGameData("fc", clubData);
   }
 }
 
@@ -1970,10 +1977,10 @@ function switchClubTab(role) {
     const isGk = c.role === 'GK';
     const s1L = isGk ? 'DIV' : 'PAC', s1V = isGk ? c.def : c.pac;
     const s2L = isGk ? 'HAN' : 'SHO', s2V = isGk ? Math.round(c.ovr * 0.98) : c.sho;
-    const s3L = isGk ? 'KIC' : 'PAS', s3V = isGk ? c.sho : (c.role === 'DEF' ? Math.round((c.sho + c.def) / 2) : Math.round(c.sho * 0.88 + 8));
-    const s4L = isGk ? 'REF' : 'DRI', s4V = isGk ? Math.min(99, Math.round(c.def * 1.02)) : Math.round(c.pac * 0.45 + c.ovr * 0.55);
+    const s3L = isGk ? 'KIC' : 'PAS', s3V = isGk ? c.sho : (c.pas || (c.role === 'DEF' ? Math.round((c.sho + c.def) / 2) : Math.round(c.sho * 0.88 + 8)));
+    const s4L = isGk ? 'REF' : 'DRI', s4V = isGk ? Math.min(99, Math.round(c.def * 1.02)) : (c.dri || Math.round(c.pac * 0.48 + c.ovr * 0.52));
     const s5L = isGk ? 'SPD' : 'DEF', s5V = isGk ? c.pac : c.def;
-    const s6L = isGk ? 'POS' : 'PHY', s6V = isGk ? c.ovr : Math.round((c.def + c.ovr) / 2);
+    const s6L = isGk ? 'POS' : 'PHY', s6V = isGk ? c.ovr : (c.phy || Math.round((c.def + c.ovr) / 2));
 
     return `
       <div class="fut-card tier-${tier} ${ps ? 'has-ps' : ''} ${isEquipped ? 'equipped' : ''}" title="${c.name} (${c.role}) • OVR ${c.ovr}">
@@ -1995,7 +2002,7 @@ function switchClubTab(role) {
           <div class="fut-tier-label">${tierLabel}</div>
         </div>
 
-        <!-- 6 GŁÓWNYCH STATYSTYK FUT -->
+        <!-- 6 GŁÓWNYCH STATYSTYK FUT — statystyki są używane w rozgrywce -->
         <div class="fut-stats-grid">
           <div class="fut-stat-cell"><span class="fut-stat-lbl">${s1L}</span><span class="fut-stat-val">${s1V}</span></div>
           <div class="fut-stat-cell"><span class="fut-stat-lbl">${s2L}</span><span class="fut-stat-val">${s2V}</span></div>
@@ -2279,8 +2286,7 @@ nickInputEl.addEventListener('input', () => {
 });
 
 function requireAndSavePlayerNick() {
-  const accountProfile = window.NovaAccounts && window.NovaAccounts.getProfile();
-  const val = String((accountProfile && accountProfile.nick) || nickInputEl.value).trim().slice(0, 12);
+  const val = String((fcCurrentUser && clubData.nick) || nickInputEl.value || '').trim().slice(0, 12);
   if (!val) {
     nickBoxEl.classList.remove('nick-error');
     void nickBoxEl.offsetWidth;
@@ -3876,6 +3882,7 @@ class Player {
     this.statPac = 75;
     this.statSho = 75;
     this.statDef = 75;
+    this.statPas = 75; this.statDri = 75; this.statPhy = 75;
     this.playstyle = null;
     this.activePlayStyle = null;
     this.playStyleTimer = 0;
@@ -3928,6 +3935,9 @@ class Player {
     this.statPac = card.pac || 75;
     this.statSho = card.sho || 75;
     this.statDef = card.def || 75;
+    this.statPas = Math.max(50, Math.min(99, card.pas || Math.round((this.statSho + this.statDef) / 2)));
+    this.statDri = Math.max(50, Math.min(99, card.dri || Math.round(this.statPac * 0.48 + this.ovr * 0.52)));
+    this.statPhy = Math.max(50, Math.min(99, card.phy || Math.round((this.statDef + this.ovr) / 2)));
     this.playstyle = card.playstyle;
     this.skinColor = card.skin || this.skinColor;
     this.hairColor = card.hair || this.hairColor;
@@ -3945,9 +3955,11 @@ class Player {
     // Przyspieszenie: karty 90+ osiągają sprint natychmiast, słabe karty potrzebują rozbiegu
     this.accelRate = 0.12 + pacNorm * 0.22;
     // Siła zastawki i walki bark w bark
-    this.strength = (this.statDef || 75) * 0.60 + (this.statSho || 75) * 0.40;
+    this.strength = (this.statPhy || 75) * 0.60 + (this.statDef || 75) * 0.25 + (this.statSho || 75) * 0.15;
+    if (this.playstyle === 'bruiser') this.strength *= 1.12;
     // Prowadzenie piłki: wysokie karty trzymają piłkę przy nodze, niskie wypuszczają ją dalej
-    this.dribbleTightness = Math.max(14, 25 - (this.ovr - 68) * 0.32);
+    this.dribbleTightness = Math.max(12, 25 - (this.statDri - 68) * 0.25);
+    if (this.playstyle === 'technical_dribble' || this.playstyle === 'first_touch') this.dribbleTightness *= 0.78;
   }
 
   activatePlayStyle(styleKey) {
@@ -3988,7 +4000,7 @@ class Player {
     this.trickType = type;
     this.trickMaxTime = 32;
     this.trickTimer = this.trickMaxTime;
-    const hasTrickster = this.playstyle === 'trickster';
+    const hasTrickster = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
     if (hasTrickster) {
       this.activatePlayStyle('trickster');
       multiplier *= 1.14;
@@ -4262,7 +4274,8 @@ class Player {
           this.isSprinting = true;
           // Statystyka PAC chroni przed szybkim zmęczeniem
           const pacStamDiscount = (this.statPac - 70) * 0.003;
-          this.stamina = Math.max(0, this.stamina - Math.max(0.18, (hasRapid ? 0.20 : 0.32) - pacStamDiscount));
+          const relentlessDiscount = this.playstyle === 'relentless' ? 0.12 : (this.playstyle === 'press_proven' ? 0.06 : 0);
+          this.stamina = Math.max(0, this.stamina - Math.max(0.12, (hasRapid ? 0.20 : 0.32) - pacStamDiscount - relentlessDiscount));
 
           if (hasRapid && tickCount % 12 === 0) {
             this.activatePlayStyle('rapid_step');
@@ -4414,7 +4427,7 @@ class Player {
         // Z bliska celuj w dalszy słupek; z daleka strzał jest mniej opłacalny.
         if (goalDx < 220 && enemyGK) targetCornerY = enemyGK.y < centerY ? centerY + 58 : centerY - 58;
         const shotStat = Math.max(50, Math.min(99, this.statSho || 75));
-        const baseError = (1 - cfg.passAcc) * 115 + (100 - shotStat) * 0.42;
+        const baseError = ((1 - cfg.passAcc) * 115 + (100 - shotStat) * 0.42) * (hasDeadBall ? 0.72 : 1.0);
         const inaccuracy = (Math.random() - 0.5) * baseError / cfg.shotQuality;
         const shotAngle = Math.atan2((targetCornerY + inaccuracy) - this.y, enemyGoalX - this.x);
         const hasBetterPass = oppDist > 95 && distToEnemyGoal > 260 && this.statSho < 82;
@@ -4422,6 +4435,7 @@ class Player {
           if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
           const isPS = this.playstyle === 'power_shot';
           const isFinesse = this.playstyle === 'finesse_shot';
+          const hasDeadBall = this.playstyle === 'dead_ball';
           ball.kick(this, shotAngle, isPS ? 19.5 : (isFinesse ? 17.2 : 15.7 + shotStat * 0.012), isFinesse ? 1.8 : 2.5, 16, isPS);
           camera.shake = 4;
           this.aiDecisionCooldown = cfg.reactDelay + 17;
@@ -4451,7 +4465,9 @@ class Player {
           const space = Math.min(150, mateDistToOpp) * 0.48;
           const distancePenalty = Math.max(0, passDist - 230) * 0.20;
           const backwardPenalty = mateGainX < -20 ? 48 : 0;
-          const score = progress + space - laneRisk * 95 * cfg.passRisk - distancePenalty - backwardPenalty + Math.random() * (1-cfg.vision) * 24;
+          const passSkill = this.statPas || 75;
+          const stylePassBonus = (this.playstyle === 'tiki_taka' ? 18 : 0) + ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && passDist > 220 ? 22 : 0) + (this.playstyle === 'incisive_pass' ? 16 : 0);
+          const score = progress + space - laneRisk * 95 * cfg.passRisk - distancePenalty - backwardPenalty + (passSkill - 75) * 0.42 + stylePassBonus + Math.random() * (1-cfg.vision) * 24;
           if (score > bestPassScore) { bestPassScore = score; bestPass = mate; }
         }
       }
@@ -4459,8 +4475,10 @@ class Player {
         const leadX = bestPass.x + bestPass.vx * (5 + cfg.vision * 5) + attackDir * 16;
         const leadY = bestPass.y + bestPass.vy * (5 + cfg.vision * 5);
         const passAngle = Math.atan2(leadY - this.y, leadX - this.x);
-        const pSpd = this.playstyle === 'incisive_pass' ? 15.2 : 12.5 + cfg.vision * 0.8;
-        ball.kick(this, passAngle, pSpd, 0);
+        const passSkill = Math.max(50, Math.min(99, this.statPas || 75));
+        const passStyleBoost = this.playstyle === 'incisive_pass' ? 1.20 : this.playstyle === 'tiki_taka' ? 1.08 : ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && Math.hypot(bestPass.x-this.x,bestPass.y-this.y)>220) ? 1.16 : 1.0;
+        const pSpd = (11.8 + cfg.vision * 0.8 + passSkill * 0.012) * passStyleBoost;
+        ball.kick(this, passAngle, pSpd, 0, 14, false, false, passStyleBoost > 1.05);
         this.aiDecisionCooldown = cfg.reactDelay + 15;
         return;
       }
@@ -5463,16 +5481,19 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     if (player.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
     const hasPowerShot = player.playstyle === 'power_shot';
     const hasFinesse = player.playstyle === 'finesse_shot';
+    const hasDeadBall = player.playstyle === 'dead_ball';
 
     if (hasPowerShot) player.activatePlayStyle('power_shot');
     if (hasFinesse) player.activatePlayStyle('finesse_shot');
+    if (hasDeadBall) player.activatePlayStyle('dead_ball');
 
-    const psMult = hasPowerShot ? 1.25 : 1.0;
+    const psMult = hasPowerShot ? 1.25 : (player.playstyle === 'aerial_threat' ? 1.06 : 1.0);
     let shotSpeed = (9.8 + ratio * 12.8) * shoScale * psMult;
     let shotLift = 1.4 + ratio * 4.4;
 
     // Błąd celności dla słabych kart (rozrzut do 12 stopni przy strzale z biegu):
-    const accuracyError = (1 - shoNorm) * 0.24;
+    const deadBallBonus = player.playstyle === 'dead_ball' ? 0.72 : 1.0;
+    const accuracyError = (1 - shoNorm) * 0.24 * deadBallBonus;
     let spreadAngle = (Math.random() - 0.5) * accuracyError * (player.isMoving ? 1.5 : 0.75);
     aimAngle += spreadAngle;
 
@@ -5481,26 +5502,32 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     spawnParticles(player.x, player.y, 2, hasPowerShot ? 18 : 9, hasPowerShot ? '#ff0055' : (hasFinesse ? '#ffb300' : '#00f0ff'), 3.6, 22, 4);
   } else if (type === 'lowPass') {
     const hasIncisive = player.playstyle === 'incisive_pass';
+    const hasTiki = player.playstyle === 'tiki_taka';
+    const hasPinged = player.playstyle === 'pinged_pass' || player.playstyle === 'long_ball';
     if (hasIncisive) player.activatePlayStyle('incisive_pass');
+    if (hasTiki) player.activatePlayStyle('tiki_taka');
+    if (hasPinged) player.activatePlayStyle(player.playstyle);
 
-    let mate = findTeammateNearAngle(player, aimAngle, hasIncisive ? 0.92 : 0.70);
+    let mate = findTeammateNearAngle(player, aimAngle, (hasIncisive || hasTiki || hasPinged) ? 0.88 : 0.70);
     if (mate) {
       let leadAngle = Math.atan2(mate.y + mate.vy * 9 - player.y, mate.x + mate.vx * 9 - player.x);
-      aimAngle = aimAngle * (hasIncisive ? 0.10 : 0.30) + leadAngle * (hasIncisive ? 0.90 : 0.70);
+      aimAngle = aimAngle * ((hasIncisive || hasTiki || hasPinged) ? 0.16 : 0.30) + leadAngle * ((hasIncisive || hasTiki || hasPinged) ? 0.84 : 0.70);
       if (player.team === 'blue') manualOverrideBlue = mate;
       else manualOverrideRed = mate;
     }
-    let passSpeed = (8.5 + ratio * 9.5) * (hasIncisive ? 1.24 : 1.0);
-    ball.kick(player, aimAngle, passSpeed, 0, 14, false, false, hasIncisive);
-    spawnParticles(player.x, player.y, 0, 6, hasIncisive ? '#f5b041' : '#00e676', 2.4, 16, 3);
+    const passSkill = Math.max(50, Math.min(99, player.statPas || 75));
+    const passBoost = hasIncisive ? 1.20 : hasTiki ? 1.08 : hasPinged ? 1.16 : 0.90 + passSkill / 750;
+    let passSpeed = (8.5 + ratio * 9.5) * passBoost;
+    ball.kick(player, aimAngle, passSpeed, 0, 14, false, false, hasIncisive || hasTiki || hasPinged);
+    spawnParticles(player.x, player.y, 0, 6, (hasIncisive || hasPinged) ? '#f5b041' : hasTiki ? '#74b9ff' : '#00e676', 2.4, 16, 3);
   } else if (type === 'lobPass') {
     let mate = findTeammateNearAngle(player, aimAngle, 0.75);
     if (mate) {
       if (player.team === 'blue') manualOverrideBlue = mate;
       else manualOverrideRed = mate;
     }
-    let lobSpeed = 7.8 + ratio * 8.8;
-    let lobVz = 6.0 + ratio * 5.0;
+    let lobSpeed = (7.8 + ratio * 8.8) * (player.playstyle === 'long_ball' || player.playstyle === 'aerial_threat' ? 1.14 : 1.0);
+    let lobVz = (6.0 + ratio * 5.0) * (player.playstyle === 'aerial_threat' ? 1.12 : 1.0);
     ball.kick(player, aimAngle, lobSpeed, lobVz, 16);
     spawnParticles(player.x, player.y, 4, 8, '#00f0ff', 2.8, 20, 3.5);
   }
@@ -5516,7 +5543,7 @@ function performStandingTackle(player) {
 
   // Zasięg odbioru silnie skalowany statystyką DEF (od 54 do 76 px)
   const defBonus = ((player.statDef || 75) - 70) * 0.45;
-  const tackleRange = (player.playstyle === 'intercept_wall' ? 74 : 62) + defBonus;
+  const tackleRange = (player.playstyle === 'intercept_wall' ? 74 : 62) + defBonus + (player.playstyle === 'block' ? 8 : 0) + (player.playstyle === 'press_proven' ? 4 : 0);
 
   if (oppWithBall && distToOwner < tackleRange) {
     if (oppWithBall.isShielding) {
@@ -6547,53 +6574,6 @@ function fcInitAccounts(){
 window.openFcAuth=openFcAuth;window.closeFcAuth=closeFcAuth;window.fcLogin=fcLogin;window.fcRegister=fcRegister;window.fcLogout=fcLogout;
 
 loadClubData();
-function restoreAccountClubData(data) {
-  if (!data || typeof data !== "object" || !Array.isArray(data.owned) || !data.lineup) return false;
-  var validIds = new Set(PLAYERS_DB.map(function (card) { return card.id; }));
-  var owned = data.owned.filter(function (id) { return typeof id === "string" && validIds.has(id); });
-  var lineup = { GK: "gk_1", DEF: "def_1", FWD: "fwd_1" };
-  ["GK", "DEF", "FWD"].forEach(function (role) {
-    var card = PLAYERS_DB.find(function (item) { return item.id === data.lineup[role] && item.role === role; });
-    if (card && owned.includes(card.id)) lineup[role] = card.id;
-  });
-  ["gk_1", "def_1", "fwd_1"].forEach(function (id) { if (!owned.includes(id)) owned.push(id); });
-  clubData = {
-    coins: Number.isFinite(data.coins) ? Math.max(0, Math.min(1000000000, Math.floor(data.coins))) : 500,
-    owned: owned, lineup: lineup,
-    nick: typeof data.nick === "string" ? data.nick.slice(0, 12) : (clubData.nick || "GRACZ_1")
-  };
-  saveClubData(false);
-  applySquadStatsToTeam(blueTeam, clubData.lineup);
-  return true;
-}
-document.addEventListener("nova-account-profile", function (event) {
-  var profile = event.detail && event.detail.profile;
-  var uid = event.detail && event.detail.uid;
-  if (!profile || !uid || !window.NovaAccounts) return;
-  var ownerKey = "novaAccountOwner_fc";
-  var previousOwner = "";
-  try { previousOwner = localStorage.getItem(ownerKey) || ""; } catch (e) {}
-  var cloudSave = profile.gameData && profile.gameData.fc;
-  if (cloudSave && restoreAccountClubData(cloudSave)) {
-    if (profile.nick && clubData.nick !== profile.nick) {
-      clubData.nick = String(profile.nick).slice(0, 12);
-      saveClubData(false);
-      window.NovaAccounts.saveGameData("fc", clubData);
-    }
-  } else {
-    if (previousOwner && previousOwner !== uid) {
-      clubData = { nick: String(profile.nick || "GRACZ_1").slice(0, 12), coins: 500, owned: ["gk_1", "def_1", "fwd_1"], lineup: { GK: "gk_1", DEF: "def_1", FWD: "fwd_1" } };
-      saveClubData(false);
-      applySquadStatsToTeam(blueTeam, clubData.lineup);
-    } else if (profile.nick) {
-      clubData.nick = String(profile.nick).slice(0, 12);
-      saveClubData(false);
-    }
-    window.NovaAccounts.saveGameData("fc", clubData);
-  }
-  try { localStorage.setItem(ownerKey, uid); } catch (e) {}
-});
-
 applySquadStatsToTeam(blueTeam, clubData.lineup);
 fcInitAccounts();
 
