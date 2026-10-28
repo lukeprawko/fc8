@@ -3433,7 +3433,7 @@ const TOTAL_TREE_SP_COST = Object.values(SKILL_TREE_NODES).reduce((sum, n) => su
 
 const PLAYER_PROFILE_KEY = 'CYBERPONG_PLAYER_PROFILE_v2';
 // Wersja resetu: zwiększ ją, aby przy następnym logowaniu WSZYSTKIE konta wróciły do stanu startowego.
-const RESET_VERSION = 4;
+const RESET_VERSION = 5;
 const START_SP = 3; // punkty umiejętności na starcie konta
 const PRIVILEGED_CLOUD_FIELDS = ['isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash', 'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'];
 function cloudSafeProfile(prof) {
@@ -3628,8 +3628,18 @@ function getPlayerProfile() {
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    // Migracja wersji profilu bez utraty odblokowanych talentów ani poziomu
-    if (prof.resetVersion !== RESET_VERSION) {
+    // Globalny Sezon 5 / Reset Postępu i Drzewka Ulepszeń
+    if (!prof.resetVersion || prof.resetVersion < RESET_VERSION) {
+      console.log('🔄 [CyberPong] Reset poziomów i drzewka talentów do Sezonu ' + RESET_VERSION);
+      safeSetStorage(WALL_RECORD_KEY, '0');
+      prof.level = 1;
+      prof.exp = 0;
+      prof.sp = START_SP;
+      prof.spentSp = 0;
+      prof.freeResets = 1;
+      prof.talents = { root: true };
+      prof.allTalents = false;
+      prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
       prof.resetVersion = RESET_VERSION;
       prof.updatedAt = Date.now();
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
@@ -4084,10 +4094,34 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     localProf = null;
   }
 
-  // Bezpieczna migracja wersji resetu: podnieś do RESET_VERSION bez czyszczenia drzewka ani postępu
-  if (cloudProf.resetVersion !== RESET_VERSION) {
+  // GLOBALNY RESET SEZONU (Wersja RESET_VERSION):
+  // Jeśli profil z chmury pochodzi ze starszej wersji, resetujemy poziom, EXP i ulepszenia do stanu początkowego.
+  if (!cloudProf.resetVersion || cloudProf.resetVersion < RESET_VERSION) {
+    cloudProf.level = 1;
+    cloudProf.exp = 0;
+    cloudProf.sp = START_SP;
+    cloudProf.spentSp = 0;
+    cloudProf.freeResets = 1;
+    cloudProf.talents = { root: true };
+    cloudProf.allTalents = false;
+    cloudProf.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     cloudProf.resetVersion = RESET_VERSION;
+    cloudProf.updatedAt = Date.now();
     forceCloudWrite = true;
+  }
+
+  // To samo dla profilu lokalnego: jeśli ma starszą wersję resetu, czyścimy go do stanu startowego Sezonu
+  if (localProf && (!localProf.resetVersion || localProf.resetVersion < RESET_VERSION)) {
+    localProf.level = 1;
+    localProf.exp = 0;
+    localProf.sp = START_SP;
+    localProf.spentSp = 0;
+    localProf.freeResets = 1;
+    localProf.talents = { root: true };
+    localProf.allTalents = false;
+    localProf.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    localProf.resetVersion = RESET_VERSION;
+    localProf.updatedAt = Date.now();
   }
 
   const base = createDefaultProfile(cloudProf.nick || (localProf ? localProf.nick : 'GRACZ'));
@@ -4592,6 +4626,7 @@ async function adminWipeAllPlayersToLevel1() {
           spentSp: 0,
           freeResets: 1,
           talents: { root: true },
+          allTalents: false,
           stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
           resetVersion: RESET_VERSION,
           updatedAt: Date.now()
@@ -4612,6 +4647,7 @@ async function adminWipeAllPlayersToLevel1() {
     prof.spentSp = 0;
     prof.freeResets = 1;
     prof.talents = { root: true };
+    prof.allTalents = false;
     prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     safeSetStorage(WALL_RECORD_KEY, '0');
     prof.resetVersion = RESET_VERSION;
@@ -4620,6 +4656,8 @@ async function adminWipeAllPlayersToLevel1() {
     applyStatsToLocalPlayer();
     updateAccountUI();
     renderSkillTreeGraph();
+    const tAll = document.getElementById('admToggleAllTalents');
+    if (tAll) tAll.checked = false;
 
     SFX.play('upgrade');
     triggerShake(10, 5);
