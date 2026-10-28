@@ -1727,6 +1727,9 @@ const PLAYERS_DB = [
   { id: 'fwd_23', name: 'PELÉ IKONA', role: 'FWD', ovr: 98, pac: 97, sho: 97, def: 76, price: 2600, playstyle: 'power_shot', skin: '#6d4c41', hair: '#111111' }
 ];
 
+// Balans kart: brązowe i srebrne karty (OVR < 80) nie mają złotego PlayStyle+.
+PLAYERS_DB.forEach(card => { if (Number(card.ovr) < 80) card.playstyle = null; });
+
 const CLUB_STORAGE_KEY = 'cyberfc28_ultimate_club_v1';
 let clubData = {
   nick: 'GRACZ_1',
@@ -2259,9 +2262,9 @@ const BOT_TIER_LABELS_PL = {
 
 const AI_CONFIG = {
   // Trudność wpływa na szybkość reakcji, jakość decyzji i wykonanie — nie daje botom darmowych statystyk.
-  easy:   { speedMult: 0.86, reactDelay: 30, passAcc: 0.72, shootDist: 300, slideChance: 0.003, trickChance: 0.008, diveReflex: 0.62, vision: 0.70, pressRange: 78, passRisk: 1.35, shotQuality: 0.76, support: 0.78 },
-  medium: { speedMult: 0.96, reactDelay: 19, passAcc: 0.86, shootDist: 355, slideChance: 0.007, trickChance: 0.020, diveReflex: 0.82, vision: 0.88, pressRange: 105, passRisk: 1.00, shotQuality: 0.91, support: 0.94 },
-  hard:   { speedMult: 1.015, reactDelay: 11, passAcc: 0.94, shootDist: 405, slideChance: 0.012, trickChance: 0.036, diveReflex: 0.96, vision: 1.00, pressRange: 132, passRisk: 0.72, shotQuality: 1.00, support: 1.00 }
+  easy:   { speedMult: 0.86, reactDelay: 30, passAcc: 0.70, shootDist: 315, slideChance: 0.003, trickChance: 0.014, diveReflex: 0.62, vision: 0.70, pressRange: 78, passRisk: 1.35, shotQuality: 0.76, support: 0.78 },
+  medium: { speedMult: 0.96, reactDelay: 19, passAcc: 0.84, shootDist: 370, slideChance: 0.007, trickChance: 0.035, diveReflex: 0.82, vision: 0.88, pressRange: 105, passRisk: 1.00, shotQuality: 0.91, support: 0.94 },
+  hard:   { speedMult: 1.015, reactDelay: 11, passAcc: 0.92, shootDist: 425, slideChance: 0.012, trickChance: 0.060, diveReflex: 0.96, vision: 1.00, pressRange: 132, passRisk: 0.72, shotQuality: 1.00, support: 1.00 }
 };
 
 let peer = null;
@@ -4163,7 +4166,8 @@ class Player {
       let cleanlyWonBall = false;
       let tackleReach = this.playstyle === 'intercept_wall' ? 40 : 34;
 
-      if (distToBall < tackleReach && ball.z < 20 && ball.kickCooldown === 0 && !setPiece.active) {
+      const opponentKeeperHasBall = !!(ball.owner && ball.owner.role === 'GK' && ball.owner.team !== this.team);
+      if (!opponentKeeperHasBall && distToBall < tackleReach && ball.z < 20 && ball.kickCooldown === 0 && !setPiece.active) {
         if (ball.owner && ball.owner !== this && ball.owner.isShielding) {
           handleFoul(this, ball.owner);
           return;
@@ -4341,6 +4345,16 @@ class Player {
     const edgeY = Math.max(8, this.radius * 0.55);
     this.x = Math.max(WORLD.marginX + edgeX, Math.min(WORLD.width - WORLD.marginX - edgeX, this.x));
     this.y = Math.max(WORLD.marginY + edgeY, Math.min(WORLD.height - WORLD.marginY - edgeY, this.y));
+    if (this.role === 'GK') {
+      const ownGoalX = this.team === 'blue' ? WORLD.marginX : WORLD.width - WORLD.marginX;
+      const minX = this.team === 'blue' ? ownGoalX + 8 : ownGoalX - 145;
+      const maxX = this.team === 'blue' ? ownGoalX + 145 : ownGoalX - 8;
+      this.x = Math.max(minX, Math.min(maxX, this.x));
+      const cy = WORLD.height / 2;
+      this.y = Math.max(cy - WORLD.goalHeight * 0.78, Math.min(cy + WORLD.goalHeight * 0.78, this.y));
+      this.vx = Math.max(-3.2, Math.min(3.2, this.vx));
+      this.vy = Math.max(-7.2, Math.min(7.2, this.vy));
+    }
   }
 
   runSmartTacticalAI() {
@@ -4393,7 +4407,10 @@ class Player {
       let outDist = Math.hypot(ball.x - ownGoalX, ball.y - centerY) < 300 ? 60 : 42;
       let targetX = ownGoalX + Math.cos(angleFromGoal) * outDist;
       let targetY = centerY + Math.sin(angleFromGoal) * 86;
-      targetY = Math.max(centerY - 94, Math.min(centerY + 94, targetY));
+      const gkMinX = this.team === 'blue' ? ownGoalX + 8 : ownGoalX - 145;
+      const gkMaxX = this.team === 'blue' ? ownGoalX + 145 : ownGoalX - 8;
+      targetX = Math.max(gkMinX, Math.min(gkMaxX, targetX));
+      targetY = Math.max(centerY - WORLD.goalHeight * 0.72, Math.min(centerY + WORLD.goalHeight * 0.72, targetY));
 
       let distToBall = Math.hypot(ball.x - ownGoalX, ball.y - centerY);
       if (!ball.owner && distToBall < 175 && Math.hypot(ball.vx, ball.vy) < 7) {
@@ -4415,6 +4432,7 @@ class Player {
       let oppDist = Math.hypot(closestOpp.x - this.x, closestOpp.y - this.y);
 
       const enemyGK = oppTeam.find(p => p.role === 'GK');
+      const hasDeadBall = this.playstyle === 'dead_ball';
       const shootingLane = Math.abs(this.y - centerY) < 255;
       const shotRange = cfg.shootDist * (0.72 + (this.statSho || 75) / 250);
       // Strzał tylko wtedy, gdy pozycja i kąt mają sens; słabsi gracze częściej szukają podania.
@@ -4435,12 +4453,18 @@ class Player {
           if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
           const isPS = this.playstyle === 'power_shot';
           const isFinesse = this.playstyle === 'finesse_shot';
-          const hasDeadBall = this.playstyle === 'dead_ball';
           ball.kick(this, shotAngle, isPS ? 19.5 : (isFinesse ? 17.2 : 15.7 + shotStat * 0.012), isFinesse ? 1.8 : 2.5, 16, isPS);
           camera.shake = 4;
           this.aiDecisionCooldown = cfg.reactDelay + 17;
           return;
         }
+      }
+
+      // Zwód pod presją: AI próbuje minąć rywala zamiast automatycznie oddawać piłkę.
+      const hasTrickStyle = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
+      if (oppDist < 112 && this.trickTimer === 0 && this.aiDecisionCooldown <= 0 && Math.random() < cfg.trickChance * (hasTrickStyle ? 3.2 : 1.0)) {
+        this.triggerTrick(hasTrickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', hasTrickStyle ? 'elastico' : 'stepover', hasTrickStyle ? 1.28 : 1.16);
+        this.aiDecisionCooldown = Math.max(8, Math.floor(cfg.reactDelay * 0.65));
       }
 
       // Wybierz najlepsze podanie na podstawie wolnej przestrzeni, progresu i ryzyka przechwytu.
@@ -4471,7 +4495,8 @@ class Player {
           if (score > bestPassScore) { bestPassScore = score; bestPass = mate; }
         }
       }
-      if (bestPass && (oppDist < cfg.pressRange || bestPassScore > 92) && this.aiDecisionCooldown <= 0) {
+      const closeToGoalWithLane = distToEnemyGoal < cfg.shootDist * 0.92 && shootingLane;
+      if (bestPass && !closeToGoalWithLane && ((oppDist < cfg.pressRange && bestPassScore > 48) || bestPassScore > 118) && this.aiDecisionCooldown <= 0) {
         const leadX = bestPass.x + bestPass.vx * (5 + cfg.vision * 5) + attackDir * 16;
         const leadY = bestPass.y + bestPass.vy * (5 + cfg.vision * 5);
         const passAngle = Math.atan2(leadY - this.y, leadX - this.x);
@@ -4481,10 +4506,6 @@ class Player {
         ball.kick(this, passAngle, pSpd, 0, 14, false, false, passStyleBoost > 1.05);
         this.aiDecisionCooldown = cfg.reactDelay + 15;
         return;
-      }
-
-      if (oppDist < 72 && this.trickTimer === 0 && Math.random() < cfg.trickChance) {
-        this.triggerTrick("AI Elastico!", 'elastico', 1.32);
       }
 
       let goalDirX = enemyGoalX - this.x;
@@ -6389,7 +6410,8 @@ function updateFixedStep() {
               let p1 = allPlayers[i], p2 = allPlayers[j];
               let dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
               let minDist = p1.radius + p2.radius;
-              if (dist < minDist && dist > 0.01) {
+              const protectedKeeper = (ball.owner === p1 && p1.role === 'GK') || (ball.owner === p2 && p2.role === 'GK');
+              if (!protectedKeeper && dist < minDist && dist > 0.01) {
                 let overlap = (minDist - dist) * 0.5;
                 let angle = Math.atan2(p1.y - p2.y, p1.x - p2.x);
                 p1.x += Math.cos(angle) * overlap;
@@ -6493,8 +6515,30 @@ function fcNickToEmail(nick) {
   clean = clean.replace(/[^a-z0-9_]/g, '_');
   return 'u_' + (clean || 'gracz') + '@cyberpong.app';
 }
+function fcFriendlyFirebaseError(e, action='logowania') {
+  const code = e && e.code ? String(e.code) : '';
+  const messages = {
+    'auth/operation-not-allowed':'Logowanie e-mail/hasło jest wyłączone w Firebase Console → Authentication → Sign-in method.',
+    'auth/configuration-not-found':'Firebase Authentication nie jest skonfigurowane dla tego projektu.',
+    'auth/api-key-not-valid':'Klucz API Firebase jest nieprawidłowy.',
+    'auth/invalid-api-key':'Klucz API Firebase jest nieprawidłowy.',
+    'auth/network-request-failed':'Brak połączenia z Firebase. Sprawdź internet i uruchom stronę przez HTTPS.',
+    'auth/too-many-requests':'Za dużo prób. Odczekaj chwilę i spróbuj ponownie.',
+    'auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.',
+    'auth/email-already-in-use':'Ten nick jest już zajęty. Zaloguj się na istniejące konto.',
+    'auth/invalid-email':'Nick tworzy nieprawidłowy identyfikator konta.',
+    'auth/invalid-credential':'Nieprawidłowy nick lub hasło.',
+    'auth/wrong-password':'Nieprawidłowy nick lub hasło.',
+    'auth/user-not-found':'Nie ma konta o takim nicku.',
+    'permission-denied':'Firebase Authentication działa, ale Firestore blokuje zapis/odczyt. Sprawdź reguły bazy players.',
+    'firestore/permission-denied':'Firebase Authentication działa, ale Firestore blokuje zapis/odczyt. Sprawdź reguły bazy players.'
+  };
+  if (messages[code]) return messages[code];
+  const msg = e && e.message ? String(e.message) : '';
+  return msg ? `Błąd ${action}: ${msg}` : `Nie udało się wykonać ${action}.`;
+}
 function fcSetAuthStatus(message, good=false) {
-  const el=document.getElementById('fcAuthStatus'); if(el){el.textContent=message;el.style.color=good?'#00ff88':'#00f0ff';}
+  const el=document.getElementById('fcAuthStatus'); if(el){el.textContent=message;el.style.color=good?'#00ff88':'#ffb86b';}
 }
 function openFcAuth(){
   const overlay=document.getElementById('fcAuthOverlay'); if(overlay)overlay.classList.add('open');
@@ -6538,7 +6582,7 @@ async function fcLogin(){
   if(!nick){fcSetAuthStatus('Wpisz nick.');return;}if(!pass){fcSetAuthStatus('Wpisz hasło.');return;}
   fcSetAuthStatus('Logowanie i pobieranie postępu...');
   try{await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick),pass);}
-  catch(e){fcSetAuthStatus(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Nieprawidłowy nick lub hasło.':(e.message||'Błąd logowania.'));}
+  catch(e){console.error('FC28 login error',e);fcSetAuthStatus(fcFriendlyFirebaseError(e,'logowania'));}
 }
 async function fcRegister(){
   if(!fcAuth){fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.');return;}
@@ -6548,15 +6592,21 @@ async function fcRegister(){
   try{
     const cred=await fcAuth.createUserWithEmailAndPassword(fcNickToEmail(nick),pass);
     const initial=fcDefaultClub(nick);
-    await fcDb.collection('players').doc(cred.user.uid).set({nick:initial.nick,gameData:{fc:initial},updatedAt:Date.now()},{merge:true});
-  }catch(e){fcSetAuthStatus(e.code==='auth/email-already-in-use'?'Ten nick jest już zajęty. Zaloguj się na istniejące konto.':(e.message||'Nie udało się utworzyć konta.'));}
+    try {
+      await fcDb.collection('players').doc(cred.user.uid).set({nick:initial.nick,gameData:{fc:initial},updatedAt:Date.now()},{merge:true});
+      fcSetAuthStatus('Konto utworzone. Wczytuję zapis...',true);
+    } catch(dbError) {
+      console.error('FC28 register profile write error',dbError);
+      fcSetAuthStatus('Konto utworzono, ale zapis profilu w Firestore jest zablokowany. Sprawdź reguły bazy players.');
+    }
+  }catch(e){console.error('FC28 register error',e);fcSetAuthStatus(fcFriendlyFirebaseError(e,'rejestracji'));}
 }
 async function fcLogout(){
   if(!fcAuth)return;
   try{await fcSaveCloudNow();await fcAuth.signOut();}catch(e){fcSetAuthStatus(e.message||'Błąd wylogowania.');}
 }
 function fcInitAccounts(){
-  try{if(!firebase.apps.length)firebase.initializeApp(FC_FIREBASE_CONFIG);fcAuth=firebase.auth();fcDb=firebase.firestore();}
+  try{if(typeof firebase==='undefined'||!firebase.initializeApp){fcSetAuthStatus('Nie załadowały się biblioteki Firebase. Otwórz stronę z internetem i odśwież.');return;}if(!firebase.apps.length)firebase.initializeApp(FC_FIREBASE_CONFIG);fcAuth=firebase.auth();fcDb=firebase.firestore();}
   catch(e){console.warn('FC28 Firebase init:',e);fcSetAuthStatus('Nie udało się uruchomić logowania Firebase.');return;}
   fcAuth.onAuthStateChanged(async user=>{
     fcCurrentUser=user||null;fcCloudReady=false;fcUpdateAuthUi();
@@ -6568,7 +6618,7 @@ function fcInitAccounts(){
         else{const fresh=fcDefaultClub(profile.nick||'GRACZ');fcApplyCloudClub(fresh,fresh.nick);await ref.set({gameData:{fc:fresh},updatedAt:Date.now()},{merge:true});}
       }else{const fresh=fcDefaultClub(user.displayName||'GRACZ');await ref.set({nick:fresh.nick,gameData:{fc:fresh},updatedAt:Date.now()},{merge:true});fcApplyCloudClub(fresh,fresh.nick);}
       fcCloudReady=true;fcUpdateAuthUi();fcSetAuthStatus('Zalogowano. Monety, zawodnicy i skład zostały wczytane.',true);closeFcAuth();
-    }catch(e){console.error('FC28 profile load:',e);fcSetAuthStatus('Zalogowano, ale nie udało się wczytać zapisu: '+(e.message||e));}
+    }catch(e){console.error('FC28 profile load:',e);fcSetAuthStatus('Zalogowano, ale Firestore nie udostępnił zapisu. Sprawdź reguły bazy players. '+(e.message||e));}
   });
 }
 window.openFcAuth=openFcAuth;window.closeFcAuth=closeFcAuth;window.fcLogin=fcLogin;window.fcRegister=fcRegister;window.fcLogout=fcLogout;
