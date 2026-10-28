@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CYBERFC 28 — ULTIMATE 2.5D SOCCER</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1739,7 +1736,8 @@ let clubData = {
 };
 
 function getCardById(id) {
-  return PLAYERS_DB.find(c => c.id === id) || PLAYERS_DB[0];
+  if (!id || typeof id !== 'string') return null;
+  return PLAYERS_DB.find(c => c.id === id) || null;
 }
 
 function saveClubData(syncCloud = true) {
@@ -1755,21 +1753,40 @@ function loadClubData() {
     const raw = localStorage.getItem(CLUB_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed.coins === 'number' && Array.isArray(parsed.owned) && parsed.lineup) {
-        clubData = parsed;
+      if (parsed && typeof parsed === 'object') {
+        const validIds = new Set(PLAYERS_DB.map(c => c.id));
+        const owned = Array.isArray(parsed.owned) ? parsed.owned.filter(id => validIds.has(id)) : [];
+        ['gk_1', 'def_1', 'fwd_1'].forEach(id => { if (!owned.includes(id)) owned.push(id); });
+
+        const lineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
+        ['GK', 'DEF', 'FWD'].forEach(role => {
+          const cardId = parsed.lineup?.[role];
+          const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
+          if (card && owned.includes(card.id)) lineup[role] = card.id;
+        });
+
+        clubData = {
+          nick: (typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '') : (clubData.nick || 'GRACZ'),
+          coins: Number.isFinite(parsed.coins) ? Math.max(0, Math.min(10000000, Math.floor(parsed.coins))) : 500,
+          owned,
+          lineup
+        };
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('loadClubData error:', e);
+  }
   const nickInput = document.getElementById('nickInput');
   if (nickInput && clubData.nick) nickInput.value = clubData.nick;
   updateMenuClubUI();
 }
 
 function updateMenuClubUI() {
+  const safeCoins = Number.isFinite(clubData?.coins) ? clubData.coins : 0;
   const c1 = document.getElementById('menuCoinsDisplay');
   const c2 = document.getElementById('clubCoinsDisplay');
-  if (c1) c1.textContent = clubData.coins;
-  if (c2) c2.textContent = clubData.coins;
+  if (c1) c1.textContent = safeCoins;
+  if (c2) c2.textContent = safeCoins;
 
   const strip = document.getElementById('menuSquadStrip');
   if (!strip) return;
@@ -2035,13 +2052,16 @@ function switchClubTab(role) {
 }
 
 function buyCard(cardId) {
+  if (!cardId || typeof cardId !== 'string') return;
   const card = getCardById(cardId);
-  if (!card || clubData.owned.includes(cardId)) return;
-  if (clubData.coins < card.price) return;
+  if (!card || !Array.isArray(clubData.owned) || clubData.owned.includes(cardId)) return;
+  if (typeof clubData.coins !== 'number' || clubData.coins < card.price) return;
 
-  clubData.coins -= card.price;
+  clubData.coins = Math.max(0, clubData.coins - card.price);
   clubData.owned.push(cardId);
-  clubData.lineup[card.role] = cardId;
+  if (clubData.lineup && card.role) {
+    clubData.lineup[card.role] = cardId;
+  }
   SFX.play('goal');
   saveClubData();
   switchClubTab(activeClubTab);
@@ -2049,9 +2069,12 @@ function buyCard(cardId) {
 }
 
 function equipCard(cardId) {
+  if (!cardId || typeof cardId !== 'string') return;
   const card = getCardById(cardId);
-  if (!card || !clubData.owned.includes(cardId)) return;
-  clubData.lineup[card.role] = cardId;
+  if (!card || !Array.isArray(clubData.owned) || !clubData.owned.includes(cardId)) return;
+  if (clubData.lineup && card.role) {
+    clubData.lineup[card.role] = cardId;
+  }
   SFX.play('pass');
   saveClubData();
   switchClubTab(activeClubTab);
@@ -2079,9 +2102,32 @@ function closeSaveCodeModal() {
 
 function copySaveCode() {
   const box = document.getElementById('exportCodeBox');
+  const statusEl = document.getElementById('saveCodeStatus');
   box.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(box.value);
-  document.getElementById('saveCodeStatus').textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(box.value).then(() => {
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
+    }).catch(() => {
+      try {
+        document.execCommand('copy');
+        statusEl.style.color = 'var(--green)';
+        statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
+      } catch (err) {
+        statusEl.style.color = 'var(--gold)';
+        statusEl.textContent = '✕ ZAZNACZ I SKOPIUJ KOD RĘCZNIE (CTRL+C)';
+      }
+    });
+  } else {
+    try {
+      document.execCommand('copy');
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
+    } catch (err) {
+      statusEl.style.color = 'var(--gold)';
+      statusEl.textContent = '✕ ZAZNACZ I SKOPIUJ KOD RĘCZNIE (CTRL+C)';
+    }
+  }
 }
 
 function importSaveCode() {
@@ -2095,21 +2141,50 @@ function importSaveCode() {
   try {
     const jsonStr = decodeURIComponent(atob(raw.slice(5)));
     const parsed = JSON.parse(jsonStr);
-    if (typeof parsed.coins === 'number' && Array.isArray(parsed.owned) && parsed.lineup) {
-      clubData = parsed;
-      if (clubData.nick) document.getElementById('nickInput').value = clubData.nick;
-      saveClubData();
-      applySquadStatsToTeam(blueTeam, clubData.lineup);
-      document.getElementById('exportCodeBox').value = generateSaveCode();
-      statusEl.style.color = 'var(--green)';
-      statusEl.textContent = '✓ POMYŚLNIE WCZYTANO KLUB, MONETY I ZAWODNIKÓW!';
-      SFX.play('goal');
-    } else {
-      throw new Error('Bad structure');
+    if (!parsed || typeof parsed !== 'object') throw new Error('Bad JSON object');
+
+    // Walidacja monet: 0 do 10 000 000
+    if (typeof parsed.coins !== 'number' || !Number.isFinite(parsed.coins) || parsed.coins < 0) {
+      throw new Error('Invalid coins');
     }
+    const safeCoins = Math.min(10000000, Math.floor(parsed.coins));
+
+    // Walidacja kart
+    if (!Array.isArray(parsed.owned)) throw new Error('Invalid owned cards');
+    const validIds = new Set(PLAYERS_DB.map(c => c.id));
+    const safeOwned = parsed.owned.filter(id => typeof id === 'string' && validIds.has(id));
+    ['gk_1', 'def_1', 'fwd_1'].forEach(id => { if (!safeOwned.includes(id)) safeOwned.push(id); });
+
+    // Walidacja składu
+    if (!parsed.lineup || typeof parsed.lineup !== 'object') throw new Error('Invalid lineup');
+    const safeLineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
+    ['GK', 'DEF', 'FWD'].forEach(role => {
+      const cardId = parsed.lineup[role];
+      const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
+      if (card && safeOwned.includes(card.id)) safeLineup[role] = card.id;
+    });
+
+    const safeNick = (typeof parsed.nick === 'string' && parsed.nick.trim())
+      ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '')
+      : (clubData.nick || 'GRACZ');
+
+    clubData = {
+      nick: safeNick,
+      coins: safeCoins,
+      owned: Array.from(new Set(safeOwned)),
+      lineup: safeLineup
+    };
+
+    if (clubData.nick) document.getElementById('nickInput').value = clubData.nick;
+    saveClubData();
+    applySquadStatsToTeam(blueTeam, clubData.lineup);
+    document.getElementById('exportCodeBox').value = generateSaveCode();
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = '✓ POMYŚLNIE WCZYTANO I ZWERYFIKOWANO ZAPIS!';
+    SFX.play('goal');
   } catch (e) {
     statusEl.style.color = 'var(--p2)';
-    statusEl.textContent = '✕ USZKODZONY KOD ZAPISU!';
+    statusEl.textContent = '✕ BŁĄD IMPORTU: KOD USZKODZONY LUB ZMANIPULOWANY!';
   }
 }
 
@@ -3017,9 +3092,22 @@ function handleHostIncomingData(remotePeerId, rawData) {
   }
 
   if (d.t === 'hello') {
-    cl.nick = (d.name || 'GRACZ').slice(0, 12);
-    if (d.lineup) cl.lineup = d.lineup;
+    cl.nick = (d.name && typeof d.name === 'string' ? d.name : 'GRACZ').slice(0, 12).replace(/[<>&"']/g, '');
+    if (d.lineup && typeof d.lineup === 'object') {
+      const validIds = new Set(PLAYERS_DB.map(p => p.id));
+      const safeLu = {};
+      ['GK', 'DEF', 'FWD'].forEach(role => {
+        const id = d.lineup[role];
+        safeLu[role] = (id && typeof id === 'string' && validIds.has(id)) ? id : (role === 'GK' ? 'gk_1' : role === 'DEF' ? 'def_1' : 'fwd_1');
+      });
+      cl.lineup = safeLu;
+    }
     if (!is2v2) {
+      const clientCount = Object.keys(hostClients).length;
+      if (clientCount > 1) {
+        safeSend(cl.conn || cl.ctrlConn, { t: 'full' });
+        return;
+      }
       oppName = cl.nick;
       blueNick = myName;
       redNick = oppName;
@@ -3059,19 +3147,26 @@ function handleHostIncomingData(remotePeerId, rawData) {
   }
 
   if (d.t === 'input') {
-    cl.input.keys = d.keys || cl.input.keys;
-    cl.input.mouseX = d.mx ?? cl.input.mouseX;
-    cl.input.mouseY = d.my ?? cl.input.mouseY;
+    if (d.keys && typeof d.keys === 'object') {
+      const allowedKeys = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'Shift', 'Space'];
+      const safeKeys = {};
+      for (const k of allowedKeys) safeKeys[k] = !!d.keys[k];
+      cl.input.keys = safeKeys;
+    }
+    if (typeof d.mx === 'number' && Number.isFinite(d.mx)) cl.input.mouseX = Math.max(0, Math.min(WORLD.width, d.mx));
+    if (typeof d.my === 'number' && Number.isFinite(d.my)) cl.input.mouseY = Math.max(0, Math.min(WORLD.height, d.my));
     cl.input.chargeActive = !!d.ca;
-    cl.input.chargeType = d.ct;
-    cl.input.chargePower = d.cp || 0;
+    cl.input.chargeType = (d.ct === 'shot' || d.ct === 'pass' || d.ct === 'lob' || d.ct === 'lowPass') ? d.ct : null;
+    cl.input.chargePower = (typeof d.cp === 'number' && Number.isFinite(d.cp)) ? Math.max(0, Math.min(100, d.cp)) : 0;
     cl.input.mouseDrive = !!d.mouseDrive;
     return;
   }
 
   if (d.t === 'cmd') {
     const slotIdx = getSlotByPeerId(remotePeerId);
-    handleRemotePlayerCommand(slotIdx, d);
+    if (slotIdx >= 0 && slotIdx <= 3) {
+      handleRemotePlayerCommand(slotIdx, d);
+    }
     return;
   }
 
@@ -3632,6 +3727,13 @@ const ball = {
       this.vy = p.vy;
       this.rotation += p.isMoving ? 0.16 : 0.02;
     } else {
+      // Anti-tunneling: prędkość maksymalna 46px/tick
+      const currentSpeed = Math.hypot(this.vx, this.vy);
+      if (currentSpeed > 46) {
+        const scale = 46 / currentSpeed;
+        this.vx *= scale;
+        this.vy *= scale;
+      }
       this.x += this.vx;
       this.y += this.vy;
 
@@ -5199,13 +5301,13 @@ const redTeam = [
 const allPlayers = [...blueTeam, ...redTeam];
 
 function applySquadStatsToTeam(teamArr, lineupObj) {
-  if (!lineupObj) return;
-  const gkCard = getCardById(lineupObj.GK);
-  const defCard = getCardById(lineupObj.DEF);
-  const fwdCard = getCardById(lineupObj.FWD);
-  if (teamArr[0]) teamArr[0].applyCardStats(gkCard);
-  if (teamArr[1]) teamArr[1].applyCardStats(defCard);
-  if (teamArr[2]) teamArr[2].applyCardStats(fwdCard);
+  if (!Array.isArray(teamArr) || !lineupObj) return;
+  const gkCard = getCardById(lineupObj.GK) || getCardById('gk_1');
+  const defCard = getCardById(lineupObj.DEF) || getCardById('def_1');
+  const fwdCard = getCardById(lineupObj.FWD) || getCardById('fwd_1');
+  if (teamArr[0] && gkCard) teamArr[0].applyCardStats(gkCard);
+  if (teamArr[1] && defCard) teamArr[1].applyCardStats(defCard);
+  if (teamArr[2] && fwdCard) teamArr[2].applyCardStats(fwdCard);
 }
 
 let manualOverrideBlue = null;
@@ -5321,7 +5423,12 @@ function setupKickoff(kickoffTeam) {
     p.trickTimer = 0;
     p.stunTimer = 0;
     p.angle = p.team === 'blue' ? 0 : Math.PI;
+    p.kickAnimTimer = 0;
+    p.lungeTimer = 0;
   });
+
+  manualOverrideBlue = null;
+  manualOverrideRed = null;
 
   const teamList = (kickoffTeam === 'blue' ? blueTeam : redTeam).filter(p => !p.sentOff);
   let fieldPlayers = teamList.filter(p => p.role !== 'GK');
@@ -5367,7 +5474,7 @@ function setupKickoff(kickoffTeam) {
 }
 
 function triggerGoal(msg, color, concedingTeam) {
-  if (matchPhase === 'GOAL_PAUSE') return;
+  if (matchPhase === 'GOAL_PAUSE' || matchEnded) return;
 
   chargeState.cancel();
   endSetPiece();
@@ -5421,6 +5528,7 @@ function triggerSetPiece(type, team, x, y, extraSubText = "") {
     : teamPlayers.filter(p => p.role !== 'GK')[0] || teamPlayers[0];
 
   setPiece.taker = taker;
+  if (!taker) { endSetPiece(); return; }
   taker.x = x;
   taker.y = y;
   taker.vx = 0;
@@ -5462,10 +5570,10 @@ function endSetPiece() {
 }
 
 function showTempBanner(main, sub, color, duration = 65) {
-  goalCelebrationTimer = duration;
-  bannerText = main;
-  bannerSubText = sub;
-  bannerColor = color;
+  goalCelebrationTimer = (typeof duration === 'number' && duration > 0) ? Math.floor(duration) : 65;
+  bannerText = String(main || '');
+  bannerSubText = String(sub || '');
+  bannerColor = color || '#00f0ff';
 }
 
 function updateScoreboardUI() {
@@ -5525,21 +5633,43 @@ function requestRematch() {
     else sendReliable({ t: 'rematch' });
   }
   restartFullMatch();
+  if (!isSinglePlayer) startPingLoop();
 }
 
 function restartFullMatch() {
+  if (!isSinglePlayer && pingIntervalId) { clearInterval(pingIntervalId); pingIntervalId = null; }
   scoreBlue = 0;
   scoreRed = 0;
   matchTimeRemaining = MATCH_DURATION_SECONDS;
   matchEnded = false;
+  matchPhase = 'KICKOFF_WAIT';
+  goalCelebrationTimer = 0;
+  bannerText = '';
+  bannerSubText = '';
+  if (Array.isArray(particles)) particles.length = 0;
+  chargeState.cancel();
   matchStats.reset();
+  manualOverrideBlue = null;
+  manualOverrideRed = null;
 
-  allPlayers.forEach(p => {
-    p.yellowCards = 0;
-    p.redCards = 0;
-    p.sentOff = false;
-    p.stamina = 100;
-  });
+  if (Array.isArray(allPlayers)) {
+    allPlayers.forEach(p => {
+      p.yellowCards = 0;
+      p.redCards = 0;
+      p.sentOff = false;
+      p.stamina = 100;
+      p.stunTimer = 0;
+      p.trickTimer = 0;
+      p.isShielding = false;
+      p.isSliding = false;
+      p.slideTimer = 0;
+      p.gkDiveTimer = 0;
+      p.activePlayStyle = null;
+      p.playStyleTimer = 0;
+      if (p.lungeTimer !== undefined) p.lungeTimer = 0;
+      if (p.kickAnimTimer !== undefined) p.kickAnimTimer = 0;
+    });
+  }
 
   document.getElementById('victoryModal').style.display = 'none';
   setDefaultTeamPositions();
@@ -5723,10 +5853,18 @@ function handleFoul(offender, victim) {
   let cardText = "Rzut wolny!";
 
   // Żółta kartka za wejście od tyłu lub niebezpieczny wślizg, a nie losowo przy każdym faulu.
-  if (fromBehind || recklessSlide || (victim.isShielding && Math.random() < 0.20)) {
+  if (fromBehind || recklessSlide || (victim.isShielding && Math.random() < 0.20) || offender.yellowCards >= 1) {
     offender.yellowCards++;
-    cardGiven = '#ffeb3b';
-    cardText = `ŻÓŁTA KARTKA (${offender.cardName})!`;
+    if (offender.yellowCards >= 2) {
+      offender.redCards = 1;
+      offender.sentOff = true;
+      cardGiven = '#ff0055';
+      cardText = `CZERWONA KARTKA (${offender.cardName})!`;
+      if (ball.owner === offender) ball.owner = null;
+    } else {
+      cardGiven = '#ffeb3b';
+      cardText = `ŻÓŁTA KARTKA (${offender.cardName})!`;
+    }
   }
 
   referee.blowWhistle(cardGiven, offender);
@@ -5818,6 +5956,54 @@ canvas.addEventListener('mousemove', e => {
   mouse.screenY = (e.clientY - rect.top) * (canvas.height / rect.height);
 });
 
+// Obsługa ekranów dotykowych (Touch Screen) bez regresji dla myszy i klawiatury
+canvas.addEventListener('touchstart', e => {
+  if (e.touches && e.touches.length > 0) {
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    mouse.screenX = (t.clientX - rect.left) * (canvas.width / rect.width);
+    mouse.screenY = (t.clientY - rect.top) * (canvas.height / rect.height);
+    mouse.leftDown = true;
+    mouseDownTimestamp = performance.now();
+    const myPlayer = getControlledPlayerForSlot(localSlotIdx);
+    if (myPlayer && ball.owner === myPlayer) {
+      chargeState.start('shot');
+    }
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchmove', e => {
+  if (e.touches && e.touches.length > 0) {
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    mouse.screenX = (t.clientX - rect.left) * (canvas.width / rect.width);
+    mouse.screenY = (t.clientY - rect.top) * (canvas.height / rect.height);
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchend', e => {
+  mouse.leftDown = false;
+  const myPlayer = getControlledPlayerForSlot(localSlotIdx);
+  if (myPlayer && ball.owner === myPlayer) {
+    const pressDuration = performance.now() - mouseDownTimestamp;
+    if (pressDuration < 180 && chargeState.power < 20) {
+      chargeState.cancel();
+      if (!isHost && !isSinglePlayer) {
+        sendReliable({ t: 'cmd', cmd: 'chargedAction', actionType: 'lowPass', power: 45, aimX: mouse.worldX, aimY: mouse.worldY });
+      } else {
+        executeChargedAction(myPlayer, 'lowPass', 45, mouse.worldX, mouse.worldY);
+      }
+    } else {
+      chargeState.release('shot');
+    }
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchcancel', () => {
+  mouse.leftDown = false;
+  if (chargeState.active) chargeState.cancel();
+}, { passive: true });
+
 // Kółko myszy do natychmiastowych tricków!
 window.addEventListener('wheel', e => {
   if (!gameStarted || matchEnded || isInputLocked()) return;
@@ -5896,6 +6082,14 @@ window.addEventListener('mouseup', e => {
     chargeState.release('lowPass');
   }
 });
+
+window.addEventListener('blur', () => {
+  // Reset wszystkich wciśniętych klawiszy i przycisków myszy po utracie fokusu okna
+  for (const key in keys) { keys[key] = false; }
+  mouse.leftDown = false;
+  mouse.rightDown = false;
+  if (chargeState.active) chargeState.cancel();
+}, { passive: true });
 
 window.addEventListener('keydown', e => {
   if (!gameStarted || matchEnded) return;
@@ -6070,7 +6264,10 @@ function broadcastNetworkState() {
       tty: p.trickType || '',
       stn: p.stunTimer || 0,
       aps: p.activePlayStyle || null,
-      pst: p.playStyleTimer || 0
+      pst: p.playStyleTimer || 0,
+      so: !!p.sentOff,
+      yc: p.yellowCards || 0,
+      rc: p.redCards || 0
     }))
   };
 
@@ -6175,6 +6372,9 @@ function applyNetworkSync(st) {
         p.activePlayStyle = ps.aps;
         p.playStyleTimer = ps.pst;
       }
+      p.sentOff = !!ps.so;
+      p.yellowCards = ps.yc || 0;
+      p.redCards = ps.rc || 0;
     });
   }
 
@@ -6591,13 +6791,16 @@ function gameLoop(timestamp = performance.now()) {
   let frameTime = timestamp - lastFrameTime;
   lastFrameTime = timestamp;
 
-  if (frameTime > 250) frameTime = 250;
+  if (frameTime > 100) frameTime = 100; // Anty-spiral-of-death przy zacięciach
   accumulator += frameTime;
 
-  while (accumulator >= FIXED_DT) {
+  let steps = 0;
+  while (accumulator >= FIXED_DT && steps < 5) {
     updateFixedStep();
     accumulator -= FIXED_DT;
+    steps++;
   }
+  if (accumulator > FIXED_DT * 3) accumulator = 0; // Reset akumulatora przy dużym spadku FPS
 
   renderScene();
   requestAnimationFrame(gameLoop);
@@ -6663,11 +6866,24 @@ function fcDefaultClub(nick){return {nick:String(nick||'GRACZ').slice(0,12),coin
 function fcApplyCloudClub(data,nick){
   if(!data||typeof data!=='object')return false;
   const validIds=new Set(PLAYERS_DB.map(c=>c.id));
-  const owned=Array.isArray(data.owned)?data.owned.filter(id=>validIds.has(id)):[];
-  ['gk_1','def_1','fwd_1'].forEach(id=>{if(!owned.includes(id))owned.push(id)});
+  const cloudOwned=Array.isArray(data.owned)?data.owned.filter(id=>validIds.has(id)):[];
+  const localOwned=Array.isArray(clubData?.owned)?clubData.owned.filter(id=>validIds.has(id)):[];
+  const mergedOwned=Array.from(new Set([...cloudOwned, ...localOwned]));
+  ['gk_1','def_1','fwd_1'].forEach(id=>{if(!mergedOwned.includes(id))mergedOwned.push(id)});
+
   const lineup={GK:'gk_1',DEF:'def_1',FWD:'fwd_1'};
-  ['GK','DEF','FWD'].forEach(role=>{const item=PLAYERS_DB.find(c=>c.id===data.lineup?.[role]&&c.role===role);if(item&&owned.includes(item.id))lineup[role]=item.id;});
-  clubData={nick:String(nick||data.nick||'GRACZ').slice(0,12),coins:Number.isFinite(Number(data.coins))?Math.max(0,Math.min(1000000000,Math.floor(Number(data.coins)))):500,owned,lineup};
+  ['GK','DEF','FWD'].forEach(role=>{
+    const candidateId = data.lineup?.[role] || clubData?.lineup?.[role];
+    const item=PLAYERS_DB.find(c=>c.id===candidateId&&c.role===role);
+    if(item&&mergedOwned.includes(item.id))lineup[role]=item.id;
+  });
+
+  const cloudCoins = Number.isFinite(Number(data.coins)) ? Math.max(0, Math.min(10000000, Math.floor(Number(data.coins)))) : 500;
+  const localCoins = Number.isFinite(Number(clubData?.coins)) ? Math.max(0, Math.min(10000000, Math.floor(Number(clubData.coins)))) : 500;
+  // Bezpieczne zachowanie wyższej puli monet (ochrona przed cofnięciem zapisu):
+  const safeCoins = Math.max(cloudCoins, localCoins);
+
+  clubData={nick:String(nick||data.nick||clubData?.nick||'GRACZ').slice(0,12).replace(/[<>&"']/g, ''),coins:safeCoins,owned:mergedOwned,lineup};
   fcApplyingCloud=true; saveClubData(false); fcApplyingCloud=false;
   const input=document.getElementById('nickInput');if(input)input.value=clubData.nick;
   if(typeof blueTeam!=='undefined')applySquadStatsToTeam(blueTeam,clubData.lineup);
@@ -6757,7 +6973,8 @@ Object.assign(window, {
   importSaveCode,
   toggleAssist,
   toggleMute,
-  requestRematch
+  requestRematch,
+  restartFullMatch
 });
 
 requestAnimationFrame(gameLoop);
