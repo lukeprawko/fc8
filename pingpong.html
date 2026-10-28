@@ -4781,10 +4781,12 @@ function handleResetTalents() {
   const acc = getCurrentAccount();
   if (!acc) return;
 
-  const totalSpDue = calculateTotalSpForLevel(acc.level);
-  const spent = acc.spentSp || 0;
-  const currentSp = acc.sp || 0;
-  const refundSp = Math.max(totalSpDue, spent + currentSp);
+  const spent = Math.max(0, Number(acc.spentSp) || 0);
+  const currentSp = Math.max(0, Number(acc.sp) || 0);
+  // Zwracamy wyłącznie SP faktycznie wydane na talenty. Nie używamy
+  // puli SP należnej za poziom, bo reset można byłoby powtarzać i
+  // wielokrotnie przyznawać te same punkty.
+  const refundSp = spent;
 
   const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
   if (!hasTalents && spent === 0) {
@@ -4792,14 +4794,13 @@ function handleResetTalents() {
     return;
   }
 
-  const confirmMsg = `Czy na pewno chcesz zresetować drzewko specjalizacji?\n\n• Zwrócone zostanie: ${refundSp} SP do ponownego rozdania\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
+  const confirmMsg = `Czy na pewno chcesz zresetować drzewko specjalizacji?\n\n• Zwrócone zostanie: ${refundSp} SP (wydane na talenty)\n• Zachowasz obecne ${currentSp} SP\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
   if (typeof confirm === 'function' && !confirm(confirmMsg)) return;
 
-  // Pełny, bezwarunkowy reset do stanu czystego
+  // Reset talentów bez tworzenia nowych punktów SP.
   acc.talents = { root: true };
   acc.spentSp = 0;
-  acc.sp = refundSp;
-  acc.freeResets = 999;
+  acc.sp = currentSp + refundSp;
   acc.updatedAt = Date.now();
 
   saveCurrentAccount(acc);
