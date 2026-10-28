@@ -2261,10 +2261,10 @@ const BOT_TIER_LABELS_PL = {
 };
 
 const AI_CONFIG = {
-  // Trudność wpływa na szybkość reakcji, jakość decyzji i wykonanie — nie daje botom darmowych statystyk.
-  easy:   { speedMult: 0.86, reactDelay: 30, passAcc: 0.70, shootDist: 315, slideChance: 0.003, trickChance: 0.014, diveReflex: 0.62, vision: 0.70, pressRange: 78, passRisk: 1.35, shotQuality: 0.76, support: 0.78 },
-  medium: { speedMult: 0.96, reactDelay: 19, passAcc: 0.84, shootDist: 370, slideChance: 0.007, trickChance: 0.035, diveReflex: 0.82, vision: 0.88, pressRange: 105, passRisk: 1.00, shotQuality: 0.91, support: 0.94 },
-  hard:   { speedMult: 1.015, reactDelay: 11, passAcc: 0.92, shootDist: 425, slideChance: 0.012, trickChance: 0.060, diveReflex: 0.96, vision: 1.00, pressRange: 132, passRisk: 0.72, shotQuality: 1.00, support: 1.00 }
+  // Poziomy różnią się decyzjami i refleksem, nie darmowymi statystykami. Boty nie biegają szybciej niż gracz w sprincie.
+  easy:   { speedMult: 0.90, reactDelay: 28, passAcc: 0.70, shootDist: 320, slideChance: 0.0015, trickChance: 0.012, diveReflex: 0.60, vision: 0.70, pressRange: 80,  passRisk: 1.30, shotQuality: 0.78, support: 0.80 },
+  medium: { speedMult: 0.97, reactDelay: 18, passAcc: 0.84, shootDist: 375, slideChance: 0.004,  trickChance: 0.030, diveReflex: 0.80, vision: 0.88, pressRange: 108, passRisk: 1.00, shotQuality: 0.92, support: 0.94 },
+  hard:   { speedMult: 1.02, reactDelay: 10, passAcc: 0.92, shootDist: 430, slideChance: 0.008,  trickChance: 0.055, diveReflex: 0.93, vision: 1.00, pressRange: 135, passRisk: 0.75, shotQuality: 1.00, support: 1.00 }
 };
 
 let peer = null;
@@ -3523,6 +3523,7 @@ const ball = {
 
   kick(player, angle, power, vz = 0, cooldown = 16, powerShotFlag = false, finesseFlag = false, incisiveFlag = false) {
     this.owner = null;
+    this.shotId = (this.shotId || 0) + 1;
     this.lastKicker = player;
     this.lastTouchTeam = player.team;
     this.kickCooldown = cooldown;
@@ -3657,15 +3658,23 @@ const ball = {
         let goalTop = WORLD.height / 2 - WORLD.goalHeight / 2;
         let goalBottom = WORLD.height / 2 + WORLD.goalHeight / 2;
 
-        if (Math.hypot(this.x - WORLD.marginX, this.y - goalTop) < 13 ||
-            Math.hypot(this.x - WORLD.marginX, this.y - goalBottom) < 13 ||
-            Math.hypot(this.x - (WORLD.width - WORLD.marginX), this.y - goalTop) < 13 ||
-            Math.hypot(this.x - (WORLD.width - WORLD.marginX), this.y - goalBottom) < 13) {
-          this.vx = -this.vx * 0.80;
-          this.vy = -this.vy * 0.80;
-          camera.shake = 5;
-          playAndBroadcastSFX('kick');
-          spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
+        const posts = [[WORLD.marginX, goalTop], [WORLD.marginX, goalBottom], [WORLD.width - WORLD.marginX, goalTop], [WORLD.width - WORLD.marginX, goalBottom]];
+        for (const [px, py] of posts) {
+          const pdx = this.x - px, pdy = this.y - py, pd = Math.hypot(pdx, pdy);
+          if (pd < 13 && pd > 0.01 && this.z < 62) {
+            const nx = pdx / pd, ny = pdy / pd, vn = this.vx * nx + this.vy * ny;
+            if (vn < 0) {
+              this.vx -= 1.75 * vn * nx;
+              this.vy -= 1.75 * vn * ny;
+              if (speed > 6) {
+                camera.shake = 5;
+                playAndBroadcastSFX('kick');
+                spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
+              }
+            }
+            this.x = px + nx * 13.3;
+            this.y = py + ny * 13.3;
+          }
         }
 
         if (this.x < WORLD.marginX) {
@@ -3718,53 +3727,74 @@ const ball = {
         }
       }
 
-      // Przejęcia piłki oraz PARADY BRAMKARSKIE W LOCIE!
-      if (this.z < 36 && !setPiece.active && matchPhase === 'PLAYING') {
-        for (let p of allPlayers) {
-          if (p.sentOff) continue;
+      // Przejęcia: najbliższy zawodnik (bez faworyzowania kolejności), bloki, przyjęcie z ryzykiem, parady
+      if (this.z < 34 && !setPiece.active && matchPhase === 'PLAYING') {
+        let best = null, bestD = Infinity;
+        for (const p of allPlayers) {
+          if (p.sentOff || p.stunTimer > 0) continue;
           if (p === this.lastKicker && this.kickCooldown > 0) continue;
-          if (p.stunTimer > 0) continue;
-
-          // Zwiększony zasięg gdy bramkarz rzuca się szczupakiem lub obrońca ma Złoty Mur+
-          let reach = p.radius + this.radius + 4;
+          let reach = p.radius + this.radius + 3;
           if (p.role === 'GK') {
             reach = p.gkDiveTimer > 0 ? p.radius + this.radius + 24 : p.radius + this.radius + 11;
             if (p.playstyle === 'cat_reflex') reach += 5;
           } else if (p.playstyle === 'intercept_wall') {
             reach += 5;
           }
-
-          let dist = Math.hypot(p.x - this.x, p.y - this.y);
-          if (dist < reach) {
-            if (p.role === 'GK' && (p.gkDiveTimer > 0 || speed > 10.5)) {
-              // Efektowna parada bramkarska!
-              if (p.team === 'blue') matchStats.savesBlue++; else matchStats.savesRed++;
-              playAndBroadcastSFX('save');
-              camera.shake = 6;
-              spawnParticles(this.x, this.y, 10, 18, '#f5b041', 3.6, 24, 4);
-
-              if (speed > 13.5 && p.gkDiveTimer > 0) {
-                // Parada końcami palców do boku boiska
-                let deflectDir = p.team === 'blue' ? 1 : -1;
-                let sideY = this.y < WORLD.height / 2 ? -1 : 1;
-                this.vx = deflectDir * 8.5;
-                this.vy = sideY * 7.5;
-                this.vz = 3.2;
-                this.kickCooldown = 12;
-                this.lastKicker = p;
-                this.lastTouchTeam = p.team;
-                showTempBanner(`🧤 PARADA BRAMKARZA (${p.cardName})!`, `Niesamowity rzut do piłki!`, p.team === 'blue' ? '#00f0ff' : '#ff0055', 48);
-                break;
-              }
-            }
-
+          const d = Math.hypot(p.x - this.x, p.y - this.y);
+          if (d < reach && d < bestD) { best = p; bestD = d; }
+        }
+        if (best) {
+          const p = best;
+          const mateKick = !!(this.lastKicker && this.lastKicker.team === p.team);
+          const grab = () => {
             this.owner = p;
             this.lastTouchTeam = p.team;
             this.vz = 0;
             this.z = 0;
-            if (p.team === 'blue') manualOverrideBlue = null;
-            else manualOverrideRed = null;
-            break;
+            if (p.team === 'blue') manualOverrideBlue = null; else manualOverrideRed = null;
+          };
+          const bounceOff = (keep, spread) => {
+            const a = Math.atan2(this.vy, this.vx) + (Math.random() - 0.5) * spread;
+            this.vx = Math.cos(a) * speed * keep;
+            this.vy = Math.sin(a) * speed * keep;
+            this.vz = Math.min(this.vz + 1.2, 3.5);
+            this.lastKicker = p;
+            this.lastTouchTeam = p.team;
+            this.kickCooldown = 10;
+          };
+          if (p.role === 'GK') {
+            if (p.gkDiveTimer > 0 || speed > 10.5) {
+              if (p.team === 'blue') matchStats.savesBlue++; else matchStats.savesRed++;
+              playAndBroadcastSFX('save');
+              camera.shake = 6;
+              spawnParticles(this.x, this.y, 10, 18, '#f5b041', 3.6, 24, 4);
+              if ((speed > 13.5 && p.gkDiveTimer > 0) || speed > 17.5) {
+                // Odbicie: wypiąstkowanie na bok (mocne strzały nie zawsze są łapane)
+                const deflectDir = p.team === 'blue' ? 1 : -1;
+                const sideY = this.y < WORLD.height / 2 ? -1 : 1;
+                this.vx = deflectDir * 8.0;
+                this.vy = sideY * 7.0;
+                this.vz = 3.0;
+                this.kickCooldown = 12;
+                this.lastKicker = p;
+                this.lastTouchTeam = p.team;
+                showTempBanner(`🧤 PARADA BRAMKARZA (${p.cardName})!`, `Niesamowity rzut do piłki!`, p.team === 'blue' ? '#00f0ff' : '#ff0055', 48);
+                return;
+              }
+            }
+            grab();
+          } else if (!mateKick && speed > 11.5) {
+            // Blok strzału/podania rywala: piłka odbija się, nie przykleja
+            const blockBonus = p.playstyle === 'block' ? 0.10 : 0;
+            bounceOff(0.42 - blockBonus * 0.5, 1.4);
+            spawnParticles(this.x, this.y, 4, 7, '#ffffff', 2.2, 14, 3);
+            playAndBroadcastSFX('pass');
+          } else {
+            const skill = ((p.statDri || 75) - 75) * 0.004 + (p.playstyle === 'first_touch' ? 0.12 : 0) + (p.playstyle === 'aerial_threat' && this.z > 12 ? 0.06 : 0);
+            let chance = 0.98 - Math.max(0, speed - 7) * 0.035 + skill + (mateKick ? 0.12 : 0) - (this.z > 14 ? 0.12 : 0);
+            chance = Math.max(0.30, Math.min(0.99, chance));
+            if (Math.random() < chance) grab();
+            else bounceOff(0.42, 1.2);
           }
         }
       }
@@ -3947,16 +3977,16 @@ class Player {
 
     // Wyraźne, odczuwalne zróżnicowanie kart (PAC, Przyspieszenie, Siła, Kontrola)
     const pacNorm = Math.max(50, Math.min(99, this.statPac)) / 100;
-    const pacCurve = Math.pow(pacNorm, 2.3);
+    const pacCurve = Math.max(0, Math.min(1, (this.statPac - 50) / 49));
 
     if (this.role === 'GK') {
-      this.baseSpeed = 2.45 + pacCurve * 1.35;
+      this.baseSpeed = 2.55 + pacCurve * 0.55;
     } else {
-      this.baseSpeed = 2.50 + pacCurve * 2.15;
+      this.baseSpeed = 2.95 + pacCurve * 0.75;
     }
 
     // Przyspieszenie: karty 90+ osiągają sprint natychmiast, słabe karty potrzebują rozbiegu
-    this.accelRate = 0.12 + pacNorm * 0.22;
+    this.accelRate = 0.16 + pacCurve * 0.12;
     // Siła zastawki i walki bark w bark
     this.strength = (this.statPhy || 75) * 0.60 + (this.statDef || 75) * 0.25 + (this.statSho || 75) * 0.15;
     if (this.playstyle === 'bruiser') this.strength *= 1.12;
@@ -4363,254 +4393,316 @@ class Player {
     const cfg = AI_CONFIG[this.getBotTier()] || AI_CONFIG.medium;
     const myTeam = (this.team === 'blue' ? blueTeam : redTeam).filter(p => !p.sentOff);
     const oppTeam = (this.team === 'blue' ? redTeam : blueTeam).filter(p => !p.sentOff);
+    if (!oppTeam.length) return;
     const ownGoalX = this.team === 'blue' ? WORLD.marginX : WORLD.width - WORLD.marginX;
     const enemyGoalX = this.team === 'blue' ? WORLD.width - WORLD.marginX : WORLD.marginX;
-    const attackDir = this.team === 'blue' ? 1 : -1;
-    const centerY = WORLD.height / 2;
+    const dir = this.team === 'blue' ? 1 : -1;
+    const cy = WORLD.height / 2;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    const field = myTeam.filter(p => p.role !== 'GK');
+    const foes = oppTeam.filter(p => p.role !== 'GK');
+    if (this.tackleCd > 0) this.tackleCd--;
+    if (this.aiTrickCd > 0) this.aiTrickCd--;
 
-    // 1. BRAMKARZ Z AUTOMATYCZNYM RZUCANIEM SIĘ DO STRZAŁÓW!
+    // Ryzyko przechwytu na torze (ax,ay)->(bx,by) względem listy rywali
+    const laneRisk = (ax, ay, bx, by, list) => {
+      let r = 0;
+      const vx = bx - ax, vy = by - ay, l2 = vx * vx + vy * vy || 1;
+      for (const o of list) {
+        const t = clamp(((o.x - ax) * vx + (o.y - ay) * vy) / l2, 0, 1);
+        const d = Math.hypot(o.x - (ax + t * vx), o.y - (ay + t * vy));
+        if (d < 55) r += (55 - d) / 55;
+      }
+      return r;
+    };
+
+    // Wybiera kierunek wybicia/podania omijający rywali stojących na linii (nie kopie prosto w pressującego)
+    const freeAngle = (base) => {
+      let best = base, bs = -1e9;
+      for (let k = -4; k <= 4; k++) {
+        const a = base + k * 0.3;
+        const sc = -laneRisk(this.x, this.y, this.x + Math.cos(a) * 130, this.y + Math.sin(a) * 130, foes) * 100 - Math.abs(k) * 6;
+        if (sc > bs) { bs = sc; best = a; }
+      }
+      return best;
+    };
+
+    // ========== BRAMKARZ ==========
     if (this.role === 'GK') {
       if (ball.owner === this) {
-        this.angle = this.team === 'blue' ? 0 : Math.PI;
-        if (this.aiDecisionCooldown <= 0) {
-          let openMate = myTeam
-            .filter(p => p !== this)
-            .sort((a, b) => (b.x - a.x) * attackDir)[0];
-          let targetAngle = openMate
-            ? Math.atan2(openMate.y + openMate.vy * 8 - this.y, openMate.x + openMate.vx * 8 - this.x)
-            : (this.team === 'blue' ? 0 : Math.PI);
-          ball.kick(this, targetAngle, 13.8, 2.0);
-          this.aiDecisionCooldown = cfg.reactDelay + 18;
+        this.angle = dir > 0 ? 0 : Math.PI;
+        this.holdTicks = (this.holdTicks || 0) + 1;
+        if (this.aiDecisionCooldown <= 0 && this.holdTicks > 40) {
+          let best = null, bs = -1e9;
+          for (const m of field) {
+            const r = laneRisk(this.x, this.y, m.x, m.y, foes);
+            const sc = (m.x - this.x) * dir * 0.25 - r * 120 - Math.abs(dist(this, m) - 300) * 0.1;
+            if (sc > bs) { bs = sc; best = m; }
+          }
+          const tx = best ? best.x + best.vx * 8 : enemyGoalX;
+          const ty = best ? best.y + best.vy * 8 : cy;
+          const far = best ? dist(this, best) : 400;
+          const a0 = Math.atan2(ty - this.y, tx - this.x), a1 = freeAngle(a0);
+          ball.kick(this, a1, clamp(6.5 + far * 0.026, 9, 15), (far > 320 || a1 !== a0) ? 4.5 : 1.0);
+          this.holdTicks = 0;
+          this.aiDecisionCooldown = cfg.reactDelay + 20;
         }
         return;
       }
+      this.holdTicks = 0;
 
-      // Sprawdzanie czy piłka leci szybko w światło bramki -> RZUT BRAMKARZA!
-      const ballApproaching = this.team === 'blue' ? (ball.vx < -5.8) : (ball.vx > 5.8);
-      const distXToGoal = Math.abs(ball.x - this.x);
-      if (!ball.owner && ballApproaching && distXToGoal < 280 && distXToGoal > 18) {
-        const framesToReach = distXToGoal / Math.max(1, Math.abs(ball.vx));
-        const predGoalY = ball.y + ball.vy * framesToReach;
-        const yDiff = Math.abs(predGoalY - this.y);
-
-        // Jeżeli piłka zmierza w światło bramki (lub tuż obok słupka) i jest poza zasięgiem stania:
-        if (Math.abs(predGoalY - centerY) < WORLD.goalHeight * 0.62 && yDiff > 24 && yDiff < 145) {
-          if (Math.random() < cfg.diveReflex || this.playstyle === 'cat_reflex') {
-            this.startGkDive(predGoalY);
-            return;
-          }
+      // Strzał w światło bramki: jeden rzut kością na strzał (refleks), potem parada lub ustawienie
+      const toward = ball.vx * dir < -5.8;
+      const dx = Math.abs(ball.x - this.x);
+      let predY = null;
+      if (!ball.owner && toward && dx < 300 && dx > 10) {
+        const frames = dx / Math.max(1, Math.abs(ball.vx));
+        predY = ball.y + ball.vy * frames;
+        if (this.gkRollId !== ball.shotId) {
+          this.gkRollId = ball.shotId;
+          this.gkReacts = this.playstyle === 'cat_reflex' || Math.random() < cfg.diveReflex;
         }
-      }
-
-      let predBallY = ball.y + ball.vy * 6;
-      let angleFromGoal = Math.atan2(predBallY - centerY, ball.x - ownGoalX);
-      let outDist = Math.hypot(ball.x - ownGoalX, ball.y - centerY) < 300 ? 60 : 42;
-      let targetX = ownGoalX + Math.cos(angleFromGoal) * outDist;
-      let targetY = centerY + Math.sin(angleFromGoal) * 86;
-      const gkMinX = this.team === 'blue' ? ownGoalX + 8 : ownGoalX - 145;
-      const gkMaxX = this.team === 'blue' ? ownGoalX + 145 : ownGoalX - 8;
-      targetX = Math.max(gkMinX, Math.min(gkMaxX, targetX));
-      targetY = Math.max(centerY - WORLD.goalHeight * 0.72, Math.min(centerY + WORLD.goalHeight * 0.72, targetY));
-
-      let distToBall = Math.hypot(ball.x - ownGoalX, ball.y - centerY);
-      if (!ball.owner && distToBall < 175 && Math.hypot(ball.vx, ball.vy) < 7) {
-        targetX = ball.x + ball.vx * 3;
-        targetY = ball.y + ball.vy * 3;
-      }
-
-      this.moveTowards(targetX, targetY, 1.0 * cfg.speedMult);
-      if (!this.isMoving) this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
-      return;
-    }
-
-    // 2. ZAWODNIK Z POLA Z PIŁKĄ
-    if (ball.owner === this) {
-      let distToEnemyGoal = Math.hypot(enemyGoalX - this.x, centerY - this.y);
-      let closestOpp = oppTeam.reduce((best, p) =>
-        Math.hypot(p.x - this.x, p.y - this.y) < Math.hypot(best.x - this.x, best.y - this.y) ? p : best
-      );
-      let oppDist = Math.hypot(closestOpp.x - this.x, closestOpp.y - this.y);
-
-      const enemyGK = oppTeam.find(p => p.role === 'GK');
-      const hasDeadBall = this.playstyle === 'dead_ball';
-      const shootingLane = Math.abs(this.y - centerY) < 255;
-      const shotRange = cfg.shootDist * (0.72 + (this.statSho || 75) / 250);
-      // Strzał tylko wtedy, gdy pozycja i kąt mają sens; słabsi gracze częściej szukają podania.
-      if (distToEnemyGoal < shotRange && shootingLane && this.aiDecisionCooldown <= 0) {
-        const goalDx = Math.abs(enemyGoalX - this.x);
-        const keeperY = enemyGK ? enemyGK.y : centerY;
-        const topGap = Math.abs((centerY - WORLD.goalHeight * 0.34) - keeperY);
-        const bottomGap = Math.abs((centerY + WORLD.goalHeight * 0.34) - keeperY);
-        let targetCornerY = topGap > bottomGap ? centerY - WORLD.goalHeight * 0.34 : centerY + WORLD.goalHeight * 0.34;
-        // Z bliska celuj w dalszy słupek; z daleka strzał jest mniej opłacalny.
-        if (goalDx < 220 && enemyGK) targetCornerY = enemyGK.y < centerY ? centerY + 58 : centerY - 58;
-        const shotStat = Math.max(50, Math.min(99, this.statSho || 75));
-        const baseError = ((1 - cfg.passAcc) * 115 + (100 - shotStat) * 0.42) * (hasDeadBall ? 0.72 : 1.0);
-        const inaccuracy = (Math.random() - 0.5) * baseError / cfg.shotQuality;
-        const shotAngle = Math.atan2((targetCornerY + inaccuracy) - this.y, enemyGoalX - this.x);
-        const hasBetterPass = oppDist > 95 && distToEnemyGoal > 260 && this.statSho < 82;
-        if (!hasBetterPass || distToEnemyGoal < 220 || Math.random() < 0.22 * cfg.shotQuality) {
-          if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
-          const isPS = this.playstyle === 'power_shot';
-          const isFinesse = this.playstyle === 'finesse_shot';
-          ball.kick(this, shotAngle, isPS ? 19.5 : (isFinesse ? 17.2 : 15.7 + shotStat * 0.012), isFinesse ? 1.8 : 2.5, 16, isPS);
-          camera.shake = 4;
-          this.aiDecisionCooldown = cfg.reactDelay + 17;
+        const yDiff = Math.abs(predY - this.y);
+        if (this.gkReacts && ball.z < 48 && Math.abs(predY - cy) < WORLD.goalHeight * 0.62 && yDiff > 24 && yDiff < 150) {
+          this.startGkDive(predY);
           return;
         }
       }
 
-      // Zwód pod presją: AI próbuje minąć rywala zamiast automatycznie oddawać piłkę.
-      const hasTrickStyle = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
-      if (oppDist < 112 && this.trickTimer === 0 && this.aiDecisionCooldown <= 0 && Math.random() < cfg.trickChance * (hasTrickStyle ? 3.2 : 1.0)) {
-        this.triggerTrick(hasTrickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', hasTrickStyle ? 'elastico' : 'stepover', hasTrickStyle ? 1.28 : 1.16);
-        this.aiDecisionCooldown = Math.max(8, Math.floor(cfg.reactDelay * 0.65));
+      const dGoalBall = Math.hypot(ball.x - ownGoalX, ball.y - cy);
+      const looseNear = !ball.owner && dGoalBall < 200 && Math.hypot(ball.vx, ball.vy) < 6;
+      const gkClosest = looseNear && [...myTeam, ...oppTeam].every(p => p === this || dist(p, ball) > dist(this, ball) * 0.9);
+      let tx, ty;
+      if (gkClosest) {
+        tx = ball.x; ty = ball.y;
+      } else {
+        const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 170 ? 105 : clamp(dGoalBall * 0.2, 36, 90);
+        tx = ownGoalX + dir * out;
+        ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.5, -WORLD.goalHeight * 0.55, WORLD.goalHeight * 0.55);
+        if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.5, WORLD.goalHeight * 0.5);
+      }
+      tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 170), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 170));
+      this.moveTowards(tx, ty, 1.0 * cfg.speedMult, gkClosest);
+      if (!this.isMoving) this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
+      return;
+    }
+
+    // ========== ZAWODNIK Z PIŁKĄ ==========
+    if (ball.owner === this) {
+      this.holdTicks = (this.holdTicks || 0) + 1;
+      const dGoal = Math.hypot(enemyGoalX - this.x, cy - this.y);
+      let near = null, nd = Infinity;
+      for (const f of foes) { const d = dist(this, f); if (d < nd) { nd = d; near = f; } }
+      const pressed = nd < cfg.pressRange * 0.75;
+      const gk = oppTeam.find(p => p.role === 'GK');
+      const sho = clamp(this.statSho || 75, 50, 99);
+
+      // --- Strzał: im czystszy tor, tym z dalszej odległości ---
+      const range = cfg.shootDist * (0.72 + sho / 250);
+      const open = clamp(1 - laneRisk(this.x, this.y, enemyGoalX, cy, foes) * 0.8, 0, 1);
+      const angleOk = Math.abs(this.y - cy) < 290 && (enemyGoalX - this.x) * dir > 0;
+      const shotReach = range * (0.62 + 0.38 * open);
+      if (this.aiDecisionCooldown <= 0 && angleOk && (dGoal < shotReach || (pressed && dGoal < range * 0.85) || (this.holdTicks > 150 && dGoal < range))) {
+        const keeperY = gk ? gk.y : cy;
+        const top = cy - WORLD.goalHeight * 0.34, bot = cy + WORLD.goalHeight * 0.34;
+        let aimY = Math.abs(top - keeperY) > Math.abs(bot - keeperY) ? top : bot;
+        const deadBall = this.playstyle === 'dead_ball' ? 0.72 : 1.0;
+        const err = ((1 - cfg.passAcc) * 95 + (100 - sho) * 0.38) * deadBall / cfg.shotQuality * (pressed ? 1.25 : 1.0);
+        aimY += (Math.random() - 0.5) * err;
+        const isPS = this.playstyle === 'power_shot', isFin = this.playstyle === 'finesse_shot';
+        if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
+        ball.kick(this, Math.atan2(aimY - this.y, enemyGoalX - this.x), isPS ? 19.5 : (isFin ? 17.2 : 15.5 + sho * 0.012), isFin ? 1.8 : 2.0, 16, isPS, isFin);
+        camera.shake = 4;
+        this.holdTicks = 0;
+        this.aiDecisionCooldown = cfg.reactDelay + 17;
+        return;
       }
 
-      // Wybierz najlepsze podanie na podstawie wolnej przestrzeni, progresu i ryzyka przechwytu.
-      let mates = myTeam.filter(p => p !== this && p.role !== 'GK');
-      let bestPass = null;
-      let bestPassScore = -Infinity;
-      if (mates.length > 0 && this.aiDecisionCooldown <= 0) {
-        for (const mate of mates) {
-          const mateGainX = (mate.x - this.x) * attackDir;
-          const mateDistToOpp = Math.min(...oppTeam.map(o => Math.hypot(o.x - mate.x, o.y - mate.y)));
-          const passDist = Math.hypot(mate.x - this.x, mate.y - this.y);
-          if (passDist < 65 || passDist > 470) continue;
-          let laneRisk = 0;
-          for (const opp of oppTeam) {
-            const vx = mate.x - this.x, vy = mate.y - this.y;
-            const len2 = vx * vx + vy * vy || 1;
-            const t = Math.max(0, Math.min(1, ((opp.x-this.x)*vx + (opp.y-this.y)*vy) / len2));
-            const d = Math.hypot(opp.x - (this.x + t*vx), opp.y - (this.y + t*vy));
-            if (d < 58) laneRisk += (58-d) / 58;
-          }
-          const progress = mateGainX * 0.60;
-          const space = Math.min(150, mateDistToOpp) * 0.48;
-          const distancePenalty = Math.max(0, passDist - 230) * 0.20;
-          const backwardPenalty = mateGainX < -20 ? 48 : 0;
-          const passSkill = this.statPas || 75;
-          const stylePassBonus = (this.playstyle === 'tiki_taka' ? 18 : 0) + ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && passDist > 220 ? 22 : 0) + (this.playstyle === 'incisive_pass' ? 16 : 0);
-          const score = progress + space - laneRisk * 95 * cfg.passRisk - distancePenalty - backwardPenalty + (passSkill - 75) * 0.42 + stylePassBonus + Math.random() * (1-cfg.vision) * 24;
-          if (score > bestPassScore) { bestPassScore = score; bestPass = mate; }
+      // --- Zwód pod presją ---
+      const trickStyle = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
+      if (nd < 105 && this.trickTimer === 0 && this.aiDecisionCooldown <= 0 && !(this.aiTrickCd > 0) && Math.random() < cfg.trickChance * (trickStyle ? 3.2 : 1.0)) {
+        this.triggerTrick(trickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', trickStyle ? 'elastico' : 'stepover', trickStyle ? 1.28 : 1.16);
+        this.aiDecisionCooldown = Math.max(8, Math.floor(cfg.reactDelay * 0.65));
+        this.aiTrickCd = 170;   // zwód ogłusza rywali, więc AI nie może go spamować
+      }
+
+      // --- Podanie: postęp, wolna przestrzeń, ryzyko przechwytu ---
+      let bestPass = null, bestScore = -Infinity, bestRisk = 0, bestDist = 0;
+      if (this.aiDecisionCooldown <= 0) {
+        for (const m of field) {
+          if (m === this) continue;
+          const pd = dist(this, m);
+          if (pd < 65 || pd > 480) continue;
+          const risk = laneRisk(this.x, this.y, m.x, m.y, oppTeam);
+          const gain = (m.x - this.x) * dir;
+          const space = Math.min(150, Math.min(...oppTeam.map(o => dist(o, m)))) * 0.48;
+          const skill = this.statPas || 75;
+          const style = (this.playstyle === 'tiki_taka' ? 18 : 0) + ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && pd > 220 ? 22 : 0) + (this.playstyle === 'incisive_pass' ? 16 : 0);
+          const sc = gain * 0.6 + space - risk * 95 * cfg.passRisk - Math.max(0, pd - 230) * 0.2 - (gain < -20 ? 48 : 0) + (skill - 75) * 0.42 + style + Math.random() * (1 - cfg.vision) * 24;
+          if (sc > bestScore) { bestScore = sc; bestPass = m; bestRisk = risk; bestDist = pd; }
         }
       }
-      const closeToGoalWithLane = distToEnemyGoal < cfg.shootDist * 0.92 && shootingLane;
-      if (bestPass && !closeToGoalWithLane && ((oppDist < cfg.pressRange && bestPassScore > 48) || bestPassScore > 118) && this.aiDecisionCooldown <= 0) {
-        const leadX = bestPass.x + bestPass.vx * (5 + cfg.vision * 5) + attackDir * 16;
-        const leadY = bestPass.y + bestPass.vy * (5 + cfg.vision * 5);
-        const passAngle = Math.atan2(leadY - this.y, leadX - this.x);
-        const passSkill = Math.max(50, Math.min(99, this.statPas || 75));
-        const passStyleBoost = this.playstyle === 'incisive_pass' ? 1.20 : this.playstyle === 'tiki_taka' ? 1.08 : ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && Math.hypot(bestPass.x-this.x,bestPass.y-this.y)>220) ? 1.16 : 1.0;
-        const pSpd = (11.8 + cfg.vision * 0.8 + passSkill * 0.012) * passStyleBoost;
-        ball.kick(this, passAngle, pSpd, 0, 14, false, false, passStyleBoost > 1.05);
+      if (bestPass && ((pressed && bestScore > 40) || bestScore > 110 || (this.holdTicks > 150 && bestScore > -60))) {
+        const lead = 5 + cfg.vision * 5;
+        const px = bestPass.x + bestPass.vx * lead + dir * 14, py = bestPass.y + bestPass.vy * lead;
+        const skill = clamp(this.statPas || 75, 50, 99);
+        const boost = this.playstyle === 'incisive_pass' ? 1.2 : this.playstyle === 'tiki_taka' ? 1.08 : ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && bestDist > 220) ? 1.16 : 1.0;
+        const err = (Math.random() - 0.5) * (1 - cfg.passAcc) * 0.55 * (85 / skill);
+        const a = Math.atan2(py - this.y, px - this.x) + err;
+        if (bestRisk > 0.55 && bestDist > 170) {
+          ball.kick(this, a, clamp(bestDist * 0.036, 6, 13), 6.2, 16);   // górne podanie nad rywalem
+        } else {
+          ball.kick(this, a, clamp((6.2 + bestDist * 0.027) * boost, 8, 18), 0, 14, false, false, boost > 1.05);
+        }
+        this.holdTicks = 0;
         this.aiDecisionCooldown = cfg.reactDelay + 15;
         return;
       }
 
-      let goalDirX = enemyGoalX - this.x;
-      let laneOffset = (this.y < centerY ? -90 : 90) + Math.sin(tickCount * 0.03 + this.number) * 70;
-      let goalDirY = (centerY + laneOffset) - this.y;
-      let len = Math.hypot(goalDirX, goalDirY) || 1;
-      goalDirX /= len;
-      goalDirY /= len;
-
-      if (oppDist < 150) {
-        let awayX = (this.x - closestOpp.x) / oppDist;
-        let awayY = (this.y - closestOpp.y) / oppDist;
-        goalDirX = goalDirX * 0.62 + awayX * 0.58;
-        goalDirY = goalDirY * 0.62 + awayY * 0.58;
+      // --- Wybicie, gdy piłka jest trzymana za długo (koniec zakleszczeń przy bandzie) ---
+      if (this.holdTicks > 150 && this.aiDecisionCooldown <= 0) {
+        const a = freeAngle(Math.atan2(cy - this.y, 320 * dir));
+        ball.kick(this, a, 13.5, 3.0, 16);
+        this.holdTicks = 0;
+        this.aiDecisionCooldown = cfg.reactDelay + 15;
+        return;
       }
 
-      this.moveTowards(this.x + goalDirX * 120, this.y + goalDirY * 120, 0.98 * cfg.speedMult);
+      // --- Prowadzenie: ku bramce, omijanie najbliższego rywala ---
+      let gx = enemyGoalX - this.x, gy = (cy + (this.y < cy ? -70 : 70)) - this.y;
+      let gl = Math.hypot(gx, gy) || 1; gx /= gl; gy /= gl;
+      if (near && nd < 145) {
+        const w = (145 - nd) / 145;
+        const ax = (this.x - near.x) / (nd || 1), ay = (this.y - near.y) / (nd || 1);
+        gx = gx * (1 - w * 0.55) + ax * w * 0.75;
+        gy = gy * (1 - w * 0.55) + ay * w * 0.75;
+      }
+      const wall = clamp((WORLD.marginY + 130 - this.y) / 130, 0, 1) - clamp((this.y - (WORLD.height - WORLD.marginY - 130)) / 130, 0, 1);
+      gy += wall * 0.9;
+      const ty = clamp(this.y + gy * 120, WORLD.marginY + 45, WORLD.height - WORLD.marginY - 45);
+      this.moveTowards(this.x + gx * 120, ty, 0.98 * cfg.speedMult, nd > 120 && this.stamina > 28);
       return;
     }
+    this.holdTicks = 0;
 
+    // ========== DRUŻYNA MA PIŁKĘ: wsparcie ==========
     if (ball.owner && ball.owner.team === this.team) {
-      let carrier = ball.owner;
-      let targetX = this.role === 'FWD' ? carrier.x + attackDir * 210 : carrier.x - attackDir * 135;
-      let targetY = carrier.y < centerY ? centerY + 165 : centerY - 165;
-      targetX = Math.max(WORLD.marginX + 110, Math.min(WORLD.width - WORLD.marginX - 110, targetX));
-      this.moveTowards(targetX, targetY, 0.96 * cfg.speedMult);
+      const c = ball.owner;
+      let tx, ty;
+      if (this.role === 'FWD') {
+        tx = c.x + dir * (170 + 40 * cfg.support);
+        ty = (c.y < cy ? cy + 150 : cy - 150) + Math.sin(tickCount * 0.02 + this.number) * 45;
+      } else {
+        tx = c.x - dir * 125;
+        ty = c.y < cy ? cy + 130 : cy - 130;
+      }
+      tx = clamp(tx, WORLD.marginX + 110, WORLD.width - WORLD.marginX - 110);
+      ty = clamp(ty, WORLD.marginY + 50, WORLD.height - WORLD.marginY - 50);
+      this.moveTowards(tx, ty, 0.96 * cfg.speedMult, Math.hypot(tx - this.x, ty - this.y) > 220);
       return;
     }
 
-    let fieldMates = myTeam.filter(p => p.role !== 'GK');
-    let closestToBall = fieldMates.reduce((prev, curr) =>
-      Math.hypot(curr.x - ball.x, curr.y - ball.y) < Math.hypot(prev.x - ball.x, prev.y - ball.y) ? curr : prev
-    , fieldMates[0]);
+    // ========== OBRONA / LUŹNA PIŁKA ==========
+    // Jeden goniący na drużynę (z histerezą, żeby nie przeskakiwali co klatkę)
+    const eta = p => dist(p, ball) - (p.wasChaser ? 38 : 0);
+    let chaser = field[0];
+    for (const p of field) if (eta(p) < eta(chaser)) chaser = p;
+    this.wasChaser = chaser === this;
+    const carrier = ball.owner && ball.owner.team !== this.team ? ball.owner : null;
 
-    if (closestToBall === this) {
-      const carrier = ball.owner && ball.owner.team !== this.team ? ball.owner : null;
-      let predictX = ball.x + ball.vx * (3 + cfg.vision * 4);
-      let predictY = ball.y + ball.vy * (3 + cfg.vision * 4);
-      // Gdy przeciwnik ma piłkę, odetnij kierunek do bramki zamiast bezmyślnie biec za piłką.
+    if (chaser === this) {
+      let px, py;
       if (carrier) {
-        const ownGoalY = centerY;
-        const dxGoal = ownGoalX - carrier.x;
-        const dyGoal = ownGoalY - carrier.y;
-        const goalLen = Math.hypot(dxGoal, dyGoal) || 1;
-        const interceptX = carrier.x - (dxGoal / goalLen) * (34 + (1-cfg.vision)*24);
-        const interceptY = carrier.y - (dyGoal / goalLen) * (34 + (1-cfg.vision)*24);
-        predictX = interceptX * cfg.vision + predictX * (1-cfg.vision);
-        predictY = interceptY * cfg.vision + predictY * (1-cfg.vision);
+        const gx = ownGoalX - carrier.x, gy = cy - carrier.y, gl = Math.hypot(gx, gy) || 1;
+        const standOff = 30 + (1 - cfg.vision) * 26;
+        px = carrier.x + gx / gl * standOff; py = carrier.y + gy / gl * standOff;
+      } else {
+        const t = clamp(dist(this, ball) / (this.baseSpeed * 1.1), 0, 24) * (0.5 + cfg.vision * 0.5);
+        px = ball.x + ball.vx * t * 0.8; py = ball.y + ball.vy * t * 0.8;
       }
-      this.moveTowards(predictX, predictY, 0.98 * cfg.speedMult);
-
+      this.moveTowards(px, py, 0.99 * cfg.speedMult, Math.hypot(px - this.x, py - this.y) > 90 && this.stamina > 20);
       if (carrier) {
-        const d = Math.hypot(this.x - carrier.x, this.y - carrier.y);
-        const tackleChance = 0.025 + cfg.vision * 0.045;
-        if (d < 43 && carrier.trickTimer === 0 && !carrier.isShielding && Math.random() < tackleChance) {
-          carrier.stunTimer = 14 + Math.round(cfg.vision * 8);
-          ball.owner = this;
-          ball.lastTouchTeam = this.team;
-          playAndBroadcastSFX('pass');
-        } else if (d > 47 && d < 78 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance) {
+        const d = dist(this, carrier);
+        if (d < 40 && this.tackleCd <= 0) {
+          this.tackleCd = 42 + Math.round((1 - cfg.vision) * 40);
+          let ch = 0.34 + ((this.statDef || 75) - (carrier.statDri || 75)) * 0.005 + cfg.vision * 0.12
+            - (carrier.isShielding ? 0.14 : 0) - (carrier.trickTimer > 0 ? 0.16 : 0)
+            + (this.playstyle === 'press_proven' ? 0.06 : 0) - (carrier.playstyle === 'bruiser' ? 0.06 : 0);
+          ch = clamp(ch, 0.12, 0.62);
+          this.angle = Math.atan2(carrier.y - this.y, carrier.x - this.x);
+          this.lungeTimer = 12;
+          if (Math.random() < ch) {
+            // Czysty odbiór: piłka wyskakuje do walki o drugą piłkę, a nie wpada darmowo do nogi
+            carrier.stunTimer = 10;
+            ball.owner = null;
+            ball.lastKicker = carrier;
+            ball.lastTouchTeam = this.team;
+            ball.kickCooldown = 12;
+            ball.vx = Math.cos(this.angle) * 2.6;
+            ball.vy = Math.sin(this.angle) * 2.6;
+            ball.vz = 0; ball.z = 0;
+            playAndBroadcastSFX('pass');
+          } else {
+            this.aiDecisionCooldown = Math.max(this.aiDecisionCooldown, 10);
+          }
+        } else if (d > 52 && d < 90 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance &&
+                   (carrier.vx * (ownGoalX - carrier.x) + carrier.vy * (cy - carrier.y)) > 0) {
           this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
           this.startSlide();
         }
       }
-    } else {
-      // Reszta drużyny ustawia się pomiędzy piłką a własną bramką, z zachowaniem odstępów.
-      const defensiveLineX = ownGoalX * 0.28 + ball.x * 0.72;
-      const roleOffset = this.role === 'DEF' ? -attackDir * 55 : attackDir * 65;
-      let targetX = defensiveLineX + roleOffset;
-      let targetY = centerY + (ball.y - centerY) * (this.role === 'DEF' ? 0.48 : 0.30);
-      targetX = Math.max(WORLD.marginX + 65, Math.min(WORLD.width - WORLD.marginX - 65, targetX));
-      targetY = Math.max(WORLD.marginY + 45, Math.min(WORLD.height - WORLD.marginY - 45, targetY));
-      this.moveTowards(targetX, targetY, (0.88 + cfg.vision * 0.08) * cfg.speedMult);
+      return;
     }
+
+    // Reszta: krycie najgroźniejszego rywala lub zwarty szyk między piłką a bramką
+    let tx, ty;
+    const mark = carrier && this.role === 'DEF'
+      ? foes.filter(f => f !== carrier).sort((a, b) => Math.abs(a.x - ownGoalX) - Math.abs(b.x - ownGoalX))[0] : null;
+    if (mark) {
+      tx = mark.x - dir * 50;
+      ty = mark.y + (cy - mark.y) * 0.15;
+    } else {
+      const f = (ball.x - WORLD.width / 2) * dir > 0 ? 0.75 : 0.62;
+      tx = ownGoalX + (ball.x - ownGoalX) * f + (this.role === 'DEF' ? -dir * 60 : dir * 70);
+      ty = cy + (ball.y - cy) * (this.role === 'DEF' ? 0.5 : 0.35);
+    }
+    tx = clamp(tx, WORLD.marginX + 65, WORLD.width - WORLD.marginX - 65);
+    ty = clamp(ty, WORLD.marginY + 45, WORLD.height - WORLD.marginY - 45);
+    this.moveTowards(tx, ty, (0.88 + cfg.vision * 0.08) * cfg.speedMult, Math.hypot(tx - this.x, ty - this.y) > 170 && this.stamina > 30);
   }
 
-  moveTowards(tx, ty, speedFactor = 1.0) {
-    let sepX = 0, sepY = 0;
-    let mates = (this.team === 'blue' ? blueTeam : redTeam).filter(p => !p.sentOff);
-    for (let m of mates) {
-      if (m === this) continue;
-      let d = Math.hypot(this.x - m.x, this.y - m.y);
-      if (d < 95 && d > 0.1) {
-        sepX += ((this.x - m.x) / d) * (95 - d) * 0.45;
-        sepY += ((this.y - m.y) / d) * (95 - d) * 0.45;
+  moveTowards(tx, ty, speedFactor = 1.0, sprint = false) {
+    // Odpychanie od kolegów z drużyny (bez tłoku)
+    let sx = 0, sy = 0;
+    for (const m of (this.team === 'blue' ? blueTeam : redTeam)) {
+      if (m === this || m.sentOff) continue;
+      const d = Math.hypot(this.x - m.x, this.y - m.y);
+      if (d < 80 && d > 0.1) {
+        const f = (80 - d) / 80;
+        sx += (this.x - m.x) / d * f * 34;
+        sy += (this.y - m.y) / d * f * 34;
       }
     }
-
-    tx += sepX;
-    ty += sepY;
-
-    let dx = tx - this.x;
-    let dy = ty - this.y;
-    let dist = Math.hypot(dx, dy);
-
-    if (dist > 7) {
-      let angle = Math.atan2(dy, dx);
-      let spd = Math.min(dist * 0.22, this.baseSpeed * speedFactor * this.speedMultiplier);
-      this.vx = Math.cos(angle) * spd;
-      this.vy = Math.sin(angle) * spd;
+    const dx = tx + sx - this.x, dy = ty + sy - this.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 6) {
+      let mult = speedFactor * this.speedMultiplier * (this.speedBoostTimer > 0 ? 1.18 : 1);
+      if (sprint && this.stamina > 20) {
+        mult *= this.playstyle === 'rapid_step' ? 1.28 : 1.18;
+        this.isSprinting = true;
+        this.stamina = Math.max(0, this.stamina - Math.max(0.34, 0.52 - ((this.statPac || 75) - 70) * 0.002 - (this.playstyle === 'relentless' ? 0.1 : 0)));
+      }
+      const want = Math.min(this.baseSpeed * mult, dist * 0.2 + 0.6);
+      const a = Math.atan2(dy, dx);
+      const ac = Math.min(0.45, (this.accelRate || 0.22) + 0.1);
+      this.vx += (Math.cos(a) * want - this.vx) * ac;
+      this.vy += (Math.sin(a) * want - this.vy) * ac;
       this.x += this.vx;
       this.y += this.vy;
-      this.angle = angle;
+      // Płynny obrót: piłka przy nodze nie "teleportuje się" przy zmianie kierunku
+      this.angle += Math.max(-0.3, Math.min(0.3, normalizeAngle(a - this.angle)));
       this.isMoving = true;
-      if (spd > this.baseSpeed * 1.02) this.isSprinting = true;
     } else {
       this.vx *= 0.6;
       this.vy *= 0.6;
@@ -6407,17 +6499,31 @@ function updateFixedStep() {
             if (allPlayers[i].sentOff) continue;
             for (let j = i + 1; j < allPlayers.length; j++) {
               if (allPlayers[j].sentOff) continue;
-              let p1 = allPlayers[i], p2 = allPlayers[j];
-              let dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-              let minDist = p1.radius + p2.radius;
+              const p1 = allPlayers[i], p2 = allPlayers[j];
+              const dx = p1.x - p2.x, dy = p1.y - p2.y;
+              const dist = Math.hypot(dx, dy);
+              const minDist = p1.radius + p2.radius;
               const protectedKeeper = (ball.owner === p1 && p1.role === 'GK') || (ball.owner === p2 && p2.role === 'GK');
-              if (!protectedKeeper && dist < minDist && dist > 0.01) {
-                let overlap = (minDist - dist) * 0.5;
-                let angle = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-                p1.x += Math.cos(angle) * overlap;
-                p1.y += Math.sin(angle) * overlap;
-                p2.x -= Math.cos(angle) * overlap;
-                p2.y -= Math.sin(angle) * overlap;
+              if (protectedKeeper || dist >= minDist || dist < 0.01) continue;
+              // Cięższy (silniejszy) zawodnik jest przesuwany mniej; wślizg/zastawka dodają wagi.
+              const m1 = Math.max(0.6, 1 + ((p1.strength || 75) - 75) * 0.012 + (p1.isShielding ? 0.35 : 0) + (p1.isSliding ? 0.25 : 0));
+              const m2 = Math.max(0.6, 1 + ((p2.strength || 75) - 75) * 0.012 + (p2.isShielding ? 0.35 : 0) + (p2.isSliding ? 0.25 : 0));
+              const ov = minDist - dist, nx = dx / dist, ny = dy / dist;
+              p1.x += nx * ov * (m2 / (m1 + m2));
+              p1.y += ny * ov * (m2 / (m1 + m2));
+              p2.x -= nx * ov * (m1 / (m1 + m2));
+              p2.y -= ny * ov * (m1 / (m1 + m2));
+            }
+          }
+          // Strefa bramkarza: rywale nie mogą zastawiać wybicia z rąk bramkarza (i tak nie mogą mu odebrać piłki)
+          if (ball.owner && ball.owner.role === 'GK') {
+            const g = ball.owner;
+            for (const p of allPlayers) {
+              if (p.sentOff || p.team === g.team) continue;
+              const gd = Math.hypot(p.x - g.x, p.y - g.y);
+              if (gd < 78 && gd > 0.01) {
+                p.x = g.x + (p.x - g.x) / gd * 78;
+                p.y = g.y + (p.y - g.y) / gd * 78;
               }
             }
           }
