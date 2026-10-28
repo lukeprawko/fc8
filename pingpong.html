@@ -3050,13 +3050,13 @@
       <!-- SEZON 3 & GLOBALNY RESET BAZY -->
       <div style="margin-top: 10px; padding: 10px; background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.35); border-radius: 8px;">
         <div style="font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:#ff0055; letter-spacing:0.8px; margin-bottom: 6px;">
-          ⚠️ GLOBALNY WIPE BAZY (SEZON 3):
+          ⚠️ RESET POSTĘPU WSZYSTKICH GRACZY:
         </div>
         <button type="button" class="btn-admin-wipe" onclick="adminWipeAllPlayersToLevel1()" style="width: 100%; background: linear-gradient(135deg, rgba(255, 0, 85, 0.25), rgba(150, 0, 50, 0.35)); border: 1px solid #ff0055; border-radius: 6px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; padding: 8px; cursor: pointer; transition: all 0.2s;">
-          💥 ZRESETUJ WSZYSTKIE KONTA W BAZIE DO LVL 1
+          💥 RESETUJ POSTĘP WSZYSTKICH GRACZY
         </button>
         <div style="font-size: 9.5px; color: #8b949e; margin-top: 5px; line-height: 1.3;">
-          Resetuje poziom (LVL 1), EXP (0), SP (1) oraz drzewko talentów dla każdego gracza w kolekcji Firestore. Statusy administratorów i nicki zostają zachowane!
+          Resetuje poziom, EXP, SP i talenty każdego gracza w Firestore. Nicki, statystyki meczowe i uprawnienia administratora pozostają bez zmian.
         </div>
       </div>
 
@@ -4627,14 +4627,14 @@ async function adminWipeAllPlayersToLevel1() {
     return;
   }
 
-  const confirmMsg = '⚠️ UWAGA: GLOBALNY WIPE BAZY (SEZON 3)!\n\nCzy na pewno chcesz zresetować WSZYSTKIE konta w bazie Firestore do Poziomu 1 (0 EXP, 1 SP, czyste drzewko)?\n\nUprawnienia Administratora i nicki graczy zostaną nienaruszone.\n\nCzy chcesz kontynuować?';
+  const confirmMsg = '⚠️ RESET POSTĘPU WSZYSTKICH GRACZY!\n\nKażde konto zostanie ustawione na Poziom 1, 0 EXP, 1 SP i czyste drzewko talentów. Nicki, statystyki meczowe i uprawnienia administratora pozostaną bez zmian.\n\nTej operacji nie można cofnąć. Kontynuować?';
   if (!confirm(confirmMsg)) return;
   if (!fbDb) {
     alert('Brak połączenia z bazą Firestore!');
     return;
   }
 
-  showBanner('⏳ Resetowanie wszystkich kont w chmurze...', '#00f0ff', 60);
+  showBanner('⏳ Resetowanie postępu wszystkich kont w chmurze...', '#00f0ff', 60);
   try {
     const pageSize = 400;
     let lastDoc = null;
@@ -4648,11 +4648,17 @@ async function adminWipeAllPlayersToLevel1() {
       snap.forEach(docSnap => {
         const data = docSnap.data() || {};
         const cleanUpdate = {
-          level: 1, exp: 0, sp: 1, spentSp: 0, freeResets: 1,
-          talents: { root: true }, stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
-          resetVersion: 3, updatedAt: Date.now()
+          level: 1,
+          exp: 0,
+          sp: 1,
+          spentSp: 0,
+          freeResets: 1,
+          talents: { root: true },
+          resetVersion: 3,
+          updatedAt: Date.now()
         };
         if (typeof data.nick === 'string') cleanUpdate.nick = data.nick.slice(0, 12);
+        // merge:true zachowuje statystyki meczowe, nick oraz flagi administratora.
         batch.set(docSnap.ref, cleanUpdate, { merge: true });
       });
       await batch.commit();
@@ -4667,7 +4673,6 @@ async function adminWipeAllPlayersToLevel1() {
     prof.spentSp = 0;
     prof.freeResets = 1;
     prof.talents = { root: true };
-    prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     prof.resetVersion = 3;
     prof.updatedAt = Date.now();
     savePlayerProfile(prof);
@@ -4677,8 +4682,8 @@ async function adminWipeAllPlayersToLevel1() {
 
     SFX.play('upgrade');
     triggerShake(10, 5);
-    showBanner('💥 SUKCES: Zresetowano ' + count + ' kont w Firestore do LVL 1!', '#00ff88', 90);
-    alert('✓ Sukces!\n\nZresetowano ' + count + ' kont w chmurze Firebase do LVL 1 (0 EXP, 1 SP, czyste talenty).\nSezon 3 rozpoczęty dla wszystkich graczy!');
+    showBanner('💥 Zresetowano postęp ' + count + ' kont. Statystyki i role zachowane.', '#00ff88', 90);
+    alert('✓ Gotowe!\n\nZresetowano postęp ' + count + ' kont: Poziom 1, 0 EXP, 1 SP i czyste drzewko talentów.\n\nNicki, statystyki meczowe oraz uprawnienia administratora zostały zachowane.');
   } catch (err) {
     console.error('Błąd resetowania bazy:', err);
     showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
