@@ -2623,7 +2623,7 @@
                 </div>
               </div>
               <div class="account-top-right">
-                <div class="account-sp-badge" id="accSpDisplay" title="Dostępne punkty umiejętności (SP) do wydania w drzewku talentów">⚡ 1 SP</div>
+                <div class="account-sp-badge" id="accSpDisplay" title="Dostępne punkty umiejętności (SP) do wydania w drzewku talentów">⚡ 3 SP</div>
                 <button type="button" class="btn-acc-switch" onclick="handleAccountSwitchClick()" title="Zaloguj na inne konto / wyloguj z chmury">
                   <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
                 </button>
@@ -3305,7 +3305,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spd_2', tier: 2, cost: 3, req: 'spd_1',
         title: 'Szybki Zryw', icon: '💨', type: 'stat',
-        benefit: 'Dash odnawia się o 35% szybciej i zużywa 25% mniej energii',
+        benefit: 'Dash kosztuje 18 zamiast 25 energii, a jego odnowienie jest o ok. 35% krótsze (9 zamiast 14 klatek)',
         legacyIds: ['speed_2', 'spd_2']
       },
       {
@@ -3317,7 +3317,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
         title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
-        benefit: 'Każde odbicie w wymianie daje +6% prędkości; przy 4 odbiciach kolejny Dash jest darmowy',
+        benefit: 'Po 4 odbiciach w wymianie kolejny Dash jest darmowy; co 8–14 s losowy Szybki Błysk daje +35% prędkości paletki na 2,5 s',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
@@ -3344,25 +3344,25 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'pwr_2', tier: 2, cost: 3, req: 'pwr_1',
         title: 'Cieplny Impuls', icon: '🔥', type: 'stat',
-        benefit: '+25% siły Smasha łącznie i o 40% szybsze ładowanie ścięcia',
+        benefit: '+25% siły Smasha łącznie',
         legacyIds: ['force_2', 'atk_2', 'pwr_2']
       },
       {
         id: 'pwr_3', tier: 3, cost: 5, req: 'pwr_2',
         title: 'Ścienny Rykoszet', icon: '⚡', type: 'skill',
-        benefit: 'Odbicie piłki od ściany nie zwalnia, lecz przyspiesza piłkę o +15%',
+        benefit: 'Odbicie piłki od ściany nie zwalnia, lecz przyspiesza piłkę o +15% (maks. 2 razy na piłkę)',
         legacyIds: ['force_3', 'atk_3', 'pwr_3']
       },
       {
         id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
         title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
-        benefit: 'Twój Smash odpycha paletkę rywala w tył o 15 px i wywołuje falę uderzeniową',
+        benefit: 'Każde Twoje odbicie ładuje stos Rozgrzania (maks. 3, każdy daje +8% siły Smasha); Smash odpycha paletkę rywala o 16 px',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
         id: 'pwr_5', tier: 5, cost: 9, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
-        benefit: 'Smash zamienia piłkę w płonący meteor o maksymalnej prędkości 200 km/h',
+        benefit: 'Smash przy 3 stosach Rozgrzania zamienia piłkę w płonący meteor 200 km/h i spowalnia rywali o 30% na 1,2 s',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
       }
     ]
@@ -3383,7 +3383,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spn_2', tier: 2, cost: 3, req: 'spn_1',
         title: 'Cyber Rotacja', icon: '🌪️', type: 'stat',
-        benefit: '+25% rotacji łącznie, a łuk skrętu utrzymuje się o 50% dłużej',
+        benefit: '+25% rotacji łącznie, a łuk skrętu utrzymuje się o ok. 15% dłużej',
         legacyIds: ['spin_2', 'spn_2']
       },
       {
@@ -3395,7 +3395,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spn_4', tier: 4, cost: 7, req: 'spn_3',
         title: 'Zakręt Grawitacyjny', icon: '🌌', type: 'skill',
-        benefit: 'Kliknięcie PPM przy uderzeniu nadaje piłce nagły, ostry zygzak w locie',
+        benefit: 'Raz na 18 s piłka w połowie boiska gwałtownie skręca w przeciwną stronę o ok. 25° (Singularność)',
         legacyIds: ['spin_4', 'spn_4']
       },
       {
@@ -3465,6 +3465,17 @@ const TALENTS_DEF = SKILL_TREE_NODES;
 const TOTAL_TREE_SP_COST = Object.values(SKILL_TREE_NODES).reduce((sum, n) => sum + (n.cost || 0), 0);
 
 const PLAYER_PROFILE_KEY = 'CYBERPONG_PLAYER_PROFILE_v2';
+// Wersja resetu: zwiększ ją, aby przy następnym logowaniu WSZYSTKIE konta wróciły do stanu startowego.
+const RESET_VERSION = 4;
+const START_SP = 3; // punkty umiejętności na starcie konta
+const PRIVILEGED_CLOUD_FIELDS = ['isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash', 'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'];
+function cloudSafeProfile(prof) {
+  const out = { ...prof };
+  PRIVILEGED_CLOUD_FIELDS.forEach(k => delete out[k]);
+  delete out.gameData;
+  out.resetVersion = RESET_VERSION;
+  return out;
+}
 
 /* =========================================================================
    KONFIGURACJA I INICJALIZACJA BAZY DANYCH GOOGLE FIREBASE CLOUD
@@ -3515,7 +3526,7 @@ function getSpGainedForLevel(lvl) {
 function calculateTotalSpForLevel(lvl) {
   const numericLevel = Number(lvl);
   const l = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : 1;
-  let total = 1;
+  let total = START_SP;
   for (let i = 2; i <= l; i++) total += getSpGainedForLevel(i);
   return total;
 }
@@ -3550,12 +3561,12 @@ function createDefaultProfile(nick = 'GRACZ') {
     nick: cleanNick,
     level: 1,
     exp: 0,
-    sp: 1,
+    sp: START_SP,
     spentSp: 0,
     freeResets: 1,
     talents: { root: true },
     stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
-    resetVersion: 3,
+    resetVersion: RESET_VERSION,
     isAdmin: false,
     allTalents: false,
     infiniteStamina: false,
@@ -3651,16 +3662,17 @@ function getPlayerProfile() {
     }
 
     // Globalny Sezon 3 / Reset Bazy (Wipe do LVL 1)
-    if (prof.resetVersion !== 3) {
-      console.log('🔄 [CyberPong] Reset profilu do LVL 1 (Sezon 3 / Wipe bazy)');
+    if (prof.resetVersion !== RESET_VERSION) {
+      console.log('🔄 [CyberPong] Reset profilu do stanu startowego (wersja ' + RESET_VERSION + ')');
+      safeSetStorage(WALL_RECORD_KEY, '0');
       prof.level = 1;
       prof.exp = 0;
-      prof.sp = 1;
+      prof.sp = START_SP;
       prof.spentSp = 0;
       prof.freeResets = 1;
       prof.talents = { root: true };
       prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
-      prof.resetVersion = 3;
+      prof.resetVersion = RESET_VERSION;
       prof.updatedAt = Date.now();
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
@@ -3739,15 +3751,7 @@ function getPlayerProfile() {
 
     if (typeof prof.exp !== 'number') prof.exp = 0;
     const prog = getLevelProgress(prof.exp);
-    const storedLvl = Number(prof.level);
-    if (Number.isFinite(storedLvl) && storedLvl > prog.level) {
-      prof.level = Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(storedLvl)));
-      let cumXp = 0;
-      for (let l = 1; l < prof.level; l++) cumXp += getXpRequiredForLevel(l);
-      prof.exp = Math.max(prof.exp, cumXp);
-    } else {
-      prof.level = prog.level;
-    }
+    prof.level = prog.level; // poziom zawsze wynika z EXP (nie ufamy polu 'level')
 
     // Zbalansowane przeliczanie należnych punktów SP:
     // Upewnij się, że gracz ma przynajmniej tyle SP, ile wynika z poziomu (i zachowaj punkty zdobyte z wygranych meczów)
@@ -3758,11 +3762,11 @@ function getPlayerProfile() {
       try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    if (typeof prof.sp !== 'number') prof.sp = 1;
+    if (typeof prof.sp !== 'number') prof.sp = START_SP;
     if (!prof.stats || typeof prof.stats !== 'object') {
       prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     }
-    prof.resetVersion = 3;
+    prof.resetVersion = RESET_VERSION;
     return prof;
   } catch (e) {
     return createDefaultProfile('GRACZ');
@@ -3776,7 +3780,7 @@ function syncProfileToCloud(prof) {
       const privilegedFields = ['isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash', 'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'];
       delete payload.adminToken;
       delete payload.gameData;
-      payload.resetVersion = 3;
+      payload.resetVersion = RESET_VERSION;
       if (!prof.isAdmin) {
         privilegedFields.forEach(key => delete payload[key]);
       } else {
@@ -3785,7 +3789,7 @@ function syncProfileToCloud(prof) {
       }
       payload.updatedAt = Date.now();
 
-      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { merge: true }).then(() => {
+      fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { mergeFields: Object.keys(payload) }).then(() => {
         console.log('☁️ [Firestore] Zsynchronizowano profil gracza w chmurze');
       }).catch(err => {
         console.warn('Błąd synchronizacji chmury Firestore:', err);
@@ -3801,6 +3805,7 @@ function savePlayerProfile(prof) {
   prof.exp = Number.isFinite(numericExp) ? Math.min(MAX_ACCOUNT_EXP, Math.max(0, Math.floor(numericExp))) : 0;
   const numericLevel = Number(prof.level);
   prof.level = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : getLevelProgress(prof.exp).level;
+  prof.ownerUid = (fbAuth && fbAuth.currentUser) ? fbAuth.currentUser.uid : null;
   prof.updatedAt = Date.now();
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
@@ -3940,7 +3945,7 @@ async function handleFirebaseLogout() {
   closeAdminPanelModal();
   closeTalentTreeModal();
 
-  // Całkowite odizolowanie danych konta: przywrócenie czystego profilu domyślnego dla gościa (LVL 1, 0 EXP, 1 SP)
+  // Całkowite odizolowanie danych konta: przywrócenie czystego profilu domyślnego dla gościa (LVL 1, 0 EXP, 3 SP)
   const guestProf = createDefaultProfile('GRACZ');
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(guestProf));
@@ -4009,10 +4014,10 @@ async function handleFirebaseRegister() {
   try {
     const email = nickToEmail(nick);
     const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
-    // Całkowita izolacja danych — każde nowo rejestrowane konto zaczyna jako czysty profil (LVL 1, 0 EXP, 1 SP)
+    // Całkowita izolacja danych — każde nowo rejestrowane konto zaczyna jako czysty profil (LVL 1, 0 EXP, 3 SP)
     const newProf = createDefaultProfile(nick);
     if (fbDb) {
-      await fbDb.collection('players').doc(cred.user.uid).set(newProf);
+      await fbDb.collection('players').doc(cred.user.uid).set(cloudSafeProfile(newProf));
     }
     savePlayerProfile(newProf);
     applyCloudProfileToLocal(newProf, cred.user.uid);
@@ -4081,7 +4086,7 @@ async function handleFirebaseLogin() {
         applyCloudProfileToLocal(cloudProf, cred.user.uid);
       } else {
         const freshProf = createDefaultProfile(nick);
-        await fbDb.collection('players').doc(cred.user.uid).set(freshProf);
+        await fbDb.collection('players').doc(cred.user.uid).set(cloudSafeProfile(freshProf));
         savePlayerProfile(freshProf);
         applyCloudProfileToLocal(freshProf, cred.user.uid);
       }
@@ -4112,7 +4117,23 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   if (!cloudProf) return;
 
   const localRaw = decodeProfileEnvelope(localStorage.getItem(PLAYER_PROFILE_KEY));
-  const localProf = localRaw ? localRaw.prof : null;
+  let localProf = localRaw ? localRaw.prof : null;
+  let forceCloudWrite = false;
+
+  // Lokalny profil innego konta / gościa nie może wpływać na to konto (izolacja kont)
+  if (localProf && localProf.ownerUid !== uid) localProf = null;
+
+  // GLOBALNY RESET: konto z chmury ze starą wersją resetu wraca do stanu startowego.
+  // Lokalne dane NIE są scalane (wcześniej scalanie przywracało stare talenty po resecie).
+  if (cloudProf.resetVersion !== RESET_VERSION) {
+    const wiped = createDefaultProfile(cloudProf.nick || (localProf && localProf.nick) || 'GRACZ');
+    PRIVILEGED_CLOUD_FIELDS.forEach(k => { if (cloudProf[k] !== undefined) wiped[k] = cloudProf[k]; });
+    wiped.updatedAt = Date.now();
+    cloudProf = wiped;
+    localProf = null;
+    safeSetStorage(WALL_RECORD_KEY, '0');
+    forceCloudWrite = true;
+  }
 
   const base = createDefaultProfile(cloudProf.nick || (localProf ? localProf.nick : 'GRACZ'));
   const merged = {
@@ -4126,27 +4147,13 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   // Połącz talenty: każdy talent odblokowany lokalnie lub w chmurze jest ZAWSZE zachowywany!
   const localTalents = (localProf && localProf.talents && typeof localProf.talents === 'object') ? localProf.talents : {};
   const cloudTalents = (cloudProf.talents && typeof cloudProf.talents === 'object') ? cloudProf.talents : {};
+  // Źródłem prawdy jest nowszy zapis (lokalny albo z chmury) — bez łączenia (łączenie dublowało talenty i SP po resecie drzewka)
+  const useLocalTalents = !!localProf && (Number(localProf.updatedAt) || 0) >= (Number(cloudProf.updatedAt) || 0);
   const mergedTalents = {
-    ...cloudTalents,
-    ...localTalents,
+    ...(useLocalTalents ? localTalents : cloudTalents),
     root: true
   };
   merged.talents = mergedTalents;
-
-  // Globalny Sezon 3 / Reset Bazy w chmurze Firebase (Synchronizacja do Sezonu 3 bez kasowania zakupionych talentów)
-  if (cloudProf.resetVersion !== 3) {
-    console.log('☁️ [Firestore Migration] Synchronizacja konta w chmurze do Sezonu 3...');
-    const targetLvl = (typeof cloudProf.level === 'number' && cloudProf.level > 1)
-      ? Math.floor(cloudProf.level)
-      : (localProf && localProf.level > 1 ? localProf.level : 1);
-    merged.level = targetLvl;
-    let cumXp = 0;
-    for (let l = 1; l < targetLvl; l++) cumXp += getXpRequiredForLevel(l);
-    merged.exp = Math.max(cloudProf.exp || 0, (localProf && localProf.exp) || 0, cumXp);
-    merged.resetVersion = 3;
-    merged.updatedAt = Date.now();
-    syncProfileToCloud(merged);
-  }
 
   // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
   const isCloudAdmin = !!(cloudProf.isAdmin === true || cloudProf.role === 'admin');
@@ -4250,8 +4257,9 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     merged.sp = minExpectedSp;
   }
 
+  merged.ownerUid = uid || null;
   merged.updatedAt = Math.max(localUp, cloudUp, Date.now());
-  merged.resetVersion = 3;
+  merged.resetVersion = RESET_VERSION;
 
   // Zapis do localStorage z poprawną sumą kontrolną
   try {
@@ -4264,7 +4272,7 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   } catch (e) {}
 
   // Jeśli w dokumencie w Firestore brakuje jeszcze pól opcji administratora lub wartości uległy wyrównaniu
-  if (merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
+  if (forceCloudWrite || merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
     syncProfileToCloud(merged);
   } else if (!fromSnapshot) {
     syncProfileToCloud(merged);
@@ -4305,7 +4313,7 @@ function initAccountSystem() {
             } else if (snap && !snap.exists) {
               // Nowy dokument gracza w chmurze - wyślij czysty profil początkowy
               const freshProf = createDefaultProfile(user.displayName || 'GRACZ');
-              fbDb.collection('players').doc(user.uid).set(freshProf).catch(console.warn);
+              fbDb.collection('players').doc(user.uid).set(cloudSafeProfile(freshProf)).catch(console.warn);
               applyCloudProfileToLocal(freshProf, user.uid, true);
             }
           }, err => {
@@ -4627,7 +4635,7 @@ async function adminWipeAllPlayersToLevel1() {
     return;
   }
 
-  const confirmMsg = '⚠️ RESET POSTĘPU WSZYSTKICH GRACZY!\n\nKażde konto zostanie ustawione na Poziom 1, 0 EXP, 1 SP i czyste drzewko talentów. Nicki, statystyki meczowe i uprawnienia administratora pozostaną bez zmian.\n\nTej operacji nie można cofnąć. Kontynuować?';
+  const confirmMsg = '⚠️ RESET POSTĘPU WSZYSTKICH GRACZY!\n\nKażde konto zostanie ustawione na Poziom 1, 0 EXP, ' + START_SP + ' SP, czyste drzewko talentów i wyzerowane statystyki. Nicki i uprawnienia administratora pozostaną bez zmian.\n\nTej operacji nie można cofnąć. Kontynuować?';
   if (!confirm(confirmMsg)) return;
   if (!fbDb) {
     alert('Brak połączenia z bazą Firestore!');
@@ -4650,16 +4658,17 @@ async function adminWipeAllPlayersToLevel1() {
         const cleanUpdate = {
           level: 1,
           exp: 0,
-          sp: 1,
+          sp: START_SP,
           spentSp: 0,
           freeResets: 1,
           talents: { root: true },
-          resetVersion: 3,
+          stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
+          resetVersion: RESET_VERSION,
           updatedAt: Date.now()
         };
         if (typeof data.nick === 'string') cleanUpdate.nick = data.nick.slice(0, 12);
-        // merge:true zachowuje statystyki meczowe, nick oraz flagi administratora.
-        batch.set(docSnap.ref, cleanUpdate, { merge: true });
+        // mergeFields nadpisuje całe pola (talents, stats), ale zostawia nick i flagi administratora.
+        batch.set(docSnap.ref, cleanUpdate, { mergeFields: Object.keys(cleanUpdate) });
       });
       await batch.commit();
       count += snap.size;
@@ -4669,11 +4678,13 @@ async function adminWipeAllPlayersToLevel1() {
 
     prof.level = 1;
     prof.exp = 0;
-    prof.sp = 1;
+    prof.sp = START_SP;
     prof.spentSp = 0;
     prof.freeResets = 1;
     prof.talents = { root: true };
-    prof.resetVersion = 3;
+    prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
+    safeSetStorage(WALL_RECORD_KEY, '0');
+    prof.resetVersion = RESET_VERSION;
     prof.updatedAt = Date.now();
     savePlayerProfile(prof);
     applyStatsToLocalPlayer();
@@ -4682,8 +4693,8 @@ async function adminWipeAllPlayersToLevel1() {
 
     SFX.play('upgrade');
     triggerShake(10, 5);
-    showBanner('💥 Zresetowano postęp ' + count + ' kont. Statystyki i role zachowane.', '#00ff88', 90);
-    alert('✓ Gotowe!\n\nZresetowano postęp ' + count + ' kont: Poziom 1, 0 EXP, 1 SP i czyste drzewko talentów.\n\nNicki, statystyki meczowe oraz uprawnienia administratora zostały zachowane.');
+    showBanner('💥 Zresetowano postęp ' + count + ' kont (LVL 1, ' + START_SP + ' SP).', '#00ff88', 90);
+    alert('✓ Gotowe!\n\nZresetowano postęp ' + count + ' kont: Poziom 1, 0 EXP, ' + START_SP + ' SP, czyste drzewko i wyzerowane statystyki.\n\nNicki oraz uprawnienia administratora zostały zachowane.');
   } catch (err) {
     console.error('Błąd resetowania bazy:', err);
     showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
@@ -4879,7 +4890,7 @@ function renderSkillTreeGraph() {
     resetBtn.innerHTML = `🔄 RESET DRZEWKA (DARMOWY)`;
     resetBtn.disabled = !canReset;
     resetBtn.className = 'btn-tree-reset' + (canReset ? ' available' : ' disabled');
-    resetBtn.title = canReset ? `Zresetuj wszystkie talenty i odzyskaj wszystkie punkty SP (${calculateTotalSpForLevel(acc.level)} SP)` : 'Wydaj punkty SP na talenty, aby móc zresetować drzewko';
+    resetBtn.title = canReset ? `Zresetuj wszystkie talenty i odzyskaj wydane punkty SP (${acc.spentSp || 0} SP)` : 'Wydaj punkty SP na talenty, aby móc zresetować drzewko';
   }
 
   // Aktualizacja zakładek (dashboard 4 gałęzi)
@@ -5224,6 +5235,8 @@ let hitStopFrames = 0;
 let floatingTexts = [];
 let rallyHits = 0;
 let rallyRewarded = false;
+let matchRallyAwarded = {}; // nagrody za wymiany: każda tylko raz na mecz
+let lastUpAwardAt = 0;
 
 const BASE_H_1V1 = 86;
 const BASE_H_2V2 = 68;
@@ -6006,11 +6019,6 @@ function addFloatingText(x, y, text, color = '#00f0ff') {
   });
   if (floatingTexts.length > 25) floatingTexts.shift();
 }
-
-// Bezpieczne atrapy po dawnym systemie ulepszeń (dla wstecznej zgodności)
-function updateStatDisplay() {}
-function upgradeStat(type) {}
-function getUpgradeCost() { return 0; }
 
 function enforceTeamPaddleConstraints() {
   for (let i = 0; i < paddles.length; i++) {
@@ -6854,14 +6862,17 @@ function handleHostIncomingData(remotePeerId, d) {
   }
 
   if (d.t === 'serve') {
+    // Serwis może wywołać tylko gracz z drużyny serwującej (wcześniej każdy mógł wymusić serwis rywala)
     if (isServing) {
-      executeServe(!!d.manual);
+      const senderPad = paddles[getPaddleIdByPeerId(remotePeerId)];
+      const srvPad = paddles[servingPaddleId];
+      if (senderPad && srvPad && senderPad.team === srvPad.team) executeServe(!!d.manual);
     }
     return;
   }
 
   if (d.t === 'hello') {
-    cl.nick = (d.name || 'GRACZ').slice(0, 12);
+    cl.nick = String(typeof d.name === 'string' && d.name ? d.name : 'GRACZ').slice(0, 12);
     if (!is2v2) {
       if (connectedOpponentPeerId && connectedOpponentPeerId !== remotePeerId) {
         if (cl.ctrlConn && cl.ctrlConn.open) {
@@ -6909,6 +6920,7 @@ function handleHostIncomingData(remotePeerId, d) {
   }
 
   if (d.t === 'rematch') {
+    if (!matchOver) return; // rewanż możliwy tylko po zakończeniu meczu (wcześniej gracz przegrywający mógł zresetować wynik)
     broadcastReliable({ t: 'rematch' }, remotePeerId);
     resetMatch();
     return;
@@ -6922,14 +6934,18 @@ function handleHostIncomingData(remotePeerId, d) {
     const pid = getPaddleIdByPeerId(remotePeerId);
     const p = paddles[pid];
     if (p && !p.isLocal && !p.isBot) {
-      p.targetY = d.py;
-      p.targetVy = d.pvy;
-      p.vy = d.pvy;
-      p.stamina = d.stam;
-      p.smashCharge = d.smashCharge;
+      // Walidacja pakietu: odrzucamy NaN/Infinity i wartości spoza zakresu
+      const num = (v, lo, hi, def) => { v = Number(v); return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : def; };
+      const py = num(d.py, 0, H, H / 2);
+      const pvy = num(d.pvy, -40, 40, 0);
+      p.targetY = py;
+      p.targetVy = pvy;
+      p.vy = pvy;
+      p.stamina = num(d.stam, 0, p.maxStamina || 100, 0);
+      p.smashCharge = num(d.smashCharge, 0, 40, 0);
       p.isRightMouseDown = !!d.rmb;
-      p.targetMouseY = d.targetY;
-      recordClientHistory(cl, performance.now(), d.py, d.pvy);
+      p.targetMouseY = num(d.targetY, 0, H, py);
+      recordClientHistory(cl, performance.now(), py, pvy);
     }
   }
 }
@@ -7017,6 +7033,9 @@ function handleGuestIncomingData(d) {
   }
 
   if (d.t === 'upAward') {
+    const nowTs = Date.now();
+    if (nowTs - lastUpAwardAt < 20000) return; // limit: bonus XP nie częściej niż co 20 s
+    lastUpAwardAt = nowTs;
     const myPaddle = getLocalPaddle();
     if (!myPaddle) return;
     const granted = (d.padId === myPaddle.id || (!is2v2 && d.team === myPaddle.team));
@@ -7145,6 +7164,7 @@ function sendFX(payload) {
    8. START MECZU I RESET
    ========================================== */
 function startGame(slotsData = null) {
+  matchRallyAwarded = {};
   document.getElementById('menu').style.display = 'none';
   document.getElementById('bgCanvas').style.display = 'none';
   document.getElementById('gameWrapper').style.display = 'flex';
@@ -7318,6 +7338,7 @@ function requestRematch() {
 }
 
 function resetMatch() {
+  matchRallyAwarded = {};
   teamScores[1] = 0;
   teamScores[2] = 0;
   for (const p of paddles) {
@@ -8212,14 +8233,8 @@ function update() {
             }
           }
 
-          if (wallScore >= 200 && wallScore % 100 === 0) {
-            showBanner(`🔥 ${wallScore} ODBIĆ! +15 XP!`, '#f5b041', 85);
-            SFX.play('upgrade');
-          } else if (wallScore === 140) {
-            showBanner(`🧱 140 ODBIĆ! +2 XP [MAX 20 XP]`, '#00f0ff', 75);
-            SFX.play('upgrade');
-          } else if (wallScore < 140 && wallScore % 20 === 0 && wallScore > 0) {
-            showBanner(`🧱 ${wallScore} ODBIĆ! +3 XP`, '#00f0ff', 75);
+          if (wallScore % 20 === 0) {
+            showBanner(`🧱 ${wallScore} ODBIĆ!`, '#00f0ff', 75);
             SFX.play('upgrade');
           } else {
             SFX.play('hit');
@@ -8492,16 +8507,19 @@ function handlePaddleHit(paddle, dir) {
   BALL.x = dir === 1 ? paddle.x + paddle.w + BALL.r : paddle.x - BALL.r;
   rallyHits++;
 
-  if (rallyHits === 10 && !rallyRewarded) {
+  if (rallyHits === 10 && !rallyRewarded && !matchRallyAwarded.r10) {
     rallyRewarded = true;
+    matchRallyAwarded.r10 = true;
     grantExp(10, 'WYMIANA x10');
     addFloatingText(W / 2, H / 2 - 25, '🔥 WYMIANA x10! +10 XP', '#f5b041');
     SFX.play('upgrade');
-  } else if (rallyHits === 20) {
+  } else if (rallyHits === 20 && !matchRallyAwarded.r20) {
+    matchRallyAwarded.r20 = true;
     grantExp(25, 'WYMIANA x20');
     addFloatingText(W / 2, H / 2 - 25, '⚡ MEGA WYMIANA x20! +25 XP', '#00ff88');
     SFX.play('upgrade');
-  } else if (rallyHits === 40) {
+  } else if (rallyHits === 40 && !matchRallyAwarded.r40) {
+    matchRallyAwarded.r40 = true;
     const acc = getCurrentAccount();
     if (acc) {
       acc.sp = (acc.sp || 0) + 1;
