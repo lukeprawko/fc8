@@ -1090,7 +1090,7 @@
         <img src="assets/logo_full.png" alt="NOVA ARCADE" class="brand-full-logo">
       </div>
       <div class="brand-sub">
-        <i></i><span id="headerLiveStatus">System Online • 3 Gotowe Gry</span>
+        <i></i><span id="headerLiveStatus">System Online • 4 Gotowe Gry</span>
       </div>
     </a>
 
@@ -1300,7 +1300,7 @@ const ICONS = {
 };
 
 /* ==========================================================================
-   BAZA DANYCH GIER I INICJALIZACJA (Z NOWYMI OKŁADKAMI WYSOKIEJ ROZDZIELCZOŚCI)
+   BAZA DANYCH GIER I INICJALIZACJA
    ========================================================================== */
 const DEFAULT_GAMES = [
   {
@@ -1337,6 +1337,17 @@ const DEFAULT_GAMES = [
     players: '1 - 4 Graczy'
   },
   {
+    title: 'CS:GO',
+    url: 'https://csgame.sorpio.pl',
+    status: 'ready',
+    desc: 'Taktyczna gra akcji FPS z dynamicznymi pojedynkami drużynowymi i precyzyjnym strzelaniem.',
+    tags: ['FPS', 'Akcja', 'Multiplayer'],
+    color: '#3b82f6',
+    image: 'assets/cover_cs.jpg',
+    badge: 'Online',
+    players: 'Wieloosobowa'
+  },
+  {
     title: 'Astro Strike',
     url: 'astrostrike.html',
     status: 'wip',
@@ -1370,33 +1381,21 @@ let GAMES = Array.isArray(storedGames) && storedGames.length ? storedGames : DEF
 // Filtruj przestarzałe linki
 GAMES = GAMES.filter(g => g && g.url !== 'cyberpong.html');
 
-// Zaktualizuj ścieżki okładek dla 3 głównych gier jeśli brakowało obrazka w localStorage
+// Zaktualizuj ścieżki okładek dla głównych gier jeśli brakowało obrazka w localStorage
 GAMES.forEach(g => {
   if (g.url === 'pingpong.html') g.image = 'assets/cover_pong.jpg';
   if (g.url === 'fc28.html') g.image = 'assets/cover_fc28.jpg';
   if (g.url === 'kaczki.html') g.image = 'assets/cover_ducks.jpg';
 });
 
+// Zapewnij obecność nowej gry CS:GO na liście
+if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl'))) {
+  GAMES.splice(3, 0, DEFAULT_GAMES[3]);
+}
+
 // Zapewnij kolejność bazowych gier
 if (!GAMES.some(g => g && g.url === 'pingpong.html')) {
   GAMES.unshift(DEFAULT_GAMES[0]);
-}
-const fcIndex = GAMES.findIndex(g => g && (g.title === 'FC 28' || g.url === 'fc28.html'));
-if (fcIndex === -1) {
-  if (GAMES.length >= 2) GAMES.splice(1, 0, DEFAULT_GAMES[1]);
-  else GAMES.push(DEFAULT_GAMES[1]);
-} else if (fcIndex !== 1) {
-  const [fcGame] = GAMES.splice(fcIndex, 1);
-  GAMES.splice(1, 0, fcGame);
-}
-
-const ducksIndex = GAMES.findIndex(g => g && (g.title === 'Kaczki' || g.url === 'kaczki.html'));
-if (ducksIndex === -1) {
-  if (GAMES.length >= 2) GAMES.splice(2, 0, DEFAULT_GAMES[2]);
-  else GAMES.push(DEFAULT_GAMES[2]);
-} else if (ducksIndex !== 2) {
-  const [ducksGame] = GAMES.splice(ducksIndex, 1);
-  GAMES.splice(2, 0, ducksGame);
 }
 
 function saveGames() {
