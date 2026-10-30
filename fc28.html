@@ -1741,16 +1741,27 @@ function getCardById(id) {
 }
 
 function saveClubData(syncCloud = true) {
-  try { localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData)); } catch (e) {}
-  updateMenuClubUI();
+  if (!clubData.updatedAt) clubData.updatedAt = Date.now();
+  try {
+    localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData));
+    localStorage.setItem('cyberfc28_backup_club', JSON.stringify(clubData));
+  } catch (e) {
+    console.warn('saveClubData localStorage error:', e);
+  }
+  try {
+    updateMenuClubUI();
+  } catch (e) {
+    console.warn('updateMenuClubUI error in saveClubData:', e);
+  }
   if (syncCloud) {
+    if (typeof fcSaveCloudNow === 'function') fcSaveCloudNow();
     if (typeof fcScheduleCloudSave === 'function') fcScheduleCloudSave();
   }
 }
 
 function loadClubData() {
   try {
-    const raw = localStorage.getItem(CLUB_STORAGE_KEY);
+    const raw = localStorage.getItem(CLUB_STORAGE_KEY) || localStorage.getItem('cyberfc28_backup_club');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
@@ -1769,7 +1780,8 @@ function loadClubData() {
           nick: (typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '') : (clubData.nick || 'GRACZ'),
           coins: Number.isFinite(parsed.coins) ? Math.max(0, Math.min(10000000, Math.floor(parsed.coins))) : 500,
           owned,
-          lineup
+          lineup,
+          updatedAt: Number(parsed.updatedAt) || Date.now()
         };
       }
     }
@@ -1778,7 +1790,11 @@ function loadClubData() {
   }
   const nickInput = document.getElementById('nickInput');
   if (nickInput && clubData.nick) nickInput.value = clubData.nick;
-  updateMenuClubUI();
+  try {
+    updateMenuClubUI();
+  } catch (e) {
+    console.warn('updateMenuClubUI error in loadClubData:', e);
+  }
 }
 
 function updateMenuClubUI() {
@@ -1798,7 +1814,9 @@ function updateMenuClubUI() {
 
   let html = `<div class="squad-strip-label">TWÓJ SKŁAD<br><span style="color:var(--gold); font-size:13px;">OVR ${avgOvr}</span></div>`;
   for (const r of roles) {
-    const card = getCardById(clubData.lineup[r]);
+    const cardId = clubData.lineup?.[r];
+    const defaultId = (r === 'GK' ? 'gk_1' : r === 'DEF' ? 'def_1' : 'fwd_1');
+    const card = getCardById(cardId) || getCardById(defaultId) || { ovr: 75, pac: 75, sho: 75, name: 'PIŁKARZ' };
     const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
     html += `
       <div class="mini-fut-card ${ps ? 'gold-tier' : ''}" onclick="openClubModal('${r}')" title="Kliknij aby zmienić zawodnika (${r})">
@@ -2062,8 +2080,9 @@ function buyCard(cardId) {
   if (clubData.lineup && card.role) {
     clubData.lineup[card.role] = cardId;
   }
+  clubData.updatedAt = Date.now();
   SFX.play('goal');
-  saveClubData();
+  saveClubData(true);
   switchClubTab(activeClubTab);
   applySquadStatsToTeam(blueTeam, clubData.lineup);
 }
@@ -2075,8 +2094,9 @@ function equipCard(cardId) {
   if (clubData.lineup && card.role) {
     clubData.lineup[card.role] = cardId;
   }
+  clubData.updatedAt = Date.now();
   SFX.play('pass');
-  saveClubData();
+  saveClubData(true);
   switchClubTab(activeClubTab);
   applySquadStatsToTeam(blueTeam, clubData.lineup);
 }
@@ -4029,7 +4049,6 @@ class Player {
     this.baseSpeed = role === 'GK' ? 2.65 : (role === 'FWD' ? 3.15 : 3.00);
     this.angle = team === 'blue' ? 0 : Math.PI;
     this.stamina = 100;
-    this.exhaustedTimer = 0; // 5 sekund bez sprintu po całkowitym wyczerpaniu
 
     this.yellowCards = 0;
     this.redCards = 0;
@@ -4132,9 +4151,6 @@ class Player {
   }
 
   triggerTrick(name, type, multiplier) {
-    if (this.stamina <= 0 || this.exhaustedTimer > 0) return;
-    this.stamina = Math.max(0, this.stamina - 12);
-    if (this.stamina <= 0) this.exhaustedTimer = 300;
     this.trickName = name;
     this.trickType = type;
     this.trickMaxTime = 32;
@@ -4348,7 +4364,7 @@ class Player {
 
     if (isHumanControlled && inputSource) {
       let dx = 0, dy = 0;
-      let wantSprint = !!inputSource.keys.Shift && this.exhaustedTimer <= 0 && this.stamina > 0;
+      let wantSprint = !!inputSource.keys.Shift;
 
       // 1. Klawiatura WASD
       if (inputSource.keys.KeyW) dy -= 1;
@@ -4406,7 +4422,6 @@ class Player {
         dy /= len;
 
         let mult = this.speedMultiplier * (this.speedBoostTimer > 0 ? 1.18 : 1);
-        if (this.exhaustedTimer > 0) mult *= 0.48;
         if (this.isShielding) mult *= 0.38; // Zastawka mocno spowalnia ruch (było 0.62)
 
         const hasRapid = this.playstyle === 'rapid_step';
@@ -4416,9 +4431,7 @@ class Player {
           // Statystyka PAC chroni przed szybkim zmęczeniem
           const pacStamDiscount = (this.statPac - 70) * 0.003;
           const relentlessDiscount = this.playstyle === 'relentless' ? 0.12 : (this.playstyle === 'press_proven' ? 0.06 : 0);
-          const oldStamina = this.stamina;
           this.stamina = Math.max(0, this.stamina - Math.max(0.12, (hasRapid ? 0.20 : 0.32) - pacStamDiscount - relentlessDiscount));
-          if (oldStamina > 0 && this.stamina <= 0) this.exhaustedTimer = 300;
 
           if (hasRapid && tickCount % 12 === 0) {
             this.activatePlayStyle('rapid_step');
@@ -4630,7 +4643,7 @@ class Player {
 
       // --- Zwód pod presją ---
       const trickStyle = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
-      if (nd < 105 && this.trickTimer === 0 && this.stamina > 0 && this.exhaustedTimer <= 0 && this.aiDecisionCooldown <= 0 && !(this.aiTrickCd > 0) && Math.random() < cfg.trickChance * (trickStyle ? 3.2 : 1.0)) {
+      if (nd < 105 && this.trickTimer === 0 && this.aiDecisionCooldown <= 0 && !(this.aiTrickCd > 0) && Math.random() < cfg.trickChance * (trickStyle ? 3.2 : 1.0)) {
         this.triggerTrick(trickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', trickStyle ? 'elastico' : 'stepover', trickStyle ? 1.28 : 1.16);
         this.aiDecisionCooldown = Math.max(8, Math.floor(cfg.reactDelay * 0.65));
         this.aiTrickCd = 170;   // zwód ogłusza rywali, więc AI nie może go spamować
@@ -4797,8 +4810,7 @@ class Player {
     const dist = Math.hypot(dx, dy);
     if (dist > 6) {
       let mult = speedFactor * this.speedMultiplier * (this.speedBoostTimer > 0 ? 1.18 : 1);
-      if (this.exhaustedTimer > 0) mult *= 0.48;
-      if (sprint && this.stamina > 0 && this.exhaustedTimer <= 0) {
+      if (sprint && this.stamina > 20) {
         mult *= this.playstyle === 'rapid_step' ? 1.28 : 1.18;
         this.isSprinting = true;
         this.stamina = Math.max(0, this.stamina - Math.max(0.34, 0.52 - ((this.statPac || 75) - 70) * 0.002 - (this.playstyle === 'relentless' ? 0.1 : 0)));
@@ -5717,7 +5729,6 @@ function findTeammateNearAngle(passer, targetAngle, maxDiff) {
 }
 
 function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY = mouse.worldY) {
-  if (setPiece.active && player !== setPiece.taker) { chargeState.cancel(); return; }
   if (isInputLocked()) return;
   if (setPiece.active) endSetPiece();
 
@@ -5741,14 +5752,12 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
 
     const psMult = hasPowerShot ? 1.25 : (player.playstyle === 'aerial_threat' ? 1.06 : 1.0);
     let shotSpeed = (9.8 + ratio * 12.8) * shoScale * psMult;
-    if (player.exhaustedTimer > 0) shotSpeed *= 0.62;
     let shotLift = 1.4 + ratio * 4.4;
 
     // Błąd celności dla słabych kart (rozrzut do 12 stopni przy strzale z biegu):
     const deadBallBonus = player.playstyle === 'dead_ball' ? 0.72 : 1.0;
     const accuracyError = (1 - shoNorm) * 0.24 * deadBallBonus;
     let spreadAngle = (Math.random() - 0.5) * accuracyError * (player.isMoving ? 1.5 : 0.75);
-    if (player.exhaustedTimer > 0) spreadAngle += (Math.random() - 0.5) * 0.42;
     aimAngle += spreadAngle;
 
     ball.kick(player, aimAngle, shotSpeed, shotLift, 16, hasPowerShot, hasFinesse, false);
@@ -5763,7 +5772,6 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     if (hasPinged) player.activatePlayStyle(player.playstyle);
 
     let mate = findTeammateNearAngle(player, aimAngle, (hasIncisive || hasTiki || hasPinged) ? 0.88 : 0.70);
-    if (player.exhaustedTimer > 0) aimAngle += (Math.random() - 0.5) * 0.38;
     if (mate) {
       let leadAngle = Math.atan2(mate.y + mate.vy * 9 - player.y, mate.x + mate.vx * 9 - player.x);
       aimAngle = aimAngle * ((hasIncisive || hasTiki || hasPinged) ? 0.16 : 0.30) + leadAngle * ((hasIncisive || hasTiki || hasPinged) ? 0.84 : 0.70);
@@ -5773,7 +5781,6 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     const passSkill = Math.max(50, Math.min(99, player.statPas || 75));
     const passBoost = hasIncisive ? 1.20 : hasTiki ? 1.08 : hasPinged ? 1.16 : 0.90 + passSkill / 750;
     let passSpeed = (8.5 + ratio * 9.5) * passBoost;
-    if (player.exhaustedTimer > 0) ratio *= 0.62;
     ball.kick(player, aimAngle, passSpeed, 0, 14, false, false, hasIncisive || hasTiki || hasPinged);
     spawnParticles(player.x, player.y, 0, 6, (hasIncisive || hasPinged) ? '#f5b041' : hasTiki ? '#74b9ff' : '#00e676', 2.4, 16, 3);
   } else if (type === 'lobPass') {
@@ -5925,9 +5932,9 @@ function handleRemotePlayerCommand(slotIdx, data) {
       if (team === 'blue') manualOverrideBlue = candidates[0];
       else manualOverrideRed = candidates[0];
     }
-  } else if (data.cmd === 'directTrick' && hasBall && !setPiece.active && player.trickTimer <= 0 && player.stamina > 0 && player.exhaustedTimer <= 0) {
+  } else if (data.cmd === 'directTrick' && hasBall && !setPiece.active && player.trickTimer <= 0) {
     player.triggerTrick(data.trickName || 'ZWÓD', data.trickType || 'feint', data.trickMult || 1.34);
-  } else if (data.cmd === 'trick' && hasBall && !setPiece.active && player.trickTimer <= 0 && player.stamina > 0 && player.exhaustedTimer <= 0) {
+  } else if (data.cmd === 'trick' && hasBall && !setPiece.active && player.trickTimer <= 0) {
     player.triggerTrick('ZWÓD', 'feint', 1.34);
   }
 }
@@ -5955,7 +5962,7 @@ function toggleMouseControl() {
 }
 
 function triggerDirectTrick(player, type, name, mult) {
-  if (isInputLocked() || setPiece.active || !player || ball.owner !== player || player.trickTimer > 0 || player.stamina <= 0 || player.exhaustedTimer > 0) return;
+  if (isInputLocked() || setPiece.active || !player || ball.owner !== player || player.trickTimer > 0) return;
   if (!isHost && !isSinglePlayer) {
     sendReliable({ t: 'cmd', cmd: 'directTrick', trickType: type, trickName: name, trickMult: mult });
   } else {
@@ -6103,6 +6110,14 @@ window.addEventListener('blur', () => {
   mouse.rightDown = false;
   if (chargeState.active) chargeState.cancel();
 }, { passive: true });
+
+// Wymuszenie zapisu przy odświeżeniu lub zamykaniu karty
+window.addEventListener('beforeunload', () => {
+  saveClubData(true);
+});
+window.addEventListener('pagehide', () => {
+  saveClubData(true);
+});
 
 window.addEventListener('keydown', e => {
   if (!gameStarted || matchEnded) return;
@@ -6610,11 +6625,6 @@ function updateFixedStep() {
   tickCount++;
 
   if (gameStarted && !matchEnded) {
-    // Odliczanie zmęczenia: pełne 5 sekund po wyczerpaniu.
-    for (const p of allPlayers) {
-      if (p.exhaustedTimer > 0) p.exhaustedTimer--;
-      if (p.stamina <= 0 && p.exhaustedTimer <= 0 && p.isSprinting) p.exhaustedTimer = 300;
-    }
     chargeState.update();
 
     if (!isHost && !isSinglePlayer) {
@@ -6652,27 +6662,6 @@ function updateFixedStep() {
       }
     } else {
       if (goalCelebrationTimer > 0) goalCelebrationTimer--;
-
-      // Bramkarz automatycznie przejmuje piłkę w polu 5 metrów.
-      if (ball.owner && ball.owner.role !== 'GK') {
-        const carrier = ball.owner;
-        const keeper = allPlayers.find(g => !g.sentOff && g.role === 'GK' && g.team !== carrier.team);
-        if (keeper) {
-          const goalY = WORLD.height / 2;
-          const defendingLeft = keeper.team === 'blue';
-          const goalX = defendingLeft ? WORLD.marginX + 18 : WORLD.width - WORLD.marginX - 18;
-          const inFiveMetreBox = Math.abs(carrier.y - goalY) <= 92 &&
-            (defendingLeft ? carrier.x <= goalX + 112 : carrier.x >= goalX - 112);
-          const keeperDistance = Math.hypot(carrier.x - keeper.x, carrier.y - keeper.y);
-          if (inFiveMetreBox && keeperDistance <= 48) {
-            ball.owner = keeper;
-            ball.lastTouchTeam = keeper.team;
-            ball.vx = 0; ball.vy = 0; ball.vz = 0; ball.z = 0;
-            keeper.stunTimer = 0;
-            showTempBanner('🧤 BRAMKARZ PRZEJMUJE PIŁKĘ!', 'Pole bramkowe — piłka pod kontrolą bramkarza.', keeper.team === 'blue' ? '#00f0ff' : '#ff0055', 36);
-          }
-        }
-      }
 
       const hostInputSource = {
         keys: {
@@ -6743,8 +6732,7 @@ function updateFixedStep() {
               const dist = Math.hypot(dx, dy);
               const minDist = p1.radius + p2.radius;
               const protectedKeeper = (ball.owner === p1 && p1.role === 'GK') || (ball.owner === p2 && p2.role === 'GK');
-              const protectedSetPieceTaker = setPiece.active && (p1 === setPiece.taker || p2 === setPiece.taker);
-              if (protectedKeeper || protectedSetPieceTaker || dist >= minDist || dist < 0.01) continue;
+              if (protectedKeeper || dist >= minDist || dist < 0.01) continue;
               // Cięższy (silniejszy) zawodnik jest przesuwany mniej; wślizg/zastawka dodają wagi.
               const m1 = Math.max(0.6, 1 + ((p1.strength || 75) - 75) * 0.012 + (p1.isShielding ? 0.35 : 0) + (p1.isSliding ? 0.25 : 0));
               const m2 = Math.max(0.6, 1 + ((p2.strength || 75) - 75) * 0.012 + (p2.isShielding ? 0.35 : 0) + (p2.isSliding ? 0.25 : 0));
@@ -6755,21 +6743,6 @@ function updateFixedStep() {
               p2.y -= ny * ov * (m1 / (m1 + m2));
             }
           }
-          // Stały fragment: wykonujący jest chroniony, a pozostali gracze nie mogą podejść bliżej niż 180 px.
-          if (setPiece.active && setPiece.taker && !setPiece.taker.sentOff) {
-            const taker=setPiece.taker;
-            for (const p of allPlayers) {
-              if (p.sentOff || p===taker) continue;
-              const dx=p.x-taker.x, dy=p.y-taker.y, d=Math.hypot(dx,dy);
-              if (d < 180) {
-                const a=d>0.01?Math.atan2(dy,dx):Math.atan2(p.y-WORLD.height/2,p.x-WORLD.width/2);
-                p.x=taker.x+Math.cos(a)*180;
-                p.y=taker.y+Math.sin(a)*180;
-                p.vx=0; p.vy=0;
-              }
-            }
-          }
-
           // Strefa bramkarza: rywale nie mogą zastawiać wybicia z rąk bramkarza (i tak nie mogą mu odebrać piłki)
           if (ball.owner && ball.owner.role === 'GK') {
             const g = ball.owner;
@@ -6917,95 +6890,215 @@ function fcUpdateAuthUi(){
   if(btn)btn.textContent=fcCurrentUser?'👤 MOJE KONTO':'👤 KONTO / LOGOWANIE';
   if(logout)logout.style.display=fcCurrentUser?'block':'none';
 }
-function fcDefaultClub(nick){return {nick:String(nick||'GRACZ').slice(0,12),coins:500,owned:['gk_1','def_1','fwd_1'],lineup:{GK:'gk_1',DEF:'def_1',FWD:'fwd_1'}};}
-function fcApplyCloudClub(data,nick){
-  if(!data||typeof data!=='object')return false;
-  const validIds=new Set(PLAYERS_DB.map(c=>c.id));
-  // Zalogowane konto jest źródłem prawdy. Nie łączymy danych z localStorage,
-  // bo mogą pochodzić z innego konta albo z trybu gościa.
-  const cloudOwned=Array.isArray(data.owned)?data.owned.filter(id=>validIds.has(id)):[];
-  const accountOwned=Array.from(new Set(cloudOwned));
-  ['gk_1','def_1','fwd_1'].forEach(id=>{if(!accountOwned.includes(id))accountOwned.push(id)});
+function fcDefaultClub(nick){return {nick:String(nick||'GRACZ').slice(0,12),coins:500,owned:['gk_1','def_1','fwd_1'],lineup:{GK:'gk_1',DEF:'def_1',FWD:'fwd_1'},updatedAt:Date.now()};}
 
-  const lineup={GK:'gk_1',DEF:'def_1',FWD:'fwd_1'};
-  ['GK','DEF','FWD'].forEach(role=>{
-    const candidateId = data.lineup?.[role];
-    const item=PLAYERS_DB.find(c=>c.id===candidateId&&c.role===role);
-    if(item&&accountOwned.includes(item.id))lineup[role]=item.id;
-  });
+function fcApplyCloudClub(cloudData, nick) {
+  if (!cloudData || typeof cloudData !== 'object') return false;
 
-  const accountCoins = Number.isFinite(Number(data.coins)) ? Math.max(0, Math.min(10000000, Math.floor(Number(data.coins)))) : 500;
-  clubData={nick:String(nick||data.nick||'GRACZ').slice(0,12).replace(/[<>&"']/g, ''),coins:accountCoins,owned:accountOwned,lineup};
-  fcApplyingCloud=true; saveClubData(false); fcApplyingCloud=false;
-  const input=document.getElementById('nickInput');if(input)input.value=clubData.nick;
-  if(typeof blueTeam!=='undefined')applySquadStatsToTeam(blueTeam,clubData.lineup);
-  updateMenuClubUI(); return true;
+  const validIds = new Set(PLAYERS_DB.map(c => c.id));
+  const cloudOwned = Array.isArray(cloudData.owned) ? cloudData.owned.filter(id => validIds.has(id)) : [];
+  const localOwned = Array.isArray(clubData?.owned) ? clubData.owned.filter(id => validIds.has(id)) : [];
+  // KARTY: ZAWSZE suma zbiorów. Karta zakupiona lokalnie lub w chmurze NIGDY nie znika!
+  const mergedOwned = Array.from(new Set([...cloudOwned, ...localOwned, 'gk_1', 'def_1', 'fwd_1']));
+
+  const localUp = Number(clubData?.updatedAt) || 0;
+  const cloudUp = Number(cloudData.updatedAt) || 0;
+
+  const localHasNonStarter = ['GK', 'DEF', 'FWD'].some(r => clubData?.lineup?.[r] && !['gk_1', 'def_1', 'fwd_1'].includes(clubData.lineup[r]));
+  const cloudHasNonStarter = ['GK', 'DEF', 'FWD'].some(r => cloudData?.lineup?.[r] && !['gk_1', 'def_1', 'fwd_1'].includes(cloudData.lineup[r]));
+
+  // Local-First: jeśli stan lokalny był zmieniony później LUB zawiera zakupionego gracza podczas gdy chmura ma tylko starter:
+  const preferLocal = (localUp >= cloudUp && localUp > 0) || (localHasNonStarter && !cloudHasNonStarter);
+
+  let resolvedCoins;
+  let resolvedLineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
+
+  if (preferLocal) {
+    resolvedCoins = Number.isFinite(Number(clubData?.coins)) ? Math.max(0, Math.min(10000000, Math.floor(Number(clubData.coins)))) : 500;
+    ['GK', 'DEF', 'FWD'].forEach(role => {
+      const localId = clubData?.lineup?.[role];
+      const cloudId = cloudData?.lineup?.[role];
+      const candidate = (localId && mergedOwned.includes(localId)) ? localId : (cloudId && mergedOwned.includes(cloudId) ? cloudId : (role === 'GK' ? 'gk_1' : role === 'DEF' ? 'def_1' : 'fwd_1'));
+      resolvedLineup[role] = candidate;
+    });
+  } else {
+    resolvedCoins = Number.isFinite(Number(cloudData.coins)) ? Math.max(0, Math.min(10000000, Math.floor(Number(cloudData.coins)))) : (Number(clubData?.coins) || 500);
+    ['GK', 'DEF', 'FWD'].forEach(role => {
+      const cloudId = cloudData?.lineup?.[role];
+      const localId = clubData?.lineup?.[role];
+      const candidate = (cloudId && mergedOwned.includes(cloudId)) ? cloudId : (localId && mergedOwned.includes(localId) ? localId : (role === 'GK' ? 'gk_1' : role === 'DEF' ? 'def_1' : 'fwd_1'));
+      resolvedLineup[role] = candidate;
+    });
+  }
+
+  const resolvedNick = String(nick || cloudData.nick || clubData?.nick || 'GRACZ').slice(0, 12).replace(/[<>&"']/g, '');
+  const resolvedUpdatedAt = Math.max(localUp, cloudUp, Date.now());
+
+  clubData = {
+    nick: resolvedNick,
+    coins: resolvedCoins,
+    owned: mergedOwned,
+    lineup: resolvedLineup,
+    updatedAt: resolvedUpdatedAt
+  };
+
+  fcApplyingCloud = true;
+  saveClubData(false);
+  fcApplyingCloud = false;
+
+  // Jeśli profil lokalny był nowszy, natychmiast zaktualizuj chmurę:
+  if (preferLocal || localOwned.length > cloudOwned.length) {
+    fcSaveCloudNow();
+  }
+
+  const input = document.getElementById('nickInput');
+  if (input) input.value = clubData.nick;
+  if (typeof blueTeam !== 'undefined') applySquadStatsToTeam(blueTeam, clubData.lineup);
+  try { updateMenuClubUI(); } catch (e) {}
+  return true;
 }
-async function fcSaveCloudNow(){
-  if(!fcCurrentUser||!fcDb||!fcCloudReady||fcApplyingCloud)return;
-  try{
-    const payload={nick:String(clubData.nick||'GRACZ').slice(0,12),coins:Math.max(0,Math.floor(Number(clubData.coins)||0)),owned:Array.isArray(clubData.owned)?clubData.owned:[],lineup:clubData.lineup,updatedAt:Date.now()};
-    // Ten sam dokument players/{uid} co w PingPong; zapisujemy tylko pole gameData.fc i nie nadpisujemy profilu.
-    await fcDb.collection('players').doc(fcCurrentUser.uid).set({gameData:{fc:payload}}, {merge:true});
-  }catch(err){console.warn('FC28 cloud save error:',err);fcSetAuthStatus('Nie udało się zapisać w chmurze: '+(err.message||err));}
+
+async function fcSaveCloudNow() {
+  if (!fcCurrentUser || !fcDb || fcApplyingCloud) return;
+  try {
+    const payload = {
+      nick: String(clubData.nick || 'GRACZ').slice(0, 12),
+      coins: Math.max(0, Math.floor(Number(clubData.coins) || 0)),
+      owned: Array.isArray(clubData.owned) ? clubData.owned : ['gk_1', 'def_1', 'fwd_1'],
+      lineup: clubData.lineup || { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' },
+      updatedAt: Number(clubData.updatedAt) || Date.now()
+    };
+    await fcDb.collection('players').doc(fcCurrentUser.uid).set({ gameData: { fc: payload } }, { merge: true });
+  } catch (err) {
+    console.warn('FC28 cloud save error:', err);
+  }
 }
-function fcScheduleCloudSave(){if(!fcCurrentUser||!fcCloudReady||fcApplyingCloud)return;clearTimeout(fcSaveTimer);fcSaveTimer=setTimeout(fcSaveCloudNow,350);}
-async function fcLogin(){
-  if(!fcAuth){fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.');return;}
-  const nick=document.getElementById('fcAuthNick').value.trim(),pass=document.getElementById('fcAuthPassword').value;
-  if(!nick){fcSetAuthStatus('Wpisz nick.');return;}if(!pass){fcSetAuthStatus('Wpisz hasło.');return;}
+
+function fcScheduleCloudSave() {
+  if (!fcCurrentUser || fcApplyingCloud) return;
+  clearTimeout(fcSaveTimer);
+  fcSaveTimer = setTimeout(fcSaveCloudNow, 200);
+}
+
+async function fcLogin() {
+  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.'); return; }
+  const nick = document.getElementById('fcAuthNick').value.trim(), pass = document.getElementById('fcAuthPassword').value;
+  if (!nick) { fcSetAuthStatus('Wpisz nick.'); return; }
+  if (!pass) { fcSetAuthStatus('Wpisz hasło.'); return; }
   fcSetAuthStatus('Logowanie i pobieranie postępu...');
-  try{await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick),pass);}
-  catch(e){console.error('FC28 login error',e);fcSetAuthStatus(fcFriendlyFirebaseError(e,'logowania'));}
+  try {
+    await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick), pass);
+  } catch (e) {
+    console.error('FC28 login error', e);
+    fcSetAuthStatus(fcFriendlyFirebaseError(e, 'logowania'));
+  }
 }
-async function fcRegister(){
-  if(!fcAuth){fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.');return;}
-  const nick=document.getElementById('fcAuthNick').value.trim(),pass=document.getElementById('fcAuthPassword').value;
-  if(nick.length<3){fcSetAuthStatus('Nick musi mieć co najmniej 3 znaki.');return;}if(pass.length<6){fcSetAuthStatus('Hasło musi mieć co najmniej 6 znaków.');return;}
+
+async function fcRegister() {
+  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.'); return; }
+  const nick = document.getElementById('fcAuthNick').value.trim(), pass = document.getElementById('fcAuthPassword').value;
+  if (nick.length < 3) { fcSetAuthStatus('Nick musi mieć co najmniej 3 znaki.'); return; }
+  if (pass.length < 6) { fcSetAuthStatus('Hasło musi mieć co najmniej 6 znaków.'); return; }
   fcSetAuthStatus('Tworzenie konta...');
-  try{
-    const cred=await fcAuth.createUserWithEmailAndPassword(fcNickToEmail(nick),pass);
-    const initial=fcDefaultClub(nick);
+  try {
+    const cred = await fcAuth.createUserWithEmailAndPassword(fcNickToEmail(nick), pass);
+    clubData.nick = nick;
+    clubData.updatedAt = Date.now();
+    saveClubData(false);
     try {
-      await fcDb.collection('players').doc(cred.user.uid).set({nick:initial.nick,gameData:{fc:initial},updatedAt:Date.now()},{merge:true});
-      fcSetAuthStatus('Konto utworzone. Wczytuję zapis...',true);
-    } catch(dbError) {
-      console.error('FC28 register profile write error',dbError);
-      fcSetAuthStatus('Konto utworzono, ale zapis profilu w Firestore jest zablokowany. Sprawdź reguły bazy players.');
+      await fcDb.collection('players').doc(cred.user.uid).set({
+        nick: nick,
+        gameData: { fc: {
+          nick: clubData.nick,
+          coins: clubData.coins,
+          owned: clubData.owned,
+          lineup: clubData.lineup,
+          updatedAt: clubData.updatedAt
+        } },
+        updatedAt: Date.now()
+      }, { merge: true });
+      fcSetAuthStatus('Konto utworzone. Zapis zsynchronizowany z chmurą!', true);
+    } catch (dbError) {
+      console.error('FC28 register profile write error', dbError);
     }
-  }catch(e){console.error('FC28 register error',e);fcSetAuthStatus(fcFriendlyFirebaseError(e,'rejestracji'));}
+  } catch (e) {
+    console.error('FC28 register error', e);
+    fcSetAuthStatus(fcFriendlyFirebaseError(e, 'rejestracji'));
+  }
 }
-async function fcLogout(){
-  if(!fcAuth)return;
-  try{await fcSaveCloudNow();await fcAuth.signOut();}catch(e){fcSetAuthStatus(e.message||'Błąd wylogowania.');}
+
+async function fcLogout() {
+  if (!fcAuth) return;
+  try {
+    await fcSaveCloudNow();
+    await fcAuth.signOut();
+  } catch (e) {
+    fcSetAuthStatus(e.message || 'Błąd wylogowania.');
+  }
 }
-function fcInitAccounts(){
-  try{if(typeof firebase==='undefined'||!firebase.initializeApp){fcSetAuthStatus('Nie załadowały się biblioteki Firebase. Otwórz stronę z internetem i odśwież.');return;}if(!firebase.apps.length)firebase.initializeApp(FC_FIREBASE_CONFIG);fcAuth=firebase.auth();fcDb=firebase.firestore();}
-  catch(e){console.warn('FC28 Firebase init:',e);fcSetAuthStatus('Nie udało się uruchomić logowania Firebase.');return;}
-  fcAuth.onAuthStateChanged(async user=>{
-    fcCurrentUser=user||null;fcCloudReady=false;fcUpdateAuthUi();
-    if(!user){return;}
-    try{
-      const ref=fcDb.collection('players').doc(user.uid);const snap=await ref.get();
-      if(snap.exists){
-        const profile=snap.data()||{};
-        const saved=profile.gameData&&profile.gameData.fc;
-        if(saved && typeof saved==='object' && Array.isArray(saved.owned) && saved.lineup && Number.isFinite(Number(saved.coins))){
-          fcApplyCloudClub(saved,profile.nick||saved.nick||'GRACZ');
+
+function fcInitAccounts() {
+  try {
+    if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+      return;
+    }
+    if (!firebase.apps.length) firebase.initializeApp(FC_FIREBASE_CONFIG);
+    fcAuth = firebase.auth();
+    fcDb = firebase.firestore();
+  } catch (e) {
+    console.warn('FC28 Firebase init:', e);
+    return;
+  }
+  fcAuth.onAuthStateChanged(async user => {
+    fcCurrentUser = user || null;
+    fcCloudReady = false;
+    fcUpdateAuthUi();
+    if (!user) return;
+    try {
+      const ref = fcDb.collection('players').doc(user.uid);
+      const snap = await ref.get();
+      if (snap.exists) {
+        const profile = snap.data() || {};
+        const saved = profile.gameData && profile.gameData.fc;
+        if (saved && typeof saved === 'object') {
+          fcApplyCloudClub(saved, profile.nick || saved.nick || 'GRACZ');
         } else {
-          // Nie nadpisuj istniejącego dokumentu startowym składem — mógł zawierać
-          // starszy format zapisu, którego nie udało się odczytać.
-          fcCloudReady=false;
-          fcSetAuthStatus('Konto zalogowane, ale nie znaleziono poprawnego zapisu FC w chmurze. Zapis został zablokowany, aby nie skasować danych. Sprawdź players/'+user.uid+' w Firestore.',false);
-          return;
+          // Brak danych FC28 w chmurze -> zachowaj obecny klub gracza i wyślij do bazy:
+          fcCloudReady = true;
+          await ref.set({
+            gameData: { fc: {
+              nick: clubData.nick || 'GRACZ',
+              coins: clubData.coins,
+              owned: clubData.owned,
+              lineup: clubData.lineup,
+              updatedAt: clubData.updatedAt || Date.now()
+            } }
+          }, { merge: true });
         }
-      }else{
-        const fresh=fcDefaultClub(user.displayName||'GRACZ');
-        await ref.set({nick:fresh.nick,gameData:{fc:fresh},updatedAt:Date.now()},{merge:true});
-        fcApplyCloudClub(fresh,fresh.nick);
+      } else {
+        // Nowy dokument gracza -> zachowaj obecny klub gracza i zapisz:
+        fcCloudReady = true;
+        await ref.set({
+          nick: clubData.nick || 'GRACZ',
+          gameData: { fc: {
+            nick: clubData.nick || 'GRACZ',
+            coins: clubData.coins,
+            owned: clubData.owned,
+            lineup: clubData.lineup,
+            updatedAt: clubData.updatedAt || Date.now()
+          } },
+          updatedAt: Date.now()
+        }, { merge: true });
       }
-      fcCloudReady=true;fcUpdateAuthUi();fcSetAuthStatus('Zalogowano. Monety, zawodnicy i skład zostały wczytane.',true);closeFcAuth();
-    }catch(e){console.error('FC28 profile load:',e);fcSetAuthStatus('Zalogowano, ale Firestore nie udostępnił zapisu. Sprawdź reguły bazy players. '+(e.message||e));}
+      fcCloudReady = true;
+      fcUpdateAuthUi();
+      fcSetAuthStatus('Zalogowano. Monety, zawodnicy i skład są zsynchronizowane.', true);
+      closeFcAuth();
+    } catch (e) {
+      console.warn('FC28 profile load error:', e);
+      fcCloudReady = true;
+      fcSetAuthStatus('Zalogowano lokalnie (chmura w trybie offline)');
+    }
   });
 }
 window.openFcAuth=openFcAuth;window.closeFcAuth=closeFcAuth;window.fcLogin=fcLogin;window.fcRegister=fcRegister;window.fcLogout=fcLogout;
