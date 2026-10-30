@@ -3166,7 +3166,14 @@ const bgCtx = bgCanvas.getContext('2d');
 let gameActive = false;
 let matchOver = false;
 let matchPaused = false;
-let controlMode = 'keyboard';
+const CONTROL_MODE_STORAGE_KEY = 'CYBERPONG_CONTROL_MODE';
+let controlMode = (function() {
+  try {
+    const saved = localStorage.getItem(CONTROL_MODE_STORAGE_KEY);
+    if (saved === 'mouse' || saved === 'keyboard') return saved;
+  } catch (e) {}
+  return 'keyboard';
+})();
 let mouseY = H / 2;
 let isRightMouseDown = false;
 let isLeftMouseDown = false;
@@ -3253,7 +3260,7 @@ if (window.location.hash && window.location.hash.length >= 7) {
 /* ==========================================
    SYSTEM KONT GRACZY & DRZEWKO TALENTÓW
    ========================================== */
-const ACCOUNTS_DB_KEY = 'CYBERPONG_ACCOUNTS_v2';
+const ACCOUNTS_DB_KEY = 'CYBERPONG_ACCOUNTS_v3';
 const CURRENT_USER_KEY = 'CYBERPONG_CURRENT_USER';
 
 const SKILL_TREE_BRANCHES = [
@@ -3550,6 +3557,62 @@ function createDefaultProfile(nick = 'GRACZ') {
 }
 
 /* =========================================================================
+   TRWAŁA LOKALNA BAZA KONT GRACZY (ODPORNA NA WYLOGOWANIE I BRAK CHMURY)
+   ========================================================================= */
+function getLocalAccountsDb() {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_DB_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveLocalAccountsDb(db) {
+  try {
+    localStorage.setItem(ACCOUNTS_DB_KEY, JSON.stringify(db));
+  } catch (e) {}
+}
+
+function saveAccountToLocalDb(prof) {
+  if (!prof || !prof.nick) return;
+  try {
+    const db = getLocalAccountsDb();
+    const cleanNick = prof.nick.trim();
+    const copy = JSON.parse(JSON.stringify(prof));
+    if (cleanNick && cleanNick !== 'GRACZ') {
+      db['nick_' + cleanNick.toLowerCase()] = copy;
+    }
+    if (prof.ownerUid) {
+      db['uid_' + prof.ownerUid] = copy;
+    }
+    saveLocalAccountsDb(db);
+  } catch (e) {
+    console.warn('[Storage] saveAccountToLocalDb error:', e);
+  }
+}
+
+function loadAccountFromLocalDb(nick, uid) {
+  try {
+    const db = getLocalAccountsDb();
+    let found = null;
+    if (uid && db['uid_' + uid]) {
+      found = JSON.parse(JSON.stringify(db['uid_' + uid]));
+    } else if (nick && nick.trim() !== 'GRACZ') {
+      const byNick = db['nick_' + nick.trim().toLowerCase()];
+      if (byNick) found = JSON.parse(JSON.stringify(byNick));
+    }
+    if (found && typeof normalizeTalentEconomy === 'function') {
+      found = normalizeTalentEconomy(found);
+    }
+    return found;
+  } catch (e) {
+    console.warn('[Storage] loadAccountFromLocalDb error:', e);
+  }
+  return null;
+}
+
+/* =========================================================================
    ZABEZPIECZENIE ANTY-CHEAT I SUMA KONTROLNA PROFILU LOKALNEGO (INTEGRITY)
    ========================================================================= */
 const CP_SEC_KEY = 'CYBERPONG_V2_INTEGRITY_SALT_#8892';
@@ -3627,7 +3690,7 @@ function getPlayerProfile() {
 
     if (!prof || typeof prof !== 'object') {
       const oldNick = localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER') || 'GRACZ';
-      prof = createDefaultProfile(oldNick);
+      prof = loadAccountFromLocalDb(oldNick, null) || createDefaultProfile(oldNick);
       prof.resetVersion = RESET_VERSION;
       try {
         localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
@@ -3656,6 +3719,14 @@ function getPlayerProfile() {
         localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
         safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(prof));
       } catch (e) {}
+    }
+
+    // Jeśli profil w aktywnej pamięci ma poziom 1 i brak ulepszeń, sprawdź czy istnieje zapisany profil tego konta z postępem
+    if (prof && prof.nick && prof.nick !== 'GRACZ' && prof.level === 1 && (prof.spentSp || 0) === 0 && (prof.exp || 0) === 0) {
+      const saved = loadAccountFromLocalDb(prof.nick, prof.ownerUid);
+      if (saved && (saved.level > 1 || (saved.spentSp || 0) > 0 || (saved.exp || 0) > 0 || (saved.talents && Object.keys(saved.talents).length > 1))) {
+        prof = saved;
+      }
     }
 
     // Walidacja autentyczności uprawnień administratora:
@@ -3770,6 +3841,11 @@ function savePlayerProfile(prof) {
     }
   } catch (e) {
     console.warn('[Storage] Błąd zapisu lokalnego:', e);
+  }
+
+  // Trwały zapis do bazy kont graczy (per-account)
+  if (prof.nick && prof.nick !== 'GRACZ') {
+    saveAccountToLocalDb(prof);
   }
 
   // Bezpieczna synchronizacja w tle
@@ -3894,6 +3970,11 @@ function toggleAccountAuthView(forceState) {
 }
 
 async function handleFirebaseLogout() {
+  const currentProf = getPlayerProfile();
+  if (currentProf && currentProf.nick && currentProf.nick !== 'GRACZ') {
+    saveAccountToLocalDb(currentProf);
+  }
+
   try {
     if (fbAuth && fbAuth.currentUser) {
       await fbAuth.signOut();
@@ -3910,6 +3991,7 @@ async function handleFirebaseLogout() {
   const guestProf = createDefaultProfile('GRACZ');
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(guestProf));
+    safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(guestProf));
     localStorage.setItem(NICK_STORAGE_KEY, 'GRACZ');
     localStorage.setItem('CYBERPONG_CURRENT_USER', 'GRACZ');
   } catch (e) {}
@@ -3977,9 +4059,17 @@ async function handleFirebaseRegister() {
     const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
     
     // Zapis lokalny ZAWSZE udaje się natychmiast
-    const newProf = createDefaultProfile(nick);
+    let newProf = loadAccountFromLocalDb(nick, cred.user.uid);
+    if (!newProf) {
+      newProf = createDefaultProfile(nick);
+    }
+    newProf.nick = nick;
     newProf.ownerUid = cred.user.uid;
     newProf.resetVersion = RESET_VERSION;
+    if (typeof normalizeTalentEconomy === 'function') {
+      newProf = normalizeTalentEconomy(newProf);
+    }
+    saveAccountToLocalDb(newProf);
     savePlayerProfile(newProf);
     applyStatsToLocalPlayer();
     updateAccountUI();
@@ -4052,17 +4142,32 @@ async function handleFirebaseLogin() {
     const email = nickToEmail(nick);
     const cred = await fbAuth.signInWithEmailAndPassword(email, pass);
 
-    // Załaduj lub zaktualizuj profil lokalny
-    let localProf = getPlayerProfile();
-    if (!localProf || localProf.nick !== nick || (localProf.ownerUid && localProf.ownerUid !== cred.user.uid)) {
+    // Załaduj zapisany profil tego konta z bazy kont (po UID lub nicku)
+    let localProf = loadAccountFromLocalDb(nick, cred.user.uid);
+    if (!localProf) {
+      const cur = getPlayerProfile();
+      if (cur && (cur.nick.toLowerCase() === nick.toLowerCase() || (cur.ownerUid && cur.ownerUid === cred.user.uid))) {
+        localProf = cur;
+      }
+    }
+
+    if (!localProf) {
       localProf = createDefaultProfile(nick);
       localProf.ownerUid = cred.user.uid;
       localProf.resetVersion = RESET_VERSION;
-      savePlayerProfile(localProf);
     } else {
+      localProf.nick = nick;
       localProf.ownerUid = cred.user.uid;
-      savePlayerProfile(localProf);
+      if (!localProf.resetVersion || localProf.resetVersion < RESET_VERSION) {
+        localProf.resetVersion = RESET_VERSION;
+      }
+      if (typeof normalizeTalentEconomy === 'function') {
+        localProf = normalizeTalentEconomy(localProf);
+      }
     }
+
+    saveAccountToLocalDb(localProf);
+    savePlayerProfile(localProf);
 
     // Bezpieczna próba odczytu z chmury (w tle)
     if (fbDb) {
@@ -4070,6 +4175,8 @@ async function handleFirebaseLogin() {
         const snap = await fbDb.collection('players').doc(cred.user.uid).get();
         if (snap && snap.exists) {
           applyCloudProfileToLocal(snap.data(), cred.user.uid);
+        } else {
+          syncProfileToCloud(localProf);
         }
       } catch (fsErr) {
         console.warn('☁️ [Firestore] Odczyt w tle pominięty:', fsErr ? fsErr.message : fsErr);
@@ -4081,13 +4188,13 @@ async function handleFirebaseLogin() {
 
     if (fbFeedback) {
       fbFeedback.style.color = '#00ff88';
-      fbFeedback.textContent = '✓ Zalogowano i zsynchronizowano!';
+      fbFeedback.textContent = '✓ Zalogowano i wczytano ulepszenia!';
     }
     setTimeout(() => {
       toggleAccountAuthView(false);
     }, 700);
     SFX.play('upgrade');
-    showBanner(`☁️ ZALOGOWANO: ${nick}!`, '#00f0ff', 60);
+    showBanner(`☁️ ZALOGOWANO: ${nick}! (LVL ${localProf.level || 1})`, '#00f0ff', 60);
   } catch (err) {
     console.error('Firebase Login Error:', err);
     if (fbFeedback) {
@@ -4108,9 +4215,14 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   let localProf = localRaw ? localRaw.prof : null;
   let forceCloudWrite = false;
 
-  // Izolacja kont: profil innego gracza nie może wpływać na to konto
-  if (localProf && localProf.ownerUid && uid && localProf.ownerUid !== uid) {
-    localProf = null;
+  // Izolacja kont: jeśli w pamięci aktywnej jest profil gościa lub innego gracza, wczytaj zapisany profil tego konta
+  if (!localProf || localProf.nick === 'GRACZ' || (localProf.ownerUid && uid && localProf.ownerUid !== uid)) {
+    const saved = loadAccountFromLocalDb(cloudProf.nick, uid);
+    if (saved) {
+      localProf = saved;
+    } else if (localProf && localProf.ownerUid && uid && localProf.ownerUid !== uid) {
+      localProf = null;
+    }
   }
 
   // Wersja resetu chmury: jeśli starsza niż RESET_VERSION, ignorujemy stare ulepszenia z chmury
@@ -4143,9 +4255,9 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   }
 
   // Local-First: jeśli snapshot przyszedł z chmury, ale profil lokalny jest nowszy, zachowaj lokalny
-  const localUp = localProf ? (Number(localProf.updatedAt) || 0) : 0;
+  const localUp = (localProf && localProf.nick !== 'GRACZ') ? (Number(localProf.updatedAt) || 0) : 0;
   const cloudUp = Number(cloudProf.updatedAt) || 0;
-  if (fromSnapshot && localProf && localUp > cloudUp) {
+  if (fromSnapshot && localProf && localProf.nick !== 'GRACZ' && localUp > cloudUp) {
     return;
   }
 
@@ -4240,6 +4352,9 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
       localStorage.setItem(NICK_STORAGE_KEY, merged.nick);
       localStorage.setItem('CYBERPONG_CURRENT_USER', merged.nick);
     }
+    if (merged.nick && merged.nick !== 'GRACZ') {
+      saveAccountToLocalDb(merged);
+    }
   } catch (e) {}
 
   if (forceCloudWrite || !fromSnapshot) {
@@ -4271,6 +4386,18 @@ function initAccountSystem() {
         unsubsDoc = null;
       }
       if (user) {
+        // Upewnij się, że lokalny profil natychmiast odpowiada zalogowanemu użytkownikowi Firebase
+        let activeProf = getPlayerProfile();
+        if (!activeProf || activeProf.nick === 'GRACZ' || (activeProf.ownerUid && activeProf.ownerUid !== user.uid)) {
+          const userNick = user.displayName || localStorage.getItem('CYBERPONG_CURRENT_USER') || localStorage.getItem('CYBERPONG_NICK') || '';
+          let loaded = loadAccountFromLocalDb(userNick, user.uid);
+          if (loaded) {
+            savePlayerProfile(loaded);
+            applyStatsToLocalPlayer();
+            updateAccountUI();
+          }
+        }
+
         if (fbDb) {
           try {
             unsubsDoc = fbDb.collection('players').doc(user.uid).onSnapshot(snap => {
@@ -4278,10 +4405,13 @@ function initAccountSystem() {
                 const cloudData = snap.data();
                 applyCloudProfileToLocal(cloudData, user.uid, true);
               } else if (snap && !snap.exists) {
-                const freshProf = createDefaultProfile(user.displayName || 'GRACZ');
-                freshProf.ownerUid = user.uid;
-                syncProfileToCloud(freshProf);
-                applyCloudProfileToLocal(freshProf, user.uid, true);
+                let existing = loadAccountFromLocalDb(user.displayName || '', user.uid) || getPlayerProfile();
+                if (!existing || existing.nick === 'GRACZ') {
+                  existing = createDefaultProfile(user.displayName || 'GRACZ');
+                  existing.ownerUid = user.uid;
+                  existing.resetVersion = RESET_VERSION;
+                }
+                syncProfileToCloud(existing);
               }
             }, err => {
               console.warn('☁️ [Firestore] Snapshot wyłączony (offline lub brak uprawnień):', err ? err.message : err);
@@ -6093,7 +6223,13 @@ function restartCurrentMatch() {
   }
 }
 function selectControl(mode) {
+  if (mode !== 'mouse' && mode !== 'keyboard') {
+    mode = 'keyboard';
+  }
   controlMode = mode;
+  try {
+    localStorage.setItem(CONTROL_MODE_STORAGE_KEY, mode);
+  } catch (e) {}
   const kbEl = document.getElementById('ctrlKeyboard');
   const msEl = document.getElementById('ctrlMouse');
   if (kbEl) {
@@ -9768,6 +9904,14 @@ document.addEventListener('click', e => {
 
 // Inicjalizacja trwałego systemu kont graczy i drzewka talentów
 initAccountSystem();
+try {
+  selectControl(controlMode);
+} catch (e) {}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    try { selectControl(controlMode); } catch (_) {}
+  });
+}
 
 // ===== TALENT SYNC AFTER LOGIN =====
 const PENDING_TALENT_AUTH_HOOK = true;
