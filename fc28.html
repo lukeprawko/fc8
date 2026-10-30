@@ -1071,21 +1071,23 @@
     border-bottom: none;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    padding: 8px 20px;
+    padding: 6px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   .player-box {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    min-width: 80px;
-    max-width: 220px;
+    min-width: 60px;
+    max-width: 180px;
     flex: 1 1 auto;
-    gap: 4px;
+    gap: 3px;
     overflow: hidden;
   }
 
@@ -1093,19 +1095,19 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
-    min-width: 120px;
+    gap: 6px;
+    min-width: 100px;
     max-width: 320px;
     flex: 1 1 auto;
   }
 
-  .player-box.right { align-items: flex-end; min-width: 80px; flex: 1 1 auto; }
+  .player-box.right { align-items: flex-end; min-width: 60px; flex: 1 1 auto; }
 
   .team-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
-    max-width: 130px;
+    max-width: 95px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1114,9 +1116,9 @@
   .p2-color { color: var(--p2); text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
 
   .stamina-bar-wrap {
-    width: 110px;
+    width: 90px;
     max-width: 100%;
-    height: 6px;
+    height: 5px;
     background: #080b12;
     border-radius: 4px;
     overflow: hidden;
@@ -1127,9 +1129,10 @@
   .center-scoreboard {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
     white-space: nowrap;
+    z-index: 5;
   }
   #hudScore {
     font-family: 'Orbitron', sans-serif;
@@ -1732,7 +1735,8 @@ let clubData = {
   nick: 'GRACZ_1',
   coins: 500,
   owned: ['gk_1', 'def_1', 'fwd_1'],
-  lineup: { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' }
+  lineup: { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' },
+  updatedAt: Date.now()
 };
 
 function getCardById(id) {
@@ -1740,14 +1744,55 @@ function getCardById(id) {
   return PLAYERS_DB.find(c => c.id === id) || null;
 }
 
+function safeReadStorageRaw() {
+  const sources = [];
+  try { const v = localStorage.getItem(CLUB_STORAGE_KEY); if (v) sources.push(v); } catch (e) {}
+  try { const v = localStorage.getItem('cyberfc28_backup_club'); if (v) sources.push(v); } catch (e) {}
+  try { const v = sessionStorage.getItem(CLUB_STORAGE_KEY); if (v) sources.push(v); } catch (e) {}
+  try { const v = sessionStorage.getItem('cyberfc28_backup_club'); if (v) sources.push(v); } catch (e) {}
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)cyberfc28_save=([^;]+)/);
+    if (match && match[1]) sources.push(decodeURIComponent(match[1]));
+  } catch (e) {}
+  if (window.__cyberfc28_memorySave) {
+    try { sources.push(JSON.stringify(window.__cyberfc28_memorySave)); } catch (e) {}
+  }
+
+  let bestParsed = null;
+  for (const raw of sources) {
+    try {
+      const p = JSON.parse(raw);
+      if (!p || typeof p !== 'object') continue;
+      if (!bestParsed) {
+        bestParsed = p;
+        continue;
+      }
+      const pCards = Array.isArray(p.owned) ? p.owned.length : 0;
+      const bCards = Array.isArray(bestParsed.owned) ? bestParsed.owned.length : 0;
+      const pTime = Number(p.updatedAt) || 0;
+      const bTime = Number(bestParsed.updatedAt) || 0;
+      if (pCards > bCards || (pCards === bCards && pTime > bTime)) {
+        bestParsed = p;
+      }
+    } catch (e) {}
+  }
+  return bestParsed;
+}
+
 function saveClubData(syncCloud = true) {
   if (!clubData.updatedAt) clubData.updatedAt = Date.now();
+  window.__cyberfc28_memorySave = clubData;
+  const serialized = JSON.stringify(clubData);
+
+  try { localStorage.setItem(CLUB_STORAGE_KEY, serialized); } catch (e) {}
+  try { localStorage.setItem('cyberfc28_backup_club', serialized); } catch (e) {}
+  try { sessionStorage.setItem(CLUB_STORAGE_KEY, serialized); } catch (e) {}
+  try { sessionStorage.setItem('cyberfc28_backup_club', serialized); } catch (e) {}
   try {
-    localStorage.setItem(CLUB_STORAGE_KEY, JSON.stringify(clubData));
-    localStorage.setItem('cyberfc28_backup_club', JSON.stringify(clubData));
-  } catch (e) {
-    console.warn('saveClubData localStorage error:', e);
-  }
+    const expires = new Date(Date.now() + 365 * 864e5).toUTCString();
+    document.cookie = `cyberfc28_save=${encodeURIComponent(serialized)}; expires=${expires}; path=/; SameSite=Lax`;
+  } catch (e) {}
+
   try {
     updateMenuClubUI();
   } catch (e) {
@@ -1761,29 +1806,26 @@ function saveClubData(syncCloud = true) {
 
 function loadClubData() {
   try {
-    const raw = localStorage.getItem(CLUB_STORAGE_KEY) || localStorage.getItem('cyberfc28_backup_club');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        const validIds = new Set(PLAYERS_DB.map(c => c.id));
-        const owned = Array.isArray(parsed.owned) ? parsed.owned.filter(id => validIds.has(id)) : [];
-        ['gk_1', 'def_1', 'fwd_1'].forEach(id => { if (!owned.includes(id)) owned.push(id); });
+    const parsed = safeReadStorageRaw();
+    if (parsed && typeof parsed === 'object') {
+      const validIds = new Set(PLAYERS_DB.map(c => c.id));
+      const owned = Array.isArray(parsed.owned) ? parsed.owned.filter(id => validIds.has(id)) : [];
+      ['gk_1', 'def_1', 'fwd_1'].forEach(id => { if (!owned.includes(id)) owned.push(id); });
 
-        const lineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
-        ['GK', 'DEF', 'FWD'].forEach(role => {
-          const cardId = parsed.lineup?.[role];
-          const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
-          if (card && owned.includes(card.id)) lineup[role] = card.id;
-        });
+      const lineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
+      ['GK', 'DEF', 'FWD'].forEach(role => {
+        const cardId = parsed.lineup?.[role];
+        const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
+        if (card && owned.includes(card.id)) lineup[role] = card.id;
+      });
 
-        clubData = {
-          nick: (typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '') : (clubData.nick || 'GRACZ'),
-          coins: Number.isFinite(parsed.coins) ? Math.max(0, Math.min(10000000, Math.floor(parsed.coins))) : 500,
-          owned,
-          lineup,
-          updatedAt: Number(parsed.updatedAt) || Date.now()
-        };
-      }
+      clubData = {
+        nick: (typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '') : (clubData.nick || 'GRACZ'),
+        coins: Number.isFinite(parsed.coins) ? Math.max(0, Math.min(10000000, Math.floor(parsed.coins))) : 500,
+        owned,
+        lineup,
+        updatedAt: Number(parsed.updatedAt) || Date.now()
+      };
     }
   } catch (e) {
     console.warn('loadClubData error:', e);
@@ -1796,6 +1838,7 @@ function loadClubData() {
     console.warn('updateMenuClubUI error in loadClubData:', e);
   }
 }
+loadClubData();
 
 function updateMenuClubUI() {
   const safeCoins = Number.isFinite(clubData?.coins) ? clubData.coins : 0;
@@ -2649,7 +2692,11 @@ function createRoom() {
       hostClients[remotePeerId].conn = c;
     }
 
+    let hasOpened = false;
     const onChannelOpen = () => {
+      if (hasOpened) return;
+      hasOpened = true;
+      try { c.open = true; } catch (e) {}
       if (!is2v2) {
         oppName = hostClients[remotePeerId].nick || 'GRACZ_2';
         blueNick = myName;
@@ -2676,8 +2723,8 @@ function createRoom() {
       }
     };
 
+    c.on('open', onChannelOpen);
     if (isConnReady(c)) onChannelOpen();
-    else c.on('open', onChannelOpen);
 
     c.on('data', d => handleHostIncomingData(remotePeerId, d));
     c.on('close', () => handleClientDisconnectOnHost(remotePeerId));
@@ -2716,7 +2763,11 @@ function joinRoom() {
     conn = peer.connect(targetPeerId, { reliable: true, serialization: 'json' });
     fastConn = conn;
 
-    conn.on('open', () => {
+    let guestOpened = false;
+    const onGuestOpen = () => {
+      if (guestOpened) return;
+      guestOpened = true;
+      try { conn.open = true; } catch (e) {}
       setStatus('POŁĄCZONO Z HOSTEM!');
       const sendHello = () => {
         if (!gameStarted && !matchEnded && isConnReady(conn)) {
@@ -2724,15 +2775,18 @@ function joinRoom() {
         }
       };
       sendHello();
-      // Ponawiaj wysyłanie 'hello' co 600ms, dopóki host nie uruchomi meczu
+      // Ponawiaj wysyłanie 'hello' co 500ms, dopóki host nie uruchomi meczu
       const helloRetry = setInterval(() => {
         if (gameStarted || matchEnded || !conn || !isConnReady(conn)) {
           clearInterval(helloRetry);
           return;
         }
         sendHello();
-      }, 600);
-    });
+      }, 500);
+    };
+
+    conn.on('open', onGuestOpen);
+    if (isConnReady(conn)) onGuestOpen();
 
     conn.on('data', handleGuestIncomingData);
     conn.on('close', () => {
@@ -2758,40 +2812,49 @@ function parseIncomingPacket(d) {
   if (typeof d === 'string') {
     try { return JSON.parse(d); } catch (e) { return null; }
   }
+  if (d instanceof ArrayBuffer || ArrayBuffer.isView(d)) {
+    try {
+      const text = new TextDecoder('utf-8').decode(d);
+      return JSON.parse(text);
+    } catch (e) { return null; }
+  }
   return d;
 }
 
 function isConnReady(c) {
   if (!c) return false;
   if (c.open) return true;
-  if (c.dataChannel && c.dataChannel.readyState === 'open') return true;
+  const dc = c.dataChannel || c._dc;
+  if (dc && dc.readyState === 'open') return true;
   return false;
 }
 
 function safeSend(c, payload) {
   if (!c) return false;
+  const isStr = typeof payload === 'string';
+  const strPayload = isStr ? payload : JSON.stringify(payload);
+  const objPayload = isStr ? null : payload;
+
   try {
     if (c.open) {
-      c.send(payload);
-      return true;
-    }
-    if (c.dataChannel && c.dataChannel.readyState === 'open') {
       try {
-        c.send(payload);
+        c.send(objPayload || strPayload);
         return true;
-      } catch (inner) {
-        c.dataChannel.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
-        return true;
+      } catch (err) {
+        try {
+          c.send(strPayload);
+          return true;
+        } catch (err2) {}
       }
     }
-  } catch (e) {
-    try {
-      if (c.dataChannel && c.dataChannel.readyState === 'open') {
-        c.dataChannel.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
+    const dc = c.dataChannel || c._dc;
+    if (dc && dc.readyState === 'open') {
+      try {
+        dc.send(strPayload);
         return true;
-      }
-    } catch (e2) {}
-  }
+      } catch (dcErr) {}
+    }
+  } catch (e) {}
   return false;
 }
 
@@ -6353,6 +6416,11 @@ function applyNetworkSync(st) {
     setPiece.y = st.sp.y;
   } else {
     setPiece.active = false;
+    setPiece.type = null;
+    setPiece.taker = null;
+  }
+  if (matchPhase === 'PLAYING' && setPiece.type === 'KICKOFF') {
+    endSetPiece();
   }
 
   if (st.ref) {
@@ -6362,11 +6430,15 @@ function applyNetworkSync(st) {
     referee.whistleTimer = st.ref.w; referee.cardTimer = st.ref.ct; referee.cardColor = st.ref.cc;
   }
 
-  if (st.ban) {
+  if (st.ban && st.ban.t > 0) {
     goalCelebrationTimer = st.ban.t;
-    bannerText = st.ban.txt;
-    bannerSubText = st.ban.sub;
-    bannerColor = st.ban.col;
+    bannerText = st.ban.txt || '';
+    bannerSubText = st.ban.sub || '';
+    bannerColor = st.ban.col || '#00f0ff';
+  } else if (matchPhase === 'PLAYING') {
+    goalCelebrationTimer = 0;
+    bannerText = '';
+    bannerSubText = '';
   }
 
   if (st.stats) {
@@ -6387,7 +6459,7 @@ function applyNetworkSync(st) {
       if (!p) return;
       p.targetX = ps.x;
       p.targetY = ps.y;
-      if (Math.hypot(p.targetX - p.x, p.targetY - p.y) > 95) {
+      if (Math.hypot(p.targetX - p.x, p.targetY - p.y) > 60) {
         p.x = p.targetX;
         p.y = p.targetY;
       }
@@ -6906,9 +6978,10 @@ function fcApplyCloudClub(cloudData, nick) {
 
   const localHasNonStarter = ['GK', 'DEF', 'FWD'].some(r => clubData?.lineup?.[r] && !['gk_1', 'def_1', 'fwd_1'].includes(clubData.lineup[r]));
   const cloudHasNonStarter = ['GK', 'DEF', 'FWD'].some(r => cloudData?.lineup?.[r] && !['gk_1', 'def_1', 'fwd_1'].includes(cloudData.lineup[r]));
+  const localHasUnsyncedCards = localOwned.some(cardId => !cloudOwned.includes(cardId));
 
-  // Local-First: jeśli stan lokalny był zmieniony później LUB zawiera zakupionego gracza podczas gdy chmura ma tylko starter:
-  const preferLocal = (localUp >= cloudUp && localUp > 0) || (localHasNonStarter && !cloudHasNonStarter);
+  // Local-First: jeśli stan lokalny był zmieniony później LUB zawiera zakupionego gracza podczas gdy chmura ma tylko starter LUB lokalnie są karty jeszcze niezapisane w chmurze:
+  const preferLocal = (localUp >= cloudUp && localUp > 0) || (localHasNonStarter && !cloudHasNonStarter) || localHasUnsyncedCards;
 
   let resolvedCoins;
   let resolvedLineup = { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' };
@@ -6946,8 +7019,8 @@ function fcApplyCloudClub(cloudData, nick) {
   saveClubData(false);
   fcApplyingCloud = false;
 
-  // Jeśli profil lokalny był nowszy, natychmiast zaktualizuj chmurę:
-  if (preferLocal || localOwned.length > cloudOwned.length) {
+  // Jeśli profil lokalny był nowszy LUB zawierał nowe karty, natychmiast zaktualizuj chmurę:
+  if (preferLocal || localOwned.length > cloudOwned.length || localHasUnsyncedCards) {
     fcSaveCloudNow();
   }
 
@@ -6968,7 +7041,17 @@ async function fcSaveCloudNow() {
       lineup: clubData.lineup || { GK: 'gk_1', DEF: 'def_1', FWD: 'fwd_1' },
       updatedAt: Number(clubData.updatedAt) || Date.now()
     };
-    await fcDb.collection('players').doc(fcCurrentUser.uid).set({ gameData: { fc: payload } }, { merge: true });
+    try {
+      await fcDb.collection('players').doc(fcCurrentUser.uid).update({
+        "gameData.fc": payload,
+        updatedAt: Date.now()
+      });
+    } catch (uErr) {
+      await fcDb.collection('players').doc(fcCurrentUser.uid).set({
+        gameData: { fc: payload },
+        updatedAt: Date.now()
+      }, { merge: true });
+    }
   } catch (err) {
     console.warn('FC28 cloud save error:', err);
   }
