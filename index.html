@@ -1090,7 +1090,7 @@
         <img src="assets/logo_full.png" alt="NOVA ARCADE" class="brand-full-logo">
       </div>
       <div class="brand-sub">
-        <i></i><span id="headerLiveStatus">System Online • 4 Gotowe Gry</span>
+        <i></i><span id="headerLiveStatus">System Online • 3 Gotowe Gry</span>
       </div>
     </a>
 
@@ -1326,17 +1326,6 @@ const DEFAULT_GAMES = [
     players: '1 - 2 Graczy'
   },
   {
-    title: 'Kaczki',
-    url: 'kaczki.html',
-    status: 'ready',
-    desc: 'Trójwymiarowa, szalona przeprawa kaczek w stylu retro-arcade. Rywalizuj do 4 graczy w czasie rzeczywistym!',
-    tags: ['Zręcznościowa', 'Kaczki 3D', 'Multiplayer P2P'],
-    color: '#f59e0b',
-    image: 'assets/cover_ducks.jpg',
-    badge: 'Nowość',
-    players: '1 - 4 Graczy'
-  },
-  {
     title: 'CS:GO',
     url: 'https://csgame.sorpio.pl',
     status: 'ready',
@@ -1379,18 +1368,17 @@ try {
 let GAMES = Array.isArray(storedGames) && storedGames.length ? storedGames : DEFAULT_GAMES.slice();
 
 // Filtruj przestarzałe linki
-GAMES = GAMES.filter(g => g && g.url !== 'cyberpong.html');
+GAMES = GAMES.filter(g => g && g.url !== 'cyberpong.html' && g.url !== 'kaczki.html' && g.title !== 'Kaczki');
 
 // Zaktualizuj ścieżki okładek dla głównych gier jeśli brakowało obrazka w localStorage
 GAMES.forEach(g => {
   if (g.url === 'pingpong.html') g.image = 'assets/cover_pong.jpg';
   if (g.url === 'fc28.html') g.image = 'assets/cover_fc28.jpg';
-  if (g.url === 'kaczki.html') g.image = 'assets/cover_ducks.jpg';
 });
 
 // Zapewnij obecność nowej gry CS:GO na liście
 if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl'))) {
-  GAMES.splice(3, 0, DEFAULT_GAMES[3]);
+  const csObj = DEFAULT_GAMES.find(g => g && g.title === 'CS:GO'); if (csObj) GAMES.splice(2, 0, csObj);
 }
 
 // Zapewnij kolejność bazowych gier
