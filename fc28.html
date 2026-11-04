@@ -11821,6 +11821,15 @@ function fcApplyCloudClub(cloudData, nick) {
     }
   });
 
+  // Jeśli gracz miał tylko wyjściowy skład podstawowy (starterzy 72-74 OVR), od razu wystaw gwiazdy do składu:
+  const isAllStarters = resolvedLineup.GK === 'gk_bazunu' && resolvedLineup.DEF === 'def_disasi' && resolvedLineup.MID === 'mid_soucek' && resolvedLineup.FWD === 'fwd_broja';
+  if (isAuth && isAllStarters && mergedOwned.includes('fwd_mbappe')) {
+    if (mergedOwned.includes('gk_courtois')) resolvedLineup.GK = 'gk_courtois';
+    if (mergedOwned.includes('def_van_dijk')) resolvedLineup.DEF = 'def_van_dijk';
+    if (mergedOwned.includes('mid_bellingham')) resolvedLineup.MID = 'mid_bellingham';
+    if (mergedOwned.includes('fwd_mbappe')) resolvedLineup.FWD = 'fwd_mbappe';
+  }
+
   // NIGDY nie przyjmuj "GOŚĆ" jako nazwy konta w zalogowanym profilu
   let resolvedNick = fcResolveUserNick(fcCurrentUser, nick || cloudData.nick || clubData?.nick);
   const resolvedUpdatedAt = Math.max(localUp, cloudUp, Date.now());
