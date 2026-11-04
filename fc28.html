@@ -4884,6 +4884,105 @@ function getCardById(id) {
 const STARTER_CARD_IDS = ['gk_bazunu', 'def_disasi', 'mid_soucek', 'fwd_broja'];
 const CLUB_STORAGE_KEY = 'cyberfc28_ultimate_club_v1';
 
+// DOŻYWOTNI SEJF KART FUT (LIFETIME VAULT)
+// Gwarancja: Żadna karta raz zdobyta na urządzeniu lub koncie nigdy nie zostanie usunięta!
+function fcSaveToVault(cardId) {
+  if (!cardId || typeof cardId !== 'string') return;
+  const mapped = (typeof OLD_ID_MAP !== 'undefined' && OLD_ID_MAP[cardId]) || cardId;
+  try {
+    const raw = localStorage.getItem('CYBERFC28_VAULT_PERMANENT');
+    const set = new Set(raw ? JSON.parse(raw) : []);
+    set.add(mapped);
+    localStorage.setItem('CYBERFC28_VAULT_PERMANENT', JSON.stringify(Array.from(set)));
+  } catch (e) {}
+
+  try {
+    const curUid = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser && fcCurrentUser.uid) || null;
+    if (curUid) {
+      const uKey = 'CYBERFC28_VAULT_' + curUid;
+      const raw = localStorage.getItem(uKey);
+      const set = new Set(raw ? JSON.parse(raw) : []);
+      set.add(mapped);
+      localStorage.setItem(uKey, JSON.stringify(Array.from(set)));
+    }
+  } catch (e) {}
+}
+
+function fcGetAllKnownCards() {
+  const validIds = new Set((typeof PLAYERS_DB !== 'undefined' && PLAYERS_DB) ? PLAYERS_DB.map(c => c.id) : []);
+  const discovered = new Set(STARTER_CARD_IDS);
+
+  const addId = (id) => {
+    if (!id || typeof id !== 'string') return;
+    const mapped = (typeof OLD_ID_MAP !== 'undefined' && OLD_ID_MAP[id]) || id;
+    if (validIds.has(mapped)) discovered.add(mapped);
+  };
+
+  const scanObject = (obj) => {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj.owned)) obj.owned.forEach(addId);
+    if (obj.lineup && typeof obj.lineup === 'object') {
+      ['GK', 'DEF', 'MID', 'FWD'].forEach(r => addId(obj.lineup[r]));
+    }
+  };
+
+  // 1. Bieżąca pamięć klubu
+  if (typeof clubData !== 'undefined') scanObject(clubData);
+
+  // 2. Dożywotni Sejf (globalny i per-UID)
+  try {
+    const vRaw = localStorage.getItem('CYBERFC28_VAULT_PERMANENT');
+    if (vRaw) {
+      const arr = JSON.parse(vRaw);
+      if (Array.isArray(arr)) arr.forEach(addId);
+    }
+  } catch (e) {}
+
+  try {
+    const curUid = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser && fcCurrentUser.uid) || null;
+    if (curUid) {
+      const uRaw = localStorage.getItem('CYBERFC28_VAULT_' + curUid);
+      if (uRaw) {
+        const arr = JSON.parse(uRaw);
+        if (Array.isArray(arr)) arr.forEach(addId);
+      }
+    }
+  } catch (e) {}
+
+  // 3. Głębokie skanowanie wszystkich źródeł pamięci podręcznej przeglądarki
+  const storages = [window.localStorage, window.sessionStorage];
+  storages.forEach(st => {
+    if (!st) return;
+    try {
+      for (let i = 0; i < st.length; i++) {
+        const k = st.key(i);
+        if (!k) continue;
+        const kl = k.toLowerCase();
+        if (kl.includes('fc') || kl.includes('club') || kl.includes('card') || kl.includes('vault') || kl.includes('cyber')) {
+          try {
+            const rawVal = st.getItem(k);
+            if (!rawVal) continue;
+            if (rawVal.startsWith('{') || rawVal.startsWith('[')) {
+              const parsed = JSON.parse(rawVal);
+              if (Array.isArray(parsed)) parsed.forEach(addId);
+              else scanObject(parsed);
+            }
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  });
+
+  // 4. Memory save i ciasteczka
+  if (window.__cyberfc28_memorySave) scanObject(window.__cyberfc28_memorySave);
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)cyberfc28_save=([^;]+)/);
+    if (m && m[1]) scanObject(JSON.parse(decodeURIComponent(m[1])));
+  } catch (e) {}
+
+  return Array.from(discovered);
+}
+
 let clubData = {
   nick: 'GOŚĆ',
   coins: 0, // 0 monet w trybie niezalogowanym (konto jest wymagane do gry!)
@@ -4899,6 +4998,13 @@ function safeReadStorageRaw() {
   try { const v = sessionStorage.getItem(CLUB_STORAGE_KEY); if (v) sources.push(v); } catch (e) {}
   try { const v = sessionStorage.getItem('cyberfc28_backup_club'); if (v) sources.push(v); } catch (e) {}
   try {
+    const curUid = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser && fcCurrentUser.uid) || null;
+    if (curUid) {
+      const u = localStorage.getItem('cyberfc28_club_' + curUid);
+      if (u) sources.push(u);
+    }
+  } catch (e) {}
+  try {
     const match = document.cookie.match(/(?:^|;\s*)cyberfc28_save=([^;]+)/);
     if (match && match[1]) sources.push(decodeURIComponent(match[1]));
   } catch (e) {}
@@ -4907,10 +5013,13 @@ function safeReadStorageRaw() {
   }
 
   let bestParsed = null;
+  const allParsedCards = new Set();
+
   for (const raw of sources) {
     try {
       const p = JSON.parse(raw);
       if (!p || typeof p !== 'object') continue;
+      if (Array.isArray(p.owned)) p.owned.forEach(id => allParsedCards.add(id));
       if (!bestParsed) {
         bestParsed = p;
         continue;
@@ -4924,16 +5033,36 @@ function safeReadStorageRaw() {
       }
     } catch (e) {}
   }
+
+  // Upewnij się, że bestParsed zawiera sumę wszystkich kart znalezionych we wszystkich źródłach
+  if (bestParsed) {
+    const existing = new Set(Array.isArray(bestParsed.owned) ? bestParsed.owned : []);
+    allParsedCards.forEach(id => existing.add(id));
+    bestParsed.owned = Array.from(existing);
+  }
+
   return bestParsed;
 }
 
 function saveClubData(syncCloud = true) {
   if (!clubData.updatedAt) clubData.updatedAt = Date.now();
+  
+  // Zawsze zsynchronizuj z dożywotnim sejfem
+  if (Array.isArray(clubData.owned)) {
+    clubData.owned.forEach(id => fcSaveToVault(id));
+  }
+  
   window.__cyberfc28_memorySave = clubData;
   const serialized = JSON.stringify(clubData);
 
   try { localStorage.setItem(CLUB_STORAGE_KEY, serialized); } catch (e) {}
   try { localStorage.setItem('cyberfc28_backup_club', serialized); } catch (e) {}
+  try {
+    const curUid = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser && fcCurrentUser.uid) || null;
+    if (curUid) {
+      localStorage.setItem('cyberfc28_club_' + curUid, serialized);
+    }
+  } catch (e) {}
   try { sessionStorage.setItem(CLUB_STORAGE_KEY, serialized); } catch (e) {}
   try { sessionStorage.setItem('cyberfc28_backup_club', serialized); } catch (e) {}
   try {
@@ -4956,38 +5085,43 @@ function loadClubData() {
   try {
     const parsed = safeReadStorageRaw();
     const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
+    
+    // Jeśli użytkownik jest niezalogowany i nie ma zapisanego nicku gracza:
     if (!curUser && (!parsed || !parsed.nick || ['GOŚĆ', 'GOSC'].includes(parsed.nick.toUpperCase()))) {
       clubData.coins = 0;
       clubData.nick = 'GOŚĆ';
       try { updateMenuClubUI(); } catch (e) {}
       return;
     }
-    if (parsed && typeof parsed === 'object') {
-      const validIds = new Set(PLAYERS_DB.map(c => c.id));
-      const rawOwned = Array.isArray(parsed.owned) ? parsed.owned : [];
-      const owned = [];
-      rawOwned.forEach(id => {
-        const mapped = OLD_ID_MAP[id] || id;
-        if (validIds.has(mapped) && !owned.includes(mapped)) owned.push(mapped);
-      });
-      STARTER_CARD_IDS.forEach(id => { if (!owned.includes(id)) owned.push(id); });
 
-      const lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
-      ['GK', 'DEF', 'MID', 'FWD'].forEach(role => {
-        let cardId = parsed.lineup?.[role];
-        if (cardId && OLD_ID_MAP[cardId]) cardId = OLD_ID_MAP[cardId];
-        const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
-        if (card && owned.includes(card.id)) lineup[role] = card.id;
-      });
+    const allKnown = fcGetAllKnownCards();
+    const validIds = new Set(PLAYERS_DB.map(c => c.id));
+    const owned = [];
+    allKnown.forEach(id => {
+      const mapped = OLD_ID_MAP[id] || id;
+      if (validIds.has(mapped) && !owned.includes(mapped)) owned.push(mapped);
+    });
+    STARTER_CARD_IDS.forEach(id => { if (!owned.includes(id)) owned.push(id); });
 
-      clubData = {
-        nick: (typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '') : (clubData.nick || 'GRACZ'),
-        coins: Number.isFinite(parsed.coins) ? Math.max(0, Math.min(10000000, Math.floor(parsed.coins))) : 200,
-        owned,
-        lineup,
-        updatedAt: Number(parsed.updatedAt) || Date.now()
-      };
-    }
+    const lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
+    ['GK', 'DEF', 'MID', 'FWD'].forEach(role => {
+      let cardId = parsed?.lineup?.[role];
+      if (cardId && OLD_ID_MAP[cardId]) cardId = OLD_ID_MAP[cardId];
+      const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
+      if (card && owned.includes(card.id)) lineup[role] = card.id;
+    });
+
+    const parsedCoins = (parsed && Number.isFinite(parsed.coins)) ? parsed.coins : 200;
+
+    clubData = {
+      nick: (parsed && typeof parsed.nick === 'string' && parsed.nick.trim())
+        ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '')
+        : (clubData.nick || 'GRACZ'),
+      coins: Math.max(0, Math.min(10000000, Math.floor(parsedCoins))),
+      owned,
+      lineup,
+      updatedAt: Number(parsed?.updatedAt) || Date.now()
+    };
   } catch (e) {
     console.warn('loadClubData error:', e);
   }
@@ -5165,6 +5299,10 @@ function switchClubTab(tab, roleFilter = null) {
     tab = 'PLAYERS';
   } else if (roleFilter) {
     activeClubRoleFilter = roleFilter;
+  } else if (tab === 'PLAYERS') {
+    // Wejście w ogólną zakładkę zawodników z menu ZAWSZE resetuje filtr do ALL,
+    // aby gracz widział WSZYSTKICH swoich piłkarzy!
+    activeClubRoleFilter = 'ALL';
   }
 
   activeClubTab = tab;
@@ -5442,12 +5580,14 @@ function openPack(packType = 'ultimate') {
     clubData.coins += refund;
   } else {
     if (!Array.isArray(clubData.owned)) clubData.owned = [];
-    clubData.owned.push(pickedCard.id);
+    if (!clubData.owned.includes(pickedCard.id)) clubData.owned.push(pickedCard.id);
+    fcSaveToVault(pickedCard.id);
   }
 
   clubData.updatedAt = Date.now();
   saveClubData(true);
-  fcScheduleCloudSave();
+  // Natychmiastowy zapis do chmury bez czekania na timer
+  if (typeof fcSaveCloudNow === 'function') fcSaveCloudNow();
   updateMenuClubUI();
 
   openPackAnimationModal(pickedCard, isDuplicate, refund);
@@ -11473,40 +11613,53 @@ function fcApplyCloudClub(cloudData, nick) {
     if (validIds.has(m) && !cloudOwned.includes(m)) cloudOwned.push(m);
   });
 
-  const rawLocalOwned = Array.isArray(clubData?.owned) ? clubData.owned : [];
-  const localOwned = [];
-  rawLocalOwned.forEach(id => {
-    const m = OLD_ID_MAP[id] || id;
-    if (validIds.has(m) && !localOwned.includes(m)) localOwned.push(m);
-  });
+  // Połącz chmurę ze wszystkimi znanymi kartami z sejfu i pamięci podręcznej tego urządzenia
+  const allKnownLocal = fcGetAllKnownCards();
+  const mergedOwned = Array.from(new Set([...cloudOwned, ...allKnownLocal, ...STARTER_CARD_IDS]));
+  
+  // Zapisz wszystkie karty do stałego dożywotniego sejfu
+  mergedOwned.forEach(id => fcSaveToVault(id));
 
-  const mergedOwned = Array.from(new Set([...cloudOwned, ...localOwned, ...STARTER_CARD_IDS]));
   const localUp = Number(clubData?.updatedAt) || 0;
   const cloudUp = Number(cloudData.updatedAt) || 0;
 
-  let resolvedCoins;
+  // Rozstrzyganie monet:
+  const localCoins = Number.isFinite(clubData?.coins) ? clubData.coins : 0;
+  const cloudCoins = Number.isFinite(Number(cloudData.coins)) ? Math.floor(Number(cloudData.coins)) : 200;
+  let resolvedCoins = localUp >= cloudUp ? (localCoins > 0 ? localCoins : cloudCoins) : Math.max(localCoins, cloudCoins);
+  if (resolvedCoins < 200) resolvedCoins = 200;
+
+  // JEDNORAZOWY PAKIET ODBUDOWY / REKOMPENSATA FUT (+500 MONET NA DARMOWĄ PACZKĘ)
+  try {
+    const curUid = (fcCurrentUser && fcCurrentUser.uid) || 'LOCAL';
+    const recKey = 'CYBERFC28_RECOMPENSE_CLAIMED_' + curUid;
+    if (!localStorage.getItem(recKey)) {
+      resolvedCoins = Math.max(resolvedCoins + 500, 500);
+      localStorage.setItem(recKey, '1');
+      console.log('🎁 Przyznano jednorazowy Pakiet Rekompensaty FUT: +500 🪙');
+    }
+  } catch (e) {}
+
+  // Rozstrzyganie składu:
+  // Jeśli lokalny stan ma wybranego zawodnika i ten zawodnik jest w posiadanych kartach, ZACHOWAJ GO!
   let resolvedLineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
-
-  if (Number.isFinite(Number(cloudData.coins))) {
-    resolvedCoins = Math.max(0, Math.floor(Number(cloudData.coins)));
-  } else {
-    resolvedCoins = 200;
-  }
-
   ['GK', 'DEF', 'MID', 'FWD'].forEach(role => {
+    let lid = clubData?.lineup?.[role];
+    if (lid && OLD_ID_MAP[lid]) lid = OLD_ID_MAP[lid];
     let cid = cloudData.lineup?.[role];
     if (cid && OLD_ID_MAP[cid]) cid = OLD_ID_MAP[cid];
-    if (cid && mergedOwned.includes(cid)) resolvedLineup[role] = cid;
-    else {
-      let lid = clubData?.lineup?.[role];
-      if (lid && OLD_ID_MAP[lid]) lid = OLD_ID_MAP[lid];
+
+    if (localUp >= cloudUp) {
       if (lid && mergedOwned.includes(lid)) resolvedLineup[role] = lid;
+      else if (cid && mergedOwned.includes(cid)) resolvedLineup[role] = cid;
+    } else {
+      if (cid && mergedOwned.includes(cid)) resolvedLineup[role] = cid;
+      else if (lid && mergedOwned.includes(lid)) resolvedLineup[role] = lid;
     }
   });
 
   // NIGDY nie przyjmuj "GOŚĆ" jako nazwy konta w zalogowanym profilu
   let resolvedNick = fcResolveUserNick(fcCurrentUser, nick || cloudData.nick || clubData?.nick);
-
   const resolvedUpdatedAt = Math.max(localUp, cloudUp, Date.now());
 
   clubData = {
@@ -11521,6 +11674,7 @@ function fcApplyCloudClub(cloudData, nick) {
   saveClubData(false);
   fcApplyingCloud = false;
 
+  // Zsynchronizuj natychmiast uzupełniony sejf z powrotem do Firestore
   fcSaveCloudNow();
 
   const input = document.getElementById('nickInput');
@@ -11730,23 +11884,25 @@ function fcInitAccounts() {
         if (saved && typeof saved === 'object') {
           fcApplyCloudClub(saved, cloudNick);
         } else {
-          // Istniejące konto bez postępu FC: 200 🪙 na start
+          // Istniejące konto bez postępu FC: ZACHOWAJ wszystkie karty z sejfu urządzenia!
+          const allKnown = fcGetAllKnownCards();
           const initialClub = {
             nick: cloudNick,
             coins: (typeof profile.coins === 'number' && profile.coins > 0) ? profile.coins : 200,
-            owned: [...STARTER_CARD_IDS],
-            lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
+            owned: allKnown.length > 0 ? allKnown : [...STARTER_CARD_IDS],
+            lineup: clubData?.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
             updatedAt: Date.now()
           };
           fcApplyCloudClub(initialClub, cloudNick);
         }
       } else {
-        // Nowy użytkownik w bazie: 200 🪙 na start
+        // Nowy użytkownik w bazie: ZACHOWAJ wszystkie karty z sejfu urządzenia!
+        const allKnown = fcGetAllKnownCards();
         const initialClub = {
           nick: activeNick,
           coins: 200,
-          owned: [...STARTER_CARD_IDS],
-          lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
+          owned: allKnown.length > 0 ? allKnown : [...STARTER_CARD_IDS],
+          lineup: clubData?.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
           updatedAt: Date.now()
         };
         fcApplyCloudClub(initialClub, activeNick);
@@ -11767,6 +11923,14 @@ function fcInitAccounts() {
 }
 
 // Globalny nasłuch klawisza ESC do zamykania pełnoekranowego klubu
+// Natychmiastowy zapis przed odświeżeniem lub zamknięciem okna
+window.addEventListener('beforeunload', () => {
+  try {
+    if (typeof fcSaveCloudNow === 'function') fcSaveCloudNow();
+    if (typeof saveClubData === 'function') saveClubData(false);
+  } catch (e) {}
+});
+
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' || e.key === 'Esc') {
     const club = document.getElementById('clubModalBackdrop');
