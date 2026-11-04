@@ -1766,50 +1766,565 @@
     transform: none;
   }
 
-  /* Modal animacji otwarcia paczki */
+  /* =========================================================================
+     NOWOCZESNY SYSTEM OTWIERANIA PACZEK (ANIMACJE, WALKOUT, LASER, PEDESTAŁ)
+     ========================================================================= */
   .pack-opening-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 85vh;
+    min-height: 90vh;
     width: 100%;
-    max-width: 600px;
+    max-width: 760px;
     position: relative;
     margin: auto;
+    perspective: 1200px;
   }
-  @keyframes packBurstAnim {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.15) rotate(3deg); filter: brightness(2) drop-shadow(0 0 40px #ffd700); }
-    85% { transform: scale(1.25) rotate(-3deg); filter: brightness(3); opacity: 1; }
-    100% { transform: scale(2.2); opacity: 0; filter: brightness(5); }
+  .pack-stage-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .pack-scene-3d {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .pack-spotlight-top {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.35) 0%, rgba(0, 240, 255, 0.15) 45%, transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    animation: spotlightPulse 3s infinite ease-in-out;
+  }
+  @keyframes spotlightPulse {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(0.95); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  }
+
+  /* KOPERTA PACZKI 3D */
+  .pack-3d-box {
+    width: 260px;
+    height: 370px;
+    background: linear-gradient(145deg, #18233c 0%, #0d1527 35%, #1f2f50 70%, #090e1a 100%);
+    border: 2.5px solid rgba(255, 215, 0, 0.7);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 215, 0, 0.35), inset 0 0 30px rgba(0, 240, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s;
+    user-select: none;
+  }
+  .pack-3d-box:hover {
+    transform: translateY(-10px) scale(1.04) rotateX(4deg);
+    box-shadow: 0 35px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(255, 215, 0, 0.65), inset 0 0 40px rgba(0, 240, 255, 0.3);
+  }
+  .pack-foil-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 20%, rgba(255, 255, 255, 0.25) 45%, rgba(255, 215, 0, 0.45) 50%, transparent 65%);
+    background-size: 200% 200%;
+    animation: foilSheen 3.5s infinite linear;
+    pointer-events: none;
+  }
+  @keyframes foilSheen {
+    0% { background-position: -200% -200%; }
+    100% { background-position: 200% 200%; }
+  }
+  .pack-seam-laser {
+    position: absolute;
+    top: 55px;
+    left: -100%;
+    width: 200%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00f0ff, #fff, #ffd700, transparent);
+    box-shadow: 0 0 15px #00f0ff, 0 0 25px #ffd700;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pack-ripping .pack-seam-laser {
+    opacity: 1;
+    animation: laserSlice 0.5s forwards ease-in-out;
+  }
+  @keyframes laserSlice {
+    0% { transform: translateX(0); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 1; }
+  }
+  .pack-fc-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--p1);
+    text-shadow: 0 0 12px var(--p1);
+  }
+  .pack-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    text-align: center;
+  }
+  .pack-sub {
+    font-size: 11px;
+    color: #8b949e;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+  .pack-odds-badge {
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .pack-rip-pulse-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    color: #000;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 9px 18px;
+    border-radius: 12px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    animation: ripPulseBtn 1.4s infinite ease-in-out;
+  }
+  @keyframes ripPulseBtn {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+    50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+  }
+
+  /* EFEKT ROZRYWANIA PACZKI */
+  @keyframes packBurstCinematic {
+    0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+    35% { transform: scale(1.1) rotate(2deg); filter: brightness(2) drop-shadow(0 0 35px #00f0ff); }
+    65% { transform: scale(1.2) rotate(-3deg); filter: brightness(3) drop-shadow(0 0 60px #ffd700); }
+    100% { transform: scale(2.8) rotate(5deg); opacity: 0; filter: brightness(6); }
   }
   .pack-bursting {
-    animation: packBurstAnim 1.1s forwards cubic-bezier(0.1, 0.9, 0.2, 1);
+    animation: packBurstCinematic 0.9s forwards cubic-bezier(0.12, 0.8, 0.25, 1);
   }
-  @keyframes cardDropIn {
-    0% { transform: scale(0.2) translateY(-100px) rotateY(180deg); opacity: 0; }
-    70% { transform: scale(1.08) translateY(10px) rotateY(-10deg); opacity: 1; }
-    100% { transform: scale(1) translateY(0) rotateY(0deg); opacity: 1; }
+
+  /* WALKOUT & SUSPENSE STAGE */
+  .walkout-spotlights {
+    position: absolute;
+    inset: -60px;
+    background: radial-gradient(circle at 50% 40%, rgba(255, 215, 0, 0.25) 0%, rgba(255, 0, 85, 0.15) 35%, transparent 70%);
+    filter: blur(35px);
+    pointer-events: none;
+    animation: walkoutStrobe 0.8s infinite alternate ease-in-out;
   }
-  .card-revealed-anim {
-    animation: cardDropIn 0.8s forwards cubic-bezier(0.34, 1.56, 0.64, 1);
+  @keyframes walkoutStrobe {
+    0% { opacity: 0.4; transform: scale(0.9); }
+    100% { opacity: 0.9; transform: scale(1.15); }
   }
-  @keyframes walkoutFlash {
-    0% { opacity: 0; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.05); }
-    100% { opacity: 1; transform: scale(1); }
+  .walkout-flag-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(8, 12, 22, 0.85);
+    border: 2px solid var(--gold);
+    border-radius: 18px;
+    padding: 10px 24px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+    margin-bottom: 14px;
+    animation: walkoutItemDrop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .walkout-flag-emoji {
+    font-size: 32px;
+  }
+  .walkout-country-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+  .walkout-pos-box {
+    display: inline-block;
+    background: rgba(0, 240, 255, 0.15);
+    border: 2px solid var(--p1);
+    border-radius: 14px;
+    padding: 8px 22px;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+    margin-bottom: 16px;
+    animation: walkoutItemDrop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .walkout-role-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--p1);
+    letter-spacing: 2px;
+  }
+  @keyframes walkoutItemDrop {
+    0% { transform: translateY(-30px) scale(0.7); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .walkout-banner-box {
+    margin-top: 10px;
+    animation: walkoutItemDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .walkout-banner {
     font-family: 'Orbitron', sans-serif;
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 900;
     letter-spacing: 3px;
     color: #ffd700;
-    text-shadow: 0 0 25px rgba(255, 215, 0, 0.9), 0 0 50px rgba(255, 0, 85, 0.6);
-    animation: walkoutFlash 0.6s ease-out;
-    margin-bottom: 12px;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.95), 0 0 60px rgba(255, 0, 85, 0.8);
     text-align: center;
+  }
+  .walkout-sub-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #00f0ff;
+    letter-spacing: 2px;
+    margin-top: 6px;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
+  }
+
+  /* PREZENTACJA KARTY & PEDESTAŁ 3D */
+  .pack-card-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    animation: cardSlamIn 0.75s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  }
+  @keyframes cardSlamIn {
+    0% { transform: scale(0.2) translateY(-140px) rotateY(180deg); opacity: 0; filter: blur(10px); }
+    70% { transform: scale(1.06) translateY(12px) rotateY(-8deg); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1) translateY(0) rotateY(0deg); opacity: 1; }
+  }
+  .pack-status-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    padding: 7px 22px;
+    border-radius: 14px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+    text-align: center;
+  }
+  .pack-pedestal-wrap {
+    position: relative;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+  }
+  .pack-plinth-glow {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%) rotateX(75deg);
+    width: 280px;
+    height: 120px;
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.5) 0%, rgba(0, 240, 255, 0.25) 50%, transparent 75%);
+    border-radius: 50%;
+    filter: blur(12px);
+    pointer-events: none;
+  }
+  .pack-compare-box {
+    background: rgba(12, 18, 32, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #c9d1d9;
+    text-align: center;
+  }
+  .pack-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .pack-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 11px 22px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pack-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+  }
+  .pack-btn-equip {
+    background: linear-gradient(135deg, #00f0ff 0%, #0088ff 100%);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
+  }
+  .pack-btn-save {
+    background: #21262d;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+  .pack-btn-next {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.45);
+  }
+
+  /* =========================================================================
+     NOWOCZESNY RANKING / TABELA LIDERÓW Z PODIUM TOP 3 & CYBER DESIGNEM
+     ========================================================================= */
+  .lb-modal-container {
+    width: 890px;
+    max-width: 95vw;
+    max-height: 88vh;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle at 50% 0%, #15223e 0%, #090e1c 60%, #04060c 100%);
+    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.2);
+  }
+  .lb-category-bar {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 16px;
+    flex-wrap: wrap;
+  }
+  .lb-category-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: #8b949e;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lb-category-btn:hover {
+    border-color: rgba(255, 215, 0, 0.5);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .lb-category-btn.active {
+    background: rgba(255, 215, 0, 0.16);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+
+  /* PODIUM TOP 3 GRACZY */
+  .lb-podium-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+  .lb-podium-card {
+    border-radius: 18px;
+    padding: 14px 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .lb-podium-card:hover {
+    transform: translateY(-4px);
+  }
+  .lb-podium-1 {
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.22) 0%, rgba(20, 16, 8, 0.95) 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.35);
+  }
+  .lb-podium-2 {
+    background: linear-gradient(180deg, rgba(192, 192, 192, 0.2) 0%, rgba(16, 20, 26, 0.95) 100%);
+    border: 1.5px solid #c0c0c0;
+    box-shadow: 0 8px 25px rgba(192, 192, 192, 0.2);
+  }
+  .lb-podium-3 {
+    background: linear-gradient(180deg, rgba(205, 127, 50, 0.2) 0%, rgba(26, 18, 14, 0.95) 100%);
+    border: 1.5px solid #cd7f32;
+    box-shadow: 0 8px 25px rgba(205, 127, 50, 0.2);
+  }
+  .lb-podium-crown {
+    font-size: 26px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .lb-podium-nick {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lb-podium-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin: 4px 0 2px;
+  }
+  .lb-podium-1 .lb-podium-val { color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+  .lb-podium-2 .lb-podium-val { color: #e0e0e0; }
+  .lb-podium-3 .lb-podium-val { color: #d79277; }
+  .lb-podium-sub {
+    font-size: 11px;
+    color: #8b949e;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+  }
+
+  /* TABELA RANKINGU */
+  .lb-table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 44vh;
+    border-radius: 16px;
+    background: rgba(6, 10, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    color: #fff;
+  }
+  .lb-table th {
+    background: rgba(12, 18, 34, 0.96);
+    padding: 12px 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: #8b949e;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .lb-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .lb-table tr {
+    transition: background 0.15s;
+  }
+  .lb-table tr:hover {
+    background: rgba(0, 240, 255, 0.07);
+  }
+  .lb-table tr.is-me {
+    background: rgba(0, 240, 255, 0.12) !important;
+    border-left: 3px solid var(--p1);
+    box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.15);
+  }
+  .lb-rank-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #c9d1d9;
+  }
+  .lb-rank-1 { background: rgba(255, 215, 0, 0.25); color: #ffd700; border: 1.5px solid #ffd700; }
+  .lb-rank-2 { background: rgba(192, 192, 192, 0.25); color: #e0e0e0; border: 1.5px solid #c0c0c0; }
+  .lb-rank-3 { background: rgba(205, 127, 50, 0.25); color: #cd7f32; border: 1.5px solid #cd7f32; }
+
+  /* DOLNY PASEK TWOJEJ POZYCJI */
+  .lb-my-rank-strip {
+    margin-top: 14px;
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.12) 0%, rgba(12, 18, 34, 0.95) 100%);
+    border: 1.5px solid var(--p1);
+    border-radius: 14px;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+  }
+  .lb-my-rank-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .lb-my-rank-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: #000;
+    background: var(--p1);
+    border-radius: 10px;
+    padding: 6px 12px;
+    box-shadow: 0 0 15px var(--p1);
+  }
+  .lb-my-rank-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .lb-my-rank-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b949e;
+  }
+  .lb-my-rank-insight {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 10px;
   }
 
   /* Animacja radaru szybkiego meczu */
@@ -1825,49 +2340,6 @@
     box-shadow: 0 0 20px var(--p1);
     animation: radarPulse 1.4s infinite cubic-bezier(0.2, 0.8, 0.4, 1);
   }
-
-  /* Tabela liderów */
-  .lb-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    color: #fff;
-  }
-  .lb-table th {
-    background: rgba(12, 18, 32, 0.95);
-    padding: 10px 14px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    color: #8b949e;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .lb-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  .lb-table tr:hover {
-    background: rgba(0, 240, 255, 0.06);
-  }
-  .lb-table tr.is-me {
-    background: rgba(245, 176, 65, 0.14) !important;
-    border-left: 3px solid var(--gold);
-  }
-  .lb-rank-badge {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-  }
-  .lb-rank-1 { background: rgba(255, 215, 0, 0.25); color: #ffd700; border: 1px solid #ffd700; }
-  .lb-rank-2 { background: rgba(192, 192, 192, 0.25); color: #e0e0e0; border: 1px solid #c0c0c0; }
-  .lb-rank-3 { background: rgba(205, 127, 50, 0.25); color: #cd7f32; border: 1px solid #cd7f32; }
 </style>
 
 <!-- Firebase: logowanie i zapis postępu FC28 w tym samym systemie kont co PingPong -->
@@ -2176,33 +2648,64 @@
   </div>
 
   <!-- MODAL ANIMACJI OTWARCIA PACZKI -->
-  <div class="modal-backdrop" id="packOpeningModal" style="display:none; z-index:11000; background:rgba(2,4,10,0.95); backdrop-filter:blur(14px);">
+  <div class="modal-backdrop" id="packOpeningModal" style="display:none; z-index:11000; background:rgba(2,4,10,0.96); backdrop-filter:blur(20px);">
     <div class="pack-opening-wrapper">
-      <!-- Faza 1: Płonąca paczka do kliknięcia -->
-      <div id="packFoilStage" style="display:flex; flex-direction:column; align-items:center; gap:20px;">
-        <div class="pack-3d-box" id="pack3dBox" onclick="triggerPackRipping()">
-          <div class="pack-foil-glow"></div>
-          <div class="pack-fc-logo">CYBERFC 28</div>
-          <div class="pack-title">ULTIMATE PACK</div>
-          <div class="pack-sub">GWARANTOWANY ZAWODNIK FUT</div>
-          <div style="font-size:11px; color:#ffd700; font-weight:800; margin-top:8px;">⚡ KLIKNIJ ABY OTWORZYĆ!</div>
+      <!-- Faza 1: Płonąca koperta 3D do kliknięcia -->
+      <div id="packFoilStage" class="pack-stage-container">
+        <div class="pack-scene-3d">
+          <div class="pack-spotlight-top"></div>
+          <div class="pack-3d-box" id="pack3dBox" onclick="triggerPackRipping()" title="Kliknij, aby otworzyć paczkę!">
+            <div class="pack-foil-glow"></div>
+            <div class="pack-seam-laser" id="packSeamLaser"></div>
+            <div class="pack-fc-logo">⚡ CYBERFC 28 ⚡</div>
+            <div class="pack-title">ULTIMATE PACK</div>
+            <div class="pack-sub">GWARANTOWANY ZAWODNIK FUT</div>
+            <div class="pack-odds-badge">👑 1% IKONA • ✨ 15% PLAYSTYLE+</div>
+            <div class="pack-rip-hint">
+              <span class="pack-rip-pulse-btn">⚡ ROZETNIJ PACZKĘ!</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Faza 2: Walkout / Ikona Banner -->
-      <div id="packWalkoutStage" style="display:none; text-align:center;">
-        <div class="walkout-banner" id="walkoutBannerText">🔥 WALKOUT! 🔥</div>
-        <div id="walkoutSubText" style="font-family:'Orbitron'; font-size:14px; color:#00f0ff; letter-spacing:2px; font-weight:800;"></div>
+      <!-- Faza 2: Walkout & Suspense Stage -->
+      <div id="packWalkoutStage" class="pack-stage-container" style="display:none;">
+        <div class="walkout-spotlights"></div>
+        <div class="walkout-flag-box" id="walkoutFlagBox" style="display:none;">
+          <span id="walkoutFlagEmoji" class="walkout-flag-emoji">⚽</span>
+          <span id="walkoutCountryName" class="walkout-country-name">KRAJ</span>
+        </div>
+        <div class="walkout-pos-box" id="walkoutPosBox" style="display:none;">
+          <span id="walkoutRoleText" class="walkout-role-text">POZYCJA</span>
+        </div>
+        <div class="walkout-banner-box" id="walkoutBannerBox" style="display:none;">
+          <div class="walkout-banner" id="walkoutBannerText">🔥 WALKOUT! 🔥</div>
+          <div id="walkoutSubText" class="walkout-sub-text"></div>
+        </div>
       </div>
 
-      <!-- Faza 3: Ujawniona Karta -->
-      <div id="packCardStage" style="display:none; flex-direction:column; align-items:center; gap:14px; width:100%;">
-        <div id="packDropStatusBadge" style="font-family:'Orbitron'; font-size:12px; font-weight:900; padding:6px 16px; border-radius:12px; background:rgba(0,255,136,0.18); border:1px solid #00ff88; color:#00ff88;">NOWA KARTA!</div>
-        <div id="packRevealedCardWrap" style="perspective:1000px; display:flex; justify-content:center;"></div>
-        <div class="pack-actions" style="display:flex; gap:12px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
-          <button type="button" class="action-btn btn-play-ai" id="btnEquipDrop" onclick="equipDroppedCard()" style="font-weight:900;">⚽ WYSTAW DO SKŁADU</button>
-          <button type="button" class="action-btn btn-host" onclick="closePackModal()" style="font-weight:900;">📥 ZAPISZ W KLUBIE</button>
-          <button type="button" class="action-btn" style="background:#f5b041; color:#000; font-weight:900;" onclick="reOpenPack()">📦 OTWÓRZ KOLEJNĄ (120 🪙)</button>
+      <!-- Faza 3: Ujawniona Karta & Prezentacja -->
+      <div id="packCardStage" class="pack-stage-container" style="display:none;">
+        <div class="pack-card-showcase">
+          <div id="packDropStatusBadge" class="pack-status-badge">NOWA KARTA!</div>
+          <div class="pack-pedestal-wrap">
+            <div class="pack-plinth-glow"></div>
+            <div id="packRevealedCardWrap" style="perspective:1000px; display:flex; justify-content:center;"></div>
+          </div>
+          <!-- Porównanie ze składem -->
+          <div id="packSquadComparison" class="pack-compare-box" style="display:none;"></div>
+          <!-- Przyciski akcji -->
+          <div class="pack-actions">
+            <button type="button" class="pack-btn pack-btn-equip" id="btnEquipDrop" onclick="equipDroppedCard()">
+              ⚽ WYSTAW DO SKŁADU
+            </button>
+            <button type="button" class="pack-btn pack-btn-save" onclick="closePackModal()">
+              📥 ZAPISZ W KLUBIE
+            </button>
+            <button type="button" class="pack-btn pack-btn-next" onclick="reOpenPack()">
+              📦 OTWÓRZ KOLEJNĄ (500 🪙)
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -4549,6 +5052,26 @@ function renderCardPlayerSvg(card, tier) {
   `;
 }
 
+function getFutStatColor(val) {
+  const v = Number(val) || 0;
+  if (v >= 86) return '#00ff88'; // Neon green (Elita)
+  if (v >= 78) return '#00f0ff'; // Bright cyan (Świetna)
+  if (v >= 70) return '#ffd700'; // Gold (Dobra)
+  return '#cbd5e1'; // Silver (Standardowa)
+}
+
+const PLAYER_COUNTRIES = {
+  "fwd_lewandowski": "POLSKA", "mid_zielinski": "POLSKA", "gk_szczesny": "POLSKA", "gk_skorupski": "POLSKA",
+  "gk_bułka": "POLSKA", "def_kiwior": "POLSKA", "def_bednarek": "POLSKA", "mid_szymański": "POLSKA",
+  "mid_zalewski": "POLSKA", "fwd_piątek": "POLSKA", "fwd_świderski": "POLSKA", "mid_urbański": "POLSKA",
+  "fwd_mbappe": "FRANCJA", "fwd_haaland": "NORWEGIA", "fwd_vinicius": "BRAZYLIA", "mid_rodri": "HISZPANIA",
+  "mid_bellingham": "ANGLIA", "mid_de_bruyne": "BELGIA", "fwd_kane": "ANGLIA", "def_van_dijk": "HOLANDIA",
+  "gk_courtois": "BELGIA", "gk_alisson": "BRAZYLIA", "fwd_salah": "EGIPT", "fwd_messi": "ARGENTYNA",
+  "fwd_ronaldo": "PORTUGALIA", "fwd_pele": "BRAZYLIA", "fwd_r9": "BRAZYLIA", "mid_zidane": "FRANCJA",
+  "fwd_cruyff": "HOLANDIA", "def_maldini": "WŁOCHY", "mid_gullit": "HOLANDIA", "mid_ronaldinho": "BRAZYLIA",
+  "def_carlos": "BRAZYLIA", "gk_yashin": "LEGENDA", "fwd_henry": "FRANCJA"
+};
+
 function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   if (!c) return '<div class="fut-card tier-bronze"><div class="fut-name">BRAK KARTY</div></div>';
   const isOwned = Array.isArray(clubData.owned) && clubData.owned.includes(c.id);
@@ -4566,6 +5089,15 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   const s5L = isGk ? 'SZY' : 'OBR', s5V = isGk ? (c.spe || c.pac) : c.def;
   const s6L = isGk ? 'UST' : 'FIZ', s6V = isGk ? (c.pos || c.ovr) : c.phy;
 
+  // Rola z dedykowanym kolorem dla maksymalnej czytelności
+  const roleStyles = {
+    GK: 'background:rgba(0,229,255,0.22); border-color:#00e5ff; color:#00e5ff;',
+    DEF: 'background:rgba(59,130,246,0.22); border-color:#3b82f6; color:#93c5fd;',
+    MID: 'background:rgba(245,158,11,0.22); border-color:#f59e0b; color:#fde047;',
+    FWD: 'background:rgba(239,68,68,0.22); border-color:#ef4444; color:#fca5a5;'
+  };
+  const roleStyle = roleStyles[c.role] || roleStyles.FWD;
+
   let btnHtml = '';
   if (!isRevealed) {
     if (isEquipped) {
@@ -4582,7 +5114,7 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
       <div class="fut-card-header">
         <div class="fut-ovr-col">
           <span class="fut-ovr" style="${isMini ? 'font-size:24px;' : ''}">${c.ovr}</span>
-          <span class="fut-pos-badge">${c.role}</span>
+          <span class="fut-pos-badge" style="${roleStyle}">${c.role}</span>
           <span class="fut-nation-flag">${nationFlag}</span>
         </div>
         <div class="fut-hero-wrap" style="${isMini ? 'width:70px; height:80px;' : ''}">
@@ -4596,17 +5128,17 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
       </div>
 
       <div class="fut-stats-grid" style="${isMini ? 'font-size:10px; gap:2px 4px;' : ''}">
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s1L}</span><span class="fut-stat-val">${s1V}</span></div>
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s2L}</span><span class="fut-stat-val">${s2V}</span></div>
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s3L}</span><span class="fut-stat-val">${s3V}</span></div>
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s4L}</span><span class="fut-stat-val">${s4V}</span></div>
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s5L}</span><span class="fut-stat-val">${s5V}</span></div>
-        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s6L}</span><span class="fut-stat-val">${s6V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s1L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s1V)};">${s1V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s2L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s2V)};">${s2V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s3L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s3V)};">${s3V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s4L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s4V)};">${s4V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s5L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s5V)};">${s5V}</span></div>
+        <div class="fut-stat-cell"><span class="fut-stat-lbl">${s6L}</span><span class="fut-stat-val" style="color:${getFutStatColor(s6V)};">${s6V}</span></div>
       </div>
 
       ${ps ? `
-        <div class="fut-card-ps-medallion" style="${isMini ? 'padding:3px 6px;' : ''}">
-          <div class="fut-ps-icon-wrap">${ps.icon}</div>
+        <div class="fut-card-ps-medallion" style="${isMini ? 'padding:4px 6px;' : ''}">
+          <div class="fut-ps-icon-wrap" style="filter:drop-shadow(0 0 6px #ffd700);">${ps.icon}</div>
           <div class="fut-ps-text-wrap">
             <span class="fut-ps-name-tag" style="${isMini ? 'font-size:9px;' : ''}">${ps.name}</span>
             ${!isMini ? `<span class="fut-ps-desc-tag">${ps.desc}</span>` : ''}
@@ -4687,7 +5219,7 @@ function renderPackStore() {
   const ownedCount = Array.isArray(clubData.owned) ? clubData.owned.length : 0;
   const coins = Number(clubData.coins) || 0;
   const isAuth = !!fcCurrentUser;
-  const canAfford = isAuth && coins >= 120;
+  const canAfford = isAuth && coins >= 500;
 
   container.innerHTML = `
     <div class="pack-store-hero-fs">
@@ -4696,7 +5228,7 @@ function renderPackStore() {
         <div class="pack-fc-logo">CYBERFC 28</div>
         <div class="pack-title">PACZKA ULTIMATE</div>
         <div class="pack-sub">GWARANTOWANY 1 ZAWODNIK FUT</div>
-        <div style="font-family:'Orbitron'; font-size:22px; font-weight:900; color:#ffd700; margin-top:12px;">120 🪙</div>
+        <div style="font-family:'Orbitron'; font-size:22px; font-weight:900; color:#ffd700; margin-top:12px;">500 🪙</div>
       </div>
 
       <div>
@@ -4721,11 +5253,11 @@ function renderPackStore() {
           </button>
         ` : (canAfford ? `
           <button type="button" class="pack-open-big-btn" onclick="openPack('ultimate')">
-            ⚡ OTWÓRZ PACZKĘ (120 🪙)
+            ⚡ OTWÓRZ PACZKĘ (500 🪙)
           </button>
         ` : `
           <button type="button" class="pack-open-big-btn" disabled>
-            🔒 BRAKUJE ${120 - coins} 🪙 MONET (ROZEGRAJ MECZ!)
+            🔒 BRAKUJE ${500 - coins} 🪙 MONET (ROZEGRAJ MECZ!)
           </button>
         `)}
       </div>
@@ -4862,7 +5394,7 @@ function openPack(packType = 'ultimate') {
     return;
   }
 
-  const PACK_COST = 120;
+  const PACK_COST = 500;
   if (typeof clubData.coins !== 'number' || clubData.coins < PACK_COST) {
     const diff = PACK_COST - (clubData.coins || 0);
     alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Rozegraj mecz przeciwko botom lub online, aby zdobyć monety.`);
@@ -4906,7 +5438,7 @@ function openPack(packType = 'ultimate') {
   const isDuplicate = Array.isArray(clubData.owned) && clubData.owned.includes(pickedCard.id);
   let refund = 0;
   if (isDuplicate) {
-    refund = pickedCard.ovr >= 90 ? 100 : (pickedCard.ovr >= 85 ? 75 : (pickedCard.ovr >= 80 ? 55 : 40));
+    refund = pickedCard.ovr >= 90 ? 350 : (pickedCard.ovr >= 85 ? 250 : (pickedCard.ovr >= 80 ? 180 : 120));
     clubData.coins += refund;
   } else {
     if (!Array.isArray(clubData.owned)) clubData.owned = [];
@@ -4921,6 +5453,11 @@ function openPack(packType = 'ultimate') {
   openPackAnimationModal(pickedCard, isDuplicate, refund);
 }
 
+let currentDropIsDuplicate = false;
+let currentDropRefund = 0;
+let packOpeningInProgress = false;
+let packRipTimeoutId = null;
+
 function openPackAnimationModal(card, isDuplicate, refund) {
   const modal = document.getElementById('packOpeningModal');
   const foilStage = document.getElementById('packFoilStage');
@@ -4930,37 +5467,65 @@ function openPackAnimationModal(card, isDuplicate, refund) {
 
   if (!modal || !foilStage || !cardStage) return;
 
+  currentDroppedCard = card;
+  currentDropIsDuplicate = !!isDuplicate;
+  currentDropRefund = refund || 0;
+  packOpeningInProgress = false;
+  if (packRipTimeoutId) clearTimeout(packRipTimeoutId);
+
   modal.style.display = 'flex';
   foilStage.style.display = 'flex';
   if (walkoutStage) walkoutStage.style.display = 'none';
   cardStage.style.display = 'none';
-  if (box) box.classList.remove('pack-bursting');
+  if (box) {
+    box.classList.remove('pack-bursting');
+    box.classList.remove('pack-ripping');
+  }
 
-  try { SFX.play('kick'); } catch (e) {}
+  try { SFX.play('pack_beam'); } catch (e) {}
 
-  setTimeout(() => {
-    triggerPackRipping(card, isDuplicate, refund);
-  }, 400);
+  // Auto-otwarcie po 2.8 sekundach jeśli gracz nie kliknie
+  packRipTimeoutId = setTimeout(() => {
+    if (!packOpeningInProgress) {
+      triggerPackRipping(card, isDuplicate, refund);
+    }
+  }, 2800);
 }
 
-function triggerPackRipping(card = currentDroppedCard, isDuplicate = false, refund = 0) {
+function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDropIsDuplicate, refund = currentDropRefund) {
+  if (packOpeningInProgress) return;
+  packOpeningInProgress = true;
+  if (packRipTimeoutId) {
+    clearTimeout(packRipTimeoutId);
+    packRipTimeoutId = null;
+  }
+
   const box = document.getElementById('pack3dBox');
   const foilStage = document.getElementById('packFoilStage');
   const walkoutStage = document.getElementById('packWalkoutStage');
   const cardStage = document.getElementById('packCardStage');
   const revealedWrap = document.getElementById('packRevealedCardWrap');
   const badge = document.getElementById('packDropStatusBadge');
+  const squadComp = document.getElementById('packSquadComparison');
 
-  if (box) box.classList.add('pack-bursting');
-  try { SFX.play('save'); } catch (e) {}
+  // Dźwięk rozrywania i laser
+  try { SFX.play('pack_rip'); } catch (e) {}
+  if (box) {
+    box.classList.add('pack-ripping');
+    setTimeout(() => {
+      box.classList.add('pack-bursting');
+      try { SFX.play('pack_beam'); } catch (e) {}
+    }, 280);
+  }
 
   setTimeout(() => {
     if (foilStage) foilStage.style.display = 'none';
 
     const isWalkout = card && card.ovr >= 85;
     const isIcon = card && card.ovr >= 90;
+    const hasPs = card && card.playstyle;
 
-    const showCard = () => {
+    const showFinalCard = () => {
       if (walkoutStage) walkoutStage.style.display = 'none';
       if (cardStage) cardStage.style.display = 'flex';
 
@@ -4970,11 +5535,33 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = false, refu
           badge.style.borderColor = '#ffb300';
           badge.style.color = '#ffb300';
           badge.textContent = `⚠️ DUPLIKAT! Szybka sprzedaż: +${refund} 🪙`;
+          try { SFX.play('coins_collect'); } catch (e) {}
         } else {
           badge.style.background = 'rgba(0, 255, 136, 0.2)';
           badge.style.borderColor = '#00ff88';
           badge.style.color = '#00ff88';
-          badge.textContent = `🎉 NOWA KARTA W TWOIM KLUBIE!`;
+          badge.textContent = `🎉 NOWY ZAWODNIK W TWOIM KLUBIE!`;
+          if (hasPs) {
+            try { SFX.play('ps_flare'); } catch (e) {}
+          }
+        }
+      }
+
+      // Porównanie ze składem
+      if (squadComp && card && card.role) {
+        const curLineupId = clubData.lineup?.[card.role];
+        const curCard = getCardById(curLineupId);
+        if (curCard) {
+          const diff = card.ovr - curCard.ovr;
+          const diffSign = diff > 0 ? `+${diff}` : `${diff}`;
+          const diffColor = diff > 0 ? '#00ff88' : (diff === 0 ? '#00f0ff' : '#8b949e');
+          squadComp.style.display = 'block';
+          squadComp.innerHTML = `
+            <span>Obecny ${card.role}: <strong>${curCard.name}</strong> (${curCard.ovr} OVR) ➔ Nowy: <strong>${card.name}</strong> (${card.ovr} OVR)</span>
+            <span style="color:${diffColor}; font-weight:900; margin-left:6px;">(${diffSign} OVR)</span>
+          `;
+        } else {
+          squadComp.style.display = 'none';
         }
       }
 
@@ -4983,22 +5570,68 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = false, refu
         const fut = revealedWrap.querySelector('.fut-card');
         if (fut) fut.classList.add('card-revealed-anim');
       }
-      try { SFX.play('goal'); } catch (e) {}
+      try { SFX.play('card_slam'); } catch (e) {}
     };
 
     if (isWalkout) {
       if (walkoutStage) {
         walkoutStage.style.display = 'block';
+        const flagBox = document.getElementById('walkoutFlagBox');
+        const posBox = document.getElementById('walkoutPosBox');
+        const bannerBox = document.getElementById('walkoutBannerBox');
+        const flagEmoji = document.getElementById('walkoutFlagEmoji');
+        const countryName = document.getElementById('walkoutCountryName');
+        const roleText = document.getElementById('walkoutRoleText');
         const banner = document.getElementById('walkoutBannerText');
         const sub = document.getElementById('walkoutSubText');
-        if (banner) banner.textContent = isIcon ? '👑 IKONA LEGEND! 👑' : '🔥 WALKOUT! 🔥';
-        if (sub) sub.textContent = `${PLAYER_NATIONS[card.id] || ''} ${card.role} • OVR ${card.ovr}`;
+
+        if (flagBox) flagBox.style.display = 'none';
+        if (posBox) posBox.style.display = 'none';
+        if (bannerBox) bannerBox.style.display = 'none';
+
+        const roleNames = { GK: 'BRAMKARZ (BR)', DEF: 'OBROŃCA (ŚO)', MID: 'POMOCNIK (ŚP)', FWD: 'NAPASTNIK (N)' };
+
+        // Krok 1: Flaga Narodowa
+        setTimeout(() => {
+          if (flagBox) {
+            flagBox.style.display = 'inline-flex';
+            if (flagEmoji) flagEmoji.textContent = PLAYER_NATIONS[card.id] || '⚽';
+            if (countryName) countryName.textContent = PLAYER_COUNTRIES[card.id] || 'NARODOWOŚĆ';
+          }
+          try { SFX.play('walkout_step'); } catch (e) {}
+        }, 150);
+
+        // Krok 2: Pozycja
+        setTimeout(() => {
+          if (posBox) {
+            posBox.style.display = 'inline-block';
+            if (roleText) roleText.textContent = roleNames[card.role] || card.role;
+          }
+          try { SFX.play('walkout_step'); } catch (e) {}
+        }, 650);
+
+        // Krok 3: Eksplozja Walkoutu / Ikony
+        setTimeout(() => {
+          if (bannerBox) {
+            bannerBox.style.display = 'block';
+            if (banner) banner.textContent = isIcon ? '👑 IKONA LEGEND FUT! 👑' : '🔥 OFICJALNY WALKOUT! 🔥';
+            if (sub) sub.textContent = `${card.name} • ${card.ovr} OVR`;
+          }
+          try {
+            SFX.play('walkout_hit');
+            SFX.play('icon_fanfare');
+          } catch (e) {}
+        }, 1150);
+
+        // Krok 4: Ujawnienie karty
+        setTimeout(showFinalCard, 2100);
+      } else {
+        showFinalCard();
       }
-      setTimeout(showCard, 1100);
     } else {
-      showCard();
+      showFinalCard();
     }
-  }, 750);
+  }, 700);
 }
 
 function closePackModal() {
@@ -5306,6 +5939,96 @@ const SFX = {
         gain.gain.setValueAtTime(0.20, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
         osc.start(now); osc.stop(now + 0.55);
+      } else if (type === 'pack_rip') {
+        // Realistyczny szum rozcinania błyszczącej folii
+        const bufLen = Math.floor(this.ctx.sampleRate * 0.38);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufLen * 0.35));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buf;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(3600, now);
+        filter.frequency.exponentialRampToValueAtTime(700, now + 0.35);
+        filter.Q.value = 3.2;
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.gain.setValueAtTime(0.40, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        noise.start(now);
+      } else if (type === 'pack_beam') {
+        // Głęboki narastający świst energetyczny
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(65, now);
+        osc.frequency.exponentialRampToValueAtTime(310, now + 0.45);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+        osc.start(now); osc.stop(now + 0.45);
+      } else if (type === 'walkout_step') {
+        // Potężne uderzenie bębna kinowego przy odkrywaniu flagi/pozycji
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.38);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.38);
+        osc.start(now); osc.stop(now + 0.38);
+      } else if (type === 'walkout_hit') {
+        // Kinowy sub-bass drop i potężny boom eksplozji
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.exponentialRampToValueAtTime(24, now + 0.75);
+        gain.gain.setValueAtTime(0.50, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.75);
+        osc.start(now); osc.stop(now + 0.75);
+      } else if (type === 'icon_fanfare') {
+        // Triumfalne złote arpeggio akordu durowego (C4 -> E4 -> G4 -> C5)
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, idx) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + idx * 0.1);
+          g.gain.setValueAtTime(0.25, now + idx * 0.1);
+          g.gain.linearRampToValueAtTime(0.01, now + idx * 0.1 + 0.5);
+          o.connect(g);
+          g.connect(this.ctx.destination);
+          o.start(now + idx * 0.1);
+          o.stop(now + idx * 0.1 + 0.5);
+        });
+      } else if (type === 'card_slam') {
+        // Mocne uderzenie karty o luksusowy cokół
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(175, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.22);
+        gain.gain.setValueAtTime(0.42, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.start(now); osc.stop(now + 0.22);
+      } else if (type === 'coins_collect') {
+        // Dźwięk brzęczących monet (szybkie 3 dźwięki)
+        const coinNotes = [987.77, 1318.51, 1760.00];
+        coinNotes.forEach((freq, idx) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(freq, now + idx * 0.08);
+          g.gain.setValueAtTime(0.22, now + idx * 0.08);
+          g.gain.linearRampToValueAtTime(0.01, now + idx * 0.08 + 0.26);
+          o.connect(g);
+          g.connect(this.ctx.destination);
+          o.start(now + idx * 0.08);
+          o.stop(now + idx * 0.08 + 0.26);
+        });
+      } else if (type === 'ps_flare') {
+        // Złoty połysk PlayStyle+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1760, now + 0.28);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.28);
+        osc.start(now); osc.stop(now + 0.28);
       }
     } catch (e) {}
   }
@@ -6993,11 +7716,12 @@ const ball = {
 
           let reach = p.radius + this.radius + 3;
           if (p.role === 'GK') {
-            const divBonus = ((p.statDiv || 75) - 75) * 0.28 + ((p.statPos || 75) - 75) * 0.14;
+            // Zbalansowany zasięg rąk (bez niewidzialnego magnesu na 80px)
+            const divBonus = ((p.statDiv || 75) - 75) * 0.16 + ((p.statPos || 75) - 75) * 0.09;
             const hasFarReach = (p.hasPlayStyle && (p.hasPlayStyle('far_reach') || p.hasPlayStyle('cat_reflex')));
             reach = p.gkDiveTimer > 0
-              ? p.radius + this.radius + 28 + divBonus + (hasFarReach ? 16 : 0)
-              : p.radius + this.radius + 14 + divBonus * 0.5 + (hasFarReach ? 8 : 0);
+              ? p.radius + this.radius + 14 + divBonus + (hasFarReach ? 7 : 0)
+              : p.radius + this.radius + 6 + divBonus * 0.5 + (hasFarReach ? 4 : 0);
           } else if (p.hasPlayStyle && p.hasPlayStyle('intercept_wall')) {
             reach += 5;
           } else if (p.hasPlayStyle && p.hasPlayStyle('anticipate')) {
@@ -7038,8 +7762,9 @@ if (best) {
             // Zdolność pewnego chwytu piłki zależy od statystyk bramkarza (statHan / OVR):
             // Lepszy bramkarz nie wylewa piłki, tylko łapie nawet mocniejsze strzały.
             const hasCat = p.playstyle === 'cat_reflex';
-            const baseCatchLimit = 13.4 + (han - 75) * 0.20 + (hasCat ? 2.5 : 0);
-            const catchThreshold = p.gkDiveTimer > 0 ? baseCatchLimit - 1.8 : baseCatchLimit;
+            // Zbalansowany limit chwytu: strzały o prędkości >14-16 są parowane (dobitki / rzuty rożne)
+            const baseCatchLimit = 11.2 + (han - 75) * 0.15 + (hasCat ? 1.8 : 0);
+            const catchThreshold = p.gkDiveTimer > 0 ? baseCatchLimit - 1.5 : baseCatchLimit;
 
             if (speed > catchThreshold) {
               // Parada bramkarska: odbicie na rożny lub aut (w bok i poza światło bramki, a NIE przed siebie!)
@@ -7397,27 +8122,28 @@ class Player {
     playAndBroadcastSFX('slide');
   }
 
-  // Rzut bramkarza szczupakiem w bok do lecącej piłki!
+  // Rzut bramkarza szczupakiem w bok do lecącej piłki (zbalansowana dynamika, nie teleportacja)
   startGkDive(targetY) {
     if (this.gkDiveTimer > 0 || this.gkDiveCooldown > 0) return;
     const hasCat = this.playstyle === 'cat_reflex';
     if (hasCat) this.activatePlayStyle('cat_reflex');
     const div = this.statDiv || this.statDef || 75;
     const ref = this.statRef || 75;
-    this.gkDiveTimer = Math.round((hasCat ? 27 : 21) * (1 + (ref - 75) * 0.005));
+    // Skrócony czas trwania rzutu (15-19 klatek) zapobiega 'wiszeniu' w powietrzu
+    this.gkDiveTimer = Math.round((hasCat ? 19 : 15) * (1 + (ref - 75) * 0.004));
     this.gkDiveMaxTimer = this.gkDiveTimer;
-    this.gkDiveCooldown = hasCat ? 34 : Math.max(38, Math.round(46 - (ref - 75) * 0.15));
+    this.gkDiveCooldown = hasCat ? 30 : Math.max(34, Math.round(42 - (ref - 75) * 0.12));
     this.gkDiveDirY = targetY >= this.y ? 1 : -1;
 
-    const divePower = (hasCat ? 9.5 : 7.2) * (1 + (div - 75) * 0.008);
-    const forwardStep = this.team === 'blue' ? 1.6 : -1.6;
+    // Zbalansowana prędkość rzutu: bramkarz dosięga strzałów przy słupkach, ale nie pokrywa natychmiast całej bramki
+    const divePower = (hasCat ? 6.2 : 5.0) * (1 + (div - 75) * 0.006);
+    const forwardStep = this.team === 'blue' ? 1.1 : -1.1;
     this.vx = forwardStep;
     this.vy = this.gkDiveDirY * divePower;
-    // Bramkarz podczas rzutu ma zawsze patrzeć w stronę boiska / lecącej piłki (nie bokiem!)
     this.angle = this.team === 'blue' ? 0 : Math.PI;
 
     playAndBroadcastSFX('slide');
-    spawnParticles(this.x, this.y, 6, 12, hasCat ? '#f5b041' : '#00f0ff', 2.8, 20, 3.5);
+    spawnParticles(this.x, this.y, 6, 10, hasCat ? '#f5b041' : '#00f0ff', 2.4, 16, 3.0);
   }
 
   update(isHumanControlled, inputSource = null) {
@@ -7940,7 +8666,7 @@ class Player {
     if (this.tackleCd > 0) this.tackleCd--;
     if (this.aiTrickCd > 0) this.aiTrickCd--;
 
-    // Przewidywanie przechwytu luźnej piłki (tarcie ~0.978/tick) zamiast biegu do jej aktualnej pozycji
+    // Przewidywanie przechwytu luźnej piłki (tarcie ~0.978/tick)
     const interceptPoint = (pl) => {
       let bx = ball.x, by = ball.y, bvx = ball.vx, bvy = ball.vy;
       const sp = pl.baseSpeed * 1.1;
@@ -7951,7 +8677,7 @@ class Player {
       return { x: bx, y: by, t: 60 };
     };
 
-    // Ryzyko przechwytu na torze (ax,ay)->(bx,by) względem listy rywali
+    // Ryzyko przecięcia linii podania przez rywali
     const laneRisk = (ax, ay, bx, by, list) => {
       let r = 0;
       const vx = bx - ax, vy = by - ay, l2 = vx * vx + vy * vy || 1;
@@ -7963,7 +8689,7 @@ class Player {
       return r;
     };
 
-    // Wybiera kierunek wybicia/podania omijający rywali stojących na linii (nie kopie prosto w pressującego)
+    // Szukanie bezpiecznego kąta podania
     const freeAngle = (base) => {
       let best = base, bs = -1e9;
       for (let k = -4; k <= 4; k++) {
@@ -7974,23 +8700,25 @@ class Player {
       return best;
     };
 
-    // ========== BRAMKARZ ==========
+    // =========================================================================
+    // 1. BRAMKARZ (GK) — Zbalansowane interwencje, bez oszustw 100% obrony
+    // =========================================================================
     if (this.role === 'GK') {
       if (ball.owner === this) {
         this.angle = dir > 0 ? 0 : Math.PI;
         this.holdTicks = (this.holdTicks || 0) + 1;
-        if (this.aiDecisionCooldown <= 0 && this.holdTicks > 40) {
+        if (this.aiDecisionCooldown <= 0 && this.holdTicks > 35) {
           let best = null, bs = -1e9;
           for (const m of field) {
             const r = laneRisk(this.x, this.y, m.x, m.y, foes);
-            const sc = (m.x - this.x) * dir * 0.25 - r * 120 - Math.abs(dist(this, m) - 300) * 0.1;
+            const sc = (m.x - this.x) * dir * 0.30 - r * 110 - Math.abs(dist(this, m) - 280) * 0.1;
             if (sc > bs) { bs = sc; best = m; }
           }
           const tx = best ? best.x + best.vx * 8 : enemyGoalX;
           const ty = best ? best.y + best.vy * 8 : cy;
           const far = best ? dist(this, best) : 400;
           const a0 = Math.atan2(ty - this.y, tx - this.x), a1 = freeAngle(a0);
-          ball.kick(this, a1, clamp(6.5 + far * 0.026, 9, 15), (far > 320 || a1 !== a0) ? 4.5 : 1.0);
+          ball.kick(this, a1, clamp(6.8 + far * 0.026, 9.5, 15.5), (far > 300 || a1 !== a0) ? 4.5 : 1.0);
           this.holdTicks = 0;
           this.aiDecisionCooldown = cfg.reactDelay + 20;
         }
@@ -7998,24 +8726,32 @@ class Player {
       }
       this.holdTicks = 0;
 
-      // Strzał w światło bramki: jeden rzut kością na strzał (refleks), potem parada lub ustawienie
-      const toward = ball.vx * dir < -5.8;
+      // Reakcja na strzał lecący w stronę bramki:
+      const toward = ball.vx * dir < -5.5;
       const dx = Math.abs(ball.x - this.x);
       let predY = null;
-      if (!ball.owner && toward && dx < 700 && dx > 8) {
+      if (!ball.owner && toward && dx < 720 && dx > 8) {
         const frames = dx / Math.max(1, Math.abs(ball.vx));
         predY = ball.y + ball.vy * frames;
         if (this.gkRollId !== ball.shotId) {
           this.gkRollId = ball.shotId;
           const refStat = this.statRef || 75;
           const posStat = this.statPos || 75;
-          const reflexBonus = (refStat - 75) * 0.007 + (posStat - 75) * 0.004;
-          const hasFarReach = (this.hasPlayStyle && (this.hasPlayStyle('far_reach') || this.hasPlayStyle('cat_reflex')));
-          this.gkReacts = hasFarReach || Math.random() < Math.min(0.97, cfg.diveReflex + reflexBonus + (hasFarReach ? 0.20 : 0));
+          const reflexBonus = (refStat - 75) * 0.005 + (posStat - 75) * 0.003;
+          const hasCat = (this.hasPlayStyle && (this.hasPlayStyle('far_reach') || this.hasPlayStyle('cat_reflex')));
+
+          // Kara do refleksu przy strzałach z bliska oraz atomowych bombach (mocne strzały wpadają!)
+          const bSpeed = Math.hypot(ball.vx, ball.vy);
+          const closeDistPen = dx < 240 ? (240 - dx) * 0.0016 : 0;
+          const rocketPen = bSpeed > 21.0 ? (bSpeed - 21.0) * 0.028 : 0;
+
+          const baseReaction = (cfg.diveReflex * 0.85) + reflexBonus + (hasCat ? 0.12 : 0) - closeDistPen - rocketPen;
+          // Zamiast gwarantowanego 100% obrony, szansa wynosi 0.25 - 0.82
+          this.gkReacts = Math.random() < clamp(baseReaction, 0.25, 0.82);
         }
         const yDiff = Math.abs(predY - this.y);
-        if (this.gkReacts && ball.z < 65 && Math.abs(predY - cy) < WORLD.goalHeight * 0.65 && yDiff > 18) {
-          if (dx < 360) {
+        if (this.gkReacts && ball.z < 65 && Math.abs(predY - cy) < WORLD.goalHeight * 0.65 && yDiff > 16) {
+          if (dx < 340) {
             this.startGkDive(predY);
             return;
           }
@@ -8023,24 +8759,26 @@ class Player {
       }
 
       const dGoalBall = Math.hypot(ball.x - ownGoalX, ball.y - cy);
-      const looseNear = !ball.owner && dGoalBall < 215 && Math.hypot(ball.vx, ball.vy) < 9.5;
+      const looseNear = !ball.owner && dGoalBall < 210 && Math.hypot(ball.vx, ball.vy) < 9.0;
       const gkClosest = looseNear && [...myTeam, ...oppTeam].every(p => p === this || dist(p, ball) > dist(this, ball) * 0.9);
       let tx, ty;
       if (gkClosest) {
         tx = ball.x; ty = ball.y;
       } else {
-        const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 170 ? 105 : clamp(dGoalBall * 0.2, 36, 90);
+        const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 170 ? 95 : clamp(dGoalBall * 0.18, 30, 85);
         tx = ownGoalX + dir * out;
-        ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.5, -WORLD.goalHeight * 0.55, WORLD.goalHeight * 0.55);
-        if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.5, WORLD.goalHeight * 0.5);
+        ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.48, -WORLD.goalHeight * 0.52, WORLD.goalHeight * 0.52);
+        if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.48, WORLD.goalHeight * 0.48);
       }
-      tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 170), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 170));
+      tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 155), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 155));
       this.moveTowards(tx, ty, 1.0 * cfg.speedMult, gkClosest);
       if (!this.isMoving) this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
       return;
     }
 
-    // ========== ZAWODNIK Z PIŁKĄ ==========
+    // =========================================================================
+    // 2. ZAWODNIK PRZY PIŁCE (BALL CARRIER) — Inteligentne, mocne strzały & przegląd pola
+    // =========================================================================
     if (ball.owner === this) {
       this.holdTicks = (this.holdTicks || 0) + 1;
       const dGoal = Math.hypot(enemyGoalX - this.x, cy - this.y);
@@ -8049,84 +8787,107 @@ class Player {
       const pressed = nd < cfg.pressRange * 0.75;
       const gk = oppTeam.find(p => p.role === 'GK');
       const sho = clamp(this.statSho || 75, 50, 99);
+      const isPS = this.playstyle === 'power_shot';
+      const isFin = this.playstyle === 'finesse_shot';
 
-      // --- Strzał: im czystszy tor, tym z dalszej odległości ---
-      const range = cfg.shootDist * (0.72 + sho / 250);
-      const open = clamp(1 - laneRisk(this.x, this.y, enemyGoalX, cy, foes) * 0.8, 0, 1);
-      const angleOk = Math.abs(this.y - cy) < 290 && (enemyGoalX - this.x) * dir > 0;
-      const shotReach = range * (0.62 + 0.38 * open);
-      if (this.aiDecisionCooldown <= 0 && angleOk && (open > 0.3 || pressed || this.holdTicks > 90) && (dGoal < shotReach || (pressed && dGoal < range * 0.85) || (this.holdTicks > 150 && dGoal < range))) {
-        const keeperY = gk ? gk.y + gk.vy * 6 : cy;
-        const top = cy - WORLD.goalHeight * 0.34, bot = cy + WORLD.goalHeight * 0.34;
-        const scoreAim = (ay) => Math.abs(ay - keeperY) * 0.5 - laneRisk(this.x, this.y, enemyGoalX, ay, foes) * 70;
-        let aimY = scoreAim(top) > scoreAim(bot) ? top : bot;
-        const deadBall = this.playstyle === 'dead_ball' ? 0.72 : 1.0;
-        const err = ((1 - cfg.passAcc) * 95 + (100 - sho) * 0.38) * deadBall / cfg.shotQuality * (pressed ? 1.25 : 1.0);
-        aimY += (Math.random() - 0.5) * err;
-        const isPS = this.playstyle === 'power_shot', isFin = this.playstyle === 'finesse_shot';
+      // --- MOCNE I SKUTECZNE STRZAŁY AI ---
+      const rRisk = laneRisk(this.x, this.y, enemyGoalX, cy, foes);
+      const inShootingZone = (enemyGoalX - this.x) * dir > 0 && dGoal < (cfg.shootDist * (0.86 + sho / 220));
+      const isOneOnOne = dGoal < 340 && foes.every(f => (f.x - this.x) * dir < -15 || dist(this, f) > 70);
+      const canShoot = inShootingZone && (rRisk < 0.36 || isOneOnOne || (pressed && dGoal < 270) || this.holdTicks > 42);
+
+      if (this.aiDecisionCooldown <= 0 && canShoot) {
+        const keeperY = gk ? gk.y + gk.vy * 4 : cy;
+        const topCorner = cy - WORLD.goalHeight * 0.38;
+        const botCorner = cy + WORLD.goalHeight * 0.38;
+
+        // Celowanie w róg bramki będący najdalej od bramkarza
+        let aimY = Math.abs(topCorner - keeperY) > Math.abs(botCorner - keeperY) ? topCorner : botCorner;
+
+        // Błąd celności (mniejszy dla wyższych poziomów i kart z dobrym SHO):
+        const deadBall = this.playstyle === 'dead_ball' ? 0.70 : 1.0;
+        const aimError = ((1 - cfg.passAcc) * 45 + (100 - sho) * 0.26) * deadBall / (cfg.shotQuality || 1);
+        aimY += (Math.random() - 0.5) * aimError * (pressed ? 1.2 : 0.75);
+
+        // MOC STRZAŁU: Skaluje się z parametrem SHOOTING (zakres 20.5 - 28.0 dla zwykłych, do 34.0 dla Power Shot!)
+        const shoFactor = (sho - 50) / 50;
+        let shotSpeed = 20.8 + shoFactor * 7.2;
+        let shotLift = 1.4 + Math.random() * 2.2;
+
+        if (isPS || (!pressed && dGoal > 210 && dGoal < 380 && Math.random() < (this.getBotTier() === 'hard' ? 0.50 : 0.28))) {
+          // Błyskawiczny atomowy Power Shot
+          shotSpeed = 26.5 + shoFactor * 7.5;
+          shotLift = 1.8 + Math.random() * 1.8;
+          if (isPS) this.activatePlayStyle('power_shot');
+        } else if (isFin || (isOneOnOne && Math.random() < 0.65)) {
+          // Podkręcony Finesse Shot w samo okienko
+          shotSpeed = 19.8 + shoFactor * 5.2;
+          shotLift = 2.2 + Math.random() * 1.5;
+          if (isFin) this.activatePlayStyle('finesse_shot');
+        }
+
         if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
-        ball.kick(this, Math.atan2(aimY - this.y, enemyGoalX - this.x), isPS ? 19.5 : (isFin ? 17.2 : 15.5 + sho * 0.012), isFin ? 1.8 : 2.0, 16, isPS, isFin);
-        camera.shake = 4;
+        ball.kick(this, Math.atan2(aimY - this.y, enemyGoalX - this.x), shotSpeed, shotLift, 16, isPS, isFin);
+        camera.shake = isPS ? 6 : 4;
         this.holdTicks = 0;
-        this.aiDecisionCooldown = cfg.reactDelay + 17;
+        this.aiDecisionCooldown = cfg.reactDelay + 14;
         return;
       }
 
-      // --- Zwód pod presją ---
+      // --- Zwód pod presją rywala ---
       const trickStyle = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
-      if (nd < 105 && this.trickTimer === 0 && this.trickCooldown <= 0 && this.stamina > 40 && this.aiDecisionCooldown <= 0 && !(this.aiTrickCd > 0) && Math.random() < cfg.trickChance * (trickStyle ? 3.2 : 1.0)) {
-        this.triggerTrick(trickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', trickStyle ? 'elastico' : 'stepover', trickStyle ? 1.28 : 1.16, true);
+      if (nd < 95 && this.trickTimer === 0 && this.trickCooldown <= 0 && this.stamina > 38 && this.aiDecisionCooldown <= 0 && !(this.aiTrickCd > 0) && Math.random() < cfg.trickChance * (trickStyle ? 3.0 : 1.0)) {
+        this.triggerTrick(trickStyle ? 'TECHNICZNY ZWÓD AI!' : 'ZWÓD AI!', trickStyle ? 'elastico' : 'stepover', trickStyle ? 1.25 : 1.15, true);
         this.aiDecisionCooldown = Math.max(8, Math.floor(cfg.reactDelay * 0.65));
-        this.aiTrickCd = 170;   // zwód ogłusza rywali, więc AI nie może go spamować
+        this.aiTrickCd = 160;
       }
 
-      // --- Podanie: postęp, wolna przestrzeń, ryzyko przechwytu ---
+      // --- Podanie: Prostopadłe wyjścia do napastnika & szybka gra pod presją ---
       let bestPass = null, bestScore = -Infinity, bestRisk = 0, bestDist = 0;
       if (this.aiDecisionCooldown <= 0) {
         for (const m of field) {
           if (m === this) continue;
           const pd = dist(this, m);
-          if (pd < 65 || pd > 480) continue;
+          if (pd < 60 || pd > 520) continue;
           const risk = laneRisk(this.x, this.y, m.x, m.y, oppTeam);
           const gain = (m.x - this.x) * dir;
-          const space = Math.min(150, Math.min(...oppTeam.map(o => dist(o, m)))) * 0.48;
+          const space = Math.min(150, Math.min(...oppTeam.map(o => dist(o, m)))) * 0.50;
           const skill = this.statPas || 75;
-          const style = (this.playstyle === 'tiki_taka' ? 18 : 0) + ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && pd > 220 ? 22 : 0) + (this.playstyle === 'incisive_pass' ? 16 : 0);
+          const style = (this.playstyle === 'tiki_taka' ? 20 : 0) + ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && pd > 220 ? 24 : 0) + (this.playstyle === 'incisive_pass' ? 18 : 0);
           const dGm = Math.hypot(enemyGoalX - m.x, cy - m.y);
-          const threat = dGm < 400 ? (400 - dGm) * 0.30 * (1 - clamp(laneRisk(m.x, m.y, enemyGoalX, cy, foes) * 0.8, 0, 1)) : 0;
-          const edge = (m.y < WORLD.marginY + 70 || m.y > WORLD.height - WORLD.marginY - 70) ? 22 : 0;
-          const sc = gain * 0.6 + space - risk * 95 * cfg.passRisk - Math.max(0, pd - 230) * 0.2 - (gain < -20 ? 48 : 0) + (skill - 75) * 0.42 + style + Math.random() * (1 - cfg.vision) * 24 + threat * cfg.vision - edge;
+          const threat = dGm < 420 ? (420 - dGm) * 0.32 * (1 - clamp(laneRisk(m.x, m.y, enemyGoalX, cy, foes) * 0.8, 0, 1)) : 0;
+          const isFwdRun = (m.role === 'FWD' && gain > 30);
+          const edge = (m.y < WORLD.marginY + 65 || m.y > WORLD.height - WORLD.marginY - 65) ? 22 : 0;
+
+          // Wysoki priorytet dla podania prostopadłego do wybiegającego napastnika
+          const sc = gain * 0.70 + space - risk * 90 * cfg.passRisk - Math.max(0, pd - 250) * 0.18 + (isFwdRun ? 45 : 0) + (skill - 75) * 0.42 + style + threat * cfg.vision - edge;
           if (sc > bestScore) { bestScore = sc; bestPass = m; bestRisk = risk; bestDist = pd; }
         }
       }
-      if (bestPass && ((pressed && bestScore > 40) || bestScore > 110 || (this.holdTicks > 150 && bestScore > -60))) {
-        const lead = 5 + cfg.vision * 5;
-        const px = bestPass.x + bestPass.vx * lead + dir * 14, py = bestPass.y + bestPass.vy * lead;
+
+      if (bestPass && ((pressed && bestScore > 28) || bestScore > 95 || (this.holdTicks > 110 && bestScore > -40))) {
+        // Podanie prostopadłe w uliczkę:
+        const isThroughPass = bestPass.role === 'FWD' && (enemyGoalX - bestPass.x) * dir > 60;
+        const lead = isThroughPass ? (14 + cfg.vision * 12) : (5 + cfg.vision * 5);
+        const px = bestPass.x + bestPass.vx * lead + (isThroughPass ? dir * 26 : dir * 8);
+        const py = bestPass.y + bestPass.vy * lead;
         const skill = clamp(this.statPas || 75, 50, 99);
-        const boost = this.playstyle === 'incisive_pass' ? 1.2 : this.playstyle === 'tiki_taka' ? 1.08 : ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && bestDist > 220) ? 1.16 : 1.0;
-        const err = (Math.random() - 0.5) * (1 - cfg.passAcc) * 0.55 * (85 / skill);
+        const boost = this.playstyle === 'incisive_pass' ? 1.22 : this.playstyle === 'tiki_taka' ? 1.10 : ((this.playstyle === 'long_ball' || this.playstyle === 'pinged_pass') && bestDist > 220) ? 1.18 : 1.0;
+        const err = (Math.random() - 0.5) * (1 - cfg.passAcc) * 0.48 * (85 / skill);
         const a = Math.atan2(py - this.y, px - this.x) + err;
-        if (bestRisk > 0.55 && bestDist > 170) {
-          ball.kick(this, a, clamp(bestDist * 0.036, 6, 13), 6.2, 16);   // górne podanie nad rywalem
+
+        if (bestRisk > 0.52 && bestDist > 165) {
+          ball.kick(this, a, clamp(bestDist * 0.038, 7, 14), 6.5, 16);
         } else {
-          ball.kick(this, a, clamp((6.2 + bestDist * 0.027) * boost, 8, 18), 0, 14, false, false, boost > 1.05);
+          ball.kick(this, a, clamp((7.0 + bestDist * 0.029) * boost, 9.5, 19.0), 0, 14, false, false, boost > 1.05);
         }
         this.holdTicks = 0;
-        this.aiDecisionCooldown = cfg.reactDelay + 15;
+        this.aiDecisionCooldown = cfg.reactDelay + 14;
         return;
       }
 
-      // --- Wybicie, gdy piłka jest trzymana za długo (koniec zakleszczeń przy bandzie) ---
-      if (this.holdTicks > 150 && this.aiDecisionCooldown <= 0) {
-        const a = freeAngle(Math.atan2(cy - this.y, 320 * dir));
-        ball.kick(this, a, 13.5, 3.0, 16);
-        this.holdTicks = 0;
-        this.aiDecisionCooldown = cfg.reactDelay + 15;
-        return;
-      }
-
-      // --- Prowadzenie: wybór najlepszego kierunku (przewidywany ruch rywali, linie boiska, bramkarz) ---
-      const goalTY = cy + (this.y < cy ? -70 : 70);
+      // --- Dłuższe prowadzenie: inteligentne omijanie rywali i band ---
+      const goalTY = cy + (this.y < cy ? -65 : 65);
       const baseA = Math.atan2(goalTY - this.y, enemyGoalX - this.x);
       const prevA = this._dribA !== undefined ? this._dribA : baseA;
       const predT = 6 + cfg.vision * 6;
@@ -8138,21 +8899,23 @@ class Player {
         let danger = 0;
         for (const f of foes) {
           const d = Math.hypot(f.x + f.vx * predT - lx, f.y + f.vy * predT - ly);
-          if (d < 90) danger += (90 - d) / 90;
+          if (d < 95) danger += (95 - d) / 95;
         }
-        if (gk) { const dg = Math.hypot(gk.x - lx, gk.y - ly); if (dg < 60) danger += (60 - dg) / 120; }
+        if (gk) { const dg = Math.hypot(gk.x - lx, gk.y - ly); if (dg < 65) danger += (65 - dg) / 120; }
         const top = WORLD.marginY + 45, bottom = WORLD.height - WORLD.marginY - 45;
-        const wallPen = (ly < top ? (top - ly) * 1.6 : 0) + (ly > bottom ? (ly - bottom) * 1.6 : 0);
+        const wallPen = (ly < top ? (top - ly) * 1.8 : 0) + (ly > bottom ? (ly - bottom) * 1.8 : 0);
         const sc = (lx - this.x) * dir * 0.45 - danger * 120 * (0.6 + cfg.vision * 0.4) - Math.abs(k) * 5 - wallPen - Math.abs(normalizeAngle(a - prevA)) * 14;
         if (sc > bestSc) { bestSc = sc; bestA = a; }
       }
       this._dribA = bestA;
-      this.moveTowards(this.x + Math.cos(bestA) * 120, this.y + Math.sin(bestA) * 120, 0.98 * cfg.speedMult, nd > 120 && this.stamina > 28);
+      this.moveTowards(this.x + Math.cos(bestA) * 120, this.y + Math.sin(bestA) * 120, 0.98 * cfg.speedMult, nd > 115 && this.stamina > 26);
       return;
     }
     this.holdTicks = 0;
 
-    // ========== DRUŻYNA MA PIŁKĘ: wsparcie (aktywne pokazywanie się do piłki i wybieganie na wolne pole) ==========
+    // =========================================================================
+    // 3. FAZA ATAKU / WSPARCIE (ANTY-DUBLOWANIE: ŚO - ŚP - N W OSOBNYCH STREFACH)
+    // =========================================================================
     if (ball.owner && ball.owner.team === this.team) {
       const c = ball.owner;
       let distToCarrierFoe = 999;
@@ -8160,40 +8923,54 @@ class Player {
         const d = dist(c, f);
         if (d < distToCarrierFoe) distToCarrierFoe = d;
       }
-      const carrierUnderPress = distToCarrierFoe < 100;
+      const carrierUnderPress = distToCarrierFoe < 95;
 
+      // Unikalne strefy taktyczne:
+      // NAPASTNIK (FWD) szuka głębi i wybiega za plecy obrońców rywali.
+      // POMOCNIK (MID) operuje w środku i po przekątnej (rozegranie i zmiana strony).
+      // OBROŃCA (DEF) asekuruje z tyłu (rest defense) na linii koła środkowego.
       if (!this._spot || this._spotFor !== c || tickCount - (this._spotTick || 0) > 10) {
         const mates = field.filter(m => m !== this && m !== c);
+
         const scoreSpot = (sx, sy) => {
           let minFoe = 220;
           for (const f of foes) minFoe = Math.min(minFoe, Math.hypot(f.x - sx, f.y - sy));
           const r = laneRisk(c.x, c.y, sx, sy, foes);
-          // Otwarty korytarz podania:
-          let sc = -r * 150 * cfg.passRisk + Math.min(minFoe, 160) * 0.75;
-          if (r < 0.12) sc += 70; // wysoki bonus za czystą linię podania
-          if (minFoe < 60) sc -= (60 - minFoe) * 1.5; // ucieczka od kryjącego obrońcy
+
+          let sc = -r * 140 * cfg.passRisk + Math.min(minFoe, 160) * 0.70;
+          if (r < 0.12) sc += 75; // Czysty korytarz podania
+          if (minFoe < 60) sc -= (60 - minFoe) * 1.5; // Odejście od kryjącego
 
           const dc = Math.hypot(sx - c.x, sy - c.y);
-          if (carrierUnderPress) {
-            // Gdy kolega jest naciskany, pokazujemy się blisko do podania ratunkowego
-            sc -= Math.abs(dc - 135) * 0.55;
-          } else {
-            if (this.role === 'FWD') {
-              // Napastnik szuka głębi i wybiega za plecy obrońców
-              sc += (sx - c.x) * dir * 0.45;
-              sc -= Math.abs(dc - 220) * 0.25;
-              sc -= Math.hypot(enemyGoalX - sx, cy - sy) * 0.15;
-            } else {
-              // Obrońca asekuruje z tyłu po przekątnej (trójkąt rozegrania)
-              sc += (c.x - sx) * dir * 0.30;
-              sc -= Math.abs(dc - 170) * 0.30;
+
+          if (this.role === 'FWD') {
+            // Napastnik: ciąg na bramkę, rozciąganie obrony wzdłuż osi boiska
+            sc += (sx - c.x) * dir * 0.65;
+            sc -= Math.hypot(enemyGoalX - sx, cy - sy) * 0.20;
+            sc -= Math.abs(dc - 240) * 0.22;
+          } else if (this.role === 'MID') {
+            // Pomocnik: gra kombinacyjna, wolna przestrzeń po przekątnej, zmiana strony
+            sc += (sx - c.x) * dir * 0.20;
+            const oppositeSideBonus = (c.y < cy && sy > cy) || (c.y >= cy && sy <= cy) ? 45 : 0;
+            sc += oppositeSideBonus;
+            sc -= Math.abs(dc - 180) * 0.35;
+          } else { // DEF
+            // Obrońca: asekuracja z tyłu, blokowanie kontrataków
+            sc += (c.x - sx) * dir * 0.40;
+            sc -= Math.abs(dc - 190) * 0.35;
+            sc -= Math.abs(sy - cy) * 0.18; // DEF pilnuje osi środkowej
+          }
+
+          // KLUCZOWE: Kara za zbliżenie do pozycji LUB celu innego kolegi z drużyny (STOP DUBLOWANIU!)
+          for (const m of mates) {
+            const dmCurr = Math.hypot(m.x - sx, m.y - sy);
+            const dmTarg = m._spot ? Math.hypot(m._spot.x - sx, m._spot.y - sy) : 999;
+            const minMateDist = Math.min(dmCurr, dmTarg);
+            if (minMateDist < 185) {
+              sc -= (185 - minMateDist) * 3.5; // Potężna separacja!
             }
           }
-          for (const m of mates) {
-            const d = Math.hypot(m.x - sx, m.y - sy);
-            if (d < 120) sc -= (120 - d) * 0.9;
-          }
-          if (Math.abs(sy - c.y) < 35 && (sx - c.x) * dir < 40) sc -= 45;
+
           sc -= Math.hypot(sx - this.x, sy - this.y) * 0.08;
           return sc;
         };
@@ -8204,31 +8981,53 @@ class Player {
           bs = scoreSpot(best.x, best.y) + 8;
         }
 
-        const candidateDists = carrierUnderPress ? [110, 140, 165] : [150, 210, 260];
-        const angles = [-1.1, -0.65, -0.25, 0.25, 0.65, 1.1];
+        // Różne bazy kątowe i odległości zależne od roli:
+        let candidateDists, angles;
+        if (this.role === 'FWD') {
+          candidateDists = [180, 240, 310];
+          angles = [-0.8, -0.4, 0, 0.4, 0.8];
+        } else if (this.role === 'MID') {
+          candidateDists = carrierUnderPress ? [110, 140] : [150, 200, 250];
+          angles = [-1.3, -0.7, 0.7, 1.3];
+        } else { // DEF
+          candidateDists = [140, 190, 240];
+          angles = [-0.9, -0.4, 0.4, 0.9];
+        }
+
+        const baseAngle = this.role === 'FWD' ? (dir > 0 ? 0 : Math.PI) : (dir > 0 ? Math.PI : 0);
         for (const cd of candidateDists) {
           for (const angOffset of angles) {
-            const baseDir = this.role === 'FWD' ? (dir > 0 ? 0 : Math.PI) : (dir > 0 ? Math.PI : 0);
-            const a = baseDir + angOffset;
+            const a = baseAngle + angOffset;
             let sx = c.x + Math.cos(a) * cd;
             let sy = c.y + Math.sin(a) * cd;
-            if (this.role === 'DEF') sx = dir > 0 ? Math.min(sx, WORLD.width / 2 + 80) : Math.max(sx, WORLD.width / 2 - 80);
-            sx = clamp(sx, WORLD.marginX + 90, WORLD.width - WORLD.marginX - 90);
+
+            // Ograniczenia terytorialne: DEF nie wchodzi głęboko na połowę rywala
+            if (this.role === 'DEF') {
+              sx = dir > 0 ? Math.min(sx, WORLD.width / 2 + 60) : Math.max(sx, WORLD.width / 2 - 60);
+            }
+            sx = clamp(sx, WORLD.marginX + 80, WORLD.width - WORLD.marginX - 80);
             sy = clamp(sy, WORLD.marginY + 50, WORLD.height - WORLD.marginY - 50);
+
             const sc = scoreSpot(sx, sy);
             if (sc > bs) { bs = sc; best = { x: sx, y: sy }; }
           }
         }
-        this._spot = best; this._spotTick = tickCount; this._spotFor = c;
+        this._spot = best;
+        this._spotTick = tickCount;
+        this._spotFor = c;
       }
-      const tx = this._spot.x, ty = this._spot.y;
-      const needSprint = (carrierUnderPress || Math.hypot(tx - this.x, ty - this.y) > 130) && this.stamina > 25;
+
+      const tx = this._spot ? this._spot.x : this.x;
+      const ty = this._spot ? this._spot.y : this.y;
+      const needSprint = (carrierUnderPress || Math.hypot(tx - this.x, ty - this.y) > 130) && this.stamina > 24;
       this.moveTowards(tx, ty, 0.98 * cfg.speedMult, needSprint);
       return;
     }
 
-    // ========== OBRONA / LUŹNA PIŁKA ==========
-    // Jeden goniący na drużynę (z histerezą, żeby nie przeskakiwali co klatkę)
+    // =========================================================================
+    // 4. FAZA OBRONY I WALKI O PIŁKĘ (KOORDYNOWANE KRYCIE 1 NA 1, BRAK DUBELKÓW)
+    // =========================================================================
+    // Dokładnie JEDEN goniący na drużynę (z histerezą)
     const eta = p => (ball.owner ? dist(p, ball) : interceptPoint(p).t * 3.4) - (p.wasChaser ? 38 : 0);
     let chaser = field[0];
     for (const p of field) if (eta(p) < eta(chaser)) chaser = p;
@@ -8239,7 +9038,7 @@ class Player {
       let px, py;
       if (carrier) {
         const gx = ownGoalX - carrier.x, gy = cy - carrier.y, gl = Math.hypot(gx, gy) || 1;
-        const standOff = 30 + (1 - cfg.vision) * 26;
+        const standOff = 28 + (1 - cfg.vision) * 24;
         const cxp = carrier.x + carrier.vx * 5 * cfg.vision, cyp = carrier.y + carrier.vy * 5 * cfg.vision;
         px = cxp + gx / gl * standOff; py = cyp + gy / gl * standOff;
       } else {
@@ -8247,31 +9046,31 @@ class Player {
         px = ball.x + (ip.x - ball.x) * bl; py = ball.y + (ip.y - ball.y) * bl;
       }
       this.moveTowards(px, py, 0.99 * cfg.speedMult, Math.hypot(px - this.x, py - this.y) > 90 && this.stamina > 20);
+
       if (carrier) {
         const d = dist(this, carrier);
-        if (d < 40 && this.tackleCd <= 0) {
-          this.tackleCd = 42 + Math.round((1 - cfg.vision) * 40);
-          let ch = 0.34 + ((this.statDef || 75) - (carrier.statDri || 75)) * 0.005 + cfg.vision * 0.12
+        if (d < 42 && this.tackleCd <= 0) {
+          this.tackleCd = 40 + Math.round((1 - cfg.vision) * 38);
+          let ch = 0.35 + ((this.statDef || 75) - (carrier.statDri || 75)) * 0.005 + cfg.vision * 0.12
             - (carrier.isShielding ? 0.14 : 0) - (carrier.trickTimer > 0 ? 0.16 : 0)
             + (this.playstyle === 'press_proven' ? 0.06 : 0) - (carrier.playstyle === 'bruiser' ? 0.06 : 0);
-          ch = clamp(ch, 0.12, 0.62);
+          ch = clamp(ch, 0.12, 0.64);
           this.angle = Math.atan2(carrier.y - this.y, carrier.x - this.x);
           this.lungeTimer = 12;
           if (Math.random() < ch) {
-            // Czysty odbiór: piłka wyskakuje do walki o drugą piłkę, a nie wpada darmowo do nogi
             carrier.stunTimer = 10;
             ball.owner = null;
             ball.lastKicker = carrier;
             ball.lastTouchTeam = this.team;
             ball.kickCooldown = 12;
-            ball.vx = Math.cos(this.angle) * 2.6;
-            ball.vy = Math.sin(this.angle) * 2.6;
+            ball.vx = Math.cos(this.angle) * 2.8;
+            ball.vy = Math.sin(this.angle) * 2.8;
             ball.vz = 0; ball.z = 0;
             playAndBroadcastSFX('pass');
           } else {
             this.aiDecisionCooldown = Math.max(this.aiDecisionCooldown, 10);
           }
-        } else if (d > 52 && d < 90 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance &&
+        } else if (d > 50 && d < 90 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance &&
                    (carrier.vx * (ownGoalX - carrier.x) + carrier.vy * (cy - carrier.y)) > 0) {
           this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
           this.startSlide();
@@ -8280,40 +9079,69 @@ class Player {
       return;
     }
 
-    // Reszta: krycie najgroźniejszego rywala lub zwarty szyk między piłką a bramką
+    // Pozostali zawodnicy: KRYCIE STREFOWO-INDYWIDUALNE (Każdy kryje innego rywala!)
+    const takenMarks = new Set();
+    for (const m of field) {
+      if (m !== this && m._markedFoe && m._markedFoe !== carrier) {
+        takenMarks.add(m._markedFoe);
+      }
+    }
+
     let tx, ty;
-    // Najgroźniejszy rywal: blisko mojej bramki i nie kryty już przez kolegę; stajemy na linii podania do niego
     let mark = null, ms = -1e9;
     if (carrier) {
       for (const f of foes) {
         if (f === carrier) continue;
-        const sc = -Math.abs(f.x - ownGoalX) * 0.6 - dist(f, this) * 0.2 - laneRisk(carrier.x, carrier.y, f.x, f.y, field) * 40;
+        let sc = -Math.abs(f.x - ownGoalX) * 0.65 - dist(f, this) * 0.22;
+        // Obrońca (DEF) ma priorytet na napastnika rywali (FWD)
+        if (this.role === 'DEF' && f.role === 'FWD') sc += 85;
+        // Pomocnik (MID) ma priorytet na pomocnika rywali (MID)
+        if (this.role === 'MID' && f.role === 'MID') sc += 85;
+        // Jeśli kolega już go kryje, zakaz dublowania krycia:
+        if (takenMarks.has(f)) sc -= 280;
         if (sc > ms) { ms = sc; mark = f; }
       }
     }
+    this._markedFoe = mark;
+
     if (mark) {
-      tx = mark.x + (carrier.x - mark.x) * 0.30 - dir * 24;
-      ty = mark.y + (carrier.y - mark.y) * 0.30 + (cy - mark.y) * 0.10;
+      // Ustawienie na linii podania między rywalem z piłką a krytym rywalem
+      tx = mark.x + (carrier.x - mark.x) * 0.32 - dir * 26;
+      ty = mark.y + (carrier.y - mark.y) * 0.32 + (cy - mark.y) * 0.12;
     } else {
-      const f = (ball.x - WORLD.width / 2) * dir > 0 ? 0.75 : 0.62;
-      tx = ownGoalX + (ball.x - ownGoalX) * f + (this.role === 'DEF' ? -dir * 60 : dir * 70);
-      ty = cy + (ball.y - cy) * (this.role === 'DEF' ? 0.5 : 0.35);
+      // Brak bezpośredniego krycia: zorganizowany szyk obronny z podziałem stref
+      let baseLineX;
+      if (this.role === 'DEF') {
+        baseLineX = ownGoalX + dir * clamp(Math.abs(ball.x - ownGoalX) * 0.42, 110, 340);
+        ty = cy + (ball.y - cy) * 0.35; // DEF asekuruje światło bramki
+      } else if (this.role === 'MID') {
+        baseLineX = ownGoalX + dir * clamp(Math.abs(ball.x - ownGoalX) * 0.65, 230, 580);
+        ty = cy + (ball.y - cy) * 0.55; // MID kontroluje drugą piłkę
+      } else { // FWD
+        baseLineX = ownGoalX + dir * clamp(Math.abs(ball.x - ownGoalX) * 0.85, 390, 840);
+        ty = cy - (ball.y - cy) * 0.28; // FWD ustawia się po przekątnej na szybką kontrę
+      }
+      tx = baseLineX;
     }
+
     tx = clamp(tx, WORLD.marginX + 65, WORLD.width - WORLD.marginX - 65);
     ty = clamp(ty, WORLD.marginY + 45, WORLD.height - WORLD.marginY - 45);
-    this.moveTowards(tx, ty, (0.88 + cfg.vision * 0.08) * cfg.speedMult, Math.hypot(tx - this.x, ty - this.y) > 170 && this.stamina > 30);
+    this.moveTowards(tx, ty, (0.88 + cfg.vision * 0.08) * cfg.speedMult, Math.hypot(tx - this.x, ty - this.y) > 165 && this.stamina > 30);
   }
 
   moveTowards(tx, ty, speedFactor = 1.0, sprint = false) {
-    // Odpychanie od kolegów z drużyny (bez tłoku)
+    this._targetX = tx;
+    this._targetY = ty;
+    // Wyraźne odpychanie od kolegów z drużyny: zapobiega dublowaniu i bieganiu ramię w ramię
     let sx = 0, sy = 0;
     for (const m of (this.team === 'blue' ? blueTeam : redTeam)) {
       if (m === this || m.sentOff) continue;
       const d = Math.hypot(this.x - m.x, this.y - m.y);
-      if (d < 80 && d > 0.1) {
-        const f = (80 - d) / 80;
-        sx += (this.x - m.x) / d * f * 34;
-        sy += (this.y - m.y) / d * f * 34;
+      if (d < 115 && d > 0.1) {
+        const f = (115 - d) / 115;
+        // Płynna, mocna siła separacji przestrzeni osobistej
+        sx += (this.x - m.x) / d * f * 48;
+        sy += (this.y - m.y) / d * f * 48;
       }
     }
     const dx = tx + sx - this.x, dy = ty + sy - this.y;
@@ -11154,16 +11982,31 @@ function closeLeaderboardModal() {
 
 function switchLeaderboardCategory(cat) {
   activeLbCategory = cat;
-  ['wins', 'goals', 'ovr'].forEach(c => {
+  ['wins', 'goals', 'ovr', 'winrate'].forEach(c => {
     const btn = document.getElementById('lb-tab-' + c);
     if (btn) btn.classList.toggle('active', c === cat);
   });
   renderLeaderboardData();
 }
 
+function getLeaderboardMetricVal(p, cat) {
+  if (cat === 'wins') return `${p.wins || 0} ${p.wins === 1 ? 'WYGRANA' : 'WYGRANYCH'}`;
+  if (cat === 'goals') return `${p.goals || 0} GOLI`;
+  if (cat === 'winrate') {
+    const wr = Math.round(((p.wins || 0) / (p.matches || 1)) * 100);
+    return `${wr}% SKUTECZNOŚĆ`;
+  }
+  return `⭐ ${p.ovr || 75} OVR`;
+}
+
 async function renderLeaderboardData() {
   const content = document.getElementById('leaderboardContent');
+  const podiumEl = document.getElementById('leaderboardPodium');
+  const myRankBadge = document.getElementById('leaderboardMyRankBadge');
+  const myRankNick = document.getElementById('leaderboardMyRankNick');
   const myRankText = document.getElementById('leaderboardMyRankText');
+  const myRankInsight = document.getElementById('leaderboardMyRankInsight');
+
   if (!content) return;
 
   content.innerHTML = '<div style="text-align:center; padding:30px; color:#8b949e; font-family:\'Orbitron\';">Ładowanie rankingu...</div>';
@@ -11195,13 +12038,14 @@ async function renderLeaderboardData() {
     }
   }
 
-  // Jeśli brak rekordów z bazy (lub timeout / błąd uprawnień), uzupełniamy mistrzami AI jako wzorzec
+  // Wzorcowe profile AI jeśli baza nie zwróciła wystarczająco graczy
   if (players.length === 0) {
     players = [
       { uid: 'ai1', nick: 'CyberKing_99', wins: 28, matches: 30, goals: 74, ovr: 88 },
       { uid: 'ai2', nick: 'StrikerPro', wins: 21, matches: 25, goals: 59, ovr: 85 },
       { uid: 'ai3', nick: 'NeonSniper', wins: 18, matches: 22, goals: 46, ovr: 83 },
-      { uid: 'ai4', nick: 'PlayStyleMaster', wins: 14, matches: 19, goals: 38, ovr: 81 }
+      { uid: 'ai4', nick: 'PlayStyleMaster', wins: 14, matches: 19, goals: 38, ovr: 81 },
+      { uid: 'ai5', nick: 'VortexKeeper', wins: 11, matches: 16, goals: 29, ovr: 79 }
     ];
   }
 
@@ -11228,16 +12072,77 @@ async function renderLeaderboardData() {
     });
   }
 
-  // Sortowanie wg wybranej kategorii
+  // Sortowanie wg aktywnej kategorii
   const currentCat = activeLbCategory || 'wins';
   if (currentCat === 'wins') {
     players.sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.goals || 0) - (a.goals || 0));
   } else if (currentCat === 'goals') {
     players.sort((a, b) => (b.goals || 0) - (a.goals || 0) || (b.wins || 0) - (a.wins || 0));
+  } else if (currentCat === 'winrate') {
+    players.sort((a, b) => {
+      const wrA = (a.matches > 0) ? (a.wins / a.matches) : 0;
+      const wrB = (b.matches > 0) ? (b.wins / b.matches) : 0;
+      return wrB - wrA || (b.wins - a.wins);
+    });
   } else {
     players.sort((a, b) => (b.ovr || 0) - (a.ovr || 0) || (b.wins || 0) - (a.wins || 0));
   }
 
+  // 1. Render Podium Top 3
+  if (podiumEl) {
+    const top3 = players.slice(0, 3);
+    let podHtml = '';
+
+    // Miejsce 2 (Lewa strona podium)
+    if (top3[1]) {
+      const p2 = top3[1];
+      const isMe = p2.uid === myUid;
+      podHtml += `
+        <div class="lb-podium-card lb-podium-2 ${isMe ? 'is-me' : ''}">
+          <div class="lb-podium-crown">🥈 2</div>
+          <div class="lb-podium-nick">${p2.nick} ${isMe ? '<span style="color:var(--p1); font-size:11px;">(TY)</span>' : ''}</div>
+          <div class="lb-podium-val">${getLeaderboardMetricVal(p2, currentCat)}</div>
+          <div class="lb-podium-sub">${p2.wins}W • ${p2.goals}G • ⭐${p2.ovr}</div>
+        </div>
+      `;
+    } else {
+      podHtml += '<div></div>';
+    }
+
+    // Miejsce 1 (Środek podium)
+    if (top3[0]) {
+      const p1 = top3[0];
+      const isMe = p1.uid === myUid;
+      podHtml += `
+        <div class="lb-podium-card lb-podium-1 ${isMe ? 'is-me' : ''}">
+          <div class="lb-podium-crown">👑 🥇 1</div>
+          <div class="lb-podium-nick" style="color:#ffd700;">${p1.nick} ${isMe ? '<span style="color:var(--p1); font-size:11px;">(TY)</span>' : ''}</div>
+          <div class="lb-podium-val">${getLeaderboardMetricVal(p1, currentCat)}</div>
+          <div class="lb-podium-sub">${p1.wins}W • ${p1.goals}G • ⭐${p1.ovr}</div>
+        </div>
+      `;
+    }
+
+    // Miejsce 3 (Prawa strona podium)
+    if (top3[2]) {
+      const p3 = top3[2];
+      const isMe = p3.uid === myUid;
+      podHtml += `
+        <div class="lb-podium-card lb-podium-3 ${isMe ? 'is-me' : ''}">
+          <div class="lb-podium-crown">🥉 3</div>
+          <div class="lb-podium-nick">${p3.nick} ${isMe ? '<span style="color:var(--p1); font-size:11px;">(TY)</span>' : ''}</div>
+          <div class="lb-podium-val">${getLeaderboardMetricVal(p3, currentCat)}</div>
+          <div class="lb-podium-sub">${p3.wins}W • ${p3.goals}G • ⭐${p3.ovr}</div>
+        </div>
+      `;
+    } else {
+      podHtml += '<div></div>';
+    }
+
+    podiumEl.innerHTML = podHtml;
+  }
+
+  // 2. Render Tabeli Liderów
   let htmlTable = `
     <table class="lb-table">
       <thead>
@@ -11246,6 +12151,7 @@ async function renderLeaderboardData() {
           <th>GRACZ</th>
           <th style="text-align:center;">WYGRANE</th>
           <th style="text-align:center;">MECZE</th>
+          <th style="text-align:center;">SKUTECZNOŚĆ</th>
           <th style="text-align:center;">GOLE</th>
           <th style="text-align:center;">OVR</th>
         </tr>
@@ -11260,6 +12166,9 @@ async function renderLeaderboardData() {
     const isMe = p.uid === myUid;
     if (isMe) myRank = '#' + rank;
 
+    const winRate = Math.round(((p.wins || 0) / (p.matches || 1)) * 100);
+    const wrColor = winRate >= 70 ? '#00ff88' : (winRate >= 50 ? '#00f0ff' : '#8b949e');
+
     let rankBadge = `<span class="lb-rank-badge">${rank}</span>`;
     if (rank === 1) rankBadge = `<span class="lb-rank-badge lb-rank-1">🥇 1</span>`;
     else if (rank === 2) rankBadge = `<span class="lb-rank-badge lb-rank-2">🥈 2</span>`;
@@ -11270,10 +12179,11 @@ async function renderLeaderboardData() {
         <td>${rankBadge}</td>
         <td>
           <strong style="${isMe ? 'color:var(--gold);' : ''}">${p.nick || 'GRACZ'}</strong>
-          ${isMe ? ' <span style="font-size:11px; color:var(--p1); font-weight:800;">(TY)</span>' : ''}
+          ${isMe ? ' <span style="font-size:11px; color:var(--p1); font-weight:900;">(TY)</span>' : ''}
         </td>
         <td style="text-align:center; font-family:'Orbitron'; font-weight:900; color:var(--green);">${p.wins || 0}</td>
         <td style="text-align:center; font-family:'Orbitron'; color:#8b949e;">${p.matches || 0}</td>
+        <td style="text-align:center; font-family:'Orbitron'; font-weight:800; color:${wrColor};">${winRate}%</td>
         <td style="text-align:center; font-family:'Orbitron'; font-weight:800; color:var(--p1);">${p.goals || 0}</td>
         <td style="text-align:center; font-family:'Orbitron'; font-weight:900; color:var(--gold);">⭐ ${p.ovr || 75}</td>
       </tr>
@@ -11283,8 +12193,22 @@ async function renderLeaderboardData() {
   htmlTable += `</tbody></table>`;
   content.innerHTML = htmlTable;
 
+  // 3. Dolny pasek pozycji
+  if (myRankBadge) myRankBadge.textContent = myRank;
+  if (myRankNick) myRankNick.textContent = (clubData && clubData.nick) || 'TWÓJ KLUB';
   if (myRankText) {
-    myRankText.textContent = `POZYCJA ${myRank} • ${myStats.wins || 0} WYGRANYCH • ${myStats.goals || 0} GOLI`;
+    const myWr = Math.round(((myStats.wins || 0) / (myStats.matches || 1)) * 100);
+    myRankText.textContent = `POZYCJA ${myRank} • ${myStats.wins || 0} WYGRANYCH • ${myWr}% WIN-RATE • ${myStats.goals || 0} GOLI • ⭐ ${myOvr} OVR`;
+  }
+  if (myRankInsight) {
+    if (myRank === '#1') {
+      myRankInsight.textContent = '👑 JESTEŚ NA SAMYM SZCZYCIE TABELI!';
+    } else if (players.length > 0 && myStats.wins < players[0].wins) {
+      const diff = players[0].wins - (myStats.wins || 0);
+      myRankInsight.textContent = `🎯 DO 1. MIEJSCA BRAKUJE CI ${diff} ${diff === 1 ? 'WYGRANEJ' : 'WYGRANYCH'}!`;
+    } else {
+      myRankInsight.textContent = '⭐ ROZGRYWAJ MECZE ABY POWIĘKSZAĆ PRZEWAGĘ!';
+    }
   }
 }
 
@@ -11296,6 +12220,11 @@ function calculatePlayerSquadOvr(lineup) {
 }
 
 // Global exports
+window.openPackAnimationModal = openPackAnimationModal;
+window.triggerPackRipping = triggerPackRipping;
+window.closePackModal = closePackModal;
+window.equipDroppedCard = equipDroppedCard;
+window.reOpenPack = reOpenPack;
 window.startQuickMatchmaking = startQuickMatchmaking;
 window.cancelQuickMatchmaking = cancelQuickMatchmaking;
 window.playAiFromMatchmaking = playAiFromMatchmaking;
@@ -11803,30 +12732,51 @@ window.renderScene=function(){
 
   <!-- MODAL: GLOBALNA TABELA LIDERÓW & RANKING -->
   <div class="modal-backdrop" id="leaderboardModalBackdrop" style="display:none; z-index:10500;">
-    <div class="club-modal" style="width:840px; max-width:95vw; max-height:88vh; padding:24px;">
+    <div class="club-modal lb-modal-container">
       <div class="club-modal-header" style="border-bottom:1px solid rgba(255,215,0,0.25); padding-bottom:12px;">
         <div>
-          <h2 style="font-family:'Orbitron'; font-size:20px; color:var(--gold); display:flex; align-items:center; gap:8px;">
-            <span>🏆</span> GLOBALNA TABELA LIDERÓW
+          <h2 style="font-family:'Orbitron'; font-size:22px; color:var(--gold); display:flex; align-items:center; gap:10px; margin:0;">
+            <span style="filter:drop-shadow(0 0 10px rgba(255,215,0,0.8));">🏆</span> GLOBALNA TABELA LIDERÓW
           </h2>
-          <span style="font-size:12px; color:#8b949e;">Ranking najlepszych graczy online i Ultimate Team w CYBERFC 28</span>
+          <span style="font-size:12px; color:#8b949e; letter-spacing:0.5px;">Ranking mistrzów CYBERFC 28 • Rywalizacja Solo & Multiplayer</span>
         </div>
         <button type="button" class="icon-btn" onclick="closeLeaderboardModal()">✕ ZAMKNIJ</button>
       </div>
 
-      <div style="display:flex; gap:8px; margin:12px 0 16px; flex-wrap:wrap;">
-        <button type="button" class="role-chip active" id="lb-tab-wins" onclick="switchLeaderboardCategory('wins')">⭐ ZWYCIĘSTWA</button>
-        <button type="button" class="role-chip" id="lb-tab-goals" onclick="switchLeaderboardCategory('goals')">⚽ STRZELONE GOLE</button>
-        <button type="button" class="role-chip" id="lb-tab-ovr" onclick="switchLeaderboardCategory('ovr')">🌟 OVR KLUBU</button>
+      <!-- Zakładki Kategorii -->
+      <div class="lb-category-bar">
+        <button type="button" class="lb-category-btn active" id="lb-tab-wins" onclick="switchLeaderboardCategory('wins')">
+          <span>⭐</span> ZWYCIĘSTWA
+        </button>
+        <button type="button" class="lb-category-btn" id="lb-tab-goals" onclick="switchLeaderboardCategory('goals')">
+          <span>⚽</span> KRÓL STRZELCÓW
+        </button>
+        <button type="button" class="lb-category-btn" id="lb-tab-ovr" onclick="switchLeaderboardCategory('ovr')">
+          <span>🌟</span> OVR KLUBU
+        </button>
+        <button type="button" class="lb-category-btn" id="lb-tab-winrate" onclick="switchLeaderboardCategory('winrate')">
+          <span>🎯</span> WIN-RATE %
+        </button>
       </div>
 
-      <div id="leaderboardContent" style="flex:1; overflow-y:auto; max-height:50vh; border-radius:12px; background:rgba(6,9,18,0.7); border:1px solid rgba(255,255,255,0.08);">
+      <!-- Podium Top 3 Graczy (Generowane dynamicznie w JS) -->
+      <div id="leaderboardPodium" class="lb-podium-grid"></div>
+
+      <!-- Tabela Liderów (Miejsca 4-15 oraz Twoja pozycja) -->
+      <div id="leaderboardContent" class="lb-table-wrap">
         <!-- Tabela liderów renderowana w JS -->
       </div>
 
-      <div id="leaderboardMyRank" style="margin-top:14px; background:rgba(0,240,255,0.08); border:1.5px solid var(--p1); border-radius:12px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-family:'Orbitron'; font-size:12px; font-weight:800; color:var(--p1);">TWOJA POZYCJA</span>
-        <span id="leaderboardMyRankText" style="font-family:'Orbitron'; font-size:13px; font-weight:900; color:#fff;">Ładowanie...</span>
+      <!-- Dolny Pasek Twojego Wyniku -->
+      <div id="leaderboardMyRank" class="lb-my-rank-strip">
+        <div class="lb-my-rank-left">
+          <span class="lb-my-rank-badge" id="leaderboardMyRankBadge">#--</span>
+          <div>
+            <div class="lb-my-rank-title" id="leaderboardMyRankNick">TWÓJ WYNIK</div>
+            <div class="lb-my-rank-sub" id="leaderboardMyRankText">Ładowanie statystyk...</div>
+          </div>
+        </div>
+        <div class="lb-my-rank-insight" id="leaderboardMyRankInsight">⭐ GRAJ WIĘCEJ MECZÓW ABY AWANSOWAĆ!</div>
       </div>
     </div>
   </div>
