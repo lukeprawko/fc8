@@ -1,0 +1,175 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: players
+    // Document ID: Firebase Auth UID ({uid})
+    // Fields:
+    //   - nick: string (optional, 1-50 chars) - Player display nickname
+    //   - wins: number (optional, >= 0) - Total match wins (FC28 / PingPong)
+    //   - matches: number (optional, >= 0) - Total matches played
+    //   - goals: number (optional, >= 0) - Total goals scored
+    //   - ovr: number (optional, 0-999) - Overall squad or player rating
+    //   - coins, level, exp, sp, spentSp, freeResets: number (optional, >= 0)
+    //   - resetVersion: number (optional) - Reset migration epoch
+    //   - gameData: map (optional) - Game specific saves (e.g. fc squad, coins, cards)
+    //   - stats: map (optional) - In-game statistics breakdown
+    //   - talents: map | list (optional) - Skill tree progression
+    //   - ownerUid: string (optional, matches auth.uid) - Account owner uid
+    //   - updatedAt: number | timestamp (optional) - Last sync timestamp
+    //   - isAdmin: bool (restricted, admin only) - Admin privileges flag
+    //   - role: string (restricted, admin only) - Admin role flag ('admin' | 'player')
+    //   - allTalents, infiniteStamina, godMode, goldSmash: bool (restricted) - Cheat/perk flags
+    //   - customSpeedMult, customSmashMult, customPaddleHeight: number (restricted) - Multipliers
+    //   - adminBadge, adminToken: string (restricted) - Admin credentials
+    //
+    // Collection: matchmaking
+    // Document ID: Room code ({code}, 6 characters)
+    // Fields:
+    //   - roomCode: string (required, 6 characters, matches {code}) - Quick match room code
+    //   - hostUid: string (required, matches auth.uid) - Host user UID
+    //   - hostNick: string (optional, 0-50 chars) - Host player nickname
+    //   - status: string (required, 'waiting' | 'matched') - Current room state
+    //   - updatedAt: number | timestamp (required) - Timestamp of heartbeat/creation
+    //
+    // ===============================================================
+
+    // Check if the request is from an authenticated user
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Check if current user owns the resource UID
+    function owner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Check if user is an administrator via player doc
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/players/$(request.auth.uid)) &&
+        (
+          get(/databases/$(database)/documents/players/$(request.auth.uid)).data.get('isAdmin', false) == true ||
+          get(/databases/$(database)/documents/players/$(request.auth.uid)).data.get('role', '') == 'admin'
+        );
+    }
+
+    // Ensure non-admins cannot initialize privileged / cheat fields on creation
+    function safeNewPlayer() {
+      return
+        (!request.resource.data.keys().hasAny(['isAdmin']) || request.resource.data.isAdmin == false) &&
+        (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'player') &&
+        (!request.resource.data.keys().hasAny(['allTalents']) || request.resource.data.allTalents == false) &&
+        (!request.resource.data.keys().hasAny(['infiniteStamina']) || request.resource.data.infiniteStamina == false) &&
+        (!request.resource.data.keys().hasAny(['godMode']) || request.resource.data.godMode == false) &&
+        (!request.resource.data.keys().hasAny(['goldSmash']) || request.resource.data.goldSmash == false) &&
+        (!request.resource.data.keys().hasAny(['customSpeedMult']) || request.resource.data.customSpeedMult == 1) &&
+        (!request.resource.data.keys().hasAny(['customSmashMult']) || request.resource.data.customSmashMult == 1) &&
+        (!request.resource.data.keys().hasAny(['customPaddleHeight']) || request.resource.data.customPaddleHeight == null || request.resource.data.customPaddleHeight == 80) &&
+        (!request.resource.data.keys().hasAny(['adminBadge']) || request.resource.data.adminBadge == null) &&
+        (!request.resource.data.keys().hasAny(['adminToken']) || request.resource.data.adminToken == null) &&
+        (!request.resource.data.keys().hasAny(['ownerUid']) || request.resource.data.ownerUid == request.auth.uid);
+    }
+
+    // Ensure non-admins cannot tamper with privileged fields or hijack ownerUid on update
+    function safePlayerUpdate() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash',
+        'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'
+      ]) &&
+      (!('ownerUid' in request.resource.data) || !('ownerUid' in resource.data) || request.resource.data.ownerUid == resource.data.ownerUid) &&
+      (!('ownerUid' in request.resource.data) || request.resource.data.ownerUid == request.auth.uid);
+    }
+
+    // Validate player profile data types and bounds
+    function isValidPlayer(data) {
+      return
+        (!('nick' in data) || (data.nick is string && data.nick.size() >= 1 && data.nick.size() <= 50)) &&
+        (!('wins' in data) || (data.wins is number && data.wins >= 0)) &&
+        (!('matches' in data) || (data.matches is number && data.matches >= 0)) &&
+        (!('goals' in data) || (data.goals is number && data.goals >= 0)) &&
+        (!('ovr' in data) || (data.ovr is number && data.ovr >= 0 && data.ovr <= 999)) &&
+        (!('coins' in data) || (data.coins is number && data.coins >= 0)) &&
+        (!('level' in data) || (data.level is number && data.level >= 0)) &&
+        (!('exp' in data) || (data.exp is number && data.exp >= 0)) &&
+        (!('sp' in data) || (data.sp is number && data.sp >= 0)) &&
+        (!('resetVersion' in data) || data.resetVersion is number) &&
+        (!('gameData' in data) || data.gameData is map) &&
+        (!('stats' in data) || data.stats is map) &&
+        (!('talents' in data) || (data.talents is map || data.talents is list)) &&
+        (!('ownerUid' in data) || (data.ownerUid is string && data.ownerUid.size() <= 128)) &&
+        (!('updatedAt' in data) || (data.updatedAt is number || data.updatedAt is timestamp));
+    }
+
+    // Validate quick matchmaking room document
+    function isValidMatchmaking(code, data) {
+      return code is string &&
+        code.size() == 6 &&
+        data.keys().hasAll(['roomCode', 'hostUid', 'status', 'updatedAt']) &&
+        data.keys().hasOnly(['roomCode', 'hostUid', 'hostNick', 'status', 'updatedAt']) &&
+        data.roomCode == code &&
+        data.hostUid is string &&
+        data.hostUid.size() > 0 &&
+        data.hostUid.size() <= 128 &&
+        data.status in ['waiting', 'matched'] &&
+        (data.updatedAt is number || data.updatedAt is timestamp) &&
+        (!('hostNick' in data) || (data.hostNick is string && data.hostNick.size() <= 50));
+    }
+
+    // -------------------------------------------------------------
+    // Players Collection
+    // -------------------------------------------------------------
+    match /players/{uid} {
+      // Signed-in users can read profiles to populate global leaderboards and player stats
+      allow read: if signedIn();
+
+      // Only the authenticated account owner or admin can create their profile with safe defaults
+      allow create: if isAdmin() || (owner(uid) && safeNewPlayer() && isValidPlayer(request.resource.data));
+
+      // Updates require ownership or admin rights and strict exclusion of privileged fields
+      allow update: if isAdmin() || (owner(uid) && safePlayerUpdate() && isValidPlayer(request.resource.data));
+
+      // Deletion is strictly reserved for administrators
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // Matchmaking Collection
+    // -------------------------------------------------------------
+    match /matchmaking/{code} {
+      // Signed-in players can browse open matchmaking rooms
+      allow read: if signedIn();
+
+      // Signed-in player can host/set their own waiting room with validated schema
+      allow create: if signedIn() &&
+        isValidMatchmaking(code, request.resource.data) &&
+        request.resource.data.hostUid == request.auth.uid;
+
+      // Host can update their room (or another signed-in player can set status to 'matched')
+      allow update: if isAdmin() || (
+        signedIn() &&
+        isValidMatchmaking(code, request.resource.data) &&
+        (
+          (resource.data.hostUid == request.auth.uid && request.resource.data.hostUid == request.auth.uid) ||
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+           request.resource.data.status == 'matched' &&
+           request.resource.data.hostUid == resource.data.hostUid)
+        )
+      );
+
+      // Room can be deleted by host when canceling or by a signed-in player claiming/cleaning it
+      allow delete: if signedIn();
+    }
+
+    // -------------------------------------------------------------
+    // Default Deny Rule
+    // -------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1327,14 +1327,14 @@ const DEFAULT_GAMES = [
   },
   {
     title: 'CS:GO',
-    url: 'https://csgame.sorpio.pl',
+    url: 'cs.html',
     status: 'ready',
-    desc: 'Taktyczna gra akcji FPS z dynamicznymi pojedynkami drużynowymi i precyzyjnym strzelaniem.',
-    tags: ['FPS', 'Akcja', 'Multiplayer'],
+    desc: 'Taktyczna gra akcji FPS 3D z pojedynkami drużynowymi 5v5, serwerem online, botami i pełnym arsenałem.',
+    tags: ['FPS 3D', 'Akcja', 'Multiplayer', 'vs Boty'],
     color: '#3b82f6',
     image: 'assets/cover_cs.jpg',
-    badge: 'Online',
-    players: 'Wieloosobowa'
+    badge: 'Multiplayer 3D',
+    players: 'Wieloosobowa 5v5'
   },
   {
     title: 'Astro Strike',
@@ -1370,14 +1370,20 @@ let GAMES = Array.isArray(storedGames) && storedGames.length ? storedGames : DEF
 // Filtruj przestarzałe linki
 GAMES = GAMES.filter(g => g && g.url !== 'cyberpong.html' && g.url !== 'kaczki.html' && g.title !== 'Kaczki');
 
-// Zaktualizuj ścieżki okładek dla głównych gier jeśli brakowało obrazka w localStorage
+// Zaktualizuj ścieżki okładek i URL dla głównych gier jeśli brakowało obrazka w localStorage
 GAMES.forEach(g => {
   if (g.url === 'pingpong.html') g.image = 'assets/cover_pong.jpg';
   if (g.url === 'fc28.html') g.image = 'assets/cover_fc28.jpg';
+  if (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl' || g.url === 'cs.html') {
+    g.url = 'cs.html';
+    g.image = 'assets/cover_cs.jpg';
+    g.badge = 'Multiplayer 3D';
+    g.status = 'ready';
+  }
 });
 
 // Zapewnij obecność nowej gry CS:GO na liście
-if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl'))) {
+if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'cs.html'))) {
   const csObj = DEFAULT_GAMES.find(g => g && g.title === 'CS:GO'); if (csObj) GAMES.splice(2, 0, csObj);
 }
 

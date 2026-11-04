@@ -1,0 +1,15 @@
+# Ignore uploader scripts and tokens
+uploader_config.json
+GitHubUploader.ps1
+
+# Ignore scratch files
+scratch/
+scratch_*.js
+generate_blender_scene.py
+starsze/
+
+# Node & IDE
+node_modules/
+.vscode/
+.idea/
+*.tmp
