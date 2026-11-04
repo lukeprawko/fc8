@@ -797,21 +797,18 @@
   /* KARTA ULTIMATE TEAM (FC 28 SHIELD) */
   .fut-card {
     position: relative;
-    border-radius: 20px;
+    border-radius: 18px;
     padding: 12px 12px 14px 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 8px;
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s, border-color 0.22s;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s, border-color 0.22s, filter 0.22s, opacity 0.22s;
     cursor: pointer;
     overflow: hidden;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
     user-select: none;
-  }
-  .fut-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    z-index: 10;
+    background: #141720;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
   }
 
   /* Holograficzny błysk szkła na hover */
@@ -825,9 +822,9 @@
     background: linear-gradient(
       65deg,
       transparent 35%,
-      rgba(255, 255, 255, 0.18) 48%,
-      rgba(255, 255, 255, 0.35) 50%,
-      rgba(255, 255, 255, 0.18) 52%,
+      rgba(255, 255, 255, 0.08) 48%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.08) 52%,
       transparent 65%
     );
     transform: rotate(-25deg);
@@ -840,105 +837,199 @@
     transform: rotate(-25deg) translate(30%, 30%);
   }
 
-  /* TIER 1: IKONA (BIAŁO-ZŁOTY MARMUR) */
-  .fut-card.tier-icon {
-    background: linear-gradient(155deg, #ffffff 0%, #f4f5f7 30%, #e5e9ec 60%, #f7ebba 85%, #d4af37 100%);
-    border: 2px solid #ffd700;
-    box-shadow: 0 10px 32px rgba(212, 175, 55, 0.35), inset 0 0 15px rgba(255, 215, 0, 0.25);
-    color: #1a1a1a;
+  /* =========================================================================
+     WYRÓŻNIENIE POSIADANEGO ZAWODNIKA VS NIEPOSIADANEGO
+     ========================================================================= */
+  .fut-card.card-owned {
+    opacity: 1;
+    filter: saturate(1.05) brightness(1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(0, 230, 118, 0.18);
+    border-color: rgba(0, 230, 118, 0.55);
   }
-  .fut-card.tier-icon .fut-name {
-    color: #111827;
-  }
-  .fut-card.tier-icon .fut-ovr {
-    color: #b8860b;
-  }
-  .fut-card.tier-icon .fut-tier-label {
-    color: #b8860b;
-  }
-  .fut-card.tier-icon .fut-name-ribbon {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(212, 175, 55, 0.45);
-  }
-  .fut-card.tier-icon .fut-stats-grid {
-    background: rgba(255, 255, 255, 0.68);
-    border-color: rgba(212, 175, 55, 0.45);
-  }
-  .fut-card.tier-icon .fut-stat-lbl {
-    color: #4b5563;
-  }
-  .fut-card.tier-icon .fut-stat-val {
-    color: #111827;
+  .fut-card.card-owned:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 230, 118, 0.35);
+    border-color: #00e676;
+    z-index: 10;
   }
 
-  /* TIER 2: TOTY (KOSMICZNY PRYZMAT ZŁOTA I CYJANU) */
+  /* KARTA W SKŁADZIE (WYJŚCIOWA 4v4) */
+  .fut-card.card-owned.equipped {
+    border-color: #ffd700 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 20px rgba(255, 215, 0, 0.35) !important;
+  }
+  .fut-card.card-owned.equipped:hover {
+    border-color: #ffffff !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 30px rgba(255, 215, 0, 0.55) !important;
+  }
+
+  /* KARTA NIEPOSIADANA (PRZYGASZONA, CZYTELNA, NIE RAZI W OCZY) */
+  .fut-card.card-unowned {
+    opacity: 0.62;
+    filter: saturate(0.55) brightness(0.82);
+    background: #0f1218;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  }
+  .fut-card.card-unowned:hover {
+    opacity: 0.94;
+    filter: saturate(0.9) brightness(0.96);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    z-index: 10;
+  }
+
+  /* WSTĄŻKA STATUSU KARTY W PRAWYM GÓRNYM ROGU */
+  .card-ownership-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    font-weight: 900;
+    padding: 3px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    z-index: 5;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  .card-ownership-badge.badge-equipped {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  }
+  .card-ownership-badge.badge-owned {
+    background: rgba(0, 230, 118, 0.18);
+    border: 1px solid #00e676;
+    color: #00ff88;
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.3);
+  }
+  .card-ownership-badge.badge-locked {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #8b949e;
+  }
+
+  /* =========================================================================
+     STONOWANE TIERY KART (BRAK RAŻĄCEJ W OCZY BIELI)
+     ========================================================================= */
+
+  /* TIER 1: IKONA (CIEMNY OBSYDIAN & MATOWE ZŁOTO) */
+  .fut-card.tier-icon {
+    background: linear-gradient(155deg, #16181f 0%, #20232c 45%, #2a251b 80%, #362e1d 100%);
+    border: 1.5px solid rgba(255, 215, 0, 0.6);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(212, 175, 55, 0.12);
+    color: #f1f5f9;
+  }
+  .fut-card.tier-icon .fut-name {
+    color: #ffffff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  }
+  .fut-card.tier-icon .fut-ovr {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  }
+  .fut-card.tier-icon .fut-tier-label {
+    color: #ffd700;
+  }
+  .fut-card.tier-icon .fut-name-ribbon {
+    background: rgba(12, 14, 20, 0.75);
+    border-color: rgba(255, 215, 0, 0.3);
+  }
+  .fut-card.tier-icon .fut-stats-grid {
+    background: rgba(12, 14, 20, 0.8);
+    border-color: rgba(255, 215, 0, 0.3);
+  }
+  .fut-card.tier-icon .fut-stat-lbl {
+    color: #94a3b8;
+  }
+  .fut-card.tier-icon .fut-stat-val {
+    color: #f8fafc;
+  }
+
+  /* TIER 2: TOTY (GŁĘBOKI SZLACHETNY GRANAT I SZAFIR) */
   .fut-card.tier-toty {
-    background: linear-gradient(155deg, #091730 0%, #0d2854 35%, #123d7d 65%, #00f0ff 95%, #ffd700 100%);
-    border: 2px solid #00f0ff;
-    box-shadow: 0 10px 35px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.2);
+    background: linear-gradient(155deg, #070d18 0%, #0c182c 45%, #112442 80%, #173056 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.5);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 240, 255, 0.1);
   }
   .fut-card.tier-toty .fut-ovr {
     color: #00f0ff;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
   }
   .fut-card.tier-toty .fut-tier-label {
     color: #00f0ff;
   }
+  .fut-card.tier-toty .fut-name-ribbon {
+    background: rgba(6, 11, 20, 0.75);
+    border-color: rgba(0, 240, 255, 0.3);
+  }
+  .fut-card.tier-toty .fut-stats-grid {
+    background: rgba(6, 11, 20, 0.8);
+    border-color: rgba(0, 240, 255, 0.3);
+  }
 
-  /* TIER 3: ZŁOTA RZADKA (GOLD RARE 86+) */
+  /* TIER 3: ZŁOTA RZADKA (MATOWE CIEMNE ZŁOTO) */
   .fut-card.tier-gold-rare {
-    background: linear-gradient(155deg, #3d2b07 0%, #634710 30%, #8c6a23 60%, #b88f37 85%, #d8ad4b 100%);
-    border: 2px solid #ffd700;
-    box-shadow: 0 10px 30px rgba(245, 176, 65, 0.28), inset 0 0 15px rgba(245, 176, 65, 0.15);
+    background: linear-gradient(155deg, #1c1810 0%, #292215 45%, #362c1a 80%, #443720 100%);
+    border: 1.5px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(255, 215, 0, 0.08);
   }
   .fut-card.tier-gold-rare .fut-ovr {
     color: #ffd700;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
   }
   .fut-card.tier-gold-rare .fut-tier-label {
     color: #ffd700;
   }
+  .fut-card.tier-gold-rare .fut-name-ribbon {
+    background: rgba(14, 12, 8, 0.75);
+    border-color: rgba(255, 215, 0, 0.25);
+  }
+  .fut-card.tier-gold-rare .fut-stats-grid {
+    background: rgba(14, 12, 8, 0.8);
+    border-color: rgba(255, 215, 0, 0.25);
+  }
 
-  /* TIER 4: ZŁOTA ZWYKŁA (GOLD COMMON 80-85) */
+  /* TIER 4: ZŁOTA ZWYKŁA */
   .fut-card.tier-gold-common {
-    background: linear-gradient(155deg, #261d0f 0%, #443319 50%, #5c4724 100%);
-    border: 1.5px solid rgba(245, 176, 65, 0.55);
+    background: linear-gradient(155deg, #15130e 0%, #201c13 50%, #2b2519 100%);
+    border: 1.5px solid rgba(212, 175, 55, 0.35);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
   }
   .fut-card.tier-gold-common .fut-ovr {
-    color: #f5b041;
+    color: #e2ba64;
   }
   .fut-card.tier-gold-common .fut-tier-label {
-    color: #f5b041;
+    color: #e2ba64;
   }
 
-  /* TIER 5: SREBRNA (SILVER 75-79) */
+  /* TIER 5: SREBRNA */
   .fut-card.tier-silver {
-    background: linear-gradient(155deg, #182230 0%, #29374c 50%, #3f4e66 100%);
-    border: 1.5px solid #94a3b8;
+    background: linear-gradient(155deg, #13171d 0%, #1b2129 50%, #242b36 100%);
+    border: 1.5px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
   }
   .fut-card.tier-silver .fut-ovr {
-    color: #e2e8f0;
+    color: #cbd5e1;
   }
   .fut-card.tier-silver .fut-tier-label {
-    color: #94a3b8;
+    color: #cbd5e1;
   }
 
-  /* TIER 6: BRĄZOWA (BRONZE <75) */
+  /* TIER 6: BRĄZOWA */
   .fut-card.tier-bronze {
-    background: linear-gradient(155deg, #22140f 0%, #3d2319 50%, #543325 100%);
-    border: 1.5px solid #a8715a;
+    background: linear-gradient(155deg, #17120e 0%, #221914 50%, #2e221b 100%);
+    border: 1.5px solid rgba(184, 115, 51, 0.35);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
   }
   .fut-card.tier-bronze .fut-ovr {
     color: #d79277;
   }
   .fut-card.tier-bronze .fut-tier-label {
     color: #a8715a;
-  }
-
-  /* WYSTAWIONA DO SKŁADU */
-  .fut-card.equipped {
-    border-color: #00e676 !important;
-    box-shadow: 0 0 25px rgba(0, 230, 118, 0.45), inset 0 0 15px rgba(0, 230, 118, 0.18) !important;
   }
 
   /* NAGŁÓWEK KARTY: OVR + POZYCJA + FLAGA */
@@ -985,6 +1076,19 @@
     align-items: center;
     justify-content: center;
     position: relative;
+    overflow: hidden;
+  }
+  .fut-player-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
+    transition: transform 0.25s ease;
+    user-select: none;
+    pointer-events: none;
+  }
+  .fut-card:hover .fut-player-img {
+    transform: scale(1.06);
   }
   .fut-avatar-svg {
     width: 100%;
@@ -1988,6 +2092,29 @@
     0% { transform: translateY(-30px) scale(0.7); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
+  .pack-skip-walkout-btn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffd700;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  }
+  .pack-skip-walkout-btn:hover {
+    background: rgba(255, 215, 0, 0.25);
+    border-color: #ffd700;
+    transform: scale(1.05);
+  }
   .walkout-banner-box {
     margin-top: 10px;
     animation: walkoutItemDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -2660,7 +2787,7 @@
             <div class="pack-fc-logo">⚡ CYBERFC 28 ⚡</div>
             <div class="pack-title">ULTIMATE PACK</div>
             <div class="pack-sub">GWARANTOWANY ZAWODNIK FUT</div>
-            <div class="pack-odds-badge">👑 1% IKONA • ✨ 15% PLAYSTYLE+</div>
+            <div class="pack-odds-badge">👑 1% IKONA • 🔥 4% WALKOUT (87+) • 🌟 10% GWIAZDA</div>
             <div class="pack-rip-hint">
               <span class="pack-rip-pulse-btn">⚡ ROZETNIJ PACZKĘ!</span>
             </div>
@@ -2668,8 +2795,9 @@
         </div>
       </div>
 
-      <!-- Faza 2: Walkout & Suspense Stage -->
-      <div id="packWalkoutStage" class="pack-stage-container" style="display:none;">
+      <!-- Faza 2: Walkout & Suspense Stage (Kliknięcie pomija animację) -->
+      <div id="packWalkoutStage" class="pack-stage-container" style="display:none;" onclick="skipWalkoutAnimation()" title="Kliknij gdziekolwiek aby pominąć animację">
+        <button type="button" class="pack-skip-walkout-btn" onclick="event.stopPropagation(); skipWalkoutAnimation()">POMIŃ ⏭️</button>
         <div class="walkout-spotlights"></div>
         <div class="walkout-flag-box" id="walkoutFlagBox" style="display:none;">
           <span id="walkoutFlagEmoji" class="walkout-flag-emoji">⚽</span>
@@ -5244,7 +5372,16 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   }
 
   return `
-    <div class="fut-card tier-${tier} ${ps ? 'has-ps' : ''} ${isEquipped ? 'equipped' : ''}" style="${isMini ? 'width:180px; padding:10px;' : ''}" title="${c.name} (${c.role}) • OVR ${c.ovr}">
+    <div class="fut-card tier-${tier} ${isOwned ? 'card-owned' : 'card-unowned'} ${ps ? 'has-ps' : ''} ${isEquipped ? 'equipped' : ''}" style="${isMini ? 'width:180px; padding:10px;' : ''}" title="${c.name} (${c.role}) • OVR ${c.ovr}">
+      <!-- Wstążka statusu karty -->
+      ${!isRevealed ? (isEquipped ? `
+        <div class="card-ownership-badge badge-equipped">⭐ W SKŁADZIE</div>
+      ` : (isOwned ? `
+        <div class="card-ownership-badge badge-owned">✓ W KLUBIE</div>
+      ` : `
+        <div class="card-ownership-badge badge-locked">🔒 ZABLOKOWANY</div>
+      `)) : ''}
+
       <div class="fut-card-header">
         <div class="fut-ovr-col">
           <span class="fut-ovr" style="${isMini ? 'font-size:24px;' : ''}">${c.ovr}</span>
@@ -5252,7 +5389,10 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
           <span class="fut-nation-flag">${nationFlag}</span>
         </div>
         <div class="fut-hero-wrap" style="${isMini ? 'width:70px; height:80px;' : ''}">
-          ${renderCardPlayerSvg(c, tier)}
+          <img src="assets/players/${c.id}.webp" class="fut-player-img" alt="${c.name}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';" loading="lazy">
+          <div class="fut-fallback-svg" style="display:none; width:100%; height:100%;">
+            ${renderCardPlayerSvg(c, tier)}
+          </div>
         </div>
       </div>
 
@@ -5272,7 +5412,10 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
 
       ${ps ? `
         <div class="fut-card-ps-medallion" style="${isMini ? 'padding:4px 6px;' : ''}">
-          <div class="fut-ps-icon-wrap" style="filter:drop-shadow(0 0 6px #ffd700);">${ps.icon}</div>
+          <div class="fut-ps-icon-wrap">
+            <img src="assets/playstyles/${c.playstyle}.webp" class="fut-ps-diamond-img" alt="${ps.name}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';">
+            <span class="fut-ps-fallback-emoji" style="display:none; font-size:14px;">${ps.icon}</span>
+          </div>
           <div class="fut-ps-text-wrap">
             <span class="fut-ps-name-tag" style="${isMini ? 'font-size:9px;' : ''}">${ps.name}</span>
             ${!isMini ? `<span class="fut-ps-desc-tag">${ps.desc}</span>` : ''}
@@ -5377,11 +5520,11 @@ function renderPackStore() {
       </div>
 
       <div class="pack-odds-badge" style="justify-content:center;">
-        <span class="pack-odd-pill" style="border-color:#8b949e;">🥉 72-79 OVR: 50%</span>
-        <span class="pack-odd-pill" style="border-color:#ffd700; color:#ffd700;">⭐ 80-84 ZŁOTA: 26%</span>
-        <span class="pack-odd-pill" style="border-color:#ff0055; color:#ff6b8a;">🔥 85-89 WALKOUT: 23%</span>
-        <span class="pack-odd-pill" style="border-color:#00f0ff; color:#00f0ff; font-weight:900;">👑 90+ IKONY: 1%</span>
-        <span class="pack-odd-pill" style="border-color:#b845ff; color:#b845ff; font-weight:900;">✨ ZŁOTY PLAYSTYLE+: 15%</span>
+        <span class="pack-odd-pill" style="border-color:#8b949e;">🥉 72-79 PODSTAWA: 65%</span>
+        <span class="pack-odd-pill" style="border-color:#ffd700; color:#ffd700;">⭐ 80-83 ZŁOTA: 20%</span>
+        <span class="pack-odd-pill" style="border-color:#ff9900; color:#ffb300;">🌟 84-86 GWIAZDA: 10%</span>
+        <span class="pack-odd-pill" style="border-color:#ff0055; color:#ff6b8a; font-weight:900;">🔥 87-89 WALKOUT: 4%</span>
+        <span class="pack-odd-pill" style="border-color:#00f0ff; color:#00f0ff; font-weight:900;">👑 90+ IKONA: 1%</span>
       </div>
 
       <div>
@@ -5541,31 +5684,29 @@ function openPack(packType = 'ultimate') {
 
   clubData.coins = Math.max(0, clubData.coins - PACK_COST);
   
-  // Zbalansowane szanse na drop:
+  // Zbalansowane, autentyczne szanse na drop (Walkout = łącznie zaledwie 5%):
   // 90+ OVR (IKONY): 1%
-  // Karty ze złotym PlayStyle+: 15% ogółem (1% ikony + 14% walkouty/złote z PlayStyle+)
-  // 85-89 OVR: ~23%
-  // 80-84 OVR: ~26%
-  // 72-79 OVR: ~50%
+  // 87-89 OVR (ELITARNY WALKOUT): 4%
+  // 84-86 OVR (ZŁOTE GWIAZDY): 10%
+  // 80-83 OVR (ZŁOTE LIGOWE): 20%
+  // 72-79 OVR (PODSTAWA KLUBU): 65%
   const roll = Math.random();
   let pool = [];
 
   if (roll < 0.01) {
-    // 1% - Ikony 90+ OVR (wszystkie mają złoty PlayStyle+)
+    // 1% - Legendarne Ikony 90+ OVR (Pele, R9, Zidane, Ronaldinho, Cruyff, Henry itp.)
     pool = PLAYERS_DB.filter(c => c.ovr >= 90);
+  } else if (roll < 0.05) {
+    // 4% - Elitarne Walkouty 87-89 OVR (Mbappe, Vini, Van Dijk, Saliba, Hakimi, Valverde itp.)
+    pool = PLAYERS_DB.filter(c => c.ovr >= 87 && c.ovr <= 89);
   } else if (roll < 0.15) {
-    // Kolejne 14% (łącznie 15% szans na kartę ze złotym PlayStyle+)
-    pool = PLAYERS_DB.filter(c => c.ovr < 90 && !!c.playstyle);
-  } else if (roll < 0.25) {
-    // Kolejne 10% - Walkouty 85-89 bez PlayStyle+
-    pool = PLAYERS_DB.filter(c => c.ovr >= 85 && c.ovr <= 89 && !c.playstyle);
-    if (pool.length === 0) pool = PLAYERS_DB.filter(c => c.ovr >= 85 && c.ovr <= 89);
-  } else if (roll < 0.50) {
-    // Kolejne 25% - Karty 80-84 bez PlayStyle+
-    pool = PLAYERS_DB.filter(c => c.ovr >= 80 && c.ovr <= 84 && !c.playstyle);
-    if (pool.length === 0) pool = PLAYERS_DB.filter(c => c.ovr >= 80 && c.ovr <= 84);
+    // 10% - Złote Gwiazdy 84-86 OVR (Bastoni, Szoboszlai, Odegaard, Alvarez, Gyokeres itp.)
+    pool = PLAYERS_DB.filter(c => c.ovr >= 84 && c.ovr <= 86);
+  } else if (roll < 0.35) {
+    // 20% - Złote karty ligowe 80-83 OVR (Raya, Vicario, Disasi, Soucek itp.)
+    pool = PLAYERS_DB.filter(c => c.ovr >= 80 && c.ovr <= 83);
   } else {
-    // Pozostałe 50% - Karty 72-79
+    // 65% - Podstawowe karty 72-79 OVR (fundament składu 4v4)
     pool = PLAYERS_DB.filter(c => c.ovr >= 72 && c.ovr <= 79);
   }
 
@@ -5661,11 +5802,20 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
   setTimeout(() => {
     if (foilStage) foilStage.style.display = 'none';
 
-    const isWalkout = card && card.ovr >= 85;
+    // Elitarny Walkout tylko od 87+ OVR lub dla Ikon 90+ (5% szansy łącznie)!
     const isIcon = card && card.ovr >= 90;
+    const isWalkout = card && (card.ovr >= 87 || isIcon);
     const hasPs = card && card.playstyle;
 
+    let walkoutTimerIds = [];
+    let walkoutCompleted = false;
+
     const showFinalCard = () => {
+      if (walkoutCompleted) return;
+      walkoutCompleted = true;
+      walkoutTimerIds.forEach(id => clearTimeout(id));
+      walkoutTimerIds = [];
+
       if (walkoutStage) walkoutStage.style.display = 'none';
       if (cardStage) cardStage.style.display = 'flex';
 
@@ -5680,7 +5830,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
           badge.style.background = 'rgba(0, 255, 136, 0.2)';
           badge.style.borderColor = '#00ff88';
           badge.style.color = '#00ff88';
-          badge.textContent = `🎉 NOWY ZAWODNIK W TWOIM KLUBIE!`;
+          badge.textContent = isIcon ? '👑 LEGENDA FUT ZDOBYTA!' : (isWalkout ? '🔥 EFEKTOWNY WALKOUT!' : '🎉 NOWY ZAWODNIK W TWOIM KLUBIE!');
           if (hasPs) {
             try { SFX.play('ps_flare'); } catch (e) {}
           }
@@ -5713,6 +5863,8 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
       try { SFX.play('card_slam'); } catch (e) {}
     };
 
+    window.skipWalkoutAnimation = showFinalCard;
+
     if (isWalkout) {
       if (walkoutStage) {
         walkoutStage.style.display = 'block';
@@ -5732,26 +5884,26 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
         const roleNames = { GK: 'BRAMKARZ (BR)', DEF: 'OBROŃCA (ŚO)', MID: 'POMOCNIK (ŚP)', FWD: 'NAPASTNIK (N)' };
 
         // Krok 1: Flaga Narodowa
-        setTimeout(() => {
+        walkoutTimerIds.push(setTimeout(() => {
           if (flagBox) {
             flagBox.style.display = 'inline-flex';
             if (flagEmoji) flagEmoji.textContent = PLAYER_NATIONS[card.id] || '⚽';
             if (countryName) countryName.textContent = PLAYER_COUNTRIES[card.id] || 'NARODOWOŚĆ';
           }
           try { SFX.play('walkout_step'); } catch (e) {}
-        }, 150);
+        }, 150));
 
         // Krok 2: Pozycja
-        setTimeout(() => {
+        walkoutTimerIds.push(setTimeout(() => {
           if (posBox) {
             posBox.style.display = 'inline-block';
             if (roleText) roleText.textContent = roleNames[card.role] || card.role;
           }
           try { SFX.play('walkout_step'); } catch (e) {}
-        }, 650);
+        }, 650));
 
         // Krok 3: Eksplozja Walkoutu / Ikony
-        setTimeout(() => {
+        walkoutTimerIds.push(setTimeout(() => {
           if (bannerBox) {
             bannerBox.style.display = 'block';
             if (banner) banner.textContent = isIcon ? '👑 IKONA LEGEND FUT! 👑' : '🔥 OFICJALNY WALKOUT! 🔥';
@@ -5761,10 +5913,10 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
             SFX.play('walkout_hit');
             SFX.play('icon_fanfare');
           } catch (e) {}
-        }, 1150);
+        }, 1150));
 
         // Krok 4: Ujawnienie karty
-        setTimeout(showFinalCard, 2100);
+        walkoutTimerIds.push(setTimeout(showFinalCard, 2100));
       } else {
         showFinalCard();
       }
@@ -5839,11 +5991,12 @@ function updateMenuSquadStrip() {
     html += `
       <div class="mini-fut-card ${ps ? 'gold-tier' : ''}" onclick="switchClubTab('SQUAD'); openClubModal();" title="Twój skład (${rl[r]}): ${card.name}">
         <div class="mini-ovr">${card.ovr}</div>
+        <img src="assets/players/${card.id}.webp" style="width:28px; height:32px; object-fit:contain; border-radius:4px; margin-right:4px;" onerror="this.style.display='none';">
         <div class="mini-info">
           <span class="mini-name">${card.name}</span>
           <span class="mini-pos">${statText}</span>
         </div>
-        ${ps ? `<span class="ps-diamond" title="${ps.name}: ${ps.desc}">${ps.icon} PS+</span>` : ''}
+        ${ps ? `<span class="ps-diamond" title="${ps.name}: ${ps.desc}"><img src="assets/playstyles/${card.playstyle}.webp" style="width:14px; height:14px; vertical-align:middle; margin-right:2px;" onerror="this.style.display='none';">${ps.name}</span>` : ''}
       </div>
     `;
   }
