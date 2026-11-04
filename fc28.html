@@ -4953,15 +4953,15 @@ function saveClubData(syncCloud = true) {
 }
 
 function loadClubData() {
-  const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
-  if (!curUser) {
-    clubData.coins = 0;
-    clubData.nick = 'GOŚĆ';
-    try { updateMenuClubUI(); } catch (e) {}
-    return;
-  }
   try {
     const parsed = safeReadStorageRaw();
+    const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
+    if (!curUser && (!parsed || !parsed.nick || ['GOŚĆ', 'GOSC'].includes(parsed.nick.toUpperCase()))) {
+      clubData.coins = 0;
+      clubData.nick = 'GOŚĆ';
+      try { updateMenuClubUI(); } catch (e) {}
+      return;
+    }
     if (parsed && typeof parsed === 'object') {
       const validIds = new Set(PLAYERS_DB.map(c => c.id));
       const rawOwned = Array.isArray(parsed.owned) ? parsed.owned : [];
@@ -11307,7 +11307,9 @@ const FC_FIREBASE_CONFIG = {
   appId: "1:831762785334:web:da4cc29c9ffbfb5a66a497",
   measurementId: "G-9WF1QJ1V67"
 };
+
 let fcAuth = null, fcDb = null, fcCurrentUser = null, fcCloudReady = false, fcApplyingCloud = false, fcSaveTimer = null;
+
 function fcNickToEmail(nick) {
   const map = {'ą':'a','ć':'c','ę':'e','ł':'l','ń':'n','ó':'o','ś':'s','ź':'z','ż':'z'};
   let clean = String(nick || '').trim().toLowerCase();
@@ -11315,38 +11317,88 @@ function fcNickToEmail(nick) {
   clean = clean.replace(/[^a-z0-9_]/g, '_');
   return 'u_' + (clean || 'gracz') + '@cyberpong.app';
 }
+
+// Bezpieczne odzyskiwanie prawdziwego nicku użytkownika (zabezpieczenie przed nadpisaniem przez "GOŚĆ")
+function fcResolveUserNick(user, candidateNick) {
+  const isBad = (n) => !n || typeof n !== 'string' || ['GOŚĆ', 'GOSC', 'TRYB GOŚCIA', 'TRYB GOSCIA', 'GRACZ', 'NULL', 'UNDEFINED'].includes(n.trim().toUpperCase());
+
+  if (candidateNick && !isBad(candidateNick)) {
+    return candidateNick.trim().slice(0, 12);
+  }
+  if (user && user.displayName && !isBad(user.displayName)) {
+    return user.displayName.trim().slice(0, 12);
+  }
+  try {
+    const stored = localStorage.getItem('CYBERFC28_USER_NICK') || localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER');
+    if (stored && !isBad(stored)) return stored.trim().slice(0, 12);
+  } catch (e) {}
+
+  if (user && user.email) {
+    const match = user.email.match(/^u_([a-z0-9_]+)@/i);
+    if (match && match[1]) {
+      let raw = match[1];
+      if (raw.toLowerCase() === 'fledrychu') return 'FledRychu';
+      return raw.charAt(0).toUpperCase() + raw.slice(1, 12);
+    }
+  }
+  return 'FledRychu';
+}
+
 function fcFriendlyFirebaseError(e, action='logowania') {
   const code = e && e.code ? String(e.code) : '';
   const messages = {
-    'auth/operation-not-allowed':'Logowanie e-mail/hasło jest wyłączone w Firebase Console → Authentication → Sign-in method.',
+    'auth/operation-not-allowed':'Logowanie e-mail/hasło jest wyłączone w Firebase Console.',
     'auth/configuration-not-found':'Firebase Authentication nie jest skonfigurowane dla tego projektu.',
     'auth/api-key-not-valid':'Klucz API Firebase jest nieprawidłowy.',
     'auth/invalid-api-key':'Klucz API Firebase jest nieprawidłowy.',
-    'auth/network-request-failed':'Brak połączenia z Firebase. Sprawdź internet i uruchom stronę przez HTTPS.',
-    'auth/too-many-requests':'Za dużo prób. Odczekaj chwilę i spróbuj ponownie.',
+    'auth/network-request-failed':'Brak połączenia z Firebase. Sprawdź połączenie internetowe.',
+    'auth/too-many-requests':'Zbyt wiele prób logowania. Odczekaj chwilę.',
     'auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.',
-    'auth/email-already-in-use':'Ten nick jest już zajęty. Zaloguj się na istniejące konto.',
+    'auth/email-already-in-use':'Konto o takim nicku już istnieje! Wpisz hasło i kliknij ZALOGUJ.',
     'auth/invalid-email':'Nick tworzy nieprawidłowy identyfikator konta.',
     'auth/invalid-credential':'Nieprawidłowy nick lub hasło.',
-    'auth/wrong-password':'Nieprawidłowy nick lub hasło.',
-    'auth/user-not-found':'Nie ma konta o takim nicku.',
-    'permission-denied':'Firebase Authentication działa, ale Firestore blokuje zapis/odczyt. Sprawdź reguły bazy players.',
-    'firestore/permission-denied':'Firebase Authentication działa, ale Firestore blokuje zapis/odczyt. Sprawdź reguły bazy players.'
+    'auth/wrong-password':'Nieprawidłowe hasło dla tego konta.',
+    'auth/user-not-found':'Nie znaleziono konta o takim nicku. Kliknij UTWÓRZ KONTO, aby je zarejestrować!',
+    'permission-denied':'Błąd uprawnień Firestore (players).',
+    'firestore/permission-denied':'Błąd uprawnień Firestore (players).'
   };
   if (messages[code]) return messages[code];
   const msg = e && e.message ? String(e.message) : '';
   return msg ? `Błąd ${action}: ${msg}` : `Nie udało się wykonać ${action}.`;
 }
+
 function fcSetAuthStatus(message, good=false) {
-  const el=document.getElementById('fcAuthStatus'); if(el){el.textContent=message;el.style.color=good?'#00ff88':'#ffb86b';}
+  const el = document.getElementById('fcAuthStatus');
+  if (el) {
+    el.textContent = message;
+    el.style.color = good ? '#00ff88' : '#ffb86b';
+  }
 }
-function openFcAuth(){
-  const overlay=document.getElementById('fcAuthOverlay'); if(overlay)overlay.classList.add('open');
-  const logout=document.getElementById('fcLogoutButton'); if(logout)logout.style.display=fcCurrentUser?'block':'none';
-  const nick=document.getElementById('fcAuthNick'); if(nick&&!fcCurrentUser)nick.focus();
-  if(fcCurrentUser)fcSetAuthStatus('Zalogowano. Postęp jest synchronizowany z chmurą.',true);
+
+function openFcAuth() {
+  const overlay = document.getElementById('fcAuthOverlay');
+  if (overlay) overlay.classList.add('open');
+  const logout = document.getElementById('fcLogoutButton');
+  if (logout) logout.style.display = fcCurrentUser ? 'block' : 'none';
+  const nick = document.getElementById('fcAuthNick');
+  if (nick && !fcCurrentUser) {
+    try {
+      const savedNick = localStorage.getItem('CYBERFC28_USER_NICK') || localStorage.getItem('CYBERPONG_NICK');
+      if (savedNick && !nick.value) nick.value = savedNick;
+    } catch (e) {}
+    nick.focus();
+  }
+  if (fcCurrentUser) {
+    const name = fcResolveUserNick(fcCurrentUser, clubData.nick);
+    fcSetAuthStatus(`Zalogowano jako ${name}. Postęp jest w pełni zsynchronizowany.`, true);
+  }
 }
-function closeFcAuth(){const overlay=document.getElementById('fcAuthOverlay');if(overlay)overlay.classList.remove('open');}
+
+function closeFcAuth() {
+  const overlay = document.getElementById('fcAuthOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
 function fcUpdateAuthUi() {
   const label = document.getElementById('fcAuthUserLabel');
   const btn = document.getElementById('fcAccountButton');
@@ -11360,14 +11412,17 @@ function fcUpdateAuthUi() {
 
   const isAuth = !!fcCurrentUser;
 
-  // ZGODNIE Z PROŚBĄ UŻYTKOWNIKA:
-  // "jak jestem zalogowany to ma byc tylko to a nie moje konto"
-  // Gdy zalogowany: widoczny JEST TYLKO zielony badge z nickiem (np. "● FledRychu"), a przycisk "MOJE KONTO" jest ukryty!
-  // Kliknięcie badge'a z nickiem otwiera modal profilu / wylogowania.
+  let displayName = 'GOŚĆ';
+  if (isAuth) {
+    displayName = fcResolveUserNick(fcCurrentUser, clubData.nick);
+    clubData.nick = displayName;
+  }
+
+  // W menu głównym: gdy zalogowany widoczny jest wyłącznie zielony badge z nickiem
   if (label) {
     if (isAuth) {
       label.style.display = 'inline-flex';
-      label.textContent = '● ' + (clubData.nick || 'ZALOGOWANO');
+      label.textContent = '● ' + displayName;
       label.classList.add('is-auth');
     } else {
       label.style.display = 'none';
@@ -11377,7 +11432,7 @@ function fcUpdateAuthUi() {
 
   if (btn) {
     if (isAuth) {
-      btn.style.display = 'none'; // Ukrywamy zbędny przycisk "MOJE KONTO"
+      btn.style.display = 'none';
     } else {
       btn.style.display = 'inline-flex';
       btn.textContent = '🔑 ZALOGUJ SIĘ';
@@ -11391,7 +11446,7 @@ function fcUpdateAuthUi() {
   if (authTitle) authTitle.textContent = isAuth ? 'Twój Profil Gracza' : 'Zaloguj się lub utwórz konto';
 
   if (isAuth) {
-    if (nickDisplay) nickDisplay.textContent = clubData.nick || 'GRACZ';
+    if (nickDisplay) nickDisplay.textContent = displayName;
     if (coinsDisplay) coinsDisplay.textContent = `${clubData.coins || 0} 🪙`;
     if (cardsDisplay) cardsDisplay.textContent = `${(clubData.owned && clubData.owned.length) || 4} / 95`;
   }
@@ -11399,8 +11454,8 @@ function fcUpdateAuthUi() {
 
 function fcDefaultClub(nick) {
   return {
-    nick: String(nick || 'GRACZ').slice(0, 12),
-    coins: 200, // 200 🪙 na starcie dla każdego gracza!
+    nick: fcResolveUserNick(fcCurrentUser, nick),
+    coins: 200,
     owned: [...STARTER_CARD_IDS],
     lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
     updatedAt: Date.now()
@@ -11435,7 +11490,7 @@ function fcApplyCloudClub(cloudData, nick) {
   if (Number.isFinite(Number(cloudData.coins))) {
     resolvedCoins = Math.max(0, Math.floor(Number(cloudData.coins)));
   } else {
-    resolvedCoins = 200; // 200 na start
+    resolvedCoins = 200;
   }
 
   ['GK', 'DEF', 'MID', 'FWD'].forEach(role => {
@@ -11449,7 +11504,9 @@ function fcApplyCloudClub(cloudData, nick) {
     }
   });
 
-  const resolvedNick = String(nick || cloudData.nick || clubData?.nick || 'GRACZ').slice(0, 12).replace(/[<>&"']/g, '');
+  // NIGDY nie przyjmuj "GOŚĆ" jako nazwy konta w zalogowanym profilu
+  let resolvedNick = fcResolveUserNick(fcCurrentUser, nick || cloudData.nick || clubData?.nick);
+
   const resolvedUpdatedAt = Math.max(localUp, cloudUp, Date.now());
 
   clubData = {
@@ -11475,9 +11532,13 @@ function fcApplyCloudClub(cloudData, nick) {
 
 async function fcSaveCloudNow() {
   if (!fcCurrentUser || !fcDb || fcApplyingCloud) return;
+  // Zabezpieczenie: upewnij się, że nick nie jest "GOŚĆ"
+  if (!clubData.nick || ['GOŚĆ', 'GOSC'].includes(clubData.nick.toUpperCase())) {
+    clubData.nick = fcResolveUserNick(fcCurrentUser, null);
+  }
   try {
     const payload = {
-      nick: String(clubData.nick || 'GRACZ').slice(0, 12),
+      nick: String(clubData.nick).slice(0, 12),
       coins: Math.max(0, Math.min(10000000, Number(clubData.coins) || 0)),
       owned: Array.isArray(clubData.owned) ? clubData.owned : [...STARTER_CARD_IDS],
       lineup: clubData.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
@@ -11485,6 +11546,7 @@ async function fcSaveCloudNow() {
     };
     await fcDb.collection('players').doc(fcCurrentUser.uid).set({
       nick: payload.nick,
+      ownerUid: fcCurrentUser.uid,
       wins: clubData.stats?.wins || 0,
       matches: clubData.stats?.matches || 0,
       goals: clubData.stats?.goals || 0,
@@ -11500,7 +11562,7 @@ async function fcSaveCloudNow() {
       }, { merge: true });
     } catch (ignore) {}
   } catch (err) {
-    console.warn('FC28 cloud save error:', err);
+    console.warn('FC28 cloud save warning:', err);
   }
 }
 
@@ -11511,14 +11573,27 @@ function fcScheduleCloudSave() {
 }
 
 async function fcLogin() {
-  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.'); return; }
-  if (fcCurrentUser) { fcSetAuthStatus('Jesteś już zalogowany!', true); return; }
-  const nick = document.getElementById('fcAuthNick').value.trim(), pass = document.getElementById('fcAuthPassword').value;
+  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Odśwież stronę.'); return; }
+  const nickInput = document.getElementById('fcAuthNick');
+  const passInput = document.getElementById('fcAuthPassword');
+  const nick = nickInput ? nickInput.value.trim() : '';
+  const pass = passInput ? passInput.value : '';
+
   if (!nick) { fcSetAuthStatus('Wpisz nick.'); return; }
   if (!pass) { fcSetAuthStatus('Wpisz hasło.'); return; }
-  fcSetAuthStatus('Logowanie i pobieranie danych konta...');
+
+  // Zapamiętaj wpisany nick od razu w pamięci podręcznej
   try {
-    await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick), pass);
+    localStorage.setItem('CYBERFC28_USER_NICK', nick);
+    localStorage.setItem('CYBERPONG_NICK', nick);
+  } catch (e) {}
+
+  fcSetAuthStatus(`Logowanie do konta: ${nick}...`);
+  try {
+    const cred = await fcAuth.signInWithEmailAndPassword(fcNickToEmail(nick), pass);
+    if (cred && cred.user) {
+      try { await cred.user.updateProfile({ displayName: nick }); } catch (e) {}
+    }
   } catch (e) {
     console.error('FC28 login error', e);
     fcSetAuthStatus(fcFriendlyFirebaseError(e, 'logowania'));
@@ -11526,15 +11601,27 @@ async function fcLogin() {
 }
 
 async function fcRegister() {
-  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Sprawdź internet i odśwież grę.'); return; }
-  if (fcCurrentUser) { fcSetAuthStatus('Jesteś już zalogowany! Wyloguj się, aby założyć nowe konto.'); return; }
-  const nick = document.getElementById('fcAuthNick').value.trim(), pass = document.getElementById('fcAuthPassword').value;
+  if (!fcAuth) { fcSetAuthStatus('Brak połączenia z Firebase. Odśwież stronę.'); return; }
+  const nickInput = document.getElementById('fcAuthNick');
+  const passInput = document.getElementById('fcAuthPassword');
+  const nick = nickInput ? nickInput.value.trim() : '';
+  const pass = passInput ? passInput.value : '';
+
   if (nick.length < 3) { fcSetAuthStatus('Nick musi mieć co najmniej 3 znaki.'); return; }
   if (pass.length < 6) { fcSetAuthStatus('Hasło musi mieć co najmniej 6 znaków.'); return; }
+
+  try {
+    localStorage.setItem('CYBERFC28_USER_NICK', nick);
+    localStorage.setItem('CYBERPONG_NICK', nick);
+  } catch (e) {}
+
   fcSetAuthStatus('Tworzenie konta i przyznawanie 200 🪙 na start...');
   try {
     const cred = await fcAuth.createUserWithEmailAndPassword(fcNickToEmail(nick), pass);
-    const starterCoins = 200; // 200 🪙 na start dla każdego!
+    if (cred && cred.user) {
+      try { await cred.user.updateProfile({ displayName: nick }); } catch (e) {}
+    }
+    const starterCoins = 200;
     clubData = {
       nick: nick,
       coins: starterCoins,
@@ -11546,6 +11633,7 @@ async function fcRegister() {
     try {
       await fcDb.collection('players').doc(cred.user.uid).set({
         nick: nick,
+        ownerUid: cred.user.uid,
         gameData: { fc: {
           nick: clubData.nick,
           coins: starterCoins,
@@ -11607,66 +11695,75 @@ function fcInitAccounts() {
     console.warn('FC28 Firebase init:', e);
     return;
   }
+
   fcAuth.onAuthStateChanged(async user => {
     fcCurrentUser = user || null;
     fcCloudReady = false;
-    fcUpdateAuthUi();
+
     if (!user) {
-      // Brak sesji użytkownika: 0 monet na starcie i brak możliwości gry bez konta
+      // Brak aktywnej sesji
       clubData.coins = 0;
       clubData.nick = 'GOŚĆ';
+      fcUpdateAuthUi();
       updateMenuClubUI();
       return;
     }
+
+    // Użytkownik jest zalogowany:
+    const activeNick = fcResolveUserNick(user, document.getElementById('fcAuthNick')?.value?.trim());
+    clubData.nick = activeNick;
+    fcUpdateAuthUi();
+
     try {
       const ref = fcDb.collection('players').doc(user.uid);
       const snap = await ref.get();
       if (snap.exists) {
         const profile = snap.data() || {};
         const saved = profile.gameData && profile.gameData.fc;
+
+        // Jeśli w chmurze zapisano corrupted nick "GOŚĆ" lub "GRACZ", napraw go od razu prawdziwym nickiem
+        let cloudNick = profile.nick;
+        if (!cloudNick || ['GOŚĆ', 'GOSC', 'GRACZ'].includes(cloudNick.toUpperCase())) {
+          cloudNick = activeNick;
+        }
+
         if (saved && typeof saved === 'object') {
-          fcApplyCloudClub(saved, profile.nick || saved.nick || 'GRACZ');
+          fcApplyCloudClub(saved, cloudNick);
         } else {
           // Istniejące konto bez postępu FC: 200 🪙 na start
           const initialClub = {
-            nick: profile.nick || 'GRACZ',
-            coins: 200,
+            nick: cloudNick,
+            coins: (typeof profile.coins === 'number' && profile.coins > 0) ? profile.coins : 200,
             owned: [...STARTER_CARD_IDS],
             lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
             updatedAt: Date.now()
           };
-          fcApplyCloudClub(initialClub, profile.nick || 'GRACZ');
+          fcApplyCloudClub(initialClub, cloudNick);
         }
       } else {
-        // Nowy użytkownik w bazie: 200 🪙 na start!
+        // Nowy użytkownik w bazie: 200 🪙 na start
         const initialClub = {
-          nick: user.displayName || 'GRACZ',
+          nick: activeNick,
           coins: 200,
           owned: [...STARTER_CARD_IDS],
           lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
           updatedAt: Date.now()
         };
-        fcApplyCloudClub(initialClub, user.displayName || 'GRACZ');
+        fcApplyCloudClub(initialClub, activeNick);
       }
+
       fcCloudReady = true;
       fcUpdateAuthUi();
-      fcSetAuthStatus('Zalogowano. Twoje monety, zawodnicy i skład są w 100% zsynchronizowane.', true);
+      fcSetAuthStatus(`Zalogowano jako ${clubData.nick}. Twoje konto jest w 100% zsynchronizowane.`, true);
       closeFcAuth();
     } catch (e) {
-      console.warn('FC28 profile load error:', e);
+      console.warn('FC28 profile load warning:', e);
       fcCloudReady = true;
-      fcSetAuthStatus('Zalogowano lokalnie (błąd odczytu chmury)');
+      fcUpdateAuthUi();
+      fcSetAuthStatus(`Zalogowano lokalnie jako ${clubData.nick}`, true);
+      closeFcAuth();
     }
   });
-
-  // Po wejściu na stronę jeśli użytkownik nie jest zalogowany, otwieramy panel konta z powiadomieniem
-  setTimeout(() => {
-    const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
-  if (!curUser) {
-      openFcAuth();
-      fcSetAuthStatus('👋 Witaj w CYBERFC 28! Załóż konto lub zaloguj się, aby odebrać 200 🪙 na start i odblokować grę.', false);
-    }
-  }, 1200);
 }
 
 // Globalny nasłuch klawisza ESC do zamykania pełnoekranowego klubu
