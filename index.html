@@ -1327,14 +1327,14 @@ const DEFAULT_GAMES = [
   },
   {
     title: 'CS:GO',
-    url: 'cs.html',
+    url: 'https://csgame.sorpio.pl',
     status: 'ready',
-    desc: 'Taktyczna gra akcji FPS 3D z pojedynkami drużynowymi 5v5, serwerem online, botami i pełnym arsenałem.',
-    tags: ['FPS 3D', 'Akcja', 'Multiplayer', 'vs Boty'],
+    desc: 'Taktyczna gra akcji FPS z dynamicznymi pojedynkami drużynowymi 5v5 i rozbrajaniem bomby.',
+    tags: ['FPS', 'Akcja', 'Multiplayer'],
     color: '#3b82f6',
     image: 'assets/cover_cs.jpg',
-    badge: 'Multiplayer 3D',
-    players: 'Wieloosobowa 5v5'
+    badge: 'Online',
+    players: 'Wieloosobowa'
   },
   {
     title: 'Astro Strike',
@@ -1374,16 +1374,16 @@ GAMES = GAMES.filter(g => g && g.url !== 'cyberpong.html' && g.url !== 'kaczki.h
 GAMES.forEach(g => {
   if (g.url === 'pingpong.html') g.image = 'assets/cover_pong.jpg';
   if (g.url === 'fc28.html') g.image = 'assets/cover_fc28.jpg';
-  if (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl' || g.url === 'cs.html') {
-    g.url = 'cs.html';
+  if (g.title === 'CS:GO' || g.url === 'cs.html' || g.url === 'https://csgame.sorpio.pl') {
+    g.url = 'https://csgame.sorpio.pl';
     g.image = 'assets/cover_cs.jpg';
-    g.badge = 'Multiplayer 3D';
+    g.badge = 'Online';
     g.status = 'ready';
   }
 });
 
 // Zapewnij obecność nowej gry CS:GO na liście
-if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'cs.html'))) {
+if (!GAMES.some(g => g && (g.title === 'CS:GO' || g.url === 'https://csgame.sorpio.pl'))) {
   const csObj = DEFAULT_GAMES.find(g => g && g.title === 'CS:GO'); if (csObj) GAMES.splice(2, 0, csObj);
 }
 
@@ -1537,6 +1537,10 @@ let activeGameUrl = '';
 
 function launchGame(url, title) {
   AudioFX.play('launch');
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    window.location.href = url;
+    return;
+  }
   activeGameUrl = url;
   const frame = document.getElementById('gameFrame');
   frame.src = url;
