@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>JDR Games</title>
+<link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090a0f;
+    --surface: #11131a;
+    --surface-hover: #161923;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(245, 158, 11, 0.45);
+    
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    
+    --accent: #f59e0b;
+    --accent-hover: #fbbf24;
+    --green: #10b981;
+    
+    --font-heading: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    min-height: 100%;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- GŁÓWNY KONTENER ---------- */
+  .app {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 28px 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* ---------- NAGŁÓWEK ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: rgba(17, 19, 26, 0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+
+  .brand-badge {
+    background: var(--accent);
+    color: #090a0f;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  .brand-sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border);
+  }
+
+  .brand-sub i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    display: inline-block;
+  }
+
+  /* Wyszukiwarka */
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    height: 40px;
+    width: 260px;
+    transition: border-color 0.2s ease, width 0.2s ease;
+  }
+
+  .search-box:focus-within {
+    border-color: var(--accent);
+    width: 290px;
+  }
+
+  .search-box svg {
+    width: 15px;
+    height: 15px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .search-box:focus-within svg {
+    color: var(--accent);
+  }
+
+  .search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    width: 100%;
+    margin: 0 8px;
+  }
+
+  .search-box input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .search-kbd {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+
+  /* ---------- SIATKA GIER ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 24px;
+  }
+
+  /* KAFELEK GRY */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    gap: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card.ready {
+    cursor: pointer;
+  }
+
+  .card.ready:hover {
+    transform: translateY(-4px);
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Okładka */
+  .cover {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #0b0d13;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cover .art {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .card.ready:hover .cover .art {
+    transform: scale(1.04);
+  }
+
+  /* Treść karty */
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    padding: 0 2px;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .game-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+    transition: color 0.2s ease;
+  }
+
+  .card.ready:hover .game-title {
+    color: var(--accent-hover);
+  }
+
+  .game-players {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .game-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Stopka karty z przyciskiem */
+  .card-footer {
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .btn-play {
+    width: 100%;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+  }
+
+  .btn-play.ready {
+    background: var(--accent);
+    color: #090a0f;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-play.ready svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .btn-play.ready:hover {
+    background: var(--accent-hover);
+  }
+
+  /* KARTY W PRZYGOTOWANIU */
+  .card.wip {
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  .lock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(9, 10, 15, 0.85);
+    color: var(--text-muted);
+  }
+
+  .lock-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+  }
+
+  .lock-icon-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lock-overlay p {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .lock-overlay small {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .btn-play.wip {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: not-allowed;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .btn-play.wip svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* Pusty stan wyszukiwania */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .empty-state svg {
+    width: 34px;
+    height: 34px;
+    color: var(--text-dim);
+  }
+
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .empty-state p {
+    font-size: 13.5px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- STOPKA ---------- */
+  footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12.5px;
+  }
+
+  /* ---------- EKRAN GRY (STAGE) ---------- */
+  #stage {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: #000;
+  }
+
+  #stage.open {
+    display: block;
+    animation: stageFadeIn 0.2s ease both;
+  }
+
+  @keyframes stageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #gameFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .stage-hud {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 7px;
+    background: rgba(17, 19, 26, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+  }
+
+  .stage-hud:hover {
+    opacity: 1;
+  }
+
+  .stage-hud-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .stage-hud-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  .stage-hud-icon-btn.back {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-hover);
+  }
+
+  .stage-hud-icon-btn.back:hover {
+    background: var(--accent);
+    color: #090a0f;
+  }
+
+  .stage-hud-icon-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .stage-hud-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+    margin: 0 2px;
+  }
+
+  /* ---------- RESPONSYWNOŚĆ ---------- */
+  @media (max-width: 768px) {
+    .app {
+      padding: 18px 16px 24px;
+      gap: 24px;
+    }
+
+    .search-box,
+    .search-box:focus-within {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .brand-sub {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="hubView">
+
+  <!-- NAGŁÓWEK -->
+  <header>
+    <a href="#" class="brand" onclick="window.location.reload(); return false;" title="JDR Games">
+      <div class="brand-logo">
+        <span>JDR</span>
+        <span class="brand-badge">GAMES</span>
+      </div>
+      <div class="brand-sub">
+        <i></i><span id="headerLiveStatus">Online • 3 Dostępne Gry</span>
+      </div>
+    </a>
+
+    <label class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Szukaj gry…" autocomplete="off">
+      <kbd class="search-kbd">/</kbd>
+    </label>
+  </header>
+
+  <!-- SIATKA GIER -->
+  <main class="grid" id="gamesGrid"></main>
+
+  <!-- STOPKA -->
+  <footer>
+    © 2026 JDR Games. Wszelkie prawa zastrzeżone.
+  </footer>
+</div>
+
+<!-- EKRAN GRY -->
+<div id="stage">
+  <div class="stage-hud" id="stageHud" title="JDR Games">
+    <button type="button" class="stage-hud-icon-btn back" onclick="closeGame()" title="Wróć do menu (ESC)" aria-label="Wróć do menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="stage-hud-divider"></div>
+    <button type="button" class="stage-hud-icon-btn" onclick="reloadGameFrame()" title="Przeładuj grę" aria-label="Przeładuj grę">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+    </button>
+    <button type="button" class="stage-hud-icon-btn" onclick="toggleFullscreen()" title="Pełny ekran" aria-label="Pełny ekran">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </div>
+  <iframe id="gameFrame" src="about:blank" allow="autoplay; fullscreen; gamepad; cross-origin-isolated"></iframe>
+</div>
+
+<script>
+/* ==========================================================================
+   SUBTELNE EFEKTY DŹWIĘKOWE
+   ========================================================================== */
+const AudioFX = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+  },
+  play(type) {
+    try {
+      this.init();
+      if (!this.ctx || this.ctx.state === 'suspended') return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      if (type === 'click') {
+        osc.frequency.setValueAtTime(580, t);
+        gain.gain.setValueAtTime(0.025, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        osc.start(t);
+        osc.stop(t + 0.05);
+      } else if (type === 'launch') {
+        osc.frequency.setValueAtTime(380, t);
+        osc.frequency.exponentialRampToValueAtTime(720, t + 0.11);
+        gain.gain.setValueAtTime(0.04, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+        osc.start(t);
+        osc.stop(t + 0.14);
+      }
+    } catch (_) {}
+  }
+};
+
+/* ==========================================================================
+   GRAFIKI I IKONY
+   ========================================================================== */
+const WIP_COVER = `
+  <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <rect width="440" height="260" fill="#0d0f15"/>
+    <rect x="20" y="20" width="400" height="220" rx="8" fill="none" stroke="#1e2433" stroke-width="1.5" stroke-dasharray="6 6"/>
+  </svg>`;
+
+const ICONS = {
+  play: `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`,
+  lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`
+};
+
+/* ==========================================================================
+   LISTA GIER
+   ========================================================================== */
+const GAMES = [
+  {
+    title: 'Ping Pong',
+    url: 'pingpong.html',
+    status: 'ready',
+    desc: 'Dynamiczny tenis stołowy w klimacie retro-arcade z fizyką podkręceń, trybem multiplayer P2P i zaawansowanym AI.',
+    tags: ['Sport', 'Multiplayer P2P', 'vs AI'],
+    image: 'assets/cover_pong.jpg',
+    players: '1 - 2 Graczy'
+  },
+  {
+    title: 'FC 28',
+    url: 'fc28.html',
+    status: 'ready',
+    desc: 'Arkadowy symulator piłki nożnej 2.5D z precyzyjną fizyką, strzałami podkręconymi, zwodami i pojedynkami online.',
+    tags: ['Sport', 'Piłka Nożna', 'Multiplayer P2P'],
+    image: 'assets/cover_fc28.jpg',
+    players: '1 - 2 Graczy'
+  },
+  {
+    title: 'CS:GO',
+    url: 'https://csgame.sorpio.pl',
+    status: 'ready',
+    desc: 'Taktyczna gra akcji FPS z dynamicznymi pojedynkami drużynowymi 5v5 i rozbrajaniem bomby.',
+    tags: ['FPS', 'Akcja', 'Multiplayer'],
+    image: 'assets/cover_cs.jpg',
+    players: 'Wieloosobowa'
+  },
+  {
+    title: 'Astro Strike',
+    url: 'astrostrike.html',
+    status: 'wip',
+    desc: 'Kooperacyjny kosmiczny shoot-em-up z proceduralnymi falami wrogów i ulepszeniami.',
+    tags: ['Shmup', 'Kooperacja', 'Kosmos'],
+    players: '1 - 2 Graczy'
+  },
+  {
+    title: 'Cyber Tanks',
+    url: 'cybertanks.html',
+    status: 'wip',
+    desc: 'Taktyczna arena pancerna z niszczalnym otoczeniem i dynamicznym trybem bitwy PvP.',
+    tags: ['Arena', 'PvP', 'Taktyczna'],
+    players: '2 - 4 Graczy'
+  }
+];
+
+/* ==========================================================================
+   RENDEROWANIE I WYSZUKIWANIE
+   ========================================================================== */
+let currentQuery = '';
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function updateStatus() {
+  const readyCount = GAMES.filter(g => g.status === 'ready').length;
+  const statusEl = document.getElementById('headerLiveStatus');
+  if (statusEl) statusEl.textContent = `Online • ${readyCount} Dostępne Gry`;
+}
+
+function renderGames() {
+  const grid = document.getElementById('gamesGrid');
+  grid.innerHTML = '';
+
+  const q = currentQuery.trim().toLowerCase();
+  const filtered = GAMES.filter(game => {
+    if (game.status === 'wip' && q) return false;
+    return !q || (
+      game.title.toLowerCase().includes(q) ||
+      (game.tags || []).some(t => t.toLowerCase().includes(q)) ||
+      (game.desc || '').toLowerCase().includes(q)
+    );
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        ${ICONS.empty}
+        <h3>Brak wyników</h3>
+        <p>Nie znaleziono gier pasujących do zapytania.</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach(game => {
+    const ready = game.status === 'ready';
+    const card = document.createElement('div');
+    card.className = `card ${ready ? 'ready' : 'wip'}`;
+
+    if (ready) {
+      card.innerHTML = `
+        <div class="cover">
+          <img class="art" src="${esc(game.image)}" alt="${esc(game.title)}" loading="lazy">
+        </div>
+
+        <div class="card-body">
+          <div class="card-header-row">
+            <h2 class="game-title">${esc(game.title)}</h2>
+            <span class="game-players">${esc(game.players)}</span>
+          </div>
+          <p class="game-desc">${esc(game.desc)}</p>
+          <div class="tags">
+            ${(game.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button type="button" class="btn-play ready">
+            ${ICONS.play} Zagraj
+          </button>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (window.getSelection().toString()) return;
+        launchGame(game.url, game.title);
+      });
+    } else {
+      card.innerHTML = `
+        <div class="cover">
+          ${WIP_COVER}
+          <div class="lock-overlay">
+            <div class="lock-icon-box">${ICONS.lock}</div>
+            <p>W produkcji</p>
+            <small>Wkrótce w JDR Games</small>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button type="button" class="btn-play wip" disabled>
+            ${ICONS.lock} Niedostępne
+          </button>
+        </div>
+      `;
+    }
+
+    grid.appendChild(card);
+  });
+
+  updateStatus();
+}
+
+/* ==========================================================================
+   KONTROLA EKRANU GRY
+   ========================================================================== */
+let activeGameUrl = '';
+
+function launchGame(url, title) {
+  AudioFX.play('launch');
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    window.location.href = url;
+    return;
+  }
+  activeGameUrl = url;
+  const frame = document.getElementById('gameFrame');
+  frame.src = url;
+  const hud = document.getElementById('stageHud');
+  if (hud) hud.title = `${title || 'Gra'} • ESC aby wyjść`;
+  document.getElementById('stage').classList.add('open');
+  frame.focus();
+}
+
+function reloadGameFrame() {
+  AudioFX.play('click');
+  const frame = document.getElementById('gameFrame');
+  if (activeGameUrl) {
+    frame.src = activeGameUrl;
+  }
+}
+
+function toggleFullscreen() {
+  AudioFX.play('click');
+  const elem = document.documentElement;
+  if (!document.fullscreenElement) {
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+
+function closeGame() {
+  AudioFX.play('click');
+  const frame = document.getElementById('gameFrame');
+  frame.src = 'about:blank';
+  document.getElementById('stage').classList.remove('open');
+  activeGameUrl = '';
+}
+
+/* ==========================================================================
+   WYSZUKIWANIE I SKRÓTY KLAWISZOWE
+   ========================================================================== */
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentQuery = e.target.value;
+  renderGames();
+});
+
+window.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== document.getElementById('searchInput')) {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+    return;
+  }
+  if (e.key === 'Escape' && document.getElementById('stage').classList.contains('open')) {
+    closeGame();
+  }
+});
+
+/* Start */
+renderGames();
+</script>
+</body>
+</html>
