@@ -1390,28 +1390,30 @@
 
   #hud {
     width: 100%;
-    background: var(--panel);
-    border: 1px solid #283044;
-    border-bottom: none;
+    background: linear-gradient(180deg, rgba(14, 20, 36, 0.96) 0%, rgba(6, 10, 20, 0.96) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 2px solid rgba(0, 240, 255, 0.25);
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    padding: 6px 14px;
+    padding: 8px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     flex-wrap: nowrap;
     overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
   }
 
   .player-box {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    min-width: 60px;
-    max-width: 180px;
+    min-width: 80px;
+    max-width: 200px;
     flex: 1 1 auto;
-    gap: 3px;
+    gap: 4px;
     overflow: hidden;
   }
 
@@ -1419,69 +1421,83 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
-    min-width: 100px;
-    max-width: 320px;
+    gap: 10px;
+    min-width: 120px;
+    max-width: 340px;
     flex: 1 1 auto;
   }
 
-  .player-box.right { align-items: flex-end; min-width: 60px; flex: 1 1 auto; }
+  .player-box.right { align-items: flex-end; min-width: 80px; flex: 1 1 auto; }
 
   .team-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 900;
-    max-width: 95px;
+    letter-spacing: 1.2px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .p1-color { color: var(--p1); text-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
-  .p2-color { color: var(--p2); text-shadow: 0 0 12px rgba(255, 0, 85, 0.5); }
+  .p1-color { color: var(--p1); text-shadow: 0 0 14px rgba(0, 240, 255, 0.6); }
+  .p2-color { color: var(--p2); text-shadow: 0 0 14px rgba(255, 0, 85, 0.6); }
 
   .stamina-bar-wrap {
-    width: 90px;
+    width: 110px;
     max-width: 100%;
-    height: 5px;
-    background: #080b12;
-    border-radius: 4px;
+    height: 6px;
+    background: rgba(3, 6, 12, 0.9);
+    border-radius: 6px;
     overflow: hidden;
-    border: 1px solid #283044;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
   }
-  .stamina-fill { height: 100%; width: 100%; transition: width 0.08s linear; }
+  .stamina-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+    transition: width 0.08s linear;
+    box-shadow: 0 0 8px currentColor;
+  }
 
   .center-scoreboard {
     display: flex;
     align-items: center;
-    gap: 6px;
+    background: rgba(4, 7, 14, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 3px 8px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    gap: 8px;
     flex-shrink: 0;
     white-space: nowrap;
     z-index: 5;
   }
   #hudScore {
     font-family: 'Orbitron', sans-serif;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 900;
-    background: #05070b;
-    padding: 4px 14px;
-    border-radius: 10px;
-    border: 1px solid #283044;
-    letter-spacing: 2px;
-    color: #fff;
+    background: transparent;
+    padding: 3px 14px;
+    border: none;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
     white-space: nowrap;
     flex-shrink: 0;
     display: inline-block;
   }
   #hudTimer {
     font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 900;
-    background: rgba(245, 176, 65, 0.14);
+    background: rgba(245, 176, 65, 0.16);
     color: var(--gold);
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(245, 176, 65, 0.5);
-    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 176, 65, 0.55);
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(245, 176, 65, 0.6);
     white-space: nowrap;
     flex-shrink: 0;
     display: inline-block;
@@ -6322,10 +6338,10 @@ const BOT_TIER_LABELS_PL = {
 };
 
 const AI_CONFIG = {
-  // Poziomy różnią się decyzjami i refleksem, nie darmowymi statystykami. Boty nie biegają szybciej niż gracz w sprincie.
-  easy:   { speedMult: 0.90, reactDelay: 28, passAcc: 0.70, shootDist: 320, slideChance: 0.0015, trickChance: 0.012, diveReflex: 0.60, vision: 0.70, pressRange: 80,  passRisk: 1.30, shotQuality: 0.78, support: 0.80 },
-  medium: { speedMult: 0.97, reactDelay: 18, passAcc: 0.84, shootDist: 375, slideChance: 0.004,  trickChance: 0.030, diveReflex: 0.80, vision: 0.88, pressRange: 108, passRisk: 1.00, shotQuality: 0.92, support: 0.94 },
-  hard:   { speedMult: 1.02, reactDelay: 10, passAcc: 0.92, shootDist: 430, slideChance: 0.008,  trickChance: 0.055, diveReflex: 0.93, vision: 1.00, pressRange: 135, passRisk: 0.75, shotQuality: 1.00, support: 1.00 }
+  // Zoptymalizowana inteligencja taktyczna i zbalansowany refleks: boty reagują natychmiast, bez sztucznego 'zastygania'
+  easy:   { speedMult: 0.94, reactDelay: 5, passAcc: 0.82, shootDist: 340, slideChance: 0.003, trickChance: 0.022, diveReflex: 0.88, vision: 0.82, pressRange: 100, passRisk: 1.10, shotQuality: 0.85, support: 0.88 },
+  medium: { speedMult: 0.99, reactDelay: 2, passAcc: 0.90, shootDist: 395, slideChance: 0.006, trickChance: 0.038, diveReflex: 0.94, vision: 0.93, pressRange: 125, passRisk: 0.90, shotQuality: 0.94, support: 0.96 },
+  hard:   { speedMult: 1.03, reactDelay: 0, passAcc: 0.96, shootDist: 440, slideChance: 0.010, trickChance: 0.060, diveReflex: 0.98, vision: 1.00, pressRange: 150, passRisk: 0.70, shotQuality: 1.00, support: 1.00 }
 };
 
 let peer = null;
@@ -7520,31 +7536,34 @@ const camera = {
   shake: 0,
   update() {
     let myPlayer = getControlledPlayerForSlot(localSlotIdx);
-    let focusX = ball.x + ball.vx * 7;
-    let focusY = ball.y + ball.vy * 5;
+    let focusX = ball.x + ball.vx * 8.5;
+    let focusY = ball.y + ball.vy * 5.5;
 
     if (matchPhase === 'KICKOFF_WAIT') {
       focusX = WORLD.width / 2;
       focusY = WORLD.height / 2;
     } else if (myPlayer) {
-      focusX = focusX * 0.72 + myPlayer.x * 0.28;
-      focusY = focusY * 0.72 + myPlayer.y * 0.28;
+      focusX = focusX * 0.70 + myPlayer.x * 0.30;
+      focusY = focusY * 0.70 + myPlayer.y * 0.30;
     }
 
     let distToGoal = Math.min(
       Math.hypot(ball.x - WORLD.marginX, ball.y - WORLD.height / 2),
       Math.hypot(ball.x - (WORLD.width - WORLD.marginX), ball.y - WORLD.height / 2)
     );
-    this.targetZoom = (setPiece.active || matchPhase === 'KICKOFF_WAIT') ? 1.05 : (distToGoal < 380 ? 1.07 : 0.98);
-    this.zoom += (this.targetZoom - this.zoom) * 0.05;
+    const bSpeed = Math.hypot(ball.vx, ball.vy);
+    this.targetZoom = (setPiece.active || matchPhase === 'KICKOFF_WAIT')
+      ? 1.04
+      : (distToGoal < 360 ? 1.07 : (bSpeed > 10.5 ? 0.94 : 0.99));
+    this.zoom += (this.targetZoom - this.zoom) * 0.06;
 
-    this.x += (focusX - this.x) * 0.08;
-    this.y += (focusY - this.y) * 0.08;
+    this.x += (focusX - this.x) * 0.09;
+    this.y += (focusY - this.y) * 0.09;
 
     let halfW = (canvas.width / 2) / this.zoom;
     let halfH = (canvas.height / 2) / this.zoom;
-    this.x = Math.max(halfW - 40, Math.min(WORLD.width - halfW + 40, this.x));
-    this.y = Math.max(halfH - 40, Math.min(WORLD.height - halfH + 40, this.y));
+    this.x = Math.max(halfW - 50, Math.min(WORLD.width - halfW + 50, this.x));
+    this.y = Math.max(halfH - 50, Math.min(WORLD.height - halfH + 50, this.y));
 
     if (this.shake > 0) this.shake *= 0.85;
     if (this.shake < 0.2) this.shake = 0;
@@ -7925,18 +7944,18 @@ const ball = {
 
           // Limit wysokości zależny od roli i PlayStyle:
           const playerMaxZ = (p.role === 'GK')
-            ? (p.gkDiveTimer > 0 ? 65 : 56)
-            : ((p.hasPlayStyle && p.hasPlayStyle('aerial_threat')) ? 42 : 32);
+            ? (p.gkDiveTimer > 0 ? 82 : 68)
+            : ((p.hasPlayStyle && p.hasPlayStyle('aerial_threat')) ? 46 : 34);
           if (this.z > playerMaxZ) continue;
 
-          let reach = p.radius + this.radius + 3;
+          let reach = p.radius + this.radius + 4;
           if (p.role === 'GK') {
-            // Zbalansowany zasięg rąk (bez niewidzialnego magnesu na 80px)
-            const divBonus = ((p.statDiv || 75) - 75) * 0.16 + ((p.statPos || 75) - 75) * 0.09;
+            // Zbalansowany i skuteczny zasięg rąk bramkarza:
+            const divBonus = ((p.statDiv || 75) - 75) * 0.22 + ((p.statPos || 75) - 75) * 0.14;
             const hasFarReach = (p.hasPlayStyle && (p.hasPlayStyle('far_reach') || p.hasPlayStyle('cat_reflex')));
             reach = p.gkDiveTimer > 0
-              ? p.radius + this.radius + 14 + divBonus + (hasFarReach ? 7 : 0)
-              : p.radius + this.radius + 6 + divBonus * 0.5 + (hasFarReach ? 4 : 0);
+              ? p.radius + this.radius + 36 + divBonus * 1.2 + (hasFarReach ? 16 : 0)
+              : p.radius + this.radius + 18 + divBonus * 0.8 + (hasFarReach ? 8 : 0);
           } else if (p.hasPlayStyle && p.hasPlayStyle('intercept_wall')) {
             reach += 5;
           } else if (p.hasPlayStyle && p.hasPlayStyle('anticipate')) {
@@ -7967,7 +7986,7 @@ if (best) {
           };
           if (p.role === 'GK') {
             const han = p.statHan || Math.round((p.statDef || 75) * 0.65 + (p.ovr || 75) * 0.35);
-            const isSave = p.gkDiveTimer > 0 || speed > 10.0;
+            const isSave = p.gkDiveTimer > 0 || speed > 9.0;
             if (isSave) {
               if (p.team === 'blue') matchStats.savesBlue++; else matchStats.savesRed++;
               playAndBroadcastSFX('save');
@@ -7975,11 +7994,10 @@ if (best) {
               spawnParticles(this.x, this.y, 8, 16, '#f5b041', 3.4, 22, 3.8);
             }
             // Zdolność pewnego chwytu piłki zależy od statystyk bramkarza (statHan / OVR):
-            // Lepszy bramkarz nie wylewa piłki, tylko łapie nawet mocniejsze strzały.
             const hasCat = p.playstyle === 'cat_reflex';
-            // Zbalansowany limit chwytu: strzały o prędkości >14-16 są parowane (dobitki / rzuty rożne)
-            const baseCatchLimit = 11.2 + (han - 75) * 0.15 + (hasCat ? 1.8 : 0);
-            const catchThreshold = p.gkDiveTimer > 0 ? baseCatchLimit - 1.5 : baseCatchLimit;
+            // Zbalansowany limit chwytu: atomowe bomby (>14.5-17.5) są parowane, lżejsze strzały łapane pewnie
+            const baseCatchLimit = 12.8 + (han - 75) * 0.18 + (hasCat ? 2.2 : 0);
+            const catchThreshold = p.gkDiveTimer > 0 ? baseCatchLimit - 1.2 : baseCatchLimit;
 
             if (speed > catchThreshold) {
               // Parada bramkarska: odbicie na rożny lub aut (w bok i poza światło bramki, a NIE przed siebie!)
@@ -8344,21 +8362,21 @@ class Player {
     if (hasCat) this.activatePlayStyle('cat_reflex');
     const div = this.statDiv || this.statDef || 75;
     const ref = this.statRef || 75;
-    // Skrócony czas trwania rzutu (15-19 klatek) zapobiega 'wiszeniu' w powietrzu
-    this.gkDiveTimer = Math.round((hasCat ? 19 : 15) * (1 + (ref - 75) * 0.004));
+    // Skuteczny czas trwania rzutu bramkarza
+    this.gkDiveTimer = Math.round((hasCat ? 25 : 21) * (1 + (ref - 75) * 0.005));
     this.gkDiveMaxTimer = this.gkDiveTimer;
-    this.gkDiveCooldown = hasCat ? 30 : Math.max(34, Math.round(42 - (ref - 75) * 0.12));
+    this.gkDiveCooldown = hasCat ? 16 : Math.max(18, Math.round(26 - (ref - 75) * 0.10));
     this.gkDiveDirY = targetY >= this.y ? 1 : -1;
 
-    // Zbalansowana prędkość rzutu: bramkarz dosięga strzałów przy słupkach, ale nie pokrywa natychmiast całej bramki
-    const divePower = (hasCat ? 6.2 : 5.0) * (1 + (div - 75) * 0.006);
-    const forwardStep = this.team === 'blue' ? 1.1 : -1.1;
+    // Prędkość rzutu: bramkarz szybko i skutecznie dosięga rogów bramki
+    const divePower = (hasCat ? 8.6 : 7.2) * (1 + (div - 75) * 0.008);
+    const forwardStep = this.team === 'blue' ? 1.4 : -1.4;
     this.vx = forwardStep;
     this.vy = this.gkDiveDirY * divePower;
     this.angle = this.team === 'blue' ? 0 : Math.PI;
 
     playAndBroadcastSFX('slide');
-    spawnParticles(this.x, this.y, 6, 10, hasCat ? '#f5b041' : '#00f0ff', 2.4, 16, 3.0);
+    spawnParticles(this.x, this.y, 6, 12, hasCat ? '#f5b041' : '#00f0ff', 3.0, 18, 3.5);
   }
 
   update(isHumanControlled, inputSource = null) {
@@ -8945,28 +8963,29 @@ class Player {
       const toward = ball.vx * dir < -5.5;
       const dx = Math.abs(ball.x - this.x);
       let predY = null;
-      if (!ball.owner && toward && dx < 720 && dx > 8) {
-        const frames = dx / Math.max(1, Math.abs(ball.vx));
+      if (!ball.owner && toward && dx < 850 && dx > 6) {
+        const frames = dx / Math.max(0.8, Math.abs(ball.vx));
         predY = ball.y + ball.vy * frames;
         if (this.gkRollId !== ball.shotId) {
           this.gkRollId = ball.shotId;
           const refStat = this.statRef || 75;
           const posStat = this.statPos || 75;
-          const reflexBonus = (refStat - 75) * 0.005 + (posStat - 75) * 0.003;
+          const divStat = this.statDiv || 75;
+          const reflexBonus = (refStat - 75) * 0.004 + (posStat - 75) * 0.003;
           const hasCat = (this.hasPlayStyle && (this.hasPlayStyle('far_reach') || this.hasPlayStyle('cat_reflex')));
 
-          // Kara do refleksu przy strzałach z bliska oraz atomowych bombach (mocne strzały wpadają!)
+          // Kara do refleksu wyłącznie przy bombach z bliska
           const bSpeed = Math.hypot(ball.vx, ball.vy);
-          const closeDistPen = dx < 240 ? (240 - dx) * 0.0016 : 0;
-          const rocketPen = bSpeed > 21.0 ? (bSpeed - 21.0) * 0.028 : 0;
+          const closeDistPen = dx < 130 ? (130 - dx) * 0.0012 : 0;
+          const rocketPen = bSpeed > 24.0 ? (bSpeed - 24.0) * 0.020 : 0;
 
-          const baseReaction = (cfg.diveReflex * 0.85) + reflexBonus + (hasCat ? 0.12 : 0) - closeDistPen - rocketPen;
-          // Zamiast gwarantowanego 100% obrony, szansa wynosi 0.25 - 0.82
-          this.gkReacts = Math.random() < clamp(baseReaction, 0.25, 0.82);
+          const baseReaction = (cfg.diveReflex * 0.94) + reflexBonus + (hasCat ? 0.08 : 0) - closeDistPen - rocketPen;
+          // Bramkarze realnie bronią! Wysoki wskaźnik obrony w świetle bramki:
+          this.gkReacts = Math.random() < clamp(baseReaction, 0.75, 0.98);
         }
         const yDiff = Math.abs(predY - this.y);
-        if (this.gkReacts && ball.z < 65 && Math.abs(predY - cy) < WORLD.goalHeight * 0.65 && yDiff > 16) {
-          if (dx < 340) {
+        if (this.gkReacts && ball.z < 82 && Math.abs(predY - cy) < WORLD.goalHeight * 0.66 && yDiff > 12) {
+          if (dx < 650) {
             this.startGkDive(predY);
             return;
           }
@@ -8980,13 +8999,14 @@ class Player {
       if (gkClosest) {
         tx = ball.x; ty = ball.y;
       } else {
-        const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 170 ? 95 : clamp(dGoalBall * 0.18, 30, 85);
+        const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 180 ? 92 : clamp(dGoalBall * 0.16, 28, 80);
         tx = ownGoalX + dir * out;
-        ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.48, -WORLD.goalHeight * 0.52, WORLD.goalHeight * 0.52);
-        if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.48, WORLD.goalHeight * 0.48);
+        // Aktywne ustawienie w świetle uderzenia (92% śledzenia trajektorii zamiast bierności)
+        ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.92, -WORLD.goalHeight * 0.50, WORLD.goalHeight * 0.50);
+        if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.49, WORLD.goalHeight * 0.49);
       }
       tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 155), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 155));
-      this.moveTowards(tx, ty, 1.0 * cfg.speedMult, gkClosest);
+      this.moveTowards(tx, ty, 1.05 * cfg.speedMult, gkClosest || (predY !== null && Math.abs(predY - this.y) > 28));
       if (!this.isMoving) this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
       return;
     }
@@ -9159,21 +9179,22 @@ class Player {
           const dc = Math.hypot(sx - c.x, sy - c.y);
 
           if (this.role === 'FWD') {
-            // Napastnik: ciąg na bramkę, rozciąganie obrony wzdłuż osi boiska
-            sc += (sx - c.x) * dir * 0.65;
-            sc -= Math.hypot(enemyGoalX - sx, cy - sy) * 0.20;
-            sc -= Math.abs(dc - 240) * 0.22;
+            // Napastnik: ciąg na bramkę, wybieganie za obrońców (agresywny atak wolnych przestrzeni)
+            sc += (sx - c.x) * dir * 1.15;
+            sc -= Math.hypot(enemyGoalX - sx, cy - sy) * 0.16;
+            sc -= Math.abs(dc - 280) * 0.18;
+            if (minFoe > 100) sc += 60; // Bonus za wyjście na czystą pozycję
           } else if (this.role === 'MID') {
-            // Pomocnik: gra kombinacyjna, wolna przestrzeń po przekątnej, zmiana strony
-            sc += (sx - c.x) * dir * 0.20;
-            const oppositeSideBonus = (c.y < cy && sy > cy) || (c.y >= cy && sy <= cy) ? 45 : 0;
+            // Pomocnik: gra kombinacyjna, wolna przestrzeń po przekątnej, trójkąty podań
+            sc += (sx - c.x) * dir * 0.35;
+            const oppositeSideBonus = (c.y < cy && sy > cy) || (c.y >= cy && sy <= cy) ? 55 : 0;
             sc += oppositeSideBonus;
-            sc -= Math.abs(dc - 180) * 0.35;
+            sc -= Math.abs(dc - 190) * 0.30;
           } else { // DEF
-            // Obrońca: asekuracja z tyłu, blokowanie kontrataków
-            sc += (c.x - sx) * dir * 0.40;
-            sc -= Math.abs(dc - 190) * 0.35;
-            sc -= Math.abs(sy - cy) * 0.18; // DEF pilnuje osi środkowej
+            // Obrońca: rest defense, asekuracja z tyłu, blokowanie kontrataków
+            sc += (c.x - sx) * dir * 0.55;
+            sc -= Math.abs(dc - 210) * 0.35;
+            sc -= Math.abs(sy - cy) * 0.22; // DEF pilnuje osi środkowej
           }
 
           // KLUCZOWE: Kara za zbliżenie do pozycji LUB celu innego kolegi z drużyny (STOP DUBLOWANIU!)
@@ -9181,8 +9202,8 @@ class Player {
             const dmCurr = Math.hypot(m.x - sx, m.y - sy);
             const dmTarg = m._spot ? Math.hypot(m._spot.x - sx, m._spot.y - sy) : 999;
             const minMateDist = Math.min(dmCurr, dmTarg);
-            if (minMateDist < 185) {
-              sc -= (185 - minMateDist) * 3.5; // Potężna separacja!
+            if (minMateDist < 190) {
+              sc -= (190 - minMateDist) * 3.8; // Potężna separacja!
             }
           }
 
@@ -9199,14 +9220,14 @@ class Player {
         // Różne bazy kątowe i odległości zależne od roli:
         let candidateDists, angles;
         if (this.role === 'FWD') {
-          candidateDists = [180, 240, 310];
-          angles = [-0.8, -0.4, 0, 0.4, 0.8];
+          candidateDists = [210, 280, 360];
+          angles = [-0.75, -0.35, 0, 0.35, 0.75];
         } else if (this.role === 'MID') {
-          candidateDists = carrierUnderPress ? [110, 140] : [150, 200, 250];
-          angles = [-1.3, -0.7, 0.7, 1.3];
+          candidateDists = carrierUnderPress ? [120, 160] : [160, 220, 270];
+          angles = [-1.2, -0.6, 0.6, 1.2];
         } else { // DEF
-          candidateDists = [140, 190, 240];
-          angles = [-0.9, -0.4, 0.4, 0.9];
+          candidateDists = [160, 220, 280];
+          angles = [-0.8, -0.3, 0.3, 0.8];
         }
 
         const baseAngle = this.role === 'FWD' ? (dir > 0 ? 0 : Math.PI) : (dir > 0 ? Math.PI : 0);
@@ -9234,8 +9255,13 @@ class Player {
 
       const tx = this._spot ? this._spot.x : this.x;
       const ty = this._spot ? this._spot.y : this.y;
-      const needSprint = (carrierUnderPress || Math.hypot(tx - this.x, ty - this.y) > 130) && this.stamina > 24;
-      this.moveTowards(tx, ty, 0.98 * cfg.speedMult, needSprint);
+      const distToSpot = Math.hypot(tx - this.x, ty - this.y);
+      const isAttackingRun = this.role === 'FWD' && (tx - this.x) * dir > 40;
+      if (isAttackingRun && this.stamina > 20 && Math.random() < 0.20) {
+        this.speedBoostTimer = 16;
+      }
+      const needSprint = (carrierUnderPress || isAttackingRun || distToSpot > 120) && this.stamina > 20;
+      this.moveTowards(tx, ty, (isAttackingRun ? 1.05 : 0.99) * cfg.speedMult, needSprint);
       return;
     }
 
@@ -12466,38 +12492,76 @@ const ctex=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.heigh
 const std=o=>new T.MeshStandardMaterial(o);
 
 /* --- światła --- */
-scene.add(new T.HemisphereLight(0xbcd0ff,0x1a3d1c,0.85));
-const sun=new T.DirectionalLight(0xfff1dd,1.35);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
-Object.assign(sun.shadow.camera,{left:-650,right:650,top:650,bottom:-650,near:50,far:2400});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.8;
+scene.add(new T.HemisphereLight(0xbcd0ff,0x1a3d1c,0.92));
+const sun=new T.DirectionalLight(0xfff5e6,1.45);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-720,right:720,top:720,bottom:-720,near:50,far:2600});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.7;
 scene.add(sun,sun.target);
 
 /* --- murawa z liniami --- */
 const pitchTex=ctex(2048,1138,(g,w,h)=>{
   const sx=w/PW,sy=h/PH;
-  for(let i=0;i<16;i++){g.fillStyle=i%2?'#2f7d34':'#276d2d';g.fillRect(i*w/16,0,w/16+1,h);}
-  for(let i=0;i<42000;i++){g.fillStyle=Math.random()<.5?`rgba(0,40,0,${Math.random()*.08})`:`rgba(150,220,100,${Math.random()*.07})`;g.fillRect(Math.random()*w,Math.random()*h,2,2+Math.random()*5);}
-  g.strokeStyle='rgba(255,255,255,.93)';g.fillStyle='#fff';g.lineWidth=5;
+  // Bogatszy, nasycony wzór pasów murawy (18 pasów w stylu Premier League):
+  for(let i=0;i<18;i++){
+    g.fillStyle=i%2?'#22682d':'#1b5424';
+    g.fillRect(i*w/18,0,w/18+1,h);
+  }
+  // Subtelne ziarno źdźbeł trawy dla fotorealistycznej głębi
+  for(let i=0;i<55000;i++){
+    g.fillStyle=Math.random()<.5?`rgba(10,38,14,${Math.random()*.09})`:`rgba(130,225,95,${Math.random()*.08})`;
+    g.fillRect(Math.random()*w,Math.random()*h,2,2+Math.random()*5);
+  }
+  g.strokeStyle='rgba(255,255,255,.95)';g.fillStyle='#fff';g.lineWidth=5.5;
   const L=(x,y,a,b)=>g.strokeRect(x*sx,y*sy,a*sx,b*sy),C=(x,y,r,a0=0,a1=7)=>{g.beginPath();g.ellipse(x*sx,y*sy,r*sx,r*sy,0,a0,a1);g.stroke();};
   L(0,0,PW,PH);g.beginPath();g.moveTo(PW/2*sx,0);g.lineTo(PW/2*sx,h);g.stroke();C(PW/2,PH/2,115);
   [[0,PH/2-210,210,420],[PW-210,PH/2-210,210,420],[0,PH/2-125,75,250],[PW-75,PH/2-125,75,250]].forEach(a=>L(...a));
   [[0,0,0,1.57],[PW,0,1.57,3.14],[0,PH,-1.57,0],[PW,PH,3.14,4.71]].forEach(c=>C(c[0],c[1],18,c[2],c[3]));
-  [[PW/2,PH/2],[140,PH/2],[PW-140,PH/2]].forEach(s=>{g.beginPath();g.arc(s[0]*sx,s[1]*sy,6,0,7);g.fill();});
+  [[PW/2,PH/2],[140,PH/2],[PW-140,PH/2]].forEach(s=>{g.beginPath();g.arc(s[0]*sx,s[1]*sy,6.5,0,7);g.fill();});
   C(140,PH/2,80,-.93,.93);C(PW-140,PH/2,80,3.14-.93,3.14+.93);
 });
 const pitch=new T.Mesh(new T.PlaneGeometry(PW,PH),std({map:pitchTex,roughness:1}));
 pitch.rotation.x=-Math.PI/2;pitch.position.set(PX+PW/2,0,PY+PH/2);pitch.receiveShadow=true;scene.add(pitch);
-const apron=new T.Mesh(new T.PlaneGeometry(7000,7000),std({color:0x1d5a25,roughness:1}));
+const apron=new T.Mesh(new T.PlaneGeometry(7000,7000),std({color:0x16461d,roughness:1}));
 apron.rotation.x=-Math.PI/2;apron.position.set(CX,-0.6,CY);apron.receiveShadow=true;scene.add(apron);
 
-/* --- bandy reklamowe --- */
+/* --- 4 narożne chorągiewki w 3D --- */
+[[PX,PY],[PX+PW,PY],[PX,PY+PH],[PX+PW,PY+PH]].forEach(([fx,fz])=>{
+  const pole=new T.Mesh(new T.CylinderGeometry(0.8,0.8,32,8),std({color:0xffffff,roughness:0.3}));
+  pole.position.set(fx,16,fz);
+  const flag=new T.Mesh(new T.PlaneGeometry(12,8),new T.MeshBasicMaterial({color:0xff0055,side:T.DoubleSide}));
+  flag.position.set(fx+6,26,fz);flag.rotation.y=Math.PI/4;
+  scene.add(pole,flag);
+});
+
+/* --- dynamiczne cyberpunkowe bandy reklamowe LED --- */
+const adCanvases = [];
 function board(cx,cz,len,rot){
-  const t=ctex(1024,64,(g,w,h)=>{g.fillStyle='#070b16';g.fillRect(0,0,w,h);g.fillStyle='#00f0ff';g.fillRect(0,h-6,w,6);g.fillStyle='#f5b041';g.font='900 34px Arial';g.textAlign='center';g.fillText('CYBERFC 28  •  ULTIMATE ARENA',w/2,42);});
-  t.wrapS=T.RepeatWrapping;t.repeat.x=Math.max(1,len/520);
-  const b=new T.Mesh(new T.BoxGeometry(len,11,2),std({map:t,emissiveMap:t,emissive:0xffffff,emissiveIntensity:.75,roughness:.5}));
-  b.position.set(cx,5.5,cz);b.rotation.y=rot;b.castShadow=true;scene.add(b);
+  const c = document.createElement('canvas');c.width = 1024; c.height = 64;
+  const g = c.getContext('2d');
+  const t = new T.CanvasTexture(c);
+  t.wrapS = T.RepeatWrapping;
+  t.repeat.x = Math.max(1, len / 520);
+  adCanvases.push({ c, g, t, len });
+  const b = new T.Mesh(new T.BoxGeometry(len,12,2),std({map:t,emissiveMap:t,emissive:0xffffff,emissiveIntensity:.85,roughness:.4}));
+  b.position.set(cx,6,cz);b.rotation.y=rot;b.castShadow=true;scene.add(b);
 }
 board(PX+PW/2,PY-16,PW+60,0);board(PX+PW/2,PY+PH+16,PW+60,0);
 const eg=CY-PY-150;[[PX-72,-1],[PX+PW+72,1]].forEach(([x])=>{board(x,PY-16+eg/2+8,eg,Math.PI/2);board(x,PY+PH+16-eg/2-8,eg,Math.PI/2);});
+
+function updateAdBoards(tt){
+  for(const ad of adCanvases){
+    const g=ad.g,w=ad.c.width,h=ad.c.height;
+    g.fillStyle='#050814';g.fillRect(0,0,w,h);
+    const shift=(tt*95)%w;
+    const grad=g.createLinearGradient(0,0,w,0);
+    grad.addColorStop(0,'#00f0ff');grad.addColorStop(0.5,'#ff0055');grad.addColorStop(1,'#00f0ff');
+    g.fillStyle=grad;g.fillRect(0,h-5,w,5);
+    g.font='900 32px Orbitron, sans-serif';g.textAlign='center';
+    g.fillStyle='#00f0ff';
+    g.fillText('CYBERFC 28  •  ULTIMATE ARENA  •  EA SPORTS EXPERIENCE',w/2-shift,42);
+    g.fillText('CYBERFC 28  •  ULTIMATE ARENA  •  EA SPORTS EXPERIENCE',w/2-shift+w,42);
+    ad.t.needsUpdate=true;
+  }
+}
 
 /* --- trybuny z tłumem --- */
 const pal=['#1a5bff','#e11d48','#f5f5f5','#1c1c24','#f5b041','#00e676','#6b7080','#1a5bff','#e11d48'],skins=['#ffdbac','#f1c27d','#e0ac69','#c68642','#8d5524'];
@@ -12521,9 +12585,10 @@ function stand(cx,cz,len,rot){
 stand(PX+PW/2,PY-6,PW+320,0);stand(PX+PW/2,PY+PH+6,PW+320,Math.PI);stand(PX-70,CY,PH+160,Math.PI/2);stand(PX+PW+70,CY,PH+160,-Math.PI/2);
 
 /* --- reflektory --- */
-[[PX-130,PY-140],[PX+PW+130,PY-140],[PX-130,PY+PH+140],[PX+PW+130,PY+PH+140]].forEach(([x,z])=>{
-  const p=new T.Mesh(new T.CylinderGeometry(4,6,380,8),std({color:0x555b68,roughness:.6}));p.position.set(x,190,z);scene.add(p);
-  const l=new T.Mesh(new T.BoxGeometry(90,50,8),new T.MeshBasicMaterial({color:0xfff6dd}));l.position.set(x,395,z);l.lookAt(CX,0,CY);scene.add(l);
+[[PX-140,PY-150],[PX+PW+140,PY-150],[PX-140,PY+PH+150],[PX+PW+140,PY+PH+150]].forEach(([x,z])=>{
+  const p=new T.Mesh(new T.CylinderGeometry(4,7,390,8),std({color:0x444b58,roughness:.5}));p.position.set(x,195,z);scene.add(p);
+  const l=new T.Mesh(new T.BoxGeometry(96,52,10),new T.MeshBasicMaterial({color:0xffffff}));l.position.set(x,400,z);l.lookAt(CX,0,CY);scene.add(l);
+  const spot=new T.PointLight(0xdbe9ff,0.55,1800);spot.position.set(x,395,z);scene.add(spot);
 });
 
 /* --- bramki z siatką --- */
@@ -12717,9 +12782,10 @@ function render3D(){
   const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;tt+=dt;
   const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;
   if(w!==sw||h!==sh){sw=w;sh=h;R.setPixelRatio(Math.min(devicePixelRatio||1,1.75));R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
-  const z=camera.zoom,d=930/z,pit=.93,sk=camera.shake||0;
-  cam.position.set(camera.x+(Math.random()-.5)*sk,d*Math.sin(pit)+(Math.random()-.5)*sk,camera.y+d*Math.cos(pit));cam.lookAt(camera.x,0,camera.y-20);cam.updateMatrixWorld();
-  sun.target.position.set(camera.x,0,camera.y);sun.position.set(camera.x-380,820,camera.y+420);
+  const z=camera.zoom,d=820/z,pit=.81,sk=camera.shake||0;
+  cam.position.set(camera.x+(Math.random()-.5)*sk,d*Math.sin(pit)+(Math.random()-.5)*sk,camera.y+d*Math.cos(pit));cam.lookAt(camera.x,0,camera.y-14);cam.updateMatrixWorld();
+  sun.target.position.set(camera.x,0,camera.y);sun.position.set(camera.x-360,860,camera.y+400);
+  updateAdBoards(tt);
   crowd.position.y=goalCelebrationTimer>0?Math.abs(Math.sin(tt*9))*3.5:0;
   goals.forEach((g,i)=>{const sw2=i?ball.netSwayRight:ball.netSwayLeft;g.net.position.x=g.dir*(sw2||0)*.5;});
   // piłka
