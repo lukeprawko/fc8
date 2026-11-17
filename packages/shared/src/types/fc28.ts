@@ -20,6 +20,12 @@ export interface PlayerCard {
   dri: number;
   def: number;
   phy: number;
+  div?: number;
+  han?: number;
+  kic?: number;
+  ref?: number;
+  spe?: number;
+  pos?: number;
   nation?: string;
 }
 

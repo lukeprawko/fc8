@@ -14,9 +14,9 @@ export const LoginSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, 'Login może zawierać tylko litery, cyfry, _ i -')
     .trim(),
   password: z.string()
-    .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 8 znaków')
+    .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 6 znaków')
     .max(SECURITY_LIMITS.MAX_PASSWORD_LENGTH, 'Hasło jest za długie'),
-  turnstileToken: z.string().min(1, 'Brak tokenu Turnstile (weryfikacja anty-bot)')
+  turnstileToken: z.string().optional()
 });
 
 // Walidacja rejestracji
@@ -27,9 +27,9 @@ export const RegisterSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, 'Login może zawierać tylko litery, cyfry, _ i -')
     .trim(),
   password: z.string()
-    .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 8 znaków')
+    .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 6 znaków')
     .max(SECURITY_LIMITS.MAX_PASSWORD_LENGTH, 'Hasło jest za długie'),
-  turnstileToken: z.string().min(1, 'Wymagana weryfikacja Cloudflare Turnstile')
+  turnstileToken: z.string().optional()
 });
 
 // Walidacja tworzenia pokoju
