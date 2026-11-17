@@ -688,18 +688,22 @@ const STATKI_COVER = `
     <circle cx="140" cy="180" r="18" fill="none" stroke="#7dd3fc" stroke-width="1.5" opacity="0.5"/>
   </svg>`;
 
-const ARENA_COVER = `
+const STICKMAN_COVER = `
   <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
     <rect width="440" height="260" fill="#120d0a"/>
-    <circle cx="220" cy="130" r="112" fill="none" stroke="#3a2412" stroke-width="2"/>
-    <circle cx="220" cy="130" r="80" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 8" opacity="0.7"/>
-    <circle cx="220" cy="130" r="48" fill="#1c130d" stroke="#f59e0b" stroke-width="2"/>
-    <path d="M220 18V60M220 200V242M108 130H150M290 130H332" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-    <circle cx="150" cy="80" r="9" fill="#10b981"/>
-    <circle cx="298" cy="178" r="9" fill="#ef4444"/>
-    <path d="M150 80L190 108" stroke="#10b981" stroke-width="2" stroke-dasharray="3 5" opacity="0.7"/>
-    <path d="M298 178L256 152" stroke="#ef4444" stroke-width="2" stroke-dasharray="3 5" opacity="0.7"/>
-    <circle cx="220" cy="130" r="8" fill="#f59e0b"/>
+    <rect x="0" y="206" width="440" height="54" fill="#1c130d"/>
+    <path d="M0 206H440" stroke="#3a2412" stroke-width="2"/>
+    <g stroke="#10b981" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="140" cy="90" r="16" fill="#120d0a"/>
+      <path d="M140 106V150M140 150L116 200M140 150L166 200M140 120L112 140M140 120L190 112"/>
+    </g>
+    <g stroke="#ef4444" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="300" cy="90" r="16" fill="#120d0a"/>
+      <path d="M300 106V150M300 150L274 200M300 150L324 200M300 120L328 140M300 120L252 112"/>
+    </g>
+    <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round">
+      <path d="M220 96V74M204 102L192 88M236 102L248 88M200 116H182M240 116H258"/>
+    </g>
   </svg>`;
 
 const ICONS = {
@@ -741,7 +745,7 @@ const GAMES = [
   },
   {
     title: 'Statki',
-    url: 'statki1.html',
+    url: 'statki.html',
     status: 'ready',
     desc: 'Klasyczna gra w statki – rozstaw flotę, odgadnij pozycje przeciwnika i zatop wszystkie jednostki jako pierwszy.',
     tags: ['Strategia', 'Planszowa', 'Klasyk'],
@@ -749,12 +753,12 @@ const GAMES = [
     players: '1 - 2 Graczy'
   },
   {
-    title: 'Arena',
-    url: 'arena.html',
+    title: 'Stickman Walki',
+    url: 'stickmanwalki.html',
     status: 'ready',
-    desc: 'Dynamiczna arena walki, w której liczy się refleks i pozycjonowanie. Pokonaj rywali i zdobądź tytuł mistrza.',
-    tags: ['Arena', 'Akcja', 'PvP'],
-    cover: ARENA_COVER,
+    desc: 'Szybkie pojedynki stickmanów – łącz ciosy, unikaj ataków i pokonaj przeciwnika w dynamicznych walkach 1 na 1.',
+    tags: ['Bijatyka', 'Akcja', 'PvP'],
+    cover: STICKMAN_COVER,
     players: '1 - 2 Graczy'
   },
   {
