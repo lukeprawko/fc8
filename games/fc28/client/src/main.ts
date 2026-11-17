@@ -181,6 +181,8 @@ function gameLoop() {
     hud.updateScore(state.scoreBlue, state.scoreRed);
     hud.updateTimer(state.timeRemaining);
     hud.updateBanner(state.banner.text, state.banner.sub, state.banner.color, state.banner.timer > 0);
+  } else {
+    engine.render(null);
   }
 
   hud.updatePing(client.pingMs);

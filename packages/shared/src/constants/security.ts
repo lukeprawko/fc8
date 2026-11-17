@@ -48,9 +48,14 @@ export const REWARD_CONFIG = {
 };
 
 export const ALLOWED_ORIGINS = [
+  'https://jdrgames.pl',
+  'https://www.jdrgames.pl',
+  'https://lukeprawko.github.io',
   'https://novagames.pl',
   'https://fc28.pages.dev',
   'http://localhost:5173',
   'http://localhost:3000',
-  'http://127.0.0.1:5173'
+  'http://localhost:8080',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:8080'
 ];
