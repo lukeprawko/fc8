@@ -30,6 +30,14 @@ pnpm-debug.log*
 GitHubUploader.*
 Uruchom-GitHub-Uploader.*
 
+# BEZWZGLĘDNA OCHRONA BACKENDU W PUBLICZNYM REPOZYTORIUM
+# Cały kod serwera, bazy D1, Durable Objects i konfiguracja Wrangler zostają wyłącznie na dysku lokalnym / prywatnym repo
+games/*/server/
+server/
+schema.sql
+wrangler.toml
+.github/workflows/deploy-*-backend.yml
+
 # Edytor i system operacyjny
 .DS_Store
 Thumbs.db
