@@ -664,48 +664,6 @@ const WIP_COVER = `
     <rect x="20" y="20" width="400" height="220" rx="8" fill="none" stroke="#1e2433" stroke-width="1.5" stroke-dasharray="6 6"/>
   </svg>`;
 
-const STATKI_COVER = `
-  <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="stSea" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#0c1a2b"/><stop offset="1" stop-color="#08101c"/>
-      </linearGradient>
-    </defs>
-    <rect width="440" height="260" fill="url(#stSea)"/>
-    <g stroke="#1e3a5a" stroke-width="1" opacity="0.8">
-      <path d="M0 40H440M0 80H440M0 120H440M0 160H440M0 200H440M0 240H440"/>
-      <path d="M40 0V260M80 0V260M120 0V260M160 0V260M200 0V260M240 0V260M280 0V260M320 0V260M360 0V260M400 0V260"/>
-    </g>
-    <g fill="#f59e0b" opacity="0.9">
-      <rect x="82" y="82" width="76" height="36" rx="8"/>
-      <rect x="242" y="162" width="116" height="36" rx="8" opacity="0.75"/>
-      <rect x="282" y="42" width="36" height="76" rx="8" opacity="0.6"/>
-    </g>
-    <g fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round">
-      <path d="M326 130l24 24M350 130l-24 24"/>
-    </g>
-    <circle cx="140" cy="180" r="8" fill="none" stroke="#7dd3fc" stroke-width="3"/>
-    <circle cx="140" cy="180" r="18" fill="none" stroke="#7dd3fc" stroke-width="1.5" opacity="0.5"/>
-  </svg>`;
-
-const STICKMAN_COVER = `
-  <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <rect width="440" height="260" fill="#120d0a"/>
-    <rect x="0" y="206" width="440" height="54" fill="#1c130d"/>
-    <path d="M0 206H440" stroke="#3a2412" stroke-width="2"/>
-    <g stroke="#10b981" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-      <circle cx="140" cy="90" r="16" fill="#120d0a"/>
-      <path d="M140 106V150M140 150L116 200M140 150L166 200M140 120L112 140M140 120L190 112"/>
-    </g>
-    <g stroke="#ef4444" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-      <circle cx="300" cy="90" r="16" fill="#120d0a"/>
-      <path d="M300 106V150M300 150L274 200M300 150L324 200M300 120L328 140M300 120L252 112"/>
-    </g>
-    <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round">
-      <path d="M220 96V74M204 102L192 88M236 102L248 88M200 116H182M240 116H258"/>
-    </g>
-  </svg>`;
-
 const ICONS = {
   play: `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`,
   lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
@@ -742,24 +700,6 @@ const GAMES = [
     tags: ['FPS', 'Akcja', 'Multiplayer'],
     image: 'assets/cover_cs.jpg',
     players: 'Wieloosobowa'
-  },
-  {
-    title: 'Statki',
-    url: 'statki.html',
-    status: 'ready',
-    desc: 'Klasyczna gra w statki – rozstaw flotę, odgadnij pozycje przeciwnika i zatop wszystkie jednostki jako pierwszy.',
-    tags: ['Strategia', 'Planszowa', 'Klasyk'],
-    cover: STATKI_COVER,
-    players: '1 - 2 Graczy'
-  },
-  {
-    title: 'Stickman Walki',
-    url: 'stickmanwalki.html',
-    status: 'ready',
-    desc: 'Szybkie pojedynki stickmanów – łącz ciosy, unikaj ataków i pokonaj przeciwnika w dynamicznych walkach 1 na 1.',
-    tags: ['Bijatyka', 'Akcja', 'PvP'],
-    cover: STICKMAN_COVER,
-    players: '1 - 2 Graczy'
   },
   {
     title: 'Astro Strike',
@@ -826,7 +766,7 @@ function renderGames() {
     if (ready) {
       card.innerHTML = `
         <div class="cover">
-          ${game.cover ? game.cover : `<img class="art" src="${esc(game.image)}" alt="${esc(game.title)}" loading="lazy">`}
+          <img class="art" src="${esc(game.image)}" alt="${esc(game.title)}" loading="lazy">
         </div>
 
         <div class="card-body">
