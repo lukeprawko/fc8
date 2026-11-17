@@ -1,0 +1,21 @@
+{
+  "name": "gierki-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zabezpieczona platforma gier przeglądarkowych na stacku Cloudflare (Pages + Workers + Durable Objects + D1 + R2)",
+  "workspaces": [
+    "packages/*",
+    "games/*/*"
+  ],
+  "scripts": {
+    "build:shared": "npm run --prefix packages/shared build",
+    "build:fc28:client": "npm run --prefix games/fc28/client build",
+    "build:fc28:server": "npm run --prefix games/fc28/server build",
+    "build": "npm run build:shared && npm run build:fc28:client && npm run build:fc28:server",
+    "deploy:fc28:server": "npm run --prefix games/fc28/server deploy",
+    "deploy:fc28:client": "npm run --prefix games/fc28/client deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

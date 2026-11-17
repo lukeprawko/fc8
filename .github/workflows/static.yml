@@ -37,6 +37,10 @@ jobs:
           mkdir -p _site/assets
           cp index.html pingpong.html fc28.html _site/
           [ -f kaczki.html ] && cp kaczki.html _site/ || true
+          [ -f sitemap.xml ] && cp sitemap.xml _site/ || true
+          [ -f robots.txt ] && cp robots.txt _site/ || true
+          [ -f CNAME ] && cp CNAME _site/ || true
+          [ -f site.webmanifest ] && cp site.webmanifest _site/ || true
           cp -R assets/. _site/assets/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

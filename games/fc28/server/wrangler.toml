@@ -1,0 +1,39 @@
+name = "fc28-backend"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Durable Objects dla autorytatywnych pokojów rozgrywki z WebSocket Hibernation API
+[durable_objects]
+bindings = [
+  { name = "GAME_ROOM", class_name = "GameRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]
+
+# Baza danych D1
+[[d1_databases]]
+binding = "DB"
+database_name = "fc28-db"
+database_id = "355af120-385a-4df5-84a9-43bd4c8ee4eb"
+
+# Magazyn R2 na chronione modele, tekstury i dźwięki (odkomentuj po włączeniu R2 w dashboardzie)
+# [[r2_buckets]]
+# binding = "ASSETS_BUCKET"
+# bucket_name = "fc28-assets"
+
+# Zadania Cron: Automatyczny backup D1 do R2 raz na dobę (wymaga R2)
+# [triggers]
+# crons = ["0 3 * * *"]
+
+# Zmienne środowiskowe (Niewrażliwe)
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGIN = "https://novagames.pl,https://fc28.pages.dev"
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+# Sekrety konfigurowane przez `wrangler secret put`:
+# - TURNSTILE_SECRET_KEY
+# - SESSION_SECRET

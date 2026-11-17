@@ -1,0 +1,24 @@
+{
+  "name": "fc28-client",
+  "version": "1.0.0",
+  "description": "Zabezpieczony klient 3D CyberFC 28 z obfuskacją kodu i renderowaniem Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@games/shared": "file:../../../packages/shared",
+    "three": "^0.152.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/three": "^0.152.1",
+    "javascript-obfuscator": "^4.1.1",
+    "rollup-plugin-obfuscator": "^1.1.0",
+    "terser": "^5.31.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  }
+}

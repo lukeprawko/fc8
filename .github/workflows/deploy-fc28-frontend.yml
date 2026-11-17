@@ -1,0 +1,45 @@
+name: Deploy FC28 Frontend (Cloudflare Pages)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'games/fc28/client/**'
+      - 'packages/shared/**'
+      - '.github/workflows/deploy-fc28-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalacja i kompilacja pakietu współdzielonego
+        run: |
+          npm --prefix packages/shared ci
+          npm --prefix packages/shared run build
+
+      - name: Instalacja zależności klienta
+        run: |
+          npm --prefix games/fc28/client ci
+
+      - name: Produkcyjny build z obfuskacją kodu (Brak sourcemap)
+        run: |
+          npm --prefix games/fc28/client run build
+
+      - name: Wdrożenie na Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: 'fc28'
+          directory: 'games/fc28/client/dist'
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

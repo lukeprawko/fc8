@@ -1,0 +1,21 @@
+{
+  "name": "Nova Games — Darmowe Gry Przeglądarkowe Online",
+  "short_name": "Nova Games",
+  "description": "Zagraj w darmowe gry online w przeglądarce: FC 28, Ping Pong, multiplayer bez pobierania i instalacji.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090d",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

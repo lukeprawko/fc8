@@ -1,0 +1,24 @@
+# Konfiguracja Gitleaks - automatyczne wykrywanie wycieków kluczy i tokenów
+title = "Gierki Monorepo Gitleaks Security Profile"
+
+[extend]
+useDefault = true
+
+[rules]
+[[rules]]
+description = "Cloudflare API Token / Global Key"
+regex = '''(?i)(?:cloudflare|cf)[-_]?(?:api[-_]?token|auth[-_]?key|secret)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{30,50}['\"]'''
+tags = ["cloudflare", "secret"]
+
+[[rules]]
+description = "Generic High-Entropy Secret Key"
+regex = '''(?i)(?:jwt_secret|session_secret|encryption_key)\s*[:=]\s*['\"][a-zA-Z0-9+/=_\-]{24,}['\"]'''
+tags = ["key", "generic"]
+
+[allowlist]
+description = "Wykluczenia dla plików przykładowych i testowych"
+paths = [
+  '''\.env\.example$''',
+  '''schema\.sql$''',
+  '''README\.md$'''
+]

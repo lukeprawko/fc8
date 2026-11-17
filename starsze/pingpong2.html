@@ -1236,6 +1236,38 @@
     align-items: center;
     gap: 8px;
   }
+  .btn-tree-reset {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-tree-reset.available:hover {
+    background: rgba(245, 158, 11, 0.22);
+    border-color: #fbbf24;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .btn-tree-reset.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #64748b;
+    background: transparent;
+  }
+  .btn-tree-reset.used {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #475569;
+    background: transparent;
+  }
   .btn-tree-close {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -3053,6 +3085,7 @@
       </div>
       <div class="tree-header-actions">
         <button type="button" class="btn-tree-admin-sp" id="btnTreeAdminSp" onclick="adminQuickAddSp(10)" style="display:none;" title="Dodaj natychmiast +10 SP (tylko Admin)">⚡ +10 SP (ADMIN)</button>
+        <button type="button" class="btn-tree-reset" id="btnTreeReset" onclick="handleResetTalents()">🔄 RESET DRZEWKA (DARMOWY)</button>
         <button type="button" class="btn-tree-close" onclick="closeTalentTreeModal()" title="Zamknij okno drzewka">✕ ZAMKNIJ</button>
       </div>
     </div>
@@ -3133,8 +3166,7 @@ const WALL_RECORD_KEY = 'cyberpong_wall_record';
 
 function safeGetStorage(key, fallback = null) {
   try {
-    const v = localStorage.getItem(key);
-    return (v !== null && v !== undefined) ? v : fallback;
+    return localStorage.getItem(key);
   } catch (e) {
     return fallback;
   }
@@ -3155,7 +3187,7 @@ const WIN_SCORE = 7;
 const INITIAL_BALL_SPEED = 4.6;
 const MAX_BASE_BALL_SPEED = 10.8;      // 135 km/h bazowy limit zwykłej wymiany
 const MAX_NORMAL_SPEED = 10.8;         // 135 km/h
-const MAX_SMASH_SPEED = 13.8;          // ~180 km/h (standardowy smash)
+const MAX_SMASH_SPEED = 14.5;          // ~180 km/h (standardowy smash)
 const ABSOLUTE_MAX_BALL_SPEED = 16.0;  // 200 km/h twardy limit prędkości po wszystkich ulepszeniach!
 
 const canvas = document.getElementById('stage');
@@ -3166,14 +3198,7 @@ const bgCtx = bgCanvas.getContext('2d');
 let gameActive = false;
 let matchOver = false;
 let matchPaused = false;
-const CONTROL_MODE_STORAGE_KEY = 'CYBERPONG_CONTROL_MODE';
-let controlMode = (function() {
-  try {
-    const saved = localStorage.getItem(CONTROL_MODE_STORAGE_KEY);
-    if (saved === 'mouse' || saved === 'keyboard') return saved;
-  } catch (e) {}
-  return 'keyboard';
-})();
+let controlMode = 'keyboard';
 let mouseY = H / 2;
 let isRightMouseDown = false;
 let isLeftMouseDown = false;
@@ -3260,7 +3285,7 @@ if (window.location.hash && window.location.hash.length >= 7) {
 /* ==========================================
    SYSTEM KONT GRACZY & DRZEWKO TALENTÓW
    ========================================== */
-const ACCOUNTS_DB_KEY = 'CYBERPONG_ACCOUNTS_v3';
+const ACCOUNTS_DB_KEY = 'CYBERPONG_ACCOUNTS_v2';
 const CURRENT_USER_KEY = 'CYBERPONG_CURRENT_USER';
 
 const SKILL_TREE_BRANCHES = [
@@ -3286,19 +3311,19 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'spd_3', tier: 3, cost: 5, req: 'spd_2',
         title: 'Kinetyczny Zryw', icon: '🚀', type: 'skill',
-        benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +18% prędkości',
+        benefit: 'Uderzenie piłki podczas Dasha dodaje jej natychmiastowe +25% prędkości',
         legacyIds: ['speed_3', 'spd_3']
       },
       {
         id: 'spd_4', tier: 4, cost: 7, req: 'spd_3',
         title: 'Tryb Overdrive', icon: '⚡', type: 'skill',
-        benefit: 'Po 5 odbiciach w wymianie kolejny Dash jest darmowy; co 10–16 s Szybki Błysk daje +25% prędkości paletki na 2 s',
+        benefit: 'Po 4 odbiciach w wymianie kolejny Dash jest darmowy; co 8–14 s losowy Szybki Błysk daje +35% prędkości paletki na 2,5 s',
         legacyIds: ['speed_4', 'spd_4']
       },
       {
         id: 'spd_5', tier: 5, cost: 9, req: 'spd_4',
         title: 'Widmowy Krok', icon: '👻', type: 'legend',
-        benefit: '+15% prędkości, Dash z bardzo krótkim cooldownem i widmowy neonowy ślad',
+        benefit: '+20% prędkości, Dash bez cooldownu i widmowy neonowy ślad',
         legacyIds: ['speed_5', 'spd_5', 'spd_6']
       }
     ]
@@ -3331,13 +3356,13 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'pwr_4', tier: 4, cost: 7, req: 'pwr_3',
         title: 'Ciężka Plazma', icon: '🔨', type: 'skill',
-        benefit: 'Każde Twoje odbicie ładuje stos Rozgrzania (maks. 3, każdy daje +7% siły Smasha); Smash odpycha paletkę rywala o 14 px',
+        benefit: 'Każde Twoje odbicie ładuje stos Rozgrzania (maks. 3, każdy daje +8% siły Smasha); Smash odpycha paletkę rywala o 16 px',
         legacyIds: ['force_4', 'atk_4', 'pwr_4']
       },
       {
         id: 'pwr_5', tier: 5, cost: 9, req: 'pwr_4',
         title: 'Meteor Smash', icon: '☄️', type: 'legend',
-        benefit: 'Smash przy 3 stosach Rozgrzania zamienia piłkę w meteor 185 km/h i spowalnia rywala o 22% na 0,9 s',
+        benefit: 'Smash przy 3 stosach Rozgrzania zamienia piłkę w płonący meteor 200 km/h i spowalnia rywali o 30% na 1,2 s',
         legacyIds: ['force_5', 'atk_5', 'pwr_5', 'pwr_6']
       }
     ]
@@ -3415,7 +3440,7 @@ const SKILL_TREE_BRANCHES = [
       {
         id: 'def_5', tier: 5, cost: 9, req: 'def_4',
         title: 'Tarcza Egidy', icon: '🔰', type: 'legend',
-        benefit: 'Raz na set, gdy piłka minimalnie ominie paletkę, Tarcza ratuje punkt i odbija piłkę',
+        benefit: 'Raz na set, gdy piłka ominie paletkę, cyber tarcza ratuje punkt i odbija piłkę',
         legacyIds: ['def_5', 'def_6', 'stm_5']
       }
     ]
@@ -3440,8 +3465,8 @@ const TALENTS_DEF = SKILL_TREE_NODES;
 const TOTAL_TREE_SP_COST = Object.values(SKILL_TREE_NODES).reduce((sum, n) => sum + (n.cost || 0), 0);
 
 const PLAYER_PROFILE_KEY = 'CYBERPONG_PLAYER_PROFILE_v2';
-// Wersja resetu: zwiększ ją, aby przy następnym uruchomieniu WSZYSTKIE konta wróciły do stanu startowego.
-const RESET_VERSION = 6;
+// Wersja resetu: zwiększ ją, aby przy następnym logowaniu WSZYSTKIE konta wróciły do stanu startowego.
+const RESET_VERSION = 4;
 const START_SP = 3; // punkty umiejętności na starcie konta
 const PRIVILEGED_CLOUD_FIELDS = ['isAdmin', 'role', 'allTalents', 'infiniteStamina', 'godMode', 'goldSmash', 'customSpeedMult', 'customSmashMult', 'customPaddleHeight', 'adminBadge', 'adminToken'];
 function cloudSafeProfile(prof) {
@@ -3557,62 +3582,6 @@ function createDefaultProfile(nick = 'GRACZ') {
 }
 
 /* =========================================================================
-   TRWAŁA LOKALNA BAZA KONT GRACZY (ODPORNA NA WYLOGOWANIE I BRAK CHMURY)
-   ========================================================================= */
-function getLocalAccountsDb() {
-  try {
-    const raw = localStorage.getItem(ACCOUNTS_DB_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
-}
-
-function saveLocalAccountsDb(db) {
-  try {
-    localStorage.setItem(ACCOUNTS_DB_KEY, JSON.stringify(db));
-  } catch (e) {}
-}
-
-function saveAccountToLocalDb(prof) {
-  if (!prof || !prof.nick) return;
-  try {
-    const db = getLocalAccountsDb();
-    const cleanNick = prof.nick.trim();
-    const copy = JSON.parse(JSON.stringify(prof));
-    if (cleanNick && cleanNick !== 'GRACZ') {
-      db['nick_' + cleanNick.toLowerCase()] = copy;
-    }
-    if (prof.ownerUid) {
-      db['uid_' + prof.ownerUid] = copy;
-    }
-    saveLocalAccountsDb(db);
-  } catch (e) {
-    console.warn('[Storage] saveAccountToLocalDb error:', e);
-  }
-}
-
-function loadAccountFromLocalDb(nick, uid) {
-  try {
-    const db = getLocalAccountsDb();
-    let found = null;
-    if (uid && db['uid_' + uid]) {
-      found = JSON.parse(JSON.stringify(db['uid_' + uid]));
-    } else if (nick && nick.trim() !== 'GRACZ') {
-      const byNick = db['nick_' + nick.trim().toLowerCase()];
-      if (byNick) found = JSON.parse(JSON.stringify(byNick));
-    }
-    if (found && typeof normalizeTalentEconomy === 'function') {
-      found = normalizeTalentEconomy(found);
-    }
-    return found;
-  } catch (e) {
-    console.warn('[Storage] loadAccountFromLocalDb error:', e);
-  }
-  return null;
-}
-
-/* =========================================================================
    ZABEZPIECZENIE ANTY-CHEAT I SUMA KONTROLNA PROFILU LOKALNEGO (INTEGRITY)
    ========================================================================= */
 const CP_SEC_KEY = 'CYBERPONG_V2_INTEGRITY_SALT_#8892';
@@ -3660,24 +3629,21 @@ function encodeProfileEnvelope(prof) {
 }
 
 function decodeProfileEnvelope(raw) {
-  if (!raw || typeof raw !== 'string') return null;
+  if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.p) {
+    if (parsed && parsed.p && parsed.sig) {
       const decodedStr = b64DecodeUnicode(parsed.p);
       const prof = JSON.parse(decodedStr);
-      return { prof, isTampered: false };
+      const expectedSig = computeProfileChecksum(prof);
+      return { prof, isTampered: (parsed.sig !== expectedSig) };
     }
-    // Obsługa bezpośredniego formatu JSON
+    // Obsługa legacy formatu
     if (parsed && typeof parsed === 'object') {
       return { prof: parsed, isTampered: false, isLegacy: true };
     }
   } catch (e) {
-    try {
-      const direct = JSON.parse(raw);
-      if (direct && typeof direct === 'object') return { prof: direct, isTampered: false, isLegacy: true };
-    } catch (_) {}
-    return { prof: null, isTampered: false };
+    return { prof: null, isTampered: true };
   }
   return null;
 }
@@ -3687,49 +3653,60 @@ function getPlayerProfile() {
     const raw = localStorage.getItem(PLAYER_PROFILE_KEY);
     const decoded = decodeProfileEnvelope(raw);
     let prof = decoded ? decoded.prof : null;
+    const isTampered = decoded ? decoded.isTampered : false;
 
     if (!prof || typeof prof !== 'object') {
       const oldNick = localStorage.getItem('CYBERPONG_NICK') || localStorage.getItem('CYBERPONG_CURRENT_USER') || 'GRACZ';
-      prof = loadAccountFromLocalDb(oldNick, null) || createDefaultProfile(oldNick);
-      prof.resetVersion = RESET_VERSION;
-      try {
-        localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
-        safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(prof));
-      } catch (e) {}
+      prof = createDefaultProfile(oldNick);
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    // Globalny Sezon 6 / Czysty Reset Postępu i Drzewka Ulepszeń
-    const needsReset = !prof.resetVersion || prof.resetVersion < RESET_VERSION;
-
-    if (needsReset) {
-      console.log('🔄 [CyberPong] Reset poziomów i drzewka talentów do Sezonu ' + RESET_VERSION);
+    // Globalny Sezon 3 / Reset Bazy (Wipe do LVL 1)
+    if (prof.resetVersion !== RESET_VERSION) {
+      console.log('🔄 [CyberPong] Reset profilu do stanu startowego (wersja ' + RESET_VERSION + ')');
       safeSetStorage(WALL_RECORD_KEY, '0');
-      clearPendingTalentSync();
       prof.level = 1;
       prof.exp = 0;
       prof.sp = START_SP;
       prof.spentSp = 0;
       prof.freeResets = 1;
       prof.talents = { root: true };
-      prof.allTalents = false;
       prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
       prof.resetVersion = RESET_VERSION;
       prof.updatedAt = Date.now();
-      try {
-        localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
-        safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(prof));
-      } catch (e) {}
+      try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
     }
 
-    // Jeśli profil w aktywnej pamięci ma poziom 1 i brak ulepszeń, sprawdź czy istnieje zapisany profil tego konta z postępem
-    if (prof && prof.nick && prof.nick !== 'GRACZ' && prof.level === 1 && (prof.spentSp || 0) === 0 && (prof.exp || 0) === 0) {
-      const saved = loadAccountFromLocalDb(prof.nick, prof.ownerUid);
-      if (saved && (saved.level > 1 || (saved.spentSp || 0) > 0 || (saved.exp || 0) > 0 || (saved.talents && Object.keys(saved.talents).length > 1))) {
-        prof = saved;
+    // Wykrycie próby manipulacji w pliku lokalnym / DevTools:
+    if (isTampered) {
+      console.warn('🛡️ [CyberPong Anti-Tamper] Wykryto niezgodność sumy kontrolnej profilu lokalnego!');
+      if (fbAuth && fbAuth.currentUser && fbDb) {
+        fbDb.collection('players').doc(fbAuth.currentUser.uid).get().then(snap => {
+          if (snap.exists) applyCloudProfileToLocal(snap.data(), fbAuth.currentUser.uid);
+        }).catch(() => {});
+      } else {
+        // Sanityzacja danych offline:
+        prof.isAdmin = false;
+        prof.adminToken = null;
+        prof.allTalents = false;
+        prof.infiniteStamina = false;
+        prof.godMode = false;
+        if (typeof prof.exp !== 'number' || prof.exp < 0) prof.exp = 0;
+        const prog = getLevelProgress(prof.exp);
+        prof.level = prog.level;
+        let calcSpent = 0;
+        for (const tKey in prof.talents) {
+          if (prof.talents[tKey] && SKILL_TREE_NODES[tKey]) calcSpent += SKILL_TREE_NODES[tKey].cost;
+        }
+        prof.spentSp = calcSpent;
+        const totalSpDue = calculateTotalSpForLevel(prof.level);
+        prof.sp = Math.max(0, totalSpDue - calcSpent);
+        try { localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof)); } catch (e) {}
+        showBanner('🛡️ Wykryto manipulację plikiem — przywrócono stan bezpieczny!', '#ff3366', 70);
       }
     }
 
-    // Walidacja autentyczności uprawnień administratora:
+    // Walidacja autentyczności tokena administratora:
     if (prof.isAdmin) {
       const expectedToken = (fbAuth && fbAuth.currentUser)
         ? hashString(fbAuth.currentUser.uid + CP_SEC_KEY)
@@ -3753,20 +3730,31 @@ function getPlayerProfile() {
     prof.talents.root = true;
     if (typeof prof.freeResets !== 'number') prof.freeResets = 1;
 
+    // Migracja wsteczna starych identyfikatorów talentów:
+    for (const key in SKILL_TREE_NODES) {
+      const node = SKILL_TREE_NODES[key];
+      if (node.legacyIds) {
+        for (const leg of node.legacyIds) {
+          if (prof.talents[leg]) prof.talents[node.id] = true;
+        }
+      }
+    }
+
     // Przeliczenie wydanych punktów na podstawie aktualnego drzewka
     let calcSpent = 0;
     for (const tKey in prof.talents) {
-      if (tKey !== 'root' && prof.talents[tKey] && SKILL_TREE_NODES[tKey]) {
-        calcSpent += Number(SKILL_TREE_NODES[tKey].cost) || 0;
+      if (prof.talents[tKey] && SKILL_TREE_NODES[tKey]) {
+        calcSpent += SKILL_TREE_NODES[tKey].cost;
       }
     }
     prof.spentSp = calcSpent;
 
-    if (typeof prof.exp !== 'number' || isNaN(prof.exp) || prof.exp < 0) prof.exp = 0;
+    if (typeof prof.exp !== 'number') prof.exp = 0;
     const prog = getLevelProgress(prof.exp);
-    prof.level = prog.level;
+    prof.level = prog.level; // poziom zawsze wynika z EXP (nie ufamy polu 'level')
 
     // Zbalansowane przeliczanie należnych punktów SP:
+    // Upewnij się, że gracz ma przynajmniej tyle SP, ile wynika z poziomu (i zachowaj punkty zdobyte z wygranych meczów)
     const totalSpDue = calculateTotalSpForLevel(prof.level);
     const minExpectedSp = Math.max(0, totalSpDue - (prof.spentSp || 0));
     if (typeof prof.sp !== 'number' || isNaN(prof.sp) || prof.sp < minExpectedSp) {
@@ -3804,55 +3792,30 @@ function syncProfileToCloud(prof) {
       fbDb.collection('players').doc(fbAuth.currentUser.uid).set(payload, { mergeFields: Object.keys(payload) }).then(() => {
         console.log('☁️ [Firestore] Zsynchronizowano profil gracza w chmurze');
       }).catch(err => {
-        console.warn('☁️ [Firestore] Synchronizacja w tle pominięta (offline/uprawnienia):', err ? err.message : err);
+        console.warn('Błąd synchronizacji chmury Firestore:', err);
       });
     } catch (e) {
       console.warn('syncProfileToCloud błąd:', e);
     }
   }
 }
-
 function savePlayerProfile(prof) {
   if (!prof) return;
   const numericExp = Number(prof.exp);
   prof.exp = Number.isFinite(numericExp) ? Math.min(MAX_ACCOUNT_EXP, Math.max(0, Math.floor(numericExp))) : 0;
-  const prog = getLevelProgress(prof.exp);
-  prof.level = prog.level;
-  
-  // Przelicz spentSp
-  let calcSpent = 0;
-  for (const tKey in prof.talents) {
-    if (tKey !== 'root' && prof.talents[tKey] && SKILL_TREE_NODES[tKey]) {
-      calcSpent += Number(SKILL_TREE_NODES[tKey].cost) || 0;
-    }
-  }
-  prof.spentSp = calcSpent;
-  prof.ownerUid = (fbAuth && fbAuth.currentUser) ? fbAuth.currentUser.uid : (prof.ownerUid || null);
+  const numericLevel = Number(prof.level);
+  prof.level = Number.isFinite(numericLevel) ? Math.min(MAX_ACCOUNT_LEVEL, Math.max(1, Math.floor(numericLevel))) : getLevelProgress(prof.exp).level;
+  prof.ownerUid = (fbAuth && fbAuth.currentUser) ? fbAuth.currentUser.uid : null;
   prof.updatedAt = Date.now();
-  prof.resetVersion = RESET_VERSION;
-
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(prof));
-    safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(prof));
     if (prof.nick) {
       myName = prof.nick;
       localStorage.setItem(NICK_STORAGE_KEY, prof.nick);
       localStorage.setItem('CYBERPONG_CURRENT_USER', prof.nick);
     }
-  } catch (e) {
-    console.warn('[Storage] Błąd zapisu lokalnego:', e);
-  }
-
-  // Trwały zapis do bazy kont graczy (per-account)
-  if (prof.nick && prof.nick !== 'GRACZ') {
-    saveAccountToLocalDb(prof);
-  }
-
-  // Bezpieczna synchronizacja w tle
-  try {
-    syncProfileToCloud(prof);
   } catch (e) {}
-
+  syncProfileToCloud(prof);
   updateAccountUI();
 }
 
@@ -3970,11 +3933,6 @@ function toggleAccountAuthView(forceState) {
 }
 
 async function handleFirebaseLogout() {
-  const currentProf = getPlayerProfile();
-  if (currentProf && currentProf.nick && currentProf.nick !== 'GRACZ') {
-    saveAccountToLocalDb(currentProf);
-  }
-
   try {
     if (fbAuth && fbAuth.currentUser) {
       await fbAuth.signOut();
@@ -3991,7 +3949,6 @@ async function handleFirebaseLogout() {
   const guestProf = createDefaultProfile('GRACZ');
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(guestProf));
-    safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(guestProf));
     localStorage.setItem(NICK_STORAGE_KEY, 'GRACZ');
     localStorage.setItem('CYBERPONG_CURRENT_USER', 'GRACZ');
   } catch (e) {}
@@ -4051,45 +4008,26 @@ async function handleFirebaseRegister() {
 
   if (fbFeedback) {
     fbFeedback.style.color = '#00f0ff';
-    fbFeedback.textContent = 'Rejestracja konta...';
+    fbFeedback.textContent = 'Rejestracja w chmurze Firebase...';
   }
 
   try {
     const email = nickToEmail(nick);
     const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
-    
-    // Zapis lokalny ZAWSZE udaje się natychmiast
-    let newProf = loadAccountFromLocalDb(nick, cred.user.uid);
-    if (!newProf) {
-      newProf = createDefaultProfile(nick);
-    }
-    newProf.nick = nick;
-    newProf.ownerUid = cred.user.uid;
-    newProf.resetVersion = RESET_VERSION;
-    if (typeof normalizeTalentEconomy === 'function') {
-      newProf = normalizeTalentEconomy(newProf);
-    }
-    saveAccountToLocalDb(newProf);
-    savePlayerProfile(newProf);
-    applyStatsToLocalPlayer();
-    updateAccountUI();
-
-    // Próba zapisu do chmury (w tle, bez blokowania rejestracji w razie błędu uprawnień)
+    // Całkowita izolacja danych — każde nowo rejestrowane konto zaczyna jako czysty profil (LVL 1, 0 EXP, 3 SP)
+    const newProf = createDefaultProfile(nick);
     if (fbDb) {
-      try {
-        await fbDb.collection('players').doc(cred.user.uid).set(cloudSafeProfile(newProf));
-      } catch (fsErr) {
-        console.warn('☁️ [Firestore] Rejestracja w chmurze pominięta:', fsErr ? fsErr.message : fsErr);
-      }
+      await fbDb.collection('players').doc(cred.user.uid).set(cloudSafeProfile(newProf));
     }
-
+    savePlayerProfile(newProf);
+    applyCloudProfileToLocal(newProf, cred.user.uid);
     if (fbFeedback) {
       fbFeedback.style.color = '#00ff88';
       fbFeedback.textContent = '✓ Zarejestrowano pomyślnie!';
     }
     setTimeout(() => {
       toggleAccountAuthView(false);
-    }, 700);
+    }, 800);
     SFX.play('upgrade');
     showBanner(`☁️ NOWE KONTO ZAREJESTROWANE: ${nick}! (LVL 1)`, '#00ff88', 60);
   } catch (err) {
@@ -4135,66 +4073,33 @@ async function handleFirebaseLogin() {
 
   if (fbFeedback) {
     fbFeedback.style.color = '#00f0ff';
-    fbFeedback.textContent = 'Logowanie do konta...';
+    fbFeedback.textContent = 'Pobieranie profilu z chmury...';
   }
 
   try {
     const email = nickToEmail(nick);
     const cred = await fbAuth.signInWithEmailAndPassword(email, pass);
-
-    // Załaduj zapisany profil tego konta z bazy kont (po UID lub nicku)
-    let localProf = loadAccountFromLocalDb(nick, cred.user.uid);
-    if (!localProf) {
-      const cur = getPlayerProfile();
-      if (cur && (cur.nick.toLowerCase() === nick.toLowerCase() || (cur.ownerUid && cur.ownerUid === cred.user.uid))) {
-        localProf = cur;
-      }
-    }
-
-    if (!localProf) {
-      localProf = createDefaultProfile(nick);
-      localProf.ownerUid = cred.user.uid;
-      localProf.resetVersion = RESET_VERSION;
-    } else {
-      localProf.nick = nick;
-      localProf.ownerUid = cred.user.uid;
-      if (!localProf.resetVersion || localProf.resetVersion < RESET_VERSION) {
-        localProf.resetVersion = RESET_VERSION;
-      }
-      if (typeof normalizeTalentEconomy === 'function') {
-        localProf = normalizeTalentEconomy(localProf);
-      }
-    }
-
-    saveAccountToLocalDb(localProf);
-    savePlayerProfile(localProf);
-
-    // Bezpieczna próba odczytu z chmury (w tle)
     if (fbDb) {
-      try {
-        const snap = await fbDb.collection('players').doc(cred.user.uid).get();
-        if (snap && snap.exists) {
-          applyCloudProfileToLocal(snap.data(), cred.user.uid);
-        } else {
-          syncProfileToCloud(localProf);
-        }
-      } catch (fsErr) {
-        console.warn('☁️ [Firestore] Odczyt w tle pominięty:', fsErr ? fsErr.message : fsErr);
+      const snap = await fbDb.collection('players').doc(cred.user.uid).get();
+      if (snap.exists) {
+        const cloudProf = snap.data();
+        applyCloudProfileToLocal(cloudProf, cred.user.uid);
+      } else {
+        const freshProf = createDefaultProfile(nick);
+        await fbDb.collection('players').doc(cred.user.uid).set(cloudSafeProfile(freshProf));
+        savePlayerProfile(freshProf);
+        applyCloudProfileToLocal(freshProf, cred.user.uid);
       }
     }
-
-    applyStatsToLocalPlayer();
-    updateAccountUI();
-
     if (fbFeedback) {
       fbFeedback.style.color = '#00ff88';
-      fbFeedback.textContent = '✓ Zalogowano i wczytano ulepszenia!';
+      fbFeedback.textContent = '✓ Zalogowano i zsynchronizowano!';
     }
     setTimeout(() => {
       toggleAccountAuthView(false);
     }, 700);
     SFX.play('upgrade');
-    showBanner(`☁️ ZALOGOWANO: ${nick}! (LVL ${localProf.level || 1})`, '#00f0ff', 60);
+    showBanner(`☁️ ZALOGOWANO: ${nick}!`, '#00f0ff', 60);
   } catch (err) {
     console.error('Firebase Login Error:', err);
     if (fbFeedback) {
@@ -4215,77 +4120,48 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
   let localProf = localRaw ? localRaw.prof : null;
   let forceCloudWrite = false;
 
-  // Izolacja kont: jeśli w pamięci aktywnej jest profil gościa lub innego gracza, wczytaj zapisany profil tego konta
-  if (!localProf || localProf.nick === 'GRACZ' || (localProf.ownerUid && uid && localProf.ownerUid !== uid)) {
-    const saved = loadAccountFromLocalDb(cloudProf.nick, uid);
-    if (saved) {
-      localProf = saved;
-    } else if (localProf && localProf.ownerUid && uid && localProf.ownerUid !== uid) {
-      localProf = null;
-    }
-  }
+  // Lokalny profil innego konta / gościa nie może wpływać na to konto (izolacja kont)
+  if (localProf && localProf.ownerUid !== uid) localProf = null;
 
-  // Wersja resetu chmury: jeśli starsza niż RESET_VERSION, ignorujemy stare ulepszenia z chmury
-  const isCloudOutdated = !cloudProf.resetVersion || cloudProf.resetVersion < RESET_VERSION;
-  if (isCloudOutdated) {
-    cloudProf.level = 1;
-    cloudProf.exp = 0;
-    cloudProf.sp = START_SP;
-    cloudProf.spentSp = 0;
-    cloudProf.freeResets = 1;
-    cloudProf.talents = { root: true };
-    cloudProf.allTalents = false;
-    cloudProf.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
-    cloudProf.resetVersion = RESET_VERSION;
-    cloudProf.updatedAt = 0;
+  // GLOBALNY RESET: konto z chmury ze starą wersją resetu wraca do stanu startowego.
+  // Lokalne dane NIE są scalane (wcześniej scalanie przywracało stare talenty po resecie).
+  if (cloudProf.resetVersion !== RESET_VERSION) {
+    const wiped = createDefaultProfile(cloudProf.nick || (localProf && localProf.nick) || 'GRACZ');
+    PRIVILEGED_CLOUD_FIELDS.forEach(k => { if (cloudProf[k] !== undefined) wiped[k] = cloudProf[k]; });
+    wiped.updatedAt = Date.now();
+    cloudProf = wiped;
+    localProf = null;
+    safeSetStorage(WALL_RECORD_KEY, '0');
     forceCloudWrite = true;
-  }
-
-  if (localProf && (!localProf.resetVersion || localProf.resetVersion < RESET_VERSION)) {
-    localProf.level = 1;
-    localProf.exp = 0;
-    localProf.sp = START_SP;
-    localProf.spentSp = 0;
-    localProf.freeResets = 1;
-    localProf.talents = { root: true };
-    localProf.allTalents = false;
-    localProf.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
-    localProf.resetVersion = RESET_VERSION;
-    localProf.updatedAt = Date.now();
-  }
-
-  // Local-First: jeśli snapshot przyszedł z chmury, ale profil lokalny jest nowszy, zachowaj lokalny
-  const localUp = (localProf && localProf.nick !== 'GRACZ') ? (Number(localProf.updatedAt) || 0) : 0;
-  const cloudUp = Number(cloudProf.updatedAt) || 0;
-  if (fromSnapshot && localProf && localProf.nick !== 'GRACZ' && localUp > cloudUp) {
-    return;
   }
 
   const base = createDefaultProfile(cloudProf.nick || (localProf ? localProf.nick : 'GRACZ'));
   const merged = {
     ...base,
-    ...localProf,
-    stats: (localProf && localProf.stats)
-      ? { ...base.stats, ...localProf.stats }
-      : ((cloudProf.stats && typeof cloudProf.stats === 'object') ? { ...base.stats, ...cloudProf.stats } : { ...base.stats })
+    ...cloudProf,
+    stats: (cloudProf.stats && typeof cloudProf.stats === 'object')
+      ? { ...base.stats, ...cloudProf.stats }
+      : (localProf && localProf.stats ? { ...base.stats, ...localProf.stats } : { ...base.stats })
   };
 
-  // TALENTY: zachowaj wszystkie talenty odblokowane lokalnie.
-  // Z chmury łączymy tylko wtedy, gdy wersja w chmurze jest aktualna (>= RESET_VERSION).
+  // Połącz talenty: każdy talent odblokowany lokalnie lub w chmurze jest ZAWSZE zachowywany!
   const localTalents = (localProf && localProf.talents && typeof localProf.talents === 'object') ? localProf.talents : {};
-  const cloudTalents = (!isCloudOutdated && cloudProf.talents && typeof cloudProf.talents === 'object') ? cloudProf.talents : {};
-  merged.talents = {
-    ...cloudTalents,
-    ...localTalents,
+  const cloudTalents = (cloudProf.talents && typeof cloudProf.talents === 'object') ? cloudProf.talents : {};
+  // Źródłem prawdy jest nowszy zapis (lokalny albo z chmury) — bez łączenia (łączenie dublowało talenty i SP po resecie drzewka)
+  const useLocalTalents = !!localProf && (Number(localProf.updatedAt) || 0) >= (Number(cloudProf.updatedAt) || 0);
+  const mergedTalents = {
+    ...(useLocalTalents ? localTalents : cloudTalents),
     root: true
   };
+  merged.talents = mergedTalents;
 
-  // Uprawnienia administratora
+  // Uprawnienia administratora nadawane są wyłącznie przez pole isAdmin: true w bazie Firebase Firestore
   const isCloudAdmin = !!(cloudProf.isAdmin === true || cloudProf.role === 'admin');
+
   if (isCloudAdmin) {
     merged.isAdmin = true;
     merged.adminToken = hashString((uid || (fbAuth && fbAuth.currentUser ? fbAuth.currentUser.uid : '')) + CP_SEC_KEY);
-    merged.allTalents = !isCloudOutdated && !!cloudProf.allTalents;
+    merged.allTalents = !!cloudProf.allTalents;
     merged.infiniteStamina = !!cloudProf.infiniteStamina;
     merged.godMode = !!cloudProf.godMode;
     merged.goldSmash = !!cloudProf.goldSmash;
@@ -4306,58 +4182,99 @@ function applyCloudProfileToLocal(cloudProf, uid, fromSnapshot = false) {
     merged.customPaddleHeight = null;
   }
 
-  // Poziom i EXP: bierzemy wyższy postęp (nigdy nie degradujemy)
-  const cloudExp = (!isCloudOutdated && typeof cloudProf.exp === 'number' && Number.isFinite(cloudProf.exp) && cloudProf.exp >= 0)
-    ? Math.min(MAX_ACCOUNT_EXP, Math.floor(cloudProf.exp)) : 0;
-  const localExp = (localProf && typeof localProf.exp === 'number' && Number.isFinite(localProf.exp)) ? localProf.exp : 0;
-  merged.exp = Math.max(cloudExp, localExp);
+  // Dynamiczna synchronizacja poziomu i EXP przy edycji w bazie Firestore:
+  const cloudLvl = (typeof cloudProf.level === 'number' && Number.isFinite(cloudProf.level) && cloudProf.level >= 1)
+    ? Math.min(MAX_ACCOUNT_LEVEL, Math.floor(cloudProf.level))
+    : null;
+  const cloudExp = (typeof cloudProf.exp === 'number' && Number.isFinite(cloudProf.exp) && cloudProf.exp >= 0)
+    ? Math.min(MAX_ACCOUNT_EXP, Math.floor(cloudProf.exp))
+    : 0;
 
-  const expDerivedLvl = getLevelProgress(merged.exp).level;
-  const localLvl = localProf ? (localProf.level || 1) : 1;
-  const cloudLvl = (!isCloudOutdated && typeof cloudProf.level === 'number' && Number.isFinite(cloudProf.level)) ? cloudProf.level : 1;
-  merged.level = Math.max(expDerivedLvl, localLvl, cloudLvl);
+  merged.exp = cloudExp;
 
-  // Przelicz spentSp
+  if (cloudLvl !== null) {
+    const expDerivedLvl = getLevelProgress(merged.exp).level;
+    const levelChangedInCloud = localProf ? (cloudLvl !== localProf.level) : (cloudLvl !== expDerivedLvl);
+    const expChangedInCloud = localProf ? (cloudExp !== localProf.exp) : false;
+
+    if (levelChangedInCloud && !expChangedInCloud) {
+      // W bazie Firestore administrator bezpośrednio ustawił pole 'level'
+      let cumXp = 0;
+      for (let l = 1; l < cloudLvl; l++) {
+        cumXp += getXpRequiredForLevel(l);
+      }
+      merged.exp = cumXp;
+      merged.level = cloudLvl;
+    } else if (expChangedInCloud && !levelChangedInCloud) {
+      // W bazie Firestore administrator bezpośrednio ustawił pole 'exp'
+      merged.level = expDerivedLvl;
+    } else if (cloudLvl !== expDerivedLvl) {
+      // Preferuj poziom podany w bazie Firestore i wyrównaj minimalny EXP
+      let cumXp = 0;
+      for (let l = 1; l < cloudLvl; l++) {
+        cumXp += getXpRequiredForLevel(l);
+      }
+      merged.exp = Math.max(merged.exp, cumXp);
+      merged.level = Math.max(cloudLvl, getLevelProgress(merged.exp).level);
+    } else {
+      merged.level = cloudLvl;
+    }
+  } else {
+    merged.level = getLevelProgress(merged.exp).level;
+  }
+
+  // Przelicz wydane punkty SP na podstawie aktualnie odblokowanych talentów
   let calcSpent = 0;
   for (const tKey in merged.talents) {
     if (tKey !== 'root' && merged.talents[tKey] && SKILL_TREE_NODES[tKey]) {
-      calcSpent += Number(SKILL_TREE_NODES[tKey].cost) || 0;
+      calcSpent += SKILL_TREE_NODES[tKey].cost;
     }
   }
   merged.spentSp = calcSpent;
 
-  // Bezpieczna kalkulacja SP:
-  const totalSpDue = calculateTotalSpForLevel(merged.level);
-  const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
-  const localSp = (localProf && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) ? localProf.sp : null;
-  const cloudSpCandidate = (!isCloudOutdated && typeof cloudProf.sp === 'number' && !isNaN(cloudProf.sp)) ? cloudProf.sp : null;
+  // Bezpieczne zarządzanie pulą SP:
+  // Jeśli lokalny profil ma nowszą lub równą datę aktualizacji (np. gracz przed chwilą zakupił talent),
+  // nie nadpisuj puli SP starszym stanem z chmury!
+  const localUp = localProf ? (Number(localProf.updatedAt) || 0) : 0;
+  const cloudUp = Number(cloudProf.updatedAt) || 0;
+  const isLocalNewer = localProf && localUp >= cloudUp;
 
-  if (localSp !== null && localUp >= cloudUp) {
-    merged.sp = Math.max(minExpectedSp, localSp);
-  } else if (cloudSpCandidate !== null) {
-    merged.sp = Math.max(minExpectedSp, cloudSpCandidate);
+  if (isLocalNewer && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
+    merged.sp = localProf.sp;
+  } else if (typeof cloudProf.sp === 'number' && !isNaN(cloudProf.sp)) {
+    merged.sp = cloudProf.sp;
+  } else if (localProf && typeof localProf.sp === 'number' && !isNaN(localProf.sp)) {
+    merged.sp = localProf.sp;
   } else {
-    merged.sp = Math.max(minExpectedSp, (localSp !== null ? localSp : START_SP));
+    const totalSpDue = calculateTotalSpForLevel(merged.level);
+    merged.sp = Math.max(0, totalSpDue - calcSpent);
   }
 
-  merged.ownerUid = uid || (localProf ? localProf.ownerUid : null);
+  // Gwarancja minimalnego bilansu SP wynikającego z poziomu
+  const totalSpDue = calculateTotalSpForLevel(merged.level);
+  const minExpectedSp = Math.max(0, totalSpDue - calcSpent);
+  if (typeof merged.sp !== 'number' || isNaN(merged.sp) || merged.sp < minExpectedSp) {
+    merged.sp = minExpectedSp;
+  }
+
+  merged.ownerUid = uid || null;
   merged.updatedAt = Math.max(localUp, cloudUp, Date.now());
   merged.resetVersion = RESET_VERSION;
 
+  // Zapis do localStorage z poprawną sumą kontrolną
   try {
     localStorage.setItem(PLAYER_PROFILE_KEY, encodeProfileEnvelope(merged));
-    safeSetStorage('CYBERPONG_PROFILE_JSON', JSON.stringify(merged));
     if (merged.nick) {
       myName = merged.nick;
       localStorage.setItem(NICK_STORAGE_KEY, merged.nick);
       localStorage.setItem('CYBERPONG_CURRENT_USER', merged.nick);
     }
-    if (merged.nick && merged.nick !== 'GRACZ') {
-      saveAccountToLocalDb(merged);
-    }
   } catch (e) {}
 
-  if (forceCloudWrite || !fromSnapshot) {
+  // Jeśli w dokumencie w Firestore brakuje jeszcze pól opcji administratora lub wartości uległy wyrównaniu
+  if (forceCloudWrite || merged.exp !== cloudProf.exp || merged.level !== cloudProf.level) {
+    syncProfileToCloud(merged);
+  } else if (!fromSnapshot) {
     syncProfileToCloud(merged);
   }
 
@@ -4382,49 +4299,29 @@ function initAccountSystem() {
     fbAuth.onAuthStateChanged(user => {
       isAuthFirstCheckDone = true;
       if (unsubsDoc) {
-        try { unsubsDoc(); } catch (e) {}
+        unsubsDoc();
         unsubsDoc = null;
       }
       if (user) {
-        // Upewnij się, że lokalny profil natychmiast odpowiada zalogowanemu użytkownikowi Firebase
-        let activeProf = getPlayerProfile();
-        if (!activeProf || activeProf.nick === 'GRACZ' || (activeProf.ownerUid && activeProf.ownerUid !== user.uid)) {
-          const userNick = user.displayName || localStorage.getItem('CYBERPONG_CURRENT_USER') || localStorage.getItem('CYBERPONG_NICK') || '';
-          let loaded = loadAccountFromLocalDb(userNick, user.uid);
-          if (loaded) {
-            savePlayerProfile(loaded);
-            applyStatsToLocalPlayer();
-            updateAccountUI();
-          }
-        }
-
+        // Użytkownik jest zalogowany na swoje konto Firebase
         if (fbDb) {
-          try {
-            unsubsDoc = fbDb.collection('players').doc(user.uid).onSnapshot(snap => {
-              if (snap && snap.exists) {
-                const cloudData = snap.data();
-                applyCloudProfileToLocal(cloudData, user.uid, true);
-              } else if (snap && !snap.exists) {
-                let existing = loadAccountFromLocalDb(user.displayName || '', user.uid) || getPlayerProfile();
-                if (!existing || existing.nick === 'GRACZ') {
-                  existing = createDefaultProfile(user.displayName || 'GRACZ');
-                  existing.ownerUid = user.uid;
-                  existing.resetVersion = RESET_VERSION;
-                }
-                syncProfileToCloud(existing);
-              }
-            }, err => {
-              console.warn('☁️ [Firestore] Snapshot wyłączony (offline lub brak uprawnień):', err ? err.message : err);
-              if (unsubsDoc) {
-                try { unsubsDoc(); } catch (_) {}
-                unsubsDoc = null;
-              }
-            });
-          } catch (e) {
-            console.warn('Could not attach Firestore listener:', e);
-          }
+          unsubsDoc = fbDb.collection('players').doc(user.uid).onSnapshot(snap => {
+            if (snap && snap.exists) {
+              const cloudData = snap.data();
+              applyCloudProfileToLocal(cloudData, user.uid, true);
+
+            } else if (snap && !snap.exists) {
+              // Nowy dokument gracza w chmurze - wyślij czysty profil początkowy
+              const freshProf = createDefaultProfile(user.displayName || 'GRACZ');
+              fbDb.collection('players').doc(user.uid).set(cloudSafeProfile(freshProf)).catch(console.warn);
+              applyCloudProfileToLocal(freshProf, user.uid, true);
+            }
+          }, err => {
+            console.warn('Auth state realtime snapshot error:', err);
+          });
         }
       } else {
+        // Użytkownik nie jest zalogowany w Firebase
         const local = getPlayerProfile();
         if (local && (local.isAdmin || local.adminToken)) {
           local.isAdmin = false;
@@ -4745,44 +4642,38 @@ async function adminWipeAllPlayersToLevel1() {
     return;
   }
 
-  showBanner('⏳ Resetowanie postępu kont...', '#00f0ff', 60);
+  showBanner('⏳ Resetowanie postępu wszystkich kont w chmurze...', '#00f0ff', 60);
   try {
-    if (fbDb) {
-      try {
-        const pageSize = 400;
-        let lastDoc = null;
-        let count = 0;
-        while (true) {
-          let query = fbDb.collection('players').orderBy(firebase.firestore.FieldPath.documentId()).limit(pageSize);
-          if (lastDoc) query = query.startAfter(lastDoc);
-          const snap = await query.get();
-          if (snap.empty) break;
-          const batch = fbDb.batch();
-          snap.forEach(docSnap => {
-            const data = docSnap.data() || {};
-            const cleanUpdate = {
-              level: 1,
-              exp: 0,
-              sp: START_SP,
-              spentSp: 0,
-              freeResets: 1,
-              talents: { root: true },
-              allTalents: false,
-              stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
-              resetVersion: RESET_VERSION,
-              updatedAt: Date.now()
-            };
-            if (typeof data.nick === 'string') cleanUpdate.nick = data.nick.slice(0, 12);
-            batch.set(docSnap.ref, cleanUpdate, { mergeFields: Object.keys(cleanUpdate) });
-          });
-          await batch.commit();
-          count += snap.size;
-          lastDoc = snap.docs[snap.docs.length - 1];
-          if (snap.size < pageSize) break;
-        }
-      } catch (cloudErr) {
-        console.warn('Reset chmury pominięty (brak uprawnień/offline):', cloudErr ? cloudErr.message : cloudErr);
-      }
+    const pageSize = 400;
+    let lastDoc = null;
+    let count = 0;
+    while (true) {
+      let query = fbDb.collection('players').orderBy(firebase.firestore.FieldPath.documentId()).limit(pageSize);
+      if (lastDoc) query = query.startAfter(lastDoc);
+      const snap = await query.get();
+      if (snap.empty) break;
+      const batch = fbDb.batch();
+      snap.forEach(docSnap => {
+        const data = docSnap.data() || {};
+        const cleanUpdate = {
+          level: 1,
+          exp: 0,
+          sp: START_SP,
+          spentSp: 0,
+          freeResets: 1,
+          talents: { root: true },
+          stats: { matches: 0, wins: 0, goals: 0, wallRecord: 0 },
+          resetVersion: RESET_VERSION,
+          updatedAt: Date.now()
+        };
+        if (typeof data.nick === 'string') cleanUpdate.nick = data.nick.slice(0, 12);
+        // mergeFields nadpisuje całe pola (talents, stats), ale zostawia nick i flagi administratora.
+        batch.set(docSnap.ref, cleanUpdate, { mergeFields: Object.keys(cleanUpdate) });
+      });
+      await batch.commit();
+      count += snap.size;
+      lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.size < pageSize) break;
     }
 
     prof.level = 1;
@@ -4791,7 +4682,6 @@ async function adminWipeAllPlayersToLevel1() {
     prof.spentSp = 0;
     prof.freeResets = 1;
     prof.talents = { root: true };
-    prof.allTalents = false;
     prof.stats = { matches: 0, wins: 0, goals: 0, wallRecord: 0 };
     safeSetStorage(WALL_RECORD_KEY, '0');
     prof.resetVersion = RESET_VERSION;
@@ -4800,17 +4690,15 @@ async function adminWipeAllPlayersToLevel1() {
     applyStatsToLocalPlayer();
     updateAccountUI();
     renderSkillTreeGraph();
-    const tAll = document.getElementById('admToggleAllTalents');
-    if (tAll) tAll.checked = false;
 
     SFX.play('upgrade');
     triggerShake(10, 5);
-    showBanner('💥 Zresetowano postęp profilu i drzewko talentów (LVL 1, ' + START_SP + ' SP).', '#00ff88', 90);
-    alert('✓ Gotowe!\n\nZresetowano postęp: Poziom 1, 0 EXP, ' + START_SP + ' SP, czyste drzewko talentów i wyzerowane statystyki.\n\nNick oraz uprawnienia administratora zostały zachowane.');
+    showBanner('💥 Zresetowano postęp ' + count + ' kont (LVL 1, ' + START_SP + ' SP).', '#00ff88', 90);
+    alert('✓ Gotowe!\n\nZresetowano postęp ' + count + ' kont: Poziom 1, 0 EXP, ' + START_SP + ' SP, czyste drzewko i wyzerowane statystyki.\n\nNicki oraz uprawnienia administratora zostały zachowane.');
   } catch (err) {
     console.error('Błąd resetowania bazy:', err);
-    showBanner('❌ Błąd podczas operacji!', '#ff0055', 70);
-    alert('Błąd resetowania: ' + (err.message || err));
+    showBanner('❌ Błąd podczas operacji w Firestore!', '#ff0055', 70);
+    alert('Błąd resetowania bazy: ' + (err.message || err));
   }
 }
 // Zamykanie modali po kliknięciu w tło poza okienkiem
@@ -4877,250 +4765,68 @@ function handleTalentNodeClick(nodeId) {
   }
 
   // 4. Sukces - zakup talentu
-  buyTalent(node);
+  buyTalent(node.id);
 }
 
-function getCalculatedSpentSp(acc) {
-  if (!acc || !acc.talents) return 0;
-  let spent = 0;
-  for (const key in acc.talents) {
-    if (key !== 'root' && acc.talents[key] && SKILL_TREE_NODES[key]) {
-      spent += Number(SKILL_TREE_NODES[key].cost) || 0;
-    }
-  }
-  return spent;
-}
-
-function normalizeTalentEconomy(acc) {
-  if (!acc) return null;
-  if (!acc.talents || typeof acc.talents !== 'object') acc.talents = { root: true };
-  acc.talents.root = true;
-
-  // Legacy IDs are migrated before calculating the balance.
-  for (const key in SKILL_TREE_NODES) {
-    const node = SKILL_TREE_NODES[key];
-    if (!node.legacyIds) continue;
-    for (const legacyId of node.legacyIds) {
-      if (acc.talents[legacyId]) acc.talents[node.id] = true;
-    }
-  }
-
-  const spent = getCalculatedSpentSp(acc);
-  const level = getLevelProgress(acc.exp || 0).level;
-  acc.level = level;
-  acc.spentSp = spent;
-
-  // Never let a stale cloud/local value remove SP earned by the current level.
-  const earned = calculateTotalSpForLevel(level);
-  const minimumAvailable = Math.max(0, earned - spent);
-  const currentSp = Number(acc.sp);
-  acc.sp = Number.isFinite(currentSp) ? Math.max(currentSp, minimumAvailable) : minimumAvailable;
-  return acc;
-}
-
-
-
-// ===== TALENT CLOUD SYNC STATE =====
-const PENDING_TALENT_SYNC_KEY = "pingpong_pending_talent_sync";
-
-function markPendingTalentSync(acc) {
-  try {
-    localStorage.setItem(PENDING_TALENT_SYNC_KEY, JSON.stringify({
-      uid: acc?.uid || acc?.userId || null,
-      profile: JSON.parse(JSON.stringify(acc)),
-      savedAt: Date.now()
-    }));
-  } catch (e) {
-    console.warn("[Talent] Could not mark pending sync:", e);
-  }
-}
-
-function clearPendingTalentSync() {
-  try { localStorage.removeItem(PENDING_TALENT_SYNC_KEY); } catch (_) {}
-}
-
-async function flushPendingTalentSync(account) {
-  try {
-    const raw = localStorage.getItem(PENDING_TALENT_SYNC_KEY);
-    if (!raw) return false;
-    const pending = JSON.parse(raw);
-    if (!pending?.profile) return false;
-    if (!pending.profile.resetVersion || pending.profile.resetVersion < RESET_VERSION) {
-      clearPendingTalentSync();
-      return false;
-    }
-
-    const currentUid = account?.uid || account?.userId || null;
-    const pendingUid = pending.uid || null;
-
-    // Never send another user's pending profile into the current account.
-    if (pendingUid && currentUid && pendingUid !== currentUid) return false;
-
-    const profile = {
-      ...pending.profile,
-      ...(account || {}),
-      talents: pending.profile.talents,
-      sp: pending.profile.sp,
-      spentSp: pending.profile.spentSp,
-      updatedAt: Math.max(
-        Number(pending.profile.updatedAt || 0),
-        Number(account?.updatedAt || 0)
-      )
-    };
-
-    if (typeof savePlayerProfile === "function") {
-      await Promise.resolve(savePlayerProfile(profile));
-    } else if (typeof syncProfileToCloud === "function") {
-      await Promise.resolve(syncProfileToCloud(profile));
-    } else {
-      return false;
-    }
-
-    clearPendingTalentSync();
-    return true;
-  } catch (e) {
-    console.warn("[Talent] Pending cloud sync failed:", e);
-    return false;
-  }
-}
-
-// ===== TALENT/FIREBASE TRANSACTIONAL SAVE =====
-function getTalentCost(node) {
-    return Number(node?.cost ?? node?.spCost ?? node?.price ?? 1);
-}
-
-function getTalentState(acc) {
-    if (!acc.talents || typeof acc.talents !== "object") acc.talents = {};
-    acc.talents.root = true;
-    return acc.talents;
-}
-
-function talentSnapshot(acc) {
-    const talents = getTalentState(acc);
-    return JSON.parse(JSON.stringify(talents));
-}
-
-async function saveTalentPurchaseToCloud(acc, nodeId, nextTalents, nextSp, nextSpentSp) {
-    // Prefer the game's existing cloud save function if available.
-    // The important part is that we pass a complete, immutable snapshot
-    // instead of allowing an old onSnapshot value to overwrite the purchase.
-    const payload = {
-        ...acc,
-        talents: nextTalents,
-        sp: nextSp,
-        spentSp: nextSpentSp,
-        updatedAt: Date.now()
-    };
-
-    if (typeof syncProfileToCloud === "function") {
-        await syncProfileToCloud(payload);
-        return true;
-    }
-    if (typeof savePlayerProfile === "function") {
-        const result = await savePlayerProfile(payload);
-        if (result === false) throw new Error("savePlayerProfile returned false");
-        return true;
-    }
-    if (typeof saveProfileToCloud === "function") {
-        await saveProfileToCloud(payload);
-        return true;
-    }
-
-    // No cloud function exposed: local save is still valid.
-    return false;
-}
-
-function queueTalentCloudSync(acc) {
-    try {
-        const copy = JSON.parse(JSON.stringify(acc));
-        copy.updatedAt = Date.now();
-        if (typeof savePlayerProfile === "function") {
-            return Promise.resolve(savePlayerProfile(copy));
-        }
-        if (typeof syncProfileToCloud === "function") {
-            return Promise.resolve(syncProfileToCloud(copy));
-        }
-    } catch (e) {
-        console.warn("[Talent] deferred cloud sync failed:", e);
-    }
-    return Promise.resolve(false);
-}
-
-async function buyTalent(nodeOrId) {
-  const node = (typeof nodeOrId === 'string')
-    ? SKILL_TREE_NODES[nodeOrId]
-    : nodeOrId;
-
-  if (!node || !node.id) {
-    console.warn('[Talent] Nieprawidłowy węzeł talentu:', nodeOrId);
-    return false;
-  }
-
+function buyTalent(nodeId) {
+  const node = SKILL_TREE_NODES[nodeId];
+  if (!node) return;
   const acc = getCurrentAccount();
-  if (!acc) return false;
+  if (!acc) return;
+  if (isTalentNodeUnlocked(node.id, acc)) return;
+  if (node.req && !isTalentNodeUnlocked(node.req, acc)) return;
+  if ((acc.sp || 0) < node.cost) return;
 
-  normalizeTalentEconomy(acc);
-
-  const id = String(node.id);
-  const cost = Number(node.cost) || 0;
-  const talents = getTalentState(acc);
-
-  if (id === 'root' || talents[id] === true) {
-    return false;
-  }
-
-  // Wymóg wcześniejszego odblokowania w gałęzi
-  if (node.req && !isTalentNodeUnlocked(node.req, acc)) {
-    return false;
-  }
-
-  const currentSp = Number(acc.sp || 0);
-  if (currentSp < cost) {
-    return false;
-  }
-
-  // Tworzenie nowego stanu drzewka
-  const nextTalents = JSON.parse(JSON.stringify(talents));
-  nextTalents[id] = true;
-
-  let nextSpentSp = 0;
-  for (const key of Object.keys(nextTalents)) {
-    if (key !== 'root' && nextTalents[key] === true && SKILL_TREE_NODES[key]) {
-      nextSpentSp += Number(SKILL_TREE_NODES[key].cost) || 0;
-    }
-  }
-
-  acc.talents = nextTalents;
-  acc.sp = Math.max(0, currentSp - cost);
-  acc.spentSp = nextSpentSp;
+  acc.sp -= node.cost;
+  if (!acc.talents) acc.talents = {};
+  acc.talents[node.id] = true;
+  acc.spentSp = (acc.spentSp || 0) + node.cost;
   acc.updatedAt = Date.now();
 
-  // Natychmiastowy zapis lokalny i synchronizacja z chmurą
-  try {
-    savePlayerProfile(acc);
-    clearPendingTalentSync();
-  } catch (e) {
-    console.warn('[Talent] Błąd zapisu profilu:', e);
-    markPendingTalentSync(acc);
-  }
-
-  // Aktualizacja statystyk i interfejsu
+  saveCurrentAccount(acc);
+  if (typeof SFX !== 'undefined') SFX.play('upgrade');
+  triggerShake(5, 3);
+  renderSkillTreeGraph();
   applyStatsToLocalPlayer();
   updateAccountUI();
 
-  if (typeof renderSkillTreeGraph === 'function') {
-    renderSkillTreeGraph();
+  showBanner(`🌟 ODBLOKOWANO: ${node.title || node.name}! (${node.cost} SP)`, '#00ff88', 80);
+}
+
+function handleResetTalents() {
+  const acc = getCurrentAccount();
+  if (!acc) return;
+
+  const spent = Math.max(0, Number(acc.spentSp) || 0);
+  const currentSp = Math.max(0, Number(acc.sp) || 0);
+  // Zwracamy wyłącznie SP faktycznie wydane na talenty. Nie używamy
+  // puli SP należnej za poziom, bo reset można byłoby powtarzać i
+  // wielokrotnie przyznawać te same punkty.
+  const refundSp = spent;
+
+  const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
+  if (!hasTalents && spent === 0) {
+    showBanner('Wszystkie punkty SP są już gotowe do rozdania!', '#00d2ff', 50);
+    return;
   }
 
-  if (typeof SFX !== 'undefined' && SFX.play) {
-    SFX.play('upgrade');
-  }
-  if (typeof triggerShake === 'function') {
-    triggerShake(4, 2);
-  }
-  showBanner(`⚡ Odblokowano talent: ${node.title || node.name || id}!`, '#00ff88', 70);
+  const confirmMsg = `Czy na pewno chcesz zresetować drzewko specjalizacji?\n\n• Zwrócone zostanie: ${refundSp} SP (wydane na talenty)\n• Zachowasz obecne ${currentSp} SP\n• Wszystkie ulepszenia zostaną zresetowane\n\nZresetować teraz?`;
+  if (typeof confirm === 'function' && !confirm(confirmMsg)) return;
 
-  return true;
+  // Reset talentów bez tworzenia nowych punktów SP.
+  acc.talents = { root: true };
+  acc.spentSp = 0;
+  acc.sp = currentSp + refundSp;
+  acc.updatedAt = Date.now();
+
+  saveCurrentAccount(acc);
+  if (typeof SFX !== 'undefined') SFX.play('upgrade');
+  triggerShake(5, 3);
+  renderSkillTreeGraph();
+  applyStatsToLocalPlayer();
+  updateAccountUI();
+
+  showBanner(`Drzewko specjalizacji zresetowane! Dostępne: ${refundSp} SP do ponownego wydania.`, '#00ff88', 80);
 }
 
 let currentTreeFilter = 'speed';
@@ -5148,10 +4854,11 @@ function formatTalentBenefit(text) {
 }
 
 function renderSkillTreeGraph() {
-  const acc = normalizeTalentEconomy(getCurrentAccount());
+  const acc = getCurrentAccount();
   const container = document.getElementById('simpleTreeContainer');
   const spCounter = document.getElementById('modalSpCounter');
   const spentCounter = document.getElementById('modalSpentCounter');
+  const resetBtn = document.getElementById('btnTreeReset');
   const admSpBtn = document.getElementById('btnTreeAdminSp');
 
   if (admSpBtn) {
@@ -5175,6 +4882,16 @@ function renderSkillTreeGraph() {
 
   if (spCounter) spCounter.textContent = `⚡ ${acc.sp || 0} SP`;
   if (spentCounter) spentCounter.textContent = `Wydano: ${acc.spentSp || 0} / ${TOTAL_TREE_SP_COST} SP`;
+
+  // Aktualizacja przycisku darmowego resetu (zawsze dostępny i darmowy, gdy cokolwiek odblokowano)
+  if (resetBtn) {
+    const hasTalents = Object.keys(acc.talents || {}).some(k => k !== 'root' && acc.talents[k]);
+    const canReset = hasTalents || (acc.spentSp || 0) > 0;
+    resetBtn.innerHTML = `🔄 RESET DRZEWKA (DARMOWY)`;
+    resetBtn.disabled = !canReset;
+    resetBtn.className = 'btn-tree-reset' + (canReset ? ' available' : ' disabled');
+    resetBtn.title = canReset ? `Zresetuj wszystkie talenty i odzyskaj wydane punkty SP (${acc.spentSp || 0} SP)` : 'Wydaj punkty SP na talenty, aby móc zresetować drzewko';
+  }
 
   // Aktualizacja zakładek (dashboard 4 gałęzi)
   const tabs = document.querySelectorAll('.tree-nav-tab');
@@ -5301,6 +5018,7 @@ function renderTalentTreeUI() {
 
 window.buyTalent = buyTalent;
 window.handleTalentNodeClick = handleTalentNodeClick;
+window.handleResetTalents = handleResetTalents;
 window.filterTreeBranch = filterTreeBranch;
 window.openTalentTreeModal = openTalentTreeModal;
 window.closeTalentTreeModal = closeTalentTreeModal;
@@ -6223,13 +5941,7 @@ function restartCurrentMatch() {
   }
 }
 function selectControl(mode) {
-  if (mode !== 'mouse' && mode !== 'keyboard') {
-    mode = 'keyboard';
-  }
   controlMode = mode;
-  try {
-    localStorage.setItem(CONTROL_MODE_STORAGE_KEY, mode);
-  } catch (e) {}
   const kbEl = document.getElementById('ctrlKeyboard');
   const msEl = document.getElementById('ctrlMouse');
   if (kbEl) {
@@ -6362,7 +6074,7 @@ function applyStatsToLocalPlayer() {
   p.hasPhantomStep = isTalentNodeUnlocked('spd_5', acc);
   p.hasFastDash = isTalentNodeUnlocked('spd_2', acc);
   if (p.hasPhantomStep) {
-    staticSpeedBonus = 0.25; // +10% (spd_1) + +15% (spd_5) = +25%
+    staticSpeedBonus = 0.30; // +10% (spd_1) + +20% (spd_5) = +30%
   } else if (isTalentNodeUnlocked('spd_1', acc)) {
     staticSpeedBonus = 0.10; // +10%
   }
@@ -6529,7 +6241,7 @@ function startWallArcade() {
   is2v2 = false;
   isWallArcade = true;
   wallScore = 0;
-  wallRecordAtStart = parseInt(safeGetStorage(WALL_RECORD_KEY, '0'), 10) || 0;
+  wallRecordAtStart = parseInt(safeGetStorage(WALL_RECORD_KEY, '0'), 10);
   hasBeatenWallRecord = false;
   localPaddleId = 0;
   startGame();
@@ -7835,7 +7547,6 @@ function triggerLocalDash(myPaddle) {
   if ((myPaddle.dashTimer === 0 || hasNoCd) && (myPaddle.stamina >= dashCost || myPaddle.infiniteStamina || myPaddle.freeDashReady)) {
     if (myPaddle.freeDashReady) {
       myPaddle.freeDashReady = false;
-      myPaddle.rallyHits = 0;
       addFloatingText(myPaddle.x, myPaddle.y - 14, '⚡ OVERDRIVE DASH!', '#00d2ff');
     } else if (!myPaddle.infiniteStamina) {
       myPaddle.stamina -= dashCost;
@@ -7997,7 +7708,7 @@ function predictLocalGuestBounce(myPaddle) {
 
   // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
   if (myPaddle.hasDashSurge && myPaddle.dashTimer > 0) {
-    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, Math.max(BALL.speed * 1.18, 9.0));
+    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
     addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
@@ -8007,7 +7718,7 @@ function predictLocalGuestBounce(myPaddle) {
   // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
   if (myPaddle.hasSpeedBurst) {
     myPaddle.rallyHits = (myPaddle.rallyHits || 0) + 1;
-    if (myPaddle.rallyHits >= 5 && !myPaddle.freeDashReady) {
+    if (myPaddle.rallyHits >= 4 && !myPaddle.freeDashReady) {
       myPaddle.freeDashReady = true;
       addFloatingText(myPaddle.x, myPaddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(myPaddle.x + myPaddle.w / 2, myPaddle.y + myPaddle.h / 2, '#00d2ff');
@@ -8065,19 +7776,19 @@ function predictLocalGuestBounce(myPaddle) {
 
   let warmupBonus = 0;
   if (myPaddle.hasWarmup && myPaddle.warmupStacks > 0) {
-    warmupBonus = myPaddle.warmupStacks * 0.07;
+    warmupBonus = myPaddle.warmupStacks * 0.08;
   }
   const effectiveSmashMult = myPaddle.smashMult + warmupBonus;
 
   // pwr_5 Meteor (przy 3 stosach, 200 km/h = 16.0 px/f, ogień, spowolnienie 30% na 1.2s)
   const isMeteor = isSmash && myPaddle.hasMeteor && myPaddle.warmupStacks === 3;
   if (isMeteor) {
-    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, 14.8);
+    BALL.speed = ABSOLUTE_MAX_BALL_SPEED;
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    triggerHitStop(3);
-    triggerShake(12, 7);
+    triggerHitStop(4);
+    triggerShake(16, 9);
     SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
@@ -8872,7 +8583,7 @@ function handlePaddleHit(paddle, dir) {
 
   // spd_3: Kinetyczny Zryw (uderzenie podczas dasha dodaje jej natychmiastowe +25% prędkości)
   if (paddle.hasDashSurge && paddle.dashTimer > 0) {
-    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, Math.max(BALL.speed * 1.18, 9.0));
+    BALL.speed = Math.max(BALL.speed * 1.25, 9.5);
     addShockwave(BALL.x, BALL.y, '#00d2ff');
     addParticles(BALL.x, BALL.y, '#00d2ff', 16);
     addFloatingText(BALL.x, BALL.y - 12, '🚀 +25% SPD!', '#00d2ff');
@@ -8882,7 +8593,7 @@ function handlePaddleHit(paddle, dir) {
   // spd_4: Tryb Overdrive (ładowanie pędu w wymianie - przy 4 odbiciach darmowy dash)
   if (paddle.hasSpeedBurst) {
     paddle.rallyHits = (paddle.rallyHits || 0) + 1;
-    if (paddle.rallyHits >= 5 && !paddle.freeDashReady) {
+    if (paddle.rallyHits >= 4 && !paddle.freeDashReady) {
       paddle.freeDashReady = true;
       addFloatingText(paddle.x, paddle.y - 12, '⚡ OVERDRIVE!', '#00d2ff');
       addShockwave(paddle.x + paddle.w / 2, paddle.y + paddle.h / 2, '#00d2ff');
@@ -8941,7 +8652,7 @@ function handlePaddleHit(paddle, dir) {
 
   let warmupBonus = 0;
   if (paddle.hasWarmup && paddle.warmupStacks > 0) {
-    warmupBonus = paddle.warmupStacks * 0.07;
+    warmupBonus = paddle.warmupStacks * 0.08;
   }
   const effectiveSmashMult = paddle.smashMult + warmupBonus;
 
@@ -8949,12 +8660,12 @@ function handlePaddleHit(paddle, dir) {
   const isMeteor = isSmash && paddle.hasMeteor && paddle.warmupStacks === 3;
 
   if (isMeteor) {
-    BALL.speed = Math.min(ABSOLUTE_MAX_BALL_SPEED, 14.8);
+    BALL.speed = ABSOLUTE_MAX_BALL_SPEED;
     BALL.isMeteor = true;
     BALL.isSmashed = true;
     BALL.plasmaBurn = true;
-    triggerHitStop(3);
-    triggerShake(12, 7);
+    triggerHitStop(4);
+    triggerShake(16, 9);
     SFX.play('heavyHit');
     addShockwave(BALL.x, BALL.y, '#ff4500');
     addParticles(BALL.x, BALL.y, '#ff4500', 30);
@@ -9051,12 +8762,11 @@ function onWallArcadeGameOver() {
   SFX.play('smash');
   triggerShake(18, 9);
 
-  const startRec = Number(wallRecordAtStart) || 0;
-  const isNewRec = wallScore > startRec && (startRec > 0 || wallScore >= 3);
-  if (wallScore > startRec) {
-    safeSetStorage(WALL_RECORD_KEY, String(wallScore));
+  const isNewRec = wallScore > wallRecordAtStart && (wallRecordAtStart > 0 || wallScore >= 3);
+  if (wallScore > wallRecordAtStart) {
+    safeSetStorage(WALL_RECORD_KEY, wallScore);
   }
-  const finalBest = Math.max(startRec, wallScore);
+  const finalBest = Math.max(wallRecordAtStart, wallScore);
 
   const modal = document.getElementById('victoryModal');
   const title = document.getElementById('winnerTitle');
@@ -9904,36 +9614,6 @@ document.addEventListener('click', e => {
 
 // Inicjalizacja trwałego systemu kont graczy i drzewka talentów
 initAccountSystem();
-try {
-  selectControl(controlMode);
-} catch (e) {}
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    try { selectControl(controlMode); } catch (_) {}
-  });
-}
-
-// ===== TALENT SYNC AFTER LOGIN =====
-const PENDING_TALENT_AUTH_HOOK = true;
-try {
-  if (typeof firebase !== "undefined" && firebase.auth) {
-    firebase.auth().onAuthStateChanged(async function(user) {
-      if (!user) return;
-      try {
-        const acc = (typeof getCurrentAccount === "function") ? getCurrentAccount() : null;
-        await flushPendingTalentSync({
-          ...(acc || {}),
-          uid: user.uid
-        });
-      } catch (e) {
-        console.warn("[Talent] post-login sync failed:", e);
-      }
-    });
-  }
-} catch (e) {
-  console.warn("[Talent] auth sync hook unavailable:", e);
-}
-
 </script>
 </body>
 </html>

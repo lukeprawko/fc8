@@ -1,0 +1,15 @@
+PROPRIETARY SOURCE CODE LICENSE
+Copyright (c) 2026 Nova Games / CyberFC Studio. Wszelkie prawa zastrzeżone.
+
+Niniejsze oprogramowanie, silnik gry, protokoły sieciowe, modele, dźwięki oraz wszelkie
+powiązane zasoby stanowią wyłączną własność intelektualną autorów (All Rights Reserved).
+
+BEZWZGLĘDNIE ZABRANIA SIĘ:
+1. Kopiowania, dekompilacji, inżynierii wstecznej, modyfikowania lub redystrybucji
+   kodu źródłowego, skompilowanych skryptów oraz zasobów graficznych i dźwiękowych.
+2. Tworzenia dzieł pochodnych lub uruchamiania nieautoryzowanych serwerów gry (emulacji backendu).
+3. Usuwania lub modyfikowania cyfrowych znaków wodnych, sum kontrolnych oraz nagłówków
+   prawnych wstrzykniętych w pliki wykonywalne i protokoły WebSocket.
+
+Identyfikator autorski projektu: CF28-ORIGIN-SEC-SIG-2026-X779
+Unikalny cyfrowy odcisk palca: SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855

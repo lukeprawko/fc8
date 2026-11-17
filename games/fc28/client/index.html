@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CYBERFC 28 — Zabezpieczona Piłka Nożna 3D Online | Nova Games</title>
+  <meta name="description" content="Autorytatywny symulator piłki nożnej 3D w chmurze Cloudflare. Paczki kart, rywalizacja 1v1 i 2v2 z anty-cheatem.">
+  <link rel="icon" type="image/jpeg" href="/assets/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Cloudflare Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root {
+      --bg: #04060c;
+      --panel: rgba(12, 17, 29, 0.94);
+      --card: rgba(20, 28, 46, 0.88);
+      --p1: #00f0ff;
+      --p2: #ff0055;
+      --gold: #f5b041;
+      --green: #00e676;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: var(--bg); color: #f0f6fc;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    #canvasContainer {
+      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;
+    }
+
+    /* HUD */
+    #matchHud {
+      position: absolute; top: 0; left: 0; right: 0; height: 70px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 24px; z-index: 10; pointer-events: none;
+      background: linear-gradient(180deg, rgba(4,6,12,0.85) 0%, transparent 100%);
+    }
+    .hud-box {
+      background: var(--panel); border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px; padding: 6px 16px; font-family: 'Orbitron', sans-serif;
+      font-size: 20px; font-weight: 800; color: #fff; pointer-events: auto;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+    #hudTimer { color: var(--gold); }
+    #hudPing { font-size: 13px; color: var(--green); margin-left: 10px; }
+    .charge-track {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      width: 280px; height: 8px; background: rgba(0,0,0,0.6);
+      border: 1px solid #334; border-radius: 4px; overflow: hidden; z-index: 10;
+    }
+    #hudChargeBar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f0ff, #ff0055); transition: width 0.05s linear; }
+
+    /* Banery zdarzeń */
+    #hudBanner {
+      position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+      display: none; flex-direction: column; align-items: center;
+      background: rgba(4, 6, 12, 0.95); border: 2px solid var(--p1);
+      border-radius: 20px; padding: 24px 48px; z-index: 20;
+      box-shadow: 0 0 35px var(--p1); text-align: center;
+    }
+    #hudBannerText { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 900; }
+    #hudBannerSub { font-size: 18px; color: #aebbd0; margin-top: 6px; }
+
+    /* Menu główne */
+    #mainMenu {
+      position: absolute; inset: 0; z-index: 30;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, rgba(12,17,29,0.85) 0%, rgba(4,6,12,0.98) 100%);
+    }
+    .logo-title {
+      font-family: 'Orbitron', sans-serif; font-size: 54px; font-weight: 900;
+      color: #fff; text-shadow: 0 0 25px var(--p1); letter-spacing: 2px;
+    }
+    .logo-sub { font-size: 14px; letter-spacing: 4px; color: var(--p1); margin-bottom: 30px; }
+    .menu-btn {
+      width: 280px; padding: 14px 20px; margin: 8px 0;
+      background: var(--card); border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 12px; color: #fff; font-family: 'Orbitron', sans-serif;
+      font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+    }
+    .menu-btn:hover {
+      background: var(--p1); color: #04060c; box-shadow: 0 0 20px var(--p1); transform: scale(1.03);
+    }
+
+    /* Modale */
+    .modal {
+      position: fixed; inset: 0; z-index: 50; display: none;
+      align-items: center; justify-content: center; background: rgba(0,0,0,0.8);
+    }
+    .modal-content {
+      background: var(--panel); border: 1px solid var(--p1); border-radius: 20px;
+      padding: 30px; width: 90%; max-width: 440px; box-shadow: 0 0 30px rgba(0,240,255,0.25);
+    }
+    .modal-input {
+      width: 100%; padding: 12px 14px; margin: 8px 0;
+      background: #080e1b; border: 1px solid #28334a; border-radius: 10px;
+      color: #fff; font-family: 'Orbitron', sans-serif; font-size: 13px;
+    }
+    .modal-input:focus { border-color: var(--p1); outline: none; }
+  </style>
+</head>
+<body>
+  <div id="canvasContainer"></div>
+
+  <!-- HUD meczu -->
+  <div id="matchHud" style="display:none;">
+    <div class="hud-box">
+      <span id="hudScore">0 : 0</span>
+    </div>
+    <div class="hud-box">
+      <span id="hudTimer">03:00</span>
+      <span id="hudPing">-- ms</span>
+    </div>
+  </div>
+  <div class="charge-track"><div id="hudChargeBar"></div></div>
+
+  <div id="hudBanner">
+    <div id="hudBannerText">GOOOOL!</div>
+    <div id="hudBannerSub">Bramka dla Cyber Niebieskich</div>
+  </div>
+
+  <!-- Menu Główne -->
+  <div id="mainMenu">
+    <div class="logo-title">CYBERFC 28</div>
+    <div class="logo-sub">AUTHORITATIVE CLOUD EDITION</div>
+    <button class="menu-btn" id="btnPlayOnline">⚡ GRAJ ONLINE</button>
+    <button class="menu-btn" id="btnPacks">📦 SKLEP Z PACZKAMI</button>
+    <button class="menu-btn" id="btnAccount">👤 MOJE KONTO</button>
+  </div>
+
+  <!-- Modal Logowania / Rejestracji -->
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <h2 style="font-family:'Orbitron'; color:var(--p1); margin-bottom:14px;" id="authModalTitle">Logowanie</h2>
+      <input class="modal-input" id="authUsername" placeholder="LOGIN (3-16 znaków)" autocomplete="username">
+      <input class="modal-input" id="authPassword" type="password" placeholder="HASŁO (min. 8 znaków)" autocomplete="current-password">
+      <div id="turnstileWidget" style="margin: 12px 0;"></div>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="menu-btn" style="width:50%;" id="btnAuthSubmit">ZALOGUJ</button>
+        <button class="menu-btn" style="width:50%; background:#28334a;" id="btnAuthToggle">REJESTRACJA</button>
+      </div>
+      <button class="menu-btn" style="width:100%; margin-top:8px; background:transparent; border-color:#445;" id="btnAuthClose">ZAMKNIJ</button>
+    </div>
+  </div>
+
+  <!-- Modal Otwierania Paczki -->
+  <div class="modal" id="packResultModal">
+    <div class="modal-content" style="text-align:center;">
+      <h3 style="font-family:'Orbitron'; color:var(--gold); margin-bottom:10px;">OTWARTO PACZKĘ!</h3>
+      <div style="font-size:48px; font-weight:900; font-family:'Orbitron'; color:var(--p1);" id="packCardOvr">89</div>
+      <div style="font-size:22px; font-weight:800; color:#fff;" id="packCardName">ALISSON BECKER</div>
+      <div style="font-size:14px; color:#889;" id="packCardRole">GK</div>
+      <div style="margin-top:15px; font-size:14px;" id="packCardInfo">Karta dodana do Twojego klubu!</div>
+      <button class="menu-btn" style="width:100%; margin-top:20px;" id="btnPackResultClose">SUPER!</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

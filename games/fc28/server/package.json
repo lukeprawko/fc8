@@ -1,0 +1,22 @@
+{
+  "name": "fc28-server",
+  "version": "1.0.0",
+  "description": "Autorytatywny backend Cloudflare Workers + Durable Objects + D1 + R2 dla gry CyberFC 28",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 execute fc28-db --local --file=./schema.sql",
+    "db:migrate:prod": "wrangler d1 execute fc28-db --remote --file=./schema.sql"
+  },
+  "dependencies": {
+    "@games/shared": "file:../../../packages/shared",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240923.0",
+    "typescript": "^5.4.5",
+    "wrangler": "^3.78.10"
+  }
+}

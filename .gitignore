@@ -1,15 +1,42 @@
-# Ignore uploader scripts and tokens
-uploader_config.json
-GitHubUploader.ps1
-
-# Ignore scratch files
-scratch/
-scratch_*.js
-generate_blender_scene.py
-starsze/
-
-# Node & IDE
+# Zależności i pakiety
 node_modules/
-.vscode/
+.pnp
+.pnp.js
+
+# Build i artefakty
+dist/
+build/
+out/
+.wrangler/
+.mf/
+
+# Pliki środowiskowe i sekrety (BEZWZGLĘDNY ZAKAZ COMMITOWANIA)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+wrangler.secrets.*
+
+# Logi
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Lokalne skrypty uploadera (zawierające tokeny użytkownika)
+GitHubUploader.*
+Uruchom-GitHub-Uploader.*
+
+# Edytor i system operacyjny
+.DS_Store
+Thumbs.db
 .idea/
-*.tmp
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

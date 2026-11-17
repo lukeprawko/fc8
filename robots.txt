@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /starsze/
+Disallow: /.github/
+
+Sitemap: https://novagames.pl/sitemap.xml
