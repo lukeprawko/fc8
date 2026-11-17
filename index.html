@@ -664,6 +664,44 @@ const WIP_COVER = `
     <rect x="20" y="20" width="400" height="220" rx="8" fill="none" stroke="#1e2433" stroke-width="1.5" stroke-dasharray="6 6"/>
   </svg>`;
 
+const STATKI_COVER = `
+  <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="stSea" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0c1a2b"/><stop offset="1" stop-color="#08101c"/>
+      </linearGradient>
+    </defs>
+    <rect width="440" height="260" fill="url(#stSea)"/>
+    <g stroke="#1e3a5a" stroke-width="1" opacity="0.8">
+      <path d="M0 40H440M0 80H440M0 120H440M0 160H440M0 200H440M0 240H440"/>
+      <path d="M40 0V260M80 0V260M120 0V260M160 0V260M200 0V260M240 0V260M280 0V260M320 0V260M360 0V260M400 0V260"/>
+    </g>
+    <g fill="#f59e0b" opacity="0.9">
+      <rect x="82" y="82" width="76" height="36" rx="8"/>
+      <rect x="242" y="162" width="116" height="36" rx="8" opacity="0.75"/>
+      <rect x="282" y="42" width="36" height="76" rx="8" opacity="0.6"/>
+    </g>
+    <g fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round">
+      <path d="M326 130l24 24M350 130l-24 24"/>
+    </g>
+    <circle cx="140" cy="180" r="8" fill="none" stroke="#7dd3fc" stroke-width="3"/>
+    <circle cx="140" cy="180" r="18" fill="none" stroke="#7dd3fc" stroke-width="1.5" opacity="0.5"/>
+  </svg>`;
+
+const ARENA_COVER = `
+  <svg class="art" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <rect width="440" height="260" fill="#120d0a"/>
+    <circle cx="220" cy="130" r="112" fill="none" stroke="#3a2412" stroke-width="2"/>
+    <circle cx="220" cy="130" r="80" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 8" opacity="0.7"/>
+    <circle cx="220" cy="130" r="48" fill="#1c130d" stroke="#f59e0b" stroke-width="2"/>
+    <path d="M220 18V60M220 200V242M108 130H150M290 130H332" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+    <circle cx="150" cy="80" r="9" fill="#10b981"/>
+    <circle cx="298" cy="178" r="9" fill="#ef4444"/>
+    <path d="M150 80L190 108" stroke="#10b981" stroke-width="2" stroke-dasharray="3 5" opacity="0.7"/>
+    <path d="M298 178L256 152" stroke="#ef4444" stroke-width="2" stroke-dasharray="3 5" opacity="0.7"/>
+    <circle cx="220" cy="130" r="8" fill="#f59e0b"/>
+  </svg>`;
+
 const ICONS = {
   play: `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`,
   lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
@@ -700,6 +738,24 @@ const GAMES = [
     tags: ['FPS', 'Akcja', 'Multiplayer'],
     image: 'assets/cover_cs.jpg',
     players: 'Wieloosobowa'
+  },
+  {
+    title: 'Statki',
+    url: 'statki1.html',
+    status: 'ready',
+    desc: 'Klasyczna gra w statki – rozstaw flotę, odgadnij pozycje przeciwnika i zatop wszystkie jednostki jako pierwszy.',
+    tags: ['Strategia', 'Planszowa', 'Klasyk'],
+    cover: STATKI_COVER,
+    players: '1 - 2 Graczy'
+  },
+  {
+    title: 'Arena',
+    url: 'arena.html',
+    status: 'ready',
+    desc: 'Dynamiczna arena walki, w której liczy się refleks i pozycjonowanie. Pokonaj rywali i zdobądź tytuł mistrza.',
+    tags: ['Arena', 'Akcja', 'PvP'],
+    cover: ARENA_COVER,
+    players: '1 - 2 Graczy'
   },
   {
     title: 'Astro Strike',
@@ -766,7 +822,7 @@ function renderGames() {
     if (ready) {
       card.innerHTML = `
         <div class="cover">
-          <img class="art" src="${esc(game.image)}" alt="${esc(game.title)}" loading="lazy">
+          ${game.cover ? game.cover : `<img class="art" src="${esc(game.image)}" alt="${esc(game.title)}" loading="lazy">`}
         </div>
 
         <div class="card-body">
