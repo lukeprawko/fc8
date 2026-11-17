@@ -21,10 +21,14 @@ export class ClubView {
    */
   public async openPack(tier: 'standard' | 'premium' | 'ultimate'): Promise<PackOpenResult | null> {
     const apiBase = import.meta.env.VITE_API_URL || '';
+    const token = localStorage.getItem('fc28_auth_token');
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${apiBase}/api/club/open-pack`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify({ tier })
       });
@@ -49,10 +53,14 @@ export class ClubView {
    */
   public async saveLineup(lineup: SquadLineup): Promise<boolean> {
     const apiBase = import.meta.env.VITE_API_URL || '';
+    const token = localStorage.getItem('fc28_auth_token');
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${apiBase}/api/club/lineup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify(lineup)
       });

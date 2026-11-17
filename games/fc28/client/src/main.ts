@@ -100,8 +100,11 @@ function setupUIHandlers() {
     if (mainMenu) mainMenu.style.display = 'none';
     if (matchHud) matchHud.style.display = 'flex';
 
+    // Pobranie zapisanego tokena sesji (jeśli gracz jest zalogowany)
+    const token = localStorage.getItem('fc28_auth_token');
+
     // Dołączenie do domyślnego pokoju w Durable Object
-    const ok = await client.connect('QUICK1');
+    const ok = await client.connect('QUICK1', token);
     if (ok) {
       client.sendReady(true);
     }
@@ -110,6 +113,15 @@ function setupUIHandlers() {
   btnPacks?.addEventListener('click', async () => {
     await club.openPack('ultimate');
   });
+
+  // Odświeżenie etykiety konta jeśli zalogowany
+  const savedUserJson = localStorage.getItem('fc28_user');
+  if (savedUserJson && btnAccount) {
+    try {
+      const u = JSON.parse(savedUserJson);
+      btnAccount.textContent = `👤 ${u.username} (${u.coins || 0} 🪙)`;
+    } catch {}
+  }
 
   btnAccount?.addEventListener('click', () => {
     if (authModal) authModal.style.display = 'flex';
@@ -148,13 +160,23 @@ function setupUIHandlers() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.token) {
+          localStorage.setItem('fc28_auth_token', data.token);
+        }
+        if (data.user) {
+          localStorage.setItem('fc28_user', JSON.stringify(data.user));
+          if (btnAccount) {
+            btnAccount.textContent = `👤 ${data.user.username} (${data.user.coins} 🪙)`;
+          }
+        }
         alert(data.message);
         if (authModal) authModal.style.display = 'none';
       } else {
         alert(data.message || 'Błąd uwierzytelniania');
       }
-    } catch {
-      alert('Błąd sieciowy podczas autoryzacji');
+    } catch (err: any) {
+      console.error('Błąd autoryzacji:', err);
+      alert('Błąd sieciowy podczas autoryzacji: ' + (err?.message || err));
     }
   });
 
