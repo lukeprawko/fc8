@@ -30,12 +30,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Test and Build FC28 2.0
+        run: |
+          if [ -d "fc28 2.0" ]; then
+            cd "fc28 2.0"
+            npm ci
+            npm test
+            cd ..
+          fi
+
       - name: Stage public site
         run: |
           mkdir -p _site/assets
           cp index.html pingpong.html fc28.html _site/
+          [ -f fc28-2.0.html ] && cp fc28-2.0.html _site/ || true
           [ -f statki.html ] && cp statki.html _site/ || true
           [ -f stickmanwalki.html ] && cp stickmanwalki.html _site/ || true
           [ -f kaczki.html ] && cp kaczki.html _site/ || true
@@ -47,11 +64,20 @@ jobs:
           if [ -d fc28 ]; then
             cp -R fc28 _site/fc28
           fi
+          if [ -d "fc28 2.0" ]; then
+            mkdir -p "_site/fc28 2.0" "_site/fc28-2.0" "_site/fc28_2.0"
+            cp -R "fc28 2.0"/* "_site/fc28 2.0/"
+            rm -rf "_site/fc28 2.0/node_modules"
+            cp -R "_site/fc28 2.0"/* "_site/fc28-2.0/"
+            cp -R "_site/fc28 2.0"/* "_site/fc28_2.0/"
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: '_site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
