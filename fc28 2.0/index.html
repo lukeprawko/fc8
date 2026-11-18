@@ -6,8 +6,917 @@
 <title>CYBERFC 28 — ULTIMATE 3D SOCCER</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
+
+  /* =========================================================
+     CYBERFC 28 — EA SPORTS FC ULTIMATE TEAM AAA DESIGN SYSTEM
+     ========================================================= */
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+  :root {
+    --bg-pitch: #06080e;
+    --panel-dark: rgba(11, 16, 28, 0.94);
+    --panel-border: rgba(255, 255, 255, 0.09);
+    --card-surface: rgba(16, 23, 40, 0.88);
+    --card-surface-hover: rgba(24, 34, 58, 0.95);
+    
+    --fc-volt: #00ff87;
+    --fc-volt-hover: #10ff94;
+    --fc-volt-glow: rgba(0, 255, 135, 0.45);
+    --fc-gold: #f5c518;
+    --fc-gold-glow: rgba(245, 197, 24, 0.4);
+    --fc-cyan: #38bdf8;
+    --fc-purple: #a855f7;
+    --fc-crimson: #f43f5e;
+    
+    --fc-white: #ffffff;
+    --fc-text-sub: #94a3b8;
+    --fc-border-subtle: rgba(255, 255, 255, 0.08);
+    --fc-border-active: rgba(0, 255, 135, 0.55);
+
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-pitch);
+    color: #f1f5f9;
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+  }
+
+  #bgCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.25;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 50% 0%, rgba(0, 255, 135, 0.08) 0%, transparent 60%),
+      radial-gradient(circle at 10% 30%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 90% 70%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+      linear-gradient(180deg, #06080e 0%, #0a0e18 50%, #05070c 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .app-layer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 16px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1340px;
+    margin: 0 auto;
+    gap: 16px;
+  }
+
+  /* =========================================================
+     TOP NAVIGATION BAR (EA SPORTS FC 28 CONSOLE BAR)
+     ========================================================= */
+  .ea-fc-header {
+    width: 100%;
+    background: rgba(11, 16, 28, 0.92);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--panel-border);
+    border-radius: 18px;
+    padding: 10px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .ea-fc-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .ea-fc-brand:hover {
+    transform: scale(1.02);
+  }
+
+  .ea-triangle-crest {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #00ff87 0%, #0284c7 100%);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 4px;
+    box-shadow: 0 0 18px var(--fc-volt-glow);
+  }
+  .crest-text {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 900;
+    color: #04060b;
+    letter-spacing: -0.5px;
+  }
+
+  .ea-brand-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .ea-brand-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+  .ea-brand-sub {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fc-volt);
+    letter-spacing: 2px;
+  }
+
+  .ea-fc-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ea-nav-btn {
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: var(--fc-text-sub);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    text-transform: uppercase;
+  }
+  .ea-nav-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ea-nav-btn.active {
+    color: #ffffff;
+    background: rgba(0, 255, 135, 0.08);
+  }
+  .ea-nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 15%;
+    width: 70%;
+    height: 3px;
+    background: var(--fc-volt);
+    border-radius: 3px;
+    box-shadow: 0 0 10px var(--fc-volt-glow);
+  }
+
+  .ea-fc-user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ea-coins-badge {
+    background: rgba(245, 197, 24, 0.1);
+    border: 1px solid rgba(245, 197, 24, 0.4);
+    border-radius: 12px;
+    padding: 6px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--fc-gold);
+    box-shadow: 0 0 16px rgba(245, 197, 24, 0.15);
+  }
+  .coin-disc {
+    background: var(--fc-gold);
+    color: #04060b;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 4px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .coin-lbl {
+    font-size: 10px;
+    color: #cbd5e1;
+    opacity: 0.75;
+    letter-spacing: 1px;
+  }
+
+  .ea-user-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .ea-user-chip:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .user-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fc-volt);
+    box-shadow: 0 0 8px var(--fc-volt-glow);
+  }
+  .user-name-text {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .user-div-tag {
+    background: rgba(0, 255, 135, 0.15);
+    border: 1px solid rgba(0, 255, 135, 0.3);
+    color: var(--fc-volt);
+    font-family: var(--font-heading);
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .ea-btn-login {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 7px 14px;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .ea-btn-login:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .ea-sync-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 7px 12px;
+    color: var(--fc-text-sub);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .ea-sync-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
+  .ea-sync-btn:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* =========================================================
+     EA SPORTS FC DASHBOARD & TILES
+     ========================================================= */
+  .ea-dashboard {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .ea-dashboard-layout {
+    display: grid;
+    grid-template-columns: 1.22fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+
+  /* LEWA KARTA: PLAY HUB */
+  .ea-play-card {
+    background: var(--panel-dark);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7);
+    position: relative;
+    overflow: hidden;
+  }
+  .ea-play-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--fc-volt), #38bdf8, transparent);
+  }
+
+  .ea-play-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ea-play-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ea-badge-volt {
+    background: rgba(0, 255, 135, 0.15);
+    border: 1px solid rgba(0, 255, 135, 0.4);
+    color: var(--fc-volt);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+  }
+  .ea-reward-tag {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fc-gold);
+    letter-spacing: 0.5px;
+  }
+  .ea-play-title {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .ea-play-desc {
+    font-size: 13px;
+    color: var(--fc-text-sub);
+    line-height: 1.45;
+  }
+
+  .ea-mode-segment-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: rgba(6, 9, 16, 0.85);
+    padding: 5px;
+    border-radius: 14px;
+    border: 1px solid var(--fc-border-subtle);
+  }
+  .ea-segment-btn {
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--fc-text-sub);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .ea-segment-btn:hover {
+    color: #ffffff;
+  }
+  .ea-segment-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  .ea-match-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .ea-options-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ea-opt-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ea-opt-label {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fc-text-sub);
+    letter-spacing: 1px;
+  }
+
+  .ai-tiers, .mp-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .mp-tiers {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tier-btn {
+    background: rgba(8, 12, 22, 0.8);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 9px 8px;
+    color: var(--fc-text-sub);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+  }
+  .tier-btn:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  .tier-btn.active {
+    background: rgba(0, 255, 135, 0.15);
+    border-color: var(--fc-volt);
+    color: #ffffff;
+    box-shadow: 0 0 14px var(--fc-volt-glow);
+  }
+  .tier-btn.ally-tier.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--fc-cyan);
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+  }
+  .tier-btn.mp-mode {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .ea-cta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .action-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+  }
+  .action-btn:active {
+    transform: scale(0.98);
+  }
+
+  .ea-btn-volt {
+    background: var(--fc-volt);
+    color: #04060b;
+    box-shadow: 0 6px 24px var(--fc-volt-glow);
+  }
+  .ea-btn-volt:hover {
+    background: var(--fc-volt-hover);
+    box-shadow: 0 8px 30px rgba(0, 255, 135, 0.65);
+  }
+  .ea-btn-sub {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+  .ea-btn-sub:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .ea-join-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .ea-join-container input {
+    flex: 1;
+    background: rgba(6, 9, 16, 0.9);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 11px 14px;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ea-join-container input:focus {
+    border-color: var(--fc-volt);
+    box-shadow: 0 0 14px var(--fc-volt-glow);
+  }
+  .ea-btn-join {
+    width: 130px;
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    color: #ffffff;
+    font-size: 12px;
+  }
+
+  /* PRAWA KOLUMNA: TILES */
+  .ea-sidebar-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ea-tile-card {
+    background: var(--panel-dark);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+  }
+
+  .ea-tile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ea-tile-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ea-tile-sub {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fc-text-sub);
+    letter-spacing: 1.5px;
+  }
+  .ea-tile-sub.gold-text {
+    color: var(--fc-gold);
+  }
+  .ea-tile-heading {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+
+  .ea-tile-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ea-badge-gold {
+    background: rgba(245, 197, 24, 0.15);
+    border: 1px solid rgba(245, 197, 24, 0.4);
+    color: var(--fc-gold);
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .ea-tile-cta {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--panel-border);
+    border-radius: 11px;
+    padding: 10px 14px;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .ea-tile-cta:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .ea-tile-cta.gold-cta {
+    background: rgba(245, 197, 24, 0.12);
+    border-color: rgba(245, 197, 24, 0.35);
+    color: var(--fc-gold);
+  }
+  .ea-tile-cta.gold-cta:hover {
+    background: rgba(245, 197, 24, 0.22);
+    border-color: var(--fc-gold);
+    box-shadow: 0 0 18px var(--fc-gold-glow);
+  }
+
+  /* SQUAD CARDS GRID */
+  .squad-preview-strip {
+    width: 100%;
+  }
+  .squad-cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ea-squad-card {
+    background: linear-gradient(160deg, #182238 0%, #0d1424 60%, #10192e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  }
+  .ea-squad-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: var(--fc-volt);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 16px var(--fc-volt-glow);
+  }
+  .ea-squad-card.is-gold {
+    background: linear-gradient(160deg, #2b220d 0%, #151a28 60%, #201808 100%);
+    border-color: rgba(245, 197, 24, 0.5);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 197, 24, 0.15);
+  }
+  .ea-squad-card.is-gold:hover {
+    border-color: var(--fc-gold);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 20px var(--fc-gold-glow);
+  }
+  .ea-squad-card.is-icon {
+    background: linear-gradient(160deg, #382c0b 0%, #192135 60%, #2e2206 100%);
+    border-color: #ffd700;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 215, 0, 0.3);
+  }
+
+  .ea-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 2px;
+  }
+  .ea-card-ovr {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--fc-gold);
+  }
+  .ea-card-pos {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fc-cyan);
+  }
+  .ea-card-flag {
+    font-size: 13px;
+  }
+
+  .ea-card-photo-wrap {
+    width: 58px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 2px 0 4px;
+  }
+  .ea-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.8));
+    transition: transform 0.2s ease;
+  }
+  .ea-squad-card:hover .ea-card-img {
+    transform: scale(1.08);
+  }
+
+  .ea-card-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 2px;
+  }
+  .ea-card-name {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-align: center;
+  }
+  .ea-card-stats {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: var(--fc-text-sub);
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .ea-card-ps {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    color: #050811;
+    font-family: var(--font-heading);
+    font-size: 8px;
+    font-weight: 900;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+  }
+  .ea-card-ps-empty {
+    font-size: 7.5px;
+    font-weight: 700;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* PACK PROMO BODY */
+  .ea-pack-promo-card {
+    background: linear-gradient(145deg, rgba(16, 23, 40, 0.95) 0%, rgba(22, 30, 52, 0.95) 100%);
+  }
+  .ea-pack-cost {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    background: rgba(245, 197, 24, 0.12);
+    border: 1px solid rgba(245, 197, 24, 0.35);
+    border-radius: 8px;
+    padding: 4px 10px;
+  }
+  .ea-pack-price {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--fc-gold);
+  }
+  .ea-pack-coin-lbl {
+    font-size: 9px;
+    color: #cbd5e1;
+    letter-spacing: 0.5px;
+  }
+  .ea-pack-promo-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 0;
+  }
+  .ea-pack-3d-box {
+    width: 68px;
+    height: 84px;
+    background: linear-gradient(135deg, #42300b 0%, #1a1f33 50%, #543f0c 100%);
+    border: 1.5px solid var(--fc-gold);
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(245, 197, 24, 0.3);
+    flex-shrink: 0;
+  }
+  .ea-pack-badge {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--fc-gold);
+  }
+  .ea-pack-label {
+    font-family: var(--font-heading);
+    font-size: 8px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .ea-pack-promo-desc {
+    font-size: 12px;
+    color: var(--fc-text-sub);
+    line-height: 1.45;
+  }
+
+  /* STATUS MESSAGE IN MENU */
+  #statusMsg {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--fc-volt);
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media (max-width: 900px) {
+    .ea-dashboard-layout {
+      grid-template-columns: 1fr;
+    }
+    .ea-fc-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+    .ea-fc-nav {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .ea-fc-user-area {
+      justify-content: space-between;
+    }
+  }
+
+
   :root {
     --bg: #04060c;
     --panel: rgba(12, 17, 29, 0.92);
@@ -3023,151 +3932,211 @@
   </div>
 </div>
 
+
 <div class="app-layer"><!-- MENU GŁÓWNE -->
   <div id="menu">
-    <div class="logo-wrap">
-      <h1>CYBERFC 28</h1>
-      <div class="logo-sub">ULTIMATE TEAM & PLAYSTYLE+ EDITION</div>
-    </div>
-
-    <div class="hub-panel" id="mainPanel">
-      <!-- GÓRNY WIERSZ: MONETY + NAWIGACJA EA FC + STATUS KONTA -->
-      <div class="top-row">
-        <div class="nick-box" id="nickBox" title="Nick konta" style="display:none">
-          <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
-          <input id="nickInput" maxlength="12" value="GOŚĆ" placeholder="WPISZ SWÓJ NICK" autocomplete="off">
+    <!-- GÓRNY PASEK NAWIGACYJNY EA SPORTS FC 28 (PRO CONSOLE & DESKTOP NAVBAR) -->
+    <header class="ea-fc-header">
+      <div class="ea-fc-brand" onclick="location.reload()" title="CYBERFC 28 Ultimate Team">
+        <div class="ea-triangle-crest">
+          <span class="crest-text">FC</span>
         </div>
-
-        <div class="top-row-left">
-          <div class="coins-badge" title="Monety FC (Zarabiasz za wygrane mecze i gole!)">
-            <span style="font-size:16px;">🪙</span>
-            <span id="menuCoinsDisplay">0</span>
-            <span style="font-size:10px; color:#c9d1d9; opacity:0.8; letter-spacing:1px; margin-left:2px;">MONET</span>
-          </div>
-        </div>
-
-        <div class="top-row-nav">
-          <button type="button" class="top-nav-btn active-tab" onclick="void(0)" title="Główna Arena Meczowa">
-            <span>⚽</span>
-            <span>ARENA</span>
-          </button>
-          <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('SQUAD'); openClubModal()" title="Zarządzaj składem i formacją">
-            <span>🛡️</span>
-            <span>SKŁAD</span>
-          </button>
-          <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS'); openClubModal()" title="Sklep z Paczkami FUT">
-            <span>📦</span>
-            <span>SKLEP PACZEK</span>
-          </button>
-          <button type="button" class="top-nav-btn" onclick="openLeaderboardModal()" style="border-color: rgba(255, 215, 0, 0.45); color: var(--gold);" title="Globalna Tabela Liderów i Statystyki">
-            <span>🏆</span>
-            <span>RANKING</span>
-          </button>
-          <button type="button" class="top-nav-btn" onclick="openSaveCodeModal()" style="border-color: rgba(0, 240, 255, 0.35);" title="Kod zapisu i transfer danych">
-            <span>💾</span>
-            <span>KOD ZAPISU</span>
-          </button>
-        </div>
-
-        <div class="top-row-right">
-          <div class="fc-auth-user is-auth" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i wyloguj" style="display:none;">● TRYB GOŚCIA</div>
-          <button type="button" class="account-top-btn" id="fcAccountButton" onclick="openFcAuth()">🔑 ZALOGUJ SIĘ</button>
+        <div class="ea-brand-info">
+          <span class="ea-brand-title">CYBERFC 28</span>
+          <span class="ea-brand-sub">ULTIMATE TEAM™</span>
         </div>
       </div>
 
-      <!-- PASEK PODGLĄDU AKTYWNEGO SKŁADU (BR, ŚO, ŚP, N) -->
-      <div class="squad-preview-strip" id="menuSquadStrip"></div>
+      <nav class="ea-fc-nav">
+        <button type="button" class="ea-nav-btn active" id="navBtnArena" onclick="void(0)">
+          <span>CENTRUM MECZOWE</span>
+        </button>
+        <button type="button" class="ea-nav-btn" id="navBtnSquad" onclick="switchClubTab('SQUAD'); openClubModal()">
+          <span>MÓJ SKŁAD</span>
+        </button>
+        <button type="button" class="ea-nav-btn" id="navBtnPacks" onclick="switchClubTab('PACKS'); openClubModal()">
+          <span>SKLEP PACZEK</span>
+        </button>
+        <button type="button" class="ea-nav-btn" id="navBtnRanking" onclick="openLeaderboardModal()">
+          <span>RANKING</span>
+        </button>
+      </nav>
 
-      <!-- KARTY TRYBÓW GRY -->
-      <div class="modes-grid">
-        <!-- SOLO ARENA -->
-        <div class="mode-card">
-          <div class="mode-header">
-            <div class="mode-header-left">
-              <div class="mode-icon ai-ic">
-                <svg viewBox="0 0 24 24" fill="#b845ff"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3z"/></svg>
-              </div>
-              <div class="mode-title">SOLO ARENA</div>
-            </div>
-            <span style="font-size:11px; color:var(--gold); font-weight:800;">+MONETY ZA MECZ</span>
-          </div>
-
-          <div class="tier-row">
-            <div class="tier-tag">
-              <svg viewBox="0 0 24 24" fill="#b845ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-              <span>RYWALE AI</span>
-            </div>
-            <div class="ai-tiers">
-              <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">ŁATWY</button>
-              <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">ŚREDNI</button>
-              <button type="button" class="tier-btn" id="ai-hard" onclick="setAiTier('hard')">PRO</button>
-            </div>
-          </div>
-
-          <div class="tier-row">
-            <div class="tier-tag">
-              <svg viewBox="0 0 24 24" fill="#00f0ff"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-              <span>DRUŻYNA AI</span>
-            </div>
-            <div class="ai-tiers">
-              <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">ŁATWY</button>
-              <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">ŚREDNI</button>
-              <button type="button" class="tier-btn ally-tier" id="ally-hard" onclick="setAllyAiTier('hard')">PRO</button>
-            </div>
-          </div>
-
-          <div class="solo-btns-row">
-            <button type="button" class="action-btn btn-play-ai" onclick="startSingleplayer()">
-              <span>1 VS 1 (AI)</span>
-            </button>
-            <button type="button" class="action-btn btn-play-solo2v2" onclick="startSolo2v2()">
-              <span>2 VS 2 (AI)</span>
-            </button>
-          </div>
+      <div class="ea-fc-user-area">
+        <div class="coins-badge ea-coins-badge" title="Twoje Monety FC">
+          <span class="coin-disc">FC</span>
+          <span id="menuCoinsDisplay">0</span>
+          <span class="coin-lbl">COINS</span>
         </div>
 
-        <!-- MULTIPLAYER ONLINE -->
-        <div class="mode-card">
-          <div class="mode-header">
-            <div class="mode-header-left">
-              <div class="mode-icon p2p-ic">
-                <svg viewBox="0 0 24 24" fill="#00f0ff"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/></svg>
+        <div class="ea-user-chip" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i profilem">
+          <span class="user-status-dot"></span>
+          <span class="user-name-text">TRYB GOŚCIA</span>
+          <span class="user-div-tag">DIV 1</span>
+        </div>
+
+        <button type="button" class="account-top-btn ea-btn-login" id="fcAccountButton" onclick="openFcAuth()">ZALOGUJ</button>
+
+        <button type="button" class="ea-sync-btn" onclick="openSaveCodeModal()" title="Kopia zapasowa, synchronizacja i transfer danych konta">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>TRANSFER DANYCH</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- WIDESCREEN EA FC DASHBOARD GRID -->
+    <div class="ea-dashboard" id="mainPanel">
+      <div class="ea-dashboard-layout">
+        
+        <!-- LEWA GŁÓWNA KARTA: CENTRUM ROZGRYWKI / PLAY HUB -->
+        <section class="ea-play-card">
+          <div class="ea-play-header">
+            <div class="ea-play-tag-row">
+              <span class="ea-badge-volt">ARENA 3D</span>
+              <span class="ea-reward-tag">+100 MONET ZA WYGRANY MECZ</span>
+            </div>
+            <h2 class="ea-play-title">CENTRUM ROZGRYWKI</h2>
+            <p class="ea-play-desc">Wkrocz na pełnowymiarowy stadion 3D ze zbalansowaną fizyką Rapier, PlayStyles+ i autentycznymi modelami gwiazd.</p>
+          </div>
+
+          <!-- Przełącznik trybu SOLO vs MULTIPLAYER -->
+          <div class="ea-mode-segment-bar">
+            <button type="button" class="ea-segment-btn active" id="segSoloTab" onclick="switchMatchTab('SOLO')">
+              SOLO ARENA (AI)
+            </button>
+            <button type="button" class="ea-segment-btn" id="segMpTab" onclick="switchMatchTab('MP')">
+              MULTIPLAYER (ONLINE P2P)
+            </button>
+          </div>
+
+          <!-- SEKCJA SOLO ARENA -->
+          <div class="ea-match-content" id="eaMatchSoloView">
+            <div class="ea-options-row">
+              <div class="ea-opt-group">
+                <span class="ea-opt-label">POZIOM RYWALI AI:</span>
+                <div class="ai-tiers">
+                  <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">AMATOR</button>
+                  <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">ZAWODOWIEC</button>
+                  <button type="button" class="tier-btn" id="ai-hard" onclick="setAiTier('hard')">KLASA ŚWIATOWA</button>
+                </div>
               </div>
-              <div class="mode-title">MULTIPLAYER P2P</div>
+
+              <div class="ea-opt-group">
+                <span class="ea-opt-label">PARTNERZY Z DRUŻYNY:</span>
+                <div class="ai-tiers">
+                  <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">AMATOR</button>
+                  <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">ZAWODOWIEC</button>
+                  <button type="button" class="tier-btn ally-tier" id="ally-hard" onclick="setAllyAiTier('hard')">KLASA ŚWIATOWA</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ea-cta-row">
+              <button type="button" class="action-btn ea-btn-volt" onclick="startSingleplayer()">
+                <span>ROZPOCZNIJ MECZ 1 VS 1 ➔</span>
+              </button>
+              <button type="button" class="action-btn ea-btn-sub" onclick="startSolo2v2()">
+                <span>MECZ 2 VS 2 CO-OP ➔</span>
+              </button>
             </div>
           </div>
 
-          <div class="mp-tiers">
-            <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">
-              <span>1 VS 1</span>
-            </button>
-            <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">
-              <span>2 VS 2 LOBBY</span>
-            </button>
+          <!-- SEKCJA MULTIPLAYER P2P -->
+          <div class="ea-match-content" id="eaMatchMpView" style="display:none;">
+            <div class="ea-options-row">
+              <div class="ea-opt-group" style="width:100%;">
+                <span class="ea-opt-label">TRYB SIECIOWY:</span>
+                <div class="mp-tiers">
+                  <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">
+                    1 VS 1 POJEDYNEK
+                  </button>
+                  <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">
+                    2 VS 2 LOBBY
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ea-cta-row">
+              <button type="button" class="action-btn ea-btn-volt" id="btnQuickMatch" onclick="startQuickMatchmaking()">
+                <span>⚡ SZYBKI MECZ ONLINE</span>
+              </button>
+              <button type="button" class="action-btn ea-btn-sub" onclick="createRoom()">
+                <span>STWÓRZ POKÓJ DLA ZNAJOMEGO</span>
+              </button>
+            </div>
+
+            <div class="ea-join-container">
+              <input id="joinInput" maxlength="6" placeholder="KOD POKOJU (6 ZNAKÓW)">
+              <button type="button" class="action-btn ea-btn-join" onclick="joinRoom()">
+                DOŁĄCZ
+              </button>
+            </div>
           </div>
 
-          <button type="button" class="action-btn" id="btnQuickMatch" onclick="startQuickMatchmaking()" style="background: linear-gradient(135deg, #00f0ff 0%, #0088ff 100%); color: #000; font-weight: 900; margin-bottom: 6px; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);">
-            <span>⚡ SZYBKI MECZ ONLINE</span>
-          </button>
-          <button type="button" class="action-btn btn-host" onclick="createRoom()">
-            <span>STWÓRZ POKÓJ</span>
-          </button>
+          <div id="statusMsg"></div>
+        </section>
 
-          <div class="join-row">
-            <input id="joinInput" maxlength="6" placeholder="KOD">
-            <button type="button" class="action-btn btn-join" onclick="joinRoom()">
-              <span>DOŁĄCZ</span>
+        <!-- PRAWA KOLUMNA: DWA KAFLOWE BLOKI (SKŁAD I SKLEP) -->
+        <div class="ea-sidebar-column">
+          
+          <!-- KAFEL 1: TWÓJ SKŁAD -->
+          <section class="ea-tile-card">
+            <div class="ea-tile-header">
+              <div class="ea-tile-title-group">
+                <span class="ea-tile-sub">ULTIMATE TEAM</span>
+                <h3 class="ea-tile-heading">TWÓJ WYJŚCIOWY SKŁAD</h3>
+              </div>
+              <div class="ea-tile-meta">
+                <span class="ea-badge-gold" id="menuOvrBadge">OVR 88</span>
+                <span class="ea-badge-volt">CHEM 33/33</span>
+              </div>
+            </div>
+
+            <!-- Kontener na 4 karty składu -->
+            <div class="squad-preview-strip" id="menuSquadStrip"></div>
+
+            <button type="button" class="ea-tile-cta" onclick="switchClubTab('SQUAD'); openClubModal();">
+              <span>ZARZĄDZAJ SKŁADEM & TAKTYKĄ ➔</span>
             </button>
-          </div>
+          </section>
+
+          <!-- KAFEL 2: SKLEP Z PACZKAMI -->
+          <section class="ea-tile-card ea-pack-promo-card">
+            <div class="ea-tile-header">
+              <div class="ea-tile-title-group">
+                <span class="ea-tile-sub gold-text">SKLEP ULTIMATE TEAM</span>
+                <h3 class="ea-tile-heading">PACZKA MISTRZÓW PRIME</h3>
+              </div>
+              <div class="ea-pack-cost">
+                <span class="ea-pack-price">100</span>
+                <span class="ea-pack-coin-lbl">COINS</span>
+              </div>
+            </div>
+
+            <div class="ea-pack-promo-body">
+              <div class="ea-pack-3d-box">
+                <div class="ea-pack-foil"></div>
+                <div class="ea-pack-badge">85+</div>
+                <div class="ea-pack-label">PRIME PACK</div>
+              </div>
+              <div class="ea-pack-promo-desc">
+                Gwarantowane 4 karty z gwiazdami światowego futbolu, wysoka szansa na Ikony oraz złote PlayStyles+!
+              </div>
+            </div>
+
+            <button type="button" class="ea-tile-cta gold-cta" onclick="switchClubTab('PACKS'); openClubModal();">
+              <span>OTWÓRZ PACZKĘ W SKLEPIE ➔</span>
+            </button>
+          </section>
+
         </div>
       </div>
-
-      <div id="statusMsg"></div>
     </div>
 
     <!-- EKRAN OCZEKIWANIA HOSTA 1 VS 1 -->
     <div class="wait-panel hidden" id="waitPanel">
-      <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU (KLIKNIJ ABY SKOPIOWAĆ)</div>
+      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU (KLIKNIJ ABY SKOPIOWAĆ)</div>
       <div id="roomCodeDisplay" onclick="copyCodeToClipboard()">------</div>
       <div style="font-size:13px; color:#8b949e; margin-bottom:16px;">Wyślij kod znajomemu. Mecz ruszy automatycznie!</div>
       <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">WRÓĆ</button>
@@ -3175,7 +4144,7 @@
 
     <!-- EKRAN LOBBY 2 VS 2 -->
     <div class="lobby-panel hidden" id="lobby2v2Panel">
-      <div style="font-family:'Orbitron'; font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2 — KOD POKOJU (KLIKNIJ BY SKOPIOWAĆ)</div>
+      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2 — KOD POKOJU (KLIKNIJ BY SKOPIOWAĆ)</div>
       <div id="lobbyCodeDisplay" onclick="copyCodeToClipboard()">------</div>
 
       <div class="lobby-presets-bar" id="hostPresetsBar">
@@ -3206,7 +4175,7 @@
     </div>
   </div>
 
-  <!-- PEŁNOEKRANOWY HUB ULTIMATE KLUB, PACZKI & SKŁAD 4v4 -->
+
   <div class="modal-backdrop" id="clubModalBackdrop" style="display:none;">
     <div class="club-modal-fullscreen">
       <!-- Pasek Nawigacji Górnej -->
@@ -3461,6 +4430,26 @@
 </div>
 
 <script>
+
+window.switchMatchTab = function(tab) {
+  const soloView = document.getElementById('eaMatchSoloView');
+  const mpView = document.getElementById('eaMatchMpView');
+  const btnSolo = document.getElementById('segSoloTab');
+  const btnMp = document.getElementById('segMpTab');
+  if (tab === 'SOLO') {
+    if (soloView) soloView.style.display = 'block';
+    if (mpView) mpView.style.display = 'none';
+    if (btnSolo) btnSolo.classList.add('active');
+    if (btnMp) btnMp.classList.remove('active');
+  } else {
+    if (soloView) soloView.style.display = 'none';
+    if (mpView) mpView.style.display = 'block';
+    if (btnSolo) btnSolo.classList.remove('active');
+    if (btnMp) btnMp.classList.add('active');
+  }
+};
+
+
 /* ==========================================
    1. BLOKADA PRZEWIJANIA I POLYFILL
    ========================================== */
@@ -6570,22 +7559,10 @@ function updateMenuSquadStrip() {
   const squadCards = roles.map((r, i) => getCardById(clubData.lineup?.[r]) || getCardById(STARTER_CARD_IDS[i]));
   const avgOvr = Math.round(squadCards.reduce((acc, c) => acc + (c ? c.ovr : 75), 0) / 4);
 
-  let html = `
-    <div class="squad-strip-header">
-      <div class="squad-header-title">
-        <span class="squad-title-tag">ULTIMATE TEAM</span>
-        <div class="squad-title-main">TWÓJ WYJŚCIOWY SKŁAD</div>
-      </div>
-      <div class="squad-header-badges">
-        <div class="squad-ovr-pill">OVR <strong>${avgOvr}</strong></div>
-        <div class="squad-chem-pill">ZGRANIE <strong>33/33</strong></div>
-        <button type="button" class="squad-manage-btn" onclick="switchClubTab('SQUAD'); openClubModal();">
-          <span>⚙️ ZARZĄDZAJ SKŁADEM & TAKTYKĄ</span>
-        </button>
-      </div>
-    </div>
-    <div class="squad-cards-row">
-  `;
+  const ovrBadge = document.getElementById('menuOvrBadge');
+  if (ovrBadge) ovrBadge.textContent = 'OVR ' + avgOvr;
+
+  let html = `<div class="squad-cards-row">`;
 
   for (let i = 0; i < roles.length; i++) {
     const r = roles[i];
@@ -10795,12 +11772,7 @@ function switchToPlayer(targetPlayer) {
     }
   }
 
-  try {
-    const roleNames = { GK: 'BRAMKARZ (BR)', DEF: 'OBROŃCA (ŚO)', MID: 'POMOCNIK (ŚP)', FWD: 'NAPASTNIK (N)' };
-    const pName = (targetPlayer.cardName || targetPlayer.role).toUpperCase();
-    spawnFloater(targetPlayer.x, targetPlayer.y - 20, `KONTROLA: ${pName} [${roleNames[targetPlayer.role] || targetPlayer.role}]`, targetPlayer.team === 'blue' ? '#00f0ff' : '#ffd700');
-    spawnParticles(targetPlayer.x, targetPlayer.y, 4, 8, targetPlayer.team === 'blue' ? '#00f0ff' : '#ffd700', 2.0, 14, 2.5);
-  } catch(e) {}
+  // Czysta zmiana zawodnika bez spamu tekstem na murawie (EA FC broadcast style)
 
   updateSquadHud();
 }
@@ -11819,7 +12791,7 @@ function handleKeyDownOnce(code) {
     if (code === 'Digit4') { switchToRole('FWD'); return; }
   }
 
-  if (code === 'Tab' || (code === 'Space' && (!hasBall || !myPlayer.isShielding)) || (code === 'KeyQ' && !hasBall)) {
+  if (code === 'Tab' || (!hasBall && (code === 'Space' || code === 'KeyE' || code === 'KeyQ'))) {
     if (!is2v2) {
       cycleControlledPlayer(1);
       return;
