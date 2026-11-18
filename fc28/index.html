@@ -4131,6 +4131,10 @@
     <div class="ea-dashboard" id="mainPanel">
       <div class="ea-dashboard-layout-3col">
         
+        <!-- Hidden compatibility elements -->
+        <div id="statusMsg" style="display:none;" aria-hidden="true"></div>
+        <input type="hidden" id="nickInput" value="Gość">
+        <input type="hidden" id="joinInput" value="">
         <!-- KAFEL 1: CENTRUM ROZGRYWKI (PLAY HUB) -->
         <section class="ea-play-card">
           <div class="ea-play-header">
@@ -6819,14 +6823,6 @@ function loadClubData() {
   try {
     const parsed = safeReadStorageRaw();
     const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
-    
-    // Jeśli użytkownik jest niezalogowany i nie ma zapisanego nicku gracza:
-    if (!curUser && (!parsed || !parsed.nick || ['GOŚĆ', 'GOSC'].includes(parsed.nick.toUpperCase()))) {
-      clubData.coins = 0;
-      clubData.nick = 'GOŚĆ';
-      try { updateMenuClubUI(); } catch (e) {}
-      return;
-    }
 
     const allKnown = fcGetAllKnownCards();
     const validIds = new Set(PLAYERS_DB.map(c => c.id));
@@ -6845,12 +6841,13 @@ function loadClubData() {
       if (card && owned.includes(card.id)) lineup[role] = card.id;
     });
 
-    const parsedCoins = (parsed && Number.isFinite(parsed.coins)) ? parsed.coins : 200;
+    const parsedCoins = (parsed && Number.isFinite(parsed.coins) && parsed.coins >= 0) ? parsed.coins : 500;
+    const userNick = (curUser && curUser.username)
+      ? curUser.username
+      : ((parsed && typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick : 'Gość');
 
     clubData = {
-      nick: (parsed && typeof parsed.nick === 'string' && parsed.nick.trim())
-        ? parsed.nick.slice(0, 12).replace(/[<>&"']/g, '')
-        : (clubData.nick || 'GRACZ'),
+      nick: userNick.slice(0, 16).replace(/[<>&"']/g, ''),
       coins: Math.max(0, Math.min(10000000, Math.floor(parsedCoins))),
       owned,
       lineup,
@@ -8195,7 +8192,7 @@ let localSlotIdx = 0;
 let smoothedPing = 0;
 let pingIntervalId = null;
 
-nickInputEl.addEventListener('input', () => {
+if (nickInputEl) nickInputEl.addEventListener('input', () => {
   nickBoxEl.classList.remove('nick-error');
   const val = nickInputEl.value.trim();
   if (val.length > 0) {
@@ -8207,16 +8204,15 @@ nickInputEl.addEventListener('input', () => {
 
 function requireAndSavePlayerNick() {
   const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
-  if (!curUser) {
-    openFcAuth();
-    fcSetAuthStatus('🔒 Aby zagrać mecz, zaloguj się lub załóż konto! Odbierz 500 🪙 na start i zapisuj swój postęp w chmurze Cloudflare.', false);
-    setStatus('ZALOGUJ SIĘ, ABY GRAĆ!');
-    return null;
+  if (curUser && curUser.username) {
+    clubData.nick = curUser.username;
+    saveClubData(false);
+    return curUser.username;
   }
-  const val = String((curUser && (clubData.nick || curUser.displayName || curUser.email)) || 'GRACZ').trim().slice(0, 16);
-  clubData.nick = val;
+  const val = String((clubData && clubData.nick) || (typeof localStorage !== 'undefined' && localStorage.getItem('FC28_USER_NICK')) || 'Gość').trim().slice(0, 16);
+  clubData.nick = val || 'Gość';
   saveClubData(false);
-  return val;
+  return clubData.nick;
 }
 
 function setStatus(txt) {
@@ -8533,7 +8529,8 @@ function joinRoom() {
     return;
   }
   myName = validNick;
-  const code = document.getElementById('joinInput').value.trim().toUpperCase();
+  const codeInput = document.getElementById('joinCodeInput') || document.getElementById('joinInput');
+  const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
   if (code.length !== 6) {
     setStatus('WPISZ 6-ZNAKOWY KOD POKOJU!');
     return;
@@ -14190,8 +14187,13 @@ async function fcInitAccounts() {
   if (hasToken) {
     await fcLoadCloudProfile();
   } else {
-    clubData.coins = 0;
-    clubData.nick = 'GOŚĆ';
+    // Tryb gościa: zachowaj monety i skład lub przydziel 500 monet startowych
+    if (!Number.isFinite(clubData.coins) || clubData.coins <= 0) {
+      clubData.coins = 500;
+    }
+    if (!clubData.nick) {
+      clubData.nick = 'Gość';
+    }
     fcUpdateAuthUi();
     updateMenuClubUI();
   }
@@ -14235,6 +14237,10 @@ applySquadStatsToTeam(blueTeam, clubData.lineup);
 fcInitAccounts();
 
 Object.assign(window, {
+  updateMenuSquadStrip,
+  updateMenuClubUI,
+  openLeaderboardModal,
+  closeLeaderboardModal,
   setAiTier,
   setAllyAiTier,
   setMpMode,
