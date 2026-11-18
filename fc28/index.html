@@ -8032,37 +8032,6 @@ function copySaveCode() {}
 function importSaveCode() {}
 function generateSaveCode() { return ''; }
 
-// Wygodne komendy konsoli (F12) do doładowania monet i kart:
-window.addCoins = function(amount = 10000) {
-  if (typeof amount !== 'number' || isNaN(amount)) amount = 10000;
-  clubData.coins = Math.max(0, Math.min(99999999, (clubData.coins || 0) + Math.floor(amount)));
-  saveClubData(true);
-  const coinsDisplay = document.getElementById('menuCoinsDisplay');
-  if (coinsDisplay) coinsDisplay.textContent = clubData.coins.toLocaleString();
-  try { SFX.play('goal'); } catch(e) {}
-  showBanner(`🪙 DODANO ${amount.toLocaleString()} MONET! SALDO: ${clubData.coins.toLocaleString()}`, '#ffd700', 120);
-  console.log(`[FC28] Nowe saldo: ${clubData.coins} monet. Zsynchronizowano z bazą Cloudflare D1!`);
-  return clubData.coins;
-};
-
-window.setCoins = function(amount = 999999) {
-  clubData.coins = Math.max(0, Math.min(99999999, Math.floor(amount)));
-  saveClubData(true);
-  const coinsDisplay = document.getElementById('menuCoinsDisplay');
-  if (coinsDisplay) coinsDisplay.textContent = clubData.coins.toLocaleString();
-  try { SFX.play('goal'); } catch(e) {}
-  showBanner(`🪙 USTAWIONO MONETY NA: ${clubData.coins.toLocaleString()}`, '#ffd700', 120);
-  return clubData.coins;
-};
-
-window.unlockAllCards = function() {
-  const allIds = PLAYERS_DB.map(c => c.id);
-  clubData.owned = Array.from(new Set([...clubData.owned, ...allIds]));
-  saveClubData(true);
-  try { SFX.play('goal'); } catch(e) {}
-  showBanner('🌟 ODBLOKOWANO WSZYSTKIE 95 KART W BAZIE!', '#00ff87', 120);
-  return clubData.owned.length;
-};
 
 /* ==========================================
    4. SYNTEZATOR DŹWIĘKU (Web Audio API)
