@@ -6,13 +6,17 @@
 import { z } from 'zod';
 import { SECURITY_LIMITS, GAME_CONSTANTS } from '../constants/security';
 
+// Dozwolone: litery (w tym polskie znaki), cyfry, znaki _ . - @ oraz spacje wewnątrz nazwy
+const USERNAME_REGEX = /^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ@._-]+(?: [a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ@._-]+)*$/;
+const USERNAME_ERROR_MSG = 'Login może zawierać litery, cyfry, spacje oraz znaki: _ . - @';
+
 // Walidacja logowania
 export const LoginSchema = z.object({
   username: z.string()
+    .trim()
     .min(SECURITY_LIMITS.MIN_USERNAME_LENGTH, 'Login musi mieć min. 3 znaki')
     .max(SECURITY_LIMITS.MAX_USERNAME_LENGTH, 'Login może mieć max 16 znaków')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Login może zawierać tylko litery, cyfry, _ i -')
-    .trim(),
+    .regex(USERNAME_REGEX, USERNAME_ERROR_MSG),
   password: z.string()
     .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 6 znaków')
     .max(SECURITY_LIMITS.MAX_PASSWORD_LENGTH, 'Hasło jest za długie'),
@@ -22,10 +26,10 @@ export const LoginSchema = z.object({
 // Walidacja rejestracji
 export const RegisterSchema = z.object({
   username: z.string()
+    .trim()
     .min(SECURITY_LIMITS.MIN_USERNAME_LENGTH, 'Login musi mieć min. 3 znaki')
     .max(SECURITY_LIMITS.MAX_USERNAME_LENGTH, 'Login może mieć max 16 znaków')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Login może zawierać tylko litery, cyfry, _ i -')
-    .trim(),
+    .regex(USERNAME_REGEX, USERNAME_ERROR_MSG),
   password: z.string()
     .min(SECURITY_LIMITS.MIN_PASSWORD_LENGTH, 'Hasło musi mieć min. 6 znaków')
     .max(SECURITY_LIMITS.MAX_PASSWORD_LENGTH, 'Hasło jest za długie'),

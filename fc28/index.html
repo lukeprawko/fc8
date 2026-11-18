@@ -1590,15 +1590,28 @@
   .account-top-btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(0,240,255,.3)}
   .fc-auth-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,14,.82);backdrop-filter:blur(12px)}
   .fc-auth-overlay.open{display:flex}
-  .fc-auth-card{width:min(440px,100%);padding:30px;border-radius:24px;background:linear-gradient(145deg,rgba(17,26,45,.98),rgba(7,11,23,.99));border:1px solid rgba(0,240,255,.45);box-shadow:0 0 55px rgba(0,240,255,.16),0 25px 90px #000;position:relative}
+  .fc-auth-card{width:min(440px,100%);padding:28px 24px;border-radius:24px;background:linear-gradient(145deg,rgba(17,26,45,.98),rgba(7,11,23,.99));border:1px solid rgba(0,240,255,.45);box-shadow:0 0 55px rgba(0,240,255,.16),0 25px 90px #000;position:relative}
   .fc-auth-kicker{font:800 10px Orbitron,sans-serif;letter-spacing:3px;color:var(--p1);text-transform:uppercase}
-  .fc-auth-title{font:900 clamp(24px,5vw,32px) Orbitron,sans-serif;color:#fff;margin:10px 0 8px}
-  .fc-auth-desc{font-size:13px;color:#aebbd0;line-height:1.6;margin-bottom:22px}
-  .fc-auth-input{box-sizing:border-box;width:100%;margin:7px 0;padding:14px 15px;background:#080e1b;border:1px solid #293851;border-radius:12px;color:#fff;font:700 13px Orbitron,sans-serif;outline:none}
+  .fc-auth-title{font:900 clamp(22px,5vw,28px) Orbitron,sans-serif;color:#fff;margin:8px 0 6px}
+  .fc-auth-desc{font-size:12px;color:#aebbd0;line-height:1.5;margin-bottom:14px}
+  .fc-auth-tabs{display:flex;gap:8px;margin:10px 0 14px;background:rgba(0,0,0,.35);padding:4px;border-radius:14px;border:1px solid rgba(255,255,255,.08)}
+  .fc-auth-tab-btn{flex:1;padding:10px 8px;font:800 11px Orbitron,sans-serif;color:#8b949e;background:transparent;border:none;border-radius:10px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;gap:6px}
+  .fc-auth-tab-btn.active{background:linear-gradient(135deg,rgba(0,240,255,.22),rgba(0,198,167,.18));color:#00f0ff;border:1px solid rgba(0,240,255,.4);box-shadow:0 0 15px rgba(0,240,255,.2)}
+  .fc-auth-alert{padding:12px 14px;border-radius:12px;font-size:12.5px;line-height:1.5;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;transition:all .25s ease}
+  .fc-auth-alert.error{background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.5);color:#ff7b72;box-shadow:0 0 16px rgba(248,81,73,.2);animation:authShake .35s cubic-bezier(.36,.07,.19,.97) both}
+  .fc-auth-alert.success{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.5);color:#00ff88;box-shadow:0 0 16px rgba(0,255,136,.2)}
+  .fc-auth-alert.info{background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.4);color:#58a6ff}
+  .fc-input-label{display:flex;justify-content:space-between;align-items:center;font:700 11px Orbitron,sans-serif;color:#8b949e;margin-top:10px;margin-bottom:4px}
+  .fc-input-hint{font-size:11px;color:#586069;margin:2px 0 8px 4px;line-height:1.4}
+  .fc-input-error{border-color:#ff7b72 !important;box-shadow:0 0 0 2px rgba(248,81,73,.35) !important}
+  @keyframes authShake{10%,90%{transform:translate3d(-1px,0,0)}20%,80%{transform:translate3d(2px,0,0)}30%,50%,70%{transform:translate3d(-3px,0,0)}40%,60%{transform:translate3d(3px,0,0)}}
+  .fc-auth-input{box-sizing:border-box;width:100%;margin:5px 0 2px;padding:13px 15px;background:#080e1b;border:1px solid #293851;border-radius:12px;color:#fff;font:700 13px Orbitron,sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
   .fc-auth-input:focus{border-color:var(--p1);box-shadow:0 0 0 3px rgba(0,240,255,.1)}
   .fc-auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .fc-auth-action{border:0;border-radius:12px;padding:14px 10px;font:900 11px Orbitron,sans-serif;cursor:pointer;color:#06101a;background:linear-gradient(135deg,#00f0ff,#00c6a7)}
+  .fc-auth-action{border:0;border-radius:12px;padding:14px 10px;font:900 11px Orbitron,sans-serif;cursor:pointer;color:#06101a;background:linear-gradient(135deg,#00f0ff,#00c6a7);transition:all .2s ease}
+  .fc-auth-action:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(0,240,255,.4)}
   .fc-auth-action.secondary{background:linear-gradient(135deg,#b845ff,#6c5ce7);color:white}
+  .fc-auth-action.secondary:hover{box-shadow:0 0 20px rgba(184,69,255,.4)}
   .fc-auth-status{font-size:12px;line-height:1.5;min-height:20px;margin-top:15px;color:#00f0ff;overflow-wrap:anywhere}
   .fc-auth-close{position:absolute;right:14px;top:14px;border:1px solid #344258;background:#111a2a;color:white;border-radius:10px;width:34px;height:34px;cursor:pointer}
   .fc-auth-user {
@@ -2511,7 +2524,7 @@
   <div class="fc-auth-card">
     <button class="fc-auth-close" type="button" onclick="closeFcAuth()" aria-label="Zamknij">✕</button>
     <div class="fc-auth-kicker">CYBERFC 28 • CLOUDFLARE ACCOUNT CENTER</div>
-    <h2 class="fc-auth-title" id="fcAuthTitle">Twoje konto</h2>
+    <h2 class="fc-auth-title" id="fcAuthTitle">Konto Gracza</h2>
 
     <!-- Widok dla zalogowanego gracza (brak ponownego wpisywania loginu/hasła) -->
     <div id="fcAuthLoggedInView" style="display:none; flex-direction:column; gap:12px; text-align:left; background:rgba(0,0,0,0.4); padding:16px; border-radius:14px; border:1px solid rgba(0,255,136,0.35); margin: 10px 0;">
@@ -2519,8 +2532,8 @@
         <span style="font-size:11px; color:#8b949e; font-family:'Orbitron';">STATUS PROFILU</span>
         <span style="font-size:11px; color:#00ff88; font-weight:900; background:rgba(0,255,136,0.15); padding:4px 8px; border-radius:8px;">● ZALOGOWANO</span>
       </div>
-      <div style="font-size:18px; font-weight:900; color:#fff; font-family:'Orbitron';" id="fcAuthNickDisplay">GRACZ</div>
-      <div style="font-size:13px; color:#c9d1d9;">Wszystkie Twoje monety, karty z paczek i skład 4v4 są w 100% zsynchronizowane z bazą Cloudflare D1.</div>
+      <div style="font-size:20px; font-weight:900; color:#fff; font-family:'Orbitron';" id="fcAuthNickDisplay">GRACZ</div>
+      <div style="font-size:13px; color:#c9d1d9;">Wszystkie Twoje monety, karty z paczek i skład 4v4 są w 100% bezpiecznie zapisane w bazie Cloudflare D1.</div>
       <div style="display:flex; gap:10px; margin-top:4px;">
         <div style="flex:1; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; text-align:center;">
           <div style="font-size:11px; color:#8b949e;">MONETY KLUBU</div>
@@ -2534,18 +2547,46 @@
       <button type="button" class="action-btn" style="background:#da3633; border-color:#f85149; margin-top:8px; font-weight:900;" onclick="fcLogout()">WYLOGUJ SIĘ</button>
     </div>
 
-    <!-- Widok formularza logowania/rejestracji dla gościa -->
+    <!-- Widok formularza logowania / rejestracji dla gościa -->
     <div id="fcAuthLoggedOutView">
-      <div class="fc-auth-desc">Konto jest wymagane do gry! Zaloguj się lub załóż darmowe konto, aby odebrać <strong style="color:var(--gold);">500 🪙 na start</strong>. Twój postęp, monety i karty piłkarzy będą w 100% bezpiecznie przypisane do Twojego konta w chmurze Cloudflare D1 na każdym urządzeniu.</div>
-      <input class="fc-auth-input" id="fcAuthNick" maxlength="16" autocomplete="username" placeholder="NICK (3-16 znaków)">
-      <input class="fc-auth-input" id="fcAuthPassword" type="password" autocomplete="current-password" placeholder="HASŁO (min. 8 znaków)" onkeydown="if(event.key==='Enter')fcLogin()">
-      <div class="fc-auth-actions">
-        <button class="fc-auth-action" type="button" onclick="fcLogin()">ZALOGUJ</button>
-        <button class="fc-auth-action secondary" type="button" onclick="fcRegister()">UTWÓRZ KONTO</button>
+      <!-- Zakładki wyboru: Logowanie / Rejestracja -->
+      <div class="fc-auth-tabs">
+        <button type="button" class="fc-auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">🔑 LOGOWANIE</button>
+        <button type="button" class="fc-auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">✨ NOWE KONTO (+500 🪙)</button>
+      </div>
+
+      <!-- Widoczny Alert / Komunikat błędu lub sukcesu -->
+      <div class="fc-auth-alert" id="fcAuthAlert" style="display:none;"></div>
+
+      <div class="fc-input-label">
+        <span>NICK GRACZA</span>
+        <span style="font-size:10px; color:#586069;">3-16 znaków</span>
+      </div>
+      <input class="fc-auth-input" id="fcAuthNick" maxlength="16" autocomplete="username" placeholder="np. zegot, Luke, Mistrz28" oninput="clearInputError(this)" onkeydown="if(event.key==='Enter')submitAuthForm()">
+      <div class="fc-input-hint">Dozwolone litery (w tym polskie), cyfry, spacje oraz znaki: _ . - @</div>
+
+      <div class="fc-input-label">
+        <span>HASŁO</span>
+        <span style="font-size:10px; color:#586069;">min. 6 znaków</span>
+      </div>
+      <div style="position:relative;">
+        <input class="fc-auth-input" id="fcAuthPassword" type="password" autocomplete="current-password" placeholder="Wpisz hasło (min. 6 znaków)" oninput="clearInputError(this)" onkeydown="if(event.key==='Enter')submitAuthForm()" style="padding-right:45px;">
+        <button type="button" onclick="togglePasswordVisibility()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#8b949e; cursor:pointer; font-size:16px;" title="Pokaż / ukryj hasło" aria-label="Pokaż hasło">👁️</button>
+      </div>
+      <div class="fc-input-hint" id="fcAuthPassHint">Hasło zabezpiecza Twoje monety i karty w chmurze Cloudflare D1.</div>
+
+      <!-- Główny przycisk akcji -->
+      <button class="fc-auth-action" id="fcAuthSubmitBtn" type="button" onclick="submitAuthForm()" style="width:100%; margin-top:14px; padding:15px; font-size:12px;">
+        🔑 ZALOGUJ SIĘ
+      </button>
+
+      <!-- Przełącznik pomocniczy pod przyciskiem -->
+      <div style="text-align:center; margin-top:14px; font-size:12px; color:#8b949e;" id="fcAuthSwitchPrompt">
+        Nie masz jeszcze konta? <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zarejestruj się za darmo (+500 🪙)</a>
       </div>
     </div>
 
-    <div class="fc-auth-status" id="fcAuthStatus" aria-live="polite">Dane konta są synchronizowane z Cloudflare D1.</div>
+    <div class="fc-auth-status" id="fcAuthStatus" aria-live="polite" style="display:none;"></div>
   </div>
 </div>
 
@@ -5484,7 +5525,7 @@ function renderPackStore() {
       <div>
         ${!isAuth ? `
           <button type="button" class="pack-open-big-btn" onclick="openFcAuth()">
-            🔒 ZALOGUJ SIĘ, ABY OTWIERAĆ PACZKI (200 🪙 NA START)
+            🔒 ZALOGUJ SIĘ, ABY OTWIERAĆ PACZKI (500 🪙 NA START)
           </button>
         ` : (canAfford ? `
           <button type="button" class="pack-open-big-btn" onclick="openPack('ultimate')">
@@ -6369,11 +6410,11 @@ function requireAndSavePlayerNick() {
   const curUser = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) || (typeof window !== 'undefined' && window.fcCurrentUser);
   if (!curUser) {
     openFcAuth();
-    fcSetAuthStatus('🔒 Aby zagrać mecz, musisz być zalogowany! Załóż darmowe konto, aby odebrać 200 🪙 na start i zapisać swój postęp.', false);
+    fcSetAuthStatus('🔒 Aby zagrać mecz, zaloguj się lub załóż konto! Odbierz 500 🪙 na start i zapisuj swój postęp w chmurze Cloudflare.', false);
     setStatus('ZALOGUJ SIĘ, ABY GRAĆ!');
     return null;
   }
-  const val = String((curUser && (clubData.nick || curUser.displayName || curUser.email)) || 'GRACZ').trim().slice(0, 12);
+  const val = String((curUser && (clubData.nick || curUser.displayName || curUser.email)) || 'GRACZ').trim().slice(0, 16);
   clubData.nick = val;
   saveClubData(false);
   return val;
@@ -11559,12 +11600,79 @@ function fcSetSessionToken(token) {
   } catch (e) {}
 }
 
+let currentAuthTab = 'login';
+
+function switchAuthTab(tab) {
+  currentAuthTab = tab;
+  const loginBtn = document.getElementById('tabLoginBtn');
+  const regBtn = document.getElementById('tabRegisterBtn');
+  const submitBtn = document.getElementById('fcAuthSubmitBtn');
+  const switchPrompt = document.getElementById('fcAuthSwitchPrompt');
+  const alertEl = document.getElementById('fcAuthAlert');
+  if (alertEl) alertEl.style.display = 'none';
+
+  if (tab === 'register') {
+    if (loginBtn) loginBtn.classList.remove('active');
+    if (regBtn) regBtn.classList.add('active');
+    if (submitBtn) {
+      submitBtn.textContent = '✨ UTWÓRZ KONTO (+500 🪙)';
+      submitBtn.style.background = 'linear-gradient(135deg, #00f0ff, #00c6a7)';
+    }
+    if (switchPrompt) {
+      switchPrompt.innerHTML = 'Masz już konto? <a href="javascript:void(0)" onclick="switchAuthTab(\'login\')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zaloguj się tutaj</a>';
+    }
+  } else {
+    if (regBtn) regBtn.classList.remove('active');
+    if (loginBtn) loginBtn.classList.add('active');
+    if (submitBtn) {
+      submitBtn.textContent = '🔑 ZALOGUJ SIĘ';
+      submitBtn.style.background = 'linear-gradient(135deg, #00f0ff, #00c6a7)';
+    }
+    if (switchPrompt) {
+      switchPrompt.innerHTML = 'Nie masz jeszcze konta? <a href="javascript:void(0)" onclick="switchAuthTab(\'register\')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zarejestruj się za darmo (+500 🪙)</a>';
+    }
+  }
+}
+
+function showAuthAlert(message, type = 'error') {
+  const el = document.getElementById('fcAuthAlert');
+  if (!el) return;
+  el.className = 'fc-auth-alert ' + type;
+  const icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : '⏳');
+  el.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  el.style.display = 'flex';
+}
+
+function clearInputError(input) {
+  if (input) input.classList.remove('fc-input-error');
+  const alertEl = document.getElementById('fcAuthAlert');
+  if (alertEl && alertEl.classList.contains('error')) {
+    alertEl.style.display = 'none';
+  }
+}
+
+function togglePasswordVisibility() {
+  const pass = document.getElementById('fcAuthPassword');
+  if (pass) {
+    pass.type = pass.type === 'password' ? 'text' : 'password';
+  }
+}
+
+function submitAuthForm() {
+  if (currentAuthTab === 'register') {
+    fcRegister();
+  } else {
+    fcLogin();
+  }
+}
+
 function fcSetAuthStatus(message, good=false) {
   const el = document.getElementById('fcAuthStatus');
   if (el) {
     el.textContent = message;
     el.style.color = good ? '#00ff88' : '#ffb86b';
   }
+  showAuthAlert(message, good ? 'success' : 'error');
 }
 
 function openFcAuth() {
@@ -11580,6 +11688,8 @@ function openFcAuth() {
     } catch (e) {}
     nick.focus();
   }
+  const alertEl = document.getElementById('fcAuthAlert');
+  if (alertEl && !fcCurrentUser) alertEl.style.display = 'none';
   if (fcCurrentUser) {
     fcSetAuthStatus('Zalogowano jako ' + fcCurrentUser.username + '. Postęp w pełni zsynchronizowany z Cloudflare D1.', true);
   }
@@ -11783,10 +11893,20 @@ async function fcLogin() {
   const nick = nickInput ? nickInput.value.trim() : '';
   const pass = passInput ? passInput.value : '';
 
-  if (!nick) { fcSetAuthStatus('Wpisz nick.'); return; }
-  if (!pass) { fcSetAuthStatus('Wpisz hasło.'); return; }
+  if (!nick) {
+    if (nickInput) nickInput.classList.add('fc-input-error');
+    showAuthAlert('Wpisz swój nick gracza.', 'error');
+    if (nickInput) nickInput.focus();
+    return;
+  }
+  if (!pass) {
+    if (passInput) passInput.classList.add('fc-input-error');
+    showAuthAlert('Wpisz hasło do konta.', 'error');
+    if (passInput) passInput.focus();
+    return;
+  }
 
-  fcSetAuthStatus('Logowanie do konta ' + nick + '...');
+  showAuthAlert('Logowanie do konta ' + nick + '...', 'info');
   try {
     const res = await fetch(`${FC_API_URL}/api/auth/login`, {
       method: 'POST',
@@ -11795,7 +11915,9 @@ async function fcLogin() {
     });
     const data = await res.json();
     if (!res.ok || !data.success) {
-      fcSetAuthStatus(data.message || 'Nieprawidłowy nick lub hasło.');
+      if (passInput) passInput.classList.add('fc-input-error');
+      const msg = data.message || 'Nieprawidłowy nick lub hasło.';
+      showAuthAlert(`${msg} Jeśli nie posiadasz jeszcze konta, kliknij zakładkę "NOWE KONTO".`, 'error');
       return;
     }
 
@@ -11803,11 +11925,11 @@ async function fcLogin() {
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
     await fcLoadCloudProfile();
-    fcSetAuthStatus('Zalogowano pomyślnie jako ' + nick + '!', true);
+    showAuthAlert('Zalogowano pomyślnie jako ' + nick + '! Pobieranie klubu...', 'success');
     setTimeout(closeFcAuth, 600);
   } catch (err) {
     console.error('Błąd logowania:', err);
-    fcSetAuthStatus('Błąd połączenia z serwerem logowania.');
+    showAuthAlert('Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie za chwilę.', 'error');
   }
 }
 
@@ -11817,10 +11939,26 @@ async function fcRegister() {
   const nick = nickInput ? nickInput.value.trim() : '';
   const pass = passInput ? passInput.value : '';
 
-  if (nick.length < 3) { fcSetAuthStatus('Nick musi mieć co najmniej 3 znaki.'); return; }
-  if (pass.length < 6) { fcSetAuthStatus('Hasło musi mieć co najmniej 6 znaków.'); return; }
+  if (nick.length < 3) {
+    if (nickInput) nickInput.classList.add('fc-input-error');
+    showAuthAlert('Nick musi mieć co najmniej 3 znaki (maksymalnie 16).', 'error');
+    if (nickInput) nickInput.focus();
+    return;
+  }
+  if (nick.length > 16) {
+    if (nickInput) nickInput.classList.add('fc-input-error');
+    showAuthAlert('Nick może mieć maksymalnie 16 znaków.', 'error');
+    if (nickInput) nickInput.focus();
+    return;
+  }
+  if (pass.length < 6) {
+    if (passInput) passInput.classList.add('fc-input-error');
+    showAuthAlert('Hasło musi mieć co najmniej 6 znaków.', 'error');
+    if (passInput) passInput.focus();
+    return;
+  }
 
-  fcSetAuthStatus('Tworzenie konta w chmurze Cloudflare D1 (500 🪙 na start)...');
+  showAuthAlert('Tworzenie konta w chmurze Cloudflare D1 (500 🪙 na start)...', 'info');
   try {
     const res = await fetch(`${FC_API_URL}/api/auth/register`, {
       method: 'POST',
@@ -11829,7 +11967,12 @@ async function fcRegister() {
     });
     const data = await res.json();
     if (!res.ok || !data.success) {
-      fcSetAuthStatus(data.message || 'Błąd rejestracji konta.');
+      if (res.status === 409) {
+        if (nickInput) nickInput.classList.add('fc-input-error');
+        showAuthAlert(`Nick "${nick}" jest już zajęty! Jeśli to Twoje konto, kliknij zakładkę "LOGOWANIE".`, 'error');
+      } else {
+        showAuthAlert(data.message || 'Błąd rejestracji konta.', 'error');
+      }
       return;
     }
 
@@ -11837,11 +11980,11 @@ async function fcRegister() {
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
     await fcLoadCloudProfile();
-    fcSetAuthStatus('Konto utworzone pomyślnie! Odebrano 500 🪙 i karty startowe.', true);
+    showAuthAlert('Konto utworzone pomyślnie! Odebrano 500 🪙 i karty startowe.', 'success');
     setTimeout(closeFcAuth, 700);
   } catch (err) {
     console.error('Błąd rejestracji:', err);
-    fcSetAuthStatus('Błąd połączenia z serwerem rejestracji.');
+    showAuthAlert('Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie za chwilę.', 'error');
   }
 }
 
@@ -11921,6 +12064,11 @@ window.closeFcAuth = closeFcAuth;
 window.fcLogin = fcLogin;
 window.fcRegister = fcRegister;
 window.fcLogout = fcLogout;
+window.switchAuthTab = switchAuthTab;
+window.submitAuthForm = submitAuthForm;
+window.clearInputError = clearInputError;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.showAuthAlert = showAuthAlert;
 
 loadClubData();
 applySquadStatsToTeam(blueTeam, clubData.lineup);
