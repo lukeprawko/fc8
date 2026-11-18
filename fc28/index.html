@@ -10274,6 +10274,7 @@ class Player {
     this.radius = 18;
     this.baseSpeed = role === 'GK' ? 2.65 : (role === 'FWD' ? 3.15 : 3.00);
     this.angle = team === 'blue' ? 0 : Math.PI;
+    this.maxStamina = 100;
     this.stamina = 100;
 
     this.yellowCards = 0;
@@ -10333,6 +10334,12 @@ class Player {
     this.playstyle = card.playstyle;
     this.skinColor = card.skin || this.skinColor;
     this.hairColor = card.hair || this.hairColor;
+
+    // Indywidualna stamina zależna od fizyczności (PHY) i cechy Relentless+
+    const basePhy = this.statPhy || 75;
+    const relentlessBonus = (card.playstyle === 'relentless' || this.hasPlayStyle('relentless')) ? 16 : 0;
+    this.maxStamina = Math.round(72 + (basePhy - 50) * 0.75) + relentlessBonus;
+    this.stamina = this.maxStamina;
 
     // Wyraźne, odczuwalne zróżnicowanie kart (PAC, Przyspieszenie, Siła, Kontrola)
     const pacNorm = Math.max(50, Math.min(99, this.statPac)) / 100;
@@ -10437,10 +10444,11 @@ class Player {
     this.isSliding = true;
     this.slideTimer = 24;
     this.slideCooldown = 48;
-    const wallBonus = this.playstyle === 'intercept_wall' ? 1.20 : 1.0;
-    if (this.playstyle === 'intercept_wall') this.activatePlayStyle('intercept_wall');
-    const defScale = 1 + (this.statDef - 75) * 0.006;
-    const slideSpd = 6.5 * wallBonus * defScale;
+    this.stamina = Math.max(0, this.stamina - 12);
+    const wallBonus = (this.playstyle === 'intercept_wall' || this.hasPlayStyle('intercept_wall')) ? 1.22 : 1.0;
+    if (this.playstyle === 'intercept_wall' || this.hasPlayStyle('intercept_wall')) this.activatePlayStyle('intercept_wall');
+    const defScale = 1 + ((this.statDef || 75) - 75) * 0.007;
+    const slideSpd = 6.8 * wallBonus * defScale;
     this.vx = Math.cos(this.angle) * slideSpd;
     this.vy = Math.sin(this.angle) * slideSpd;
     playAndBroadcastSFX('slide');
@@ -10702,14 +10710,22 @@ class Player {
         let mult = this.speedMultiplier * (this.speedBoostTimer > 0 ? 1.18 : 1);
         if (this.isShielding) mult *= 0.38; // Zastawka mocno spowalnia ruch (było 0.62)
 
+        const curMaxStam = this.maxStamina || 100;
+        const isRelentless = this.hasPlayStyle('relentless');
         const hasRapid = this.playstyle === 'rapid_step';
-        if (wantSprint && this.stamina > 5 && !this.isShielding) {
-          mult *= hasRapid ? 1.36 : 1.24;
+
+        if (wantSprint && this.stamina > 4 && !this.isShielding) {
           this.isSprinting = true;
-          // Statystyka PAC chroni przed szybkim zmęczeniem
-          const pacStamDiscount = (this.statPac - 70) * 0.003;
-          const relentlessDiscount = this.playstyle === 'relentless' ? 0.12 : (this.playstyle === 'press_proven' ? 0.06 : 0);
-          this.stamina = Math.max(0, this.stamina - Math.max(0.12, (hasRapid ? 0.20 : 0.32) - pacStamDiscount - relentlessDiscount));
+          // Zależność sprintu od aktualnej staminy: im bardziej zmęczony, tym wolniejszy
+          const stamPct = Math.max(0.40, Math.min(1.0, this.stamina / curMaxStam));
+          const sprintMult = (hasRapid ? 1.36 : 1.25) * (0.80 + 0.20 * stamPct);
+          mult *= sprintMult;
+
+          // Koszt staminy na sprint:
+          let sprintDrain = hasRapid ? 0.36 : 0.28;
+          sprintDrain -= ((this.statPac - 70) * 0.0015 + (this.statPhy - 70) * 0.002);
+          if (isRelentless) sprintDrain *= 0.50; // Cecha Relentless zmniejsza spalanie o 50%!
+          this.stamina = Math.max(0, this.stamina - Math.max(0.12, sprintDrain));
 
           if (hasRapid && tickCount % 12 === 0) {
             this.activatePlayStyle('rapid_step');
@@ -10718,15 +10734,27 @@ class Player {
             spawnParticles(this.x, this.y + 8, 0, 1, hasRapid ? 'rgba(255, 215, 0, 0.75)' : 'rgba(0, 240, 255, 0.45)', 1.0, 14, 2.5);
           }
         } else {
-          this.stamina = Math.min(100, this.stamina + 0.32);
+          // Zrównoważona regeneracja sił podczas truchtu (nie natychmiastowa!)
+          const jogRegen = isRelentless ? 0.09 : 0.055;
+          this.stamina = Math.min(curMaxStam, this.stamina + jogRegen);
+        }
+
+        // Poważne konsekwencje niskiej staminy (Fatigue & Exhaustion)
+        const stamRatio = this.stamina / curMaxStam;
+        if (stamRatio < 0.35) {
+          const fatiguePenalty = 0.72 + 0.28 * (stamRatio / 0.35);
+          mult *= fatiguePenalty;
         }
 
         let targetSpeed = this.baseSpeed * mult;
-        // Płynna inercja i przyspieszenie zależne od karty
+        let curAccel = this.accelRate;
+        if (stamRatio < 0.30) {
+          curAccel *= (0.70 + 0.30 * (stamRatio / 0.30));
+        }
         let targetVx = dx * targetSpeed;
         let targetVy = dy * targetSpeed;
-        this.vx += (targetVx - this.vx) * this.accelRate;
-        this.vy += (targetVy - this.vy) * this.accelRate;
+        this.vx += (targetVx - this.vx) * curAccel;
+        this.vy += (targetVy - this.vy) * curAccel;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -10737,7 +10765,11 @@ class Player {
       } else {
         this.vx *= 0.48;
         this.vy *= 0.48;
-        this.stamina = Math.min(100, this.stamina + 0.44);
+        const curMaxStam = this.maxStamina || 100;
+        const isRelentless = this.hasPlayStyle('relentless');
+        // Regeneracja podczas postoju w miejscu (idle recovery)
+        const idleRegen = isRelentless ? 0.18 : 0.11;
+        this.stamina = Math.min(curMaxStam, this.stamina + idleRegen);
         if (ball.owner === this && !this.isShielding) {
           const aimMX = (inputSource.mouseX !== undefined) ? inputSource.mouseX : mouse.worldX;
           const aimMY = (inputSource.mouseY !== undefined) ? inputSource.mouseY : mouse.worldY;
@@ -10746,7 +10778,9 @@ class Player {
       }
     } else {
       if (this.playStyleTimer > 0) this.playStyleTimer--;
-      this.stamina = Math.min(100, this.stamina + 0.30);
+      const curMaxStam = this.maxStamina || 100;
+      const isRelentless = this.hasPlayStyle('relentless');
+      this.stamina = Math.min(curMaxStam, this.stamina + (isRelentless ? 0.10 : 0.06));
       this.runSmartTacticalAI();
     }
 
@@ -12010,7 +12044,7 @@ class Player {
             hintTxt = 'PPM = PODAJ | Q = LOB | SHIFT = SPRINT';
           }
         } else {
-          hintTxt = 'LPM = ODBIÓR | PPM = WŚLIZG | SPACJA = ZMIEŃ';
+          hintTxt = 'SPACJA / LPM = ODBIÓR | PPM = WŚLIZG | TAB = ZMIEŃ';
         }
         ctx.save();
         ctx.font = '900 10px Outfit, sans-serif';
@@ -12021,6 +12055,18 @@ class Player {
         ctx.fillText(hintTxt, this.x, this.y - 56 + bounce);
         ctx.restore();
       }
+    } else if (typeof getNextPlayerSwitchCandidate === 'function' && this === getNextPlayerSwitchCandidate()) {
+      // Wskaźnik drugiego zawodnika (Next Player Switch Cursor jak w EA FC)
+      const cy = badgeY - 5;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(this.x, cy);
+      ctx.lineTo(this.x - 5.5, cy - 7.5);
+      ctx.lineTo(this.x + 5.5, cy - 7.5);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.60)';
+      ctx.fill();
+      ctx.restore();
     }
 
     if (this.stunTimer > 0) {
@@ -12191,8 +12237,12 @@ function switchToClosestPlayerToBall() {
   const activeCandidates = teamArr.filter(p => !p.sentOff);
   if (activeCandidates.length === 0) return;
 
+  // W obronie priorytet mają zawodnicy z pola (DEF, MID, FWD), aby nie wyrywać bramkarza z linii!
+  const outfield = activeCandidates.filter(p => p.role !== 'GK');
+  const pool = outfield.length > 0 ? outfield : activeCandidates;
+
   // Sortuj zawodników rosnąco według odległości euklidesowej od piłki
-  const sorted = [...activeCandidates].sort((a, b) => {
+  const sorted = [...pool].sort((a, b) => {
     const distA = Math.hypot(a.x - ball.x, a.y - ball.y);
     const distB = Math.hypot(b.x - ball.x, b.y - ball.y);
     return distA - distB;
@@ -12204,6 +12254,25 @@ function switchToClosestPlayerToBall() {
     target = sorted[1];
   }
   switchToPlayer(target);
+}
+
+function getNextPlayerSwitchCandidate() {
+  if (is2v2) return null;
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+  const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+  const current = getControlledPlayerForSlot(localSlotIdx);
+  const activeCandidates = teamArr.filter(p => !p.sentOff);
+  const outfield = activeCandidates.filter(p => p.role !== 'GK');
+  const pool = outfield.length > 0 ? outfield : activeCandidates;
+
+  const sorted = [...pool].sort((a, b) => {
+    const distA = Math.hypot(a.x - ball.x, a.y - ball.y);
+    const distB = Math.hypot(b.x - ball.x, b.y - ball.y);
+    return distA - distB;
+  });
+
+  if (sorted[0] === current && sorted.length > 1) return sorted[1];
+  return sorted[0] !== current ? sorted[0] : null;
 }
 
 function cycleControlledPlayer(direction = 1) {
@@ -12773,38 +12842,64 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
 }
 
 function performStandingTackle(player) {
-  if (isInputLocked() || setPiece.active) return;
-  player.lungeTimer = 15;
+  if (!player || isInputLocked() || setPiece.active) return;
+  player.lungeTimer = 18;
+  player.stamina = Math.max(0, player.stamina - 4);
+
   const oppTeamColor = player.team === 'blue' ? 'red' : 'blue';
   let oppWithBall = allPlayers.find(p => !p.sentOff && p.team === oppTeamColor && ball.owner === p);
-  if (oppWithBall && oppWithBall.role === 'GK') return; // piłki w rękach bramkarza nie da się wyszarpać
+  if (oppWithBall && oppWithBall.role === 'GK') return;
+
   let distToOwner = oppWithBall ? Math.hypot(player.x - oppWithBall.x, player.y - oppWithBall.y) : 999;
   let distToBall = Math.hypot(player.x - ball.x, player.y - ball.y);
 
-  // Zasięg odbioru silnie skalowany statystyką DEF (od 54 do 76 px)
-  const defBonus = ((player.statDef || 75) - 70) * 0.45;
-  const tackleRange = (player.playstyle === 'intercept_wall' ? 74 : 62) + defBonus + (player.playstyle === 'block' ? 8 : 0) + (player.playstyle === 'press_proven' ? 4 : 0);
+  // Kierunek wykroku obronnego (lunge)
+  let tackleAngle = player.angle;
+  if (oppWithBall && distToOwner < 110) {
+    tackleAngle = Math.atan2(oppWithBall.y - player.y, oppWithBall.x - player.x);
+  } else if (!ball.owner && distToBall < 110) {
+    tackleAngle = Math.atan2(ball.y - player.y, ball.x - player.x);
+  }
+
+  // Impuls fizyczny wykroku w stronę rywala/piłki (realistyczny lunge obrońcy)
+  player.vx = Math.cos(tackleAngle) * 3.4;
+  player.vy = Math.sin(tackleAngle) * 3.4;
+  player.angle = tackleAngle;
+
+  // Zasięg odbioru na stojąco skalowany statystykami DEF, PHY oraz cechami PlayStyle+
+  const defBonus = ((player.statDef || 75) - 70) * 0.55;
+  const hasAnticipate = (player.playstyle === 'intercept_wall' || player.hasPlayStyle('intercept_wall'));
+  const hasBruiser = (player.playstyle === 'bruiser' || player.hasPlayStyle('bruiser'));
+  const tackleRange = (hasAnticipate ? 74 : 62) + defBonus + (hasBruiser ? 6 : 0) + (player.playstyle === 'block' ? 8 : 0);
+
+  // Kąt odbioru — odbiór działa w przednim stożku (frontal cone ~160 stopni)
+  const angleDiff = oppWithBall ? Math.abs(normalizeAngle(tackleAngle - player.angle)) : 0;
+  if (angleDiff > 1.45) return;
 
   if (oppWithBall && distToOwner < tackleRange) {
+    const oppStamRatio = (oppWithBall.stamina / (oppWithBall.maxStamina || 100));
+
     if (oppWithBall.isShielding) {
-      // Zastawka znerfiona: można ją przebić od boku, z przodu lub z wyższą obroną!
       let approachAngle = Math.atan2(player.y - oppWithBall.y, player.x - oppWithBall.x);
       let angleRel = Math.abs(normalizeAngle(approachAngle - (oppWithBall.angle + Math.PI)));
-      let defPower = (player.statDef || 75) + (player.playstyle === 'intercept_wall' ? 22 : 0);
-      let shieldPower = oppWithBall.strength + (oppWithBall.stamina * 0.35);
+      let defPower = (player.statDef || 75) * 0.70 + (player.statPhy || 75) * 0.30 + (hasAnticipate ? 25 : 0) + (hasBruiser ? 18 : 0);
+      let shieldPower = oppWithBall.strength + (oppStamRatio * 25);
 
-      if (angleRel > 0.70 || defPower >= shieldPower || oppWithBall.stamina < 30) {
+      if (angleRel > 0.65 || defPower >= shieldPower || oppWithBall.stamina < 25) {
         oppWithBall.isShielding = false;
         oppWithBall.stunTimer = 22;
+        oppWithBall.vx *= 0.25;
+        oppWithBall.vy *= 0.25;
         ball.owner = player;
         ball.lastTouchTeam = player.team;
-        if (player.playstyle === 'intercept_wall') player.activatePlayStyle('intercept_wall');
+        if (hasAnticipate) player.activatePlayStyle('intercept_wall');
+        else if (hasBruiser) player.activatePlayStyle('bruiser');
         playAndBroadcastSFX('pass');
-        spawnParticles(ball.x, ball.y, 0, 14, '#00e676', 3.0, 20, 3.5);
+        camera.shake = 0.35;
+        spawnParticles(ball.x, ball.y, 0, 16, '#00e676', 3.2, 22, 3.8);
         return;
       } else {
-        // Obrońca odbija się, ale zabiera atakującemu 18 pkt staminy
-        oppWithBall.stamina = Math.max(0, oppWithBall.stamina - 18);
+        oppWithBall.stamina = Math.max(0, oppWithBall.stamina - 15);
         player.vx -= Math.cos(approachAngle) * 2.2;
         player.vy -= Math.sin(approachAngle) * 2.2;
         spawnParticles(oppWithBall.x, oppWithBall.y, 2, 8, '#f5b041', 2.0, 14, 2.5);
@@ -12812,19 +12907,47 @@ function performStandingTackle(player) {
       }
     }
 
-    if (oppWithBall.trickType !== 'sombrero' && oppWithBall.trickType !== 'rainbow' && oppWithBall.trickType !== 'gaucho') {
-      ball.owner = player;
-      ball.lastTouchTeam = player.team;
-      oppWithBall.stunTimer = 24;
-      if (player.playstyle === 'intercept_wall') player.activatePlayStyle('intercept_wall');
-      playAndBroadcastSFX('pass');
-      spawnParticles(ball.x, ball.y, 0, 10, '#00e676', 2.8, 18, 3);
+    if (oppWithBall.trickTimer > 0 && (oppWithBall.trickType === 'sombrero' || oppWithBall.trickType === 'rainbow')) {
+      if (!hasAnticipate) return;
     }
-  } else if (!ball.owner && distToBall < tackleRange && ball.z < 28) {
+
+    const defScore = (player.statDef || 75) * 0.68 + (player.statPhy || 75) * 0.32 + (hasAnticipate ? 24 : 0) + (hasBruiser ? 16 : 0);
+    const driScore = (oppWithBall.statDri || 75) * 0.55 + (oppWithBall.statPhy || 75) * 0.30 + (oppStamRatio * 20);
+
+    if (defScore >= driScore * 0.82) {
+      oppWithBall.stunTimer = 20;
+      oppWithBall.vx *= 0.2;
+      oppWithBall.vy *= 0.2;
+
+      if (distToOwner < 42 || hasAnticipate) {
+        ball.owner = player;
+        ball.lastTouchTeam = player.team;
+      } else {
+        ball.owner = null;
+        ball.lastTouchTeam = player.team;
+        ball.kick(player, tackleAngle, 7.8, 0.4, 12);
+      }
+
+      if (hasAnticipate) player.activatePlayStyle('intercept_wall');
+      else if (hasBruiser) player.activatePlayStyle('bruiser');
+      playAndBroadcastSFX('pass');
+      camera.shake = 0.35;
+      spawnParticles(ball.x, ball.y, 0, 14, '#00e676', 3.0, 20, 3.5);
+    } else {
+      oppWithBall.stamina = Math.max(0, oppWithBall.stamina - 12);
+      oppWithBall.vx *= 0.6;
+      oppWithBall.vy *= 0.6;
+      ball.vx += Math.cos(tackleAngle) * 2.5;
+      ball.vy += Math.sin(tackleAngle) * 2.5;
+      playAndBroadcastSFX('pass');
+      spawnParticles(ball.x, ball.y, 1, 8, '#f5b041', 2.2, 16, 2.5);
+    }
+  } else if (!ball.owner && distToBall < tackleRange && ball.z < 30) {
     ball.owner = player;
     ball.lastTouchTeam = player.team;
-    if (player.playstyle === 'intercept_wall') player.activatePlayStyle('intercept_wall');
+    if (hasAnticipate) player.activatePlayStyle('intercept_wall');
     playAndBroadcastSFX('pass');
+    spawnParticles(ball.x, ball.y, 0, 8, '#00e676', 2.4, 16, 3);
   }
 }
 
@@ -13197,9 +13320,31 @@ function handleKeyDownOnce(code) {
     if (code === 'Digit4') { switchToRole('FWD'); return; }
   }
 
-  if (code === 'Tab' || (!hasBall && (code === 'Space' || code === 'KeyE' || code === 'KeyQ'))) {
+  // ODBIÓR NA STOJĄCO (SPACJA W OBRONIE)
+  if (!hasBall && code === 'Space') {
+    if (!isHost && !isSinglePlayer) sendReliable({ t: 'cmd', cmd: 'tackle' });
+    else performStandingTackle(myPlayer);
+    return;
+  }
+
+  // WŚLIZG (KLAWISZ C LUB B W OBRONIE)
+  if (!hasBall && (code === 'KeyC' || code === 'KeyB')) {
+    if (myPlayer.slideCooldown <= 0 && !myPlayer.isSliding && !setPiece.active) {
+      if (!isHost && !isSinglePlayer) {
+        sendReliable({ t: 'cmd', cmd: 'slide', aimX: mouse.worldX, aimY: mouse.worldY });
+      } else {
+        let toMouse = Math.atan2(mouse.worldY - myPlayer.y, mouse.worldX - myPlayer.x);
+        if (!myPlayer.isMoving) myPlayer.angle = toMouse;
+        myPlayer.startSlide();
+      }
+    }
+    return;
+  }
+
+  // PRZEŁĄCZANIE NA NAJBLIŻSZEGO ZAWODNIKA DO PIŁKI (TAB LUB Q W OBRONIE)
+  if (code === 'Tab' || (!hasBall && code === 'KeyQ')) {
     if (!is2v2) {
-      cycleControlledPlayer(1);
+      switchToClosestPlayerToBall();
       return;
     }
   }
@@ -13855,8 +14000,22 @@ function updateFixedStep() {
 
     const blueActive = getControlledPlayerForSlot(0) || blueTeam[1];
     const redActive = getControlledPlayerForSlot(2) || redTeam[1];
-    if (blueActive) document.getElementById('staminaBarBlue').style.width = blueActive.stamina + '%';
-    if (redActive) document.getElementById('staminaBarRed').style.width = redActive.stamina + '%';
+    if (blueActive) {
+      const bPct = Math.max(0, Math.min(100, Math.round((blueActive.stamina / (blueActive.maxStamina || 100)) * 100)));
+      const elB = document.getElementById('staminaBarBlue');
+      if (elB) {
+        elB.style.width = bPct + '%';
+        elB.style.background = bPct > 55 ? 'var(--p1)' : (bPct > 28 ? '#ffd700' : '#ff0055');
+      }
+    }
+    if (redActive) {
+      const rPct = Math.max(0, Math.min(100, Math.round((redActive.stamina / (redActive.maxStamina || 100)) * 100)));
+      const elR = document.getElementById('staminaBarRed');
+      if (elR) {
+        elR.style.width = rPct + '%';
+        elR.style.background = rPct > 55 ? 'var(--p2)' : (rPct > 28 ? '#ffd700' : '#ff0055');
+      }
+    }
 
     const currentControlled = getControlledPlayerForSlot(localSlotIdx);
     if (currentControlled !== lastTrackedControlled) {
@@ -14809,67 +14968,66 @@ async function renderLeaderboardData() {
 
   if (!content) return;
 
-  content.innerHTML = '<div style="text-align:center; padding:30px; color:#8b949e; font-family:\'Outfit\';">Ładowanie rankingu...</div>';
+  content.innerHTML = '<div style="text-align:center; padding:30px; color:#8b949e; font-family:\'Outfit\';">Ładowanie oficjalnego rankingu zarejestrowanych graczy...</div>';
 
   let players = [];
 
-  if (typeof fcDb !== 'undefined' && fcDb) {
-    try {
-      const snapPromise = fcDb.collection('players').limit(30).get();
-      const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 1000));
-      const snap = await Promise.race([snapPromise, timeoutPromise]);
-      snap.forEach(doc => {
-        const d = doc.data() || {};
-        const fc = (d.gameData && d.gameData.fc) || {};
-        const st = fc.stats || {};
-        const squadOvr = calculatePlayerSquadOvr(fc.lineup || d.lineup);
+  // Pobieranie autorytatywnego rankingu zarejestrowanych kont z Cloudflare D1
+  try {
+    const res = await fetch(`${FC_API_URL}/api/leaderboard`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.players)) {
+        players = data.players.map(p => ({
+          uid: p.uid,
+          nick: p.nick,
+          wins: Number(p.wins || 0),
+          matches: Number(p.matches || 0),
+          goals: Number(p.goals || 0),
+          coins: Number(p.coins || 0),
+          ovr: Number(p.ovr || 75)
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn('Leaderboard API fetch warning:', err);
+  }
 
-        players.push({
-          uid: doc.id,
-          nick: d.nick || fc.nick || 'GRACZ',
-          wins: Number(d.wins || st.wins || 0),
-          matches: Number(d.matches || st.matches || 0),
-          goals: Number(d.goals || st.goals || 0),
-          ovr: squadOvr
-        });
+  // Zawsze dołączamy/synchronizujemy aktualnego gracza
+  const myUid = (typeof fcCurrentUser !== 'undefined' && (fcCurrentUser?.uid || fcCurrentUser?.id)) || null;
+  const myOvr = calculatePlayerSquadOvr(clubData?.lineup);
+  const myStats = (clubData && clubData.stats) || { wins: 0, matches: 0, goals: 0 };
+  const currentNick = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser?.username) || (clubData && clubData.nick) || '';
+
+  if (myUid) {
+    const existingMeIdx = players.findIndex(p => p.uid === myUid || (currentNick && p.nick.toLowerCase() === currentNick.toLowerCase()));
+    if (existingMeIdx !== -1) {
+      players[existingMeIdx].nick = currentNick || players[existingMeIdx].nick;
+      players[existingMeIdx].wins = Math.max(players[existingMeIdx].wins, myStats.wins || 0);
+      players[existingMeIdx].matches = Math.max(players[existingMeIdx].matches, myStats.matches || 0);
+      players[existingMeIdx].goals = Math.max(players[existingMeIdx].goals, myStats.goals || 0);
+      players[existingMeIdx].ovr = myOvr;
+    } else {
+      players.push({
+        uid: myUid,
+        nick: currentNick || 'TWÓJ KLUB',
+        wins: myStats.wins || 0,
+        matches: myStats.matches || 0,
+        goals: myStats.goals || 0,
+        ovr: myOvr
       });
-    } catch (e) {
-      console.warn('Leaderboard fetch warning/timeout:', e.message);
     }
   }
 
-  // Wzorcowe profile AI jeśli baza nie zwróciła wystarczająco graczy
+  // Jeśli brak zarejestrowanych graczy w bazie — nie generujemy żadnych fałszywych botów!
   if (players.length === 0) {
-    players = [
-      { uid: 'ai1', nick: 'CyberKing_99', wins: 28, matches: 30, goals: 74, ovr: 88 },
-      { uid: 'ai2', nick: 'StrikerPro', wins: 21, matches: 25, goals: 59, ovr: 85 },
-      { uid: 'ai3', nick: 'NeonSniper', wins: 18, matches: 22, goals: 46, ovr: 83 },
-      { uid: 'ai4', nick: 'PlayStyleMaster', wins: 14, matches: 19, goals: 38, ovr: 81 },
-      { uid: 'ai5', nick: 'VortexKeeper', wins: 11, matches: 16, goals: 29, ovr: 79 }
-    ];
-  }
-
-  // Zawsze dołączamy aktualnego gracza
-  const myUid = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser?.uid) || 'guest';
-  const myOvr = calculatePlayerSquadOvr(clubData?.lineup);
-  const existingMeIdx = players.findIndex(p => p.uid === myUid);
-  const myStats = (clubData && clubData.stats) || { wins: 0, matches: 0, goals: 0 };
-
-  if (existingMeIdx !== -1) {
-    players[existingMeIdx].nick = (clubData && clubData.nick) || players[existingMeIdx].nick;
-    players[existingMeIdx].wins = Math.max(players[existingMeIdx].wins, myStats.wins || 0);
-    players[existingMeIdx].matches = Math.max(players[existingMeIdx].matches, myStats.matches || 0);
-    players[existingMeIdx].goals = Math.max(players[existingMeIdx].goals, myStats.goals || 0);
-    players[existingMeIdx].ovr = myOvr;
-  } else {
-    players.push({
-      uid: myUid,
-      nick: (clubData && clubData.nick) || 'TY',
-      wins: myStats.wins || 0,
-      matches: myStats.matches || 0,
-      goals: myStats.goals || 0,
-      ovr: myOvr
-    });
+    if (podiumEl) podiumEl.innerHTML = '';
+    content.innerHTML = '<div style="text-align:center; padding:50px 20px; color:#8b949e; font-family:\'Outfit\';"><div style="font-size:36px; margin-bottom:12px;">🏆</div>Brak zarejestrowanych graczy w bazie danych.<br><span style="color:#00f0ff; font-weight:700;">Zarejestruj konto i wygraj mecz, aby zostać liderem rankingu!</span></div>';
+    if (myRankBadge) myRankBadge.textContent = '-';
+    if (myRankNick) myRankNick.textContent = currentNick || 'GOŚĆ';
+    if (myRankText) myRankText.textContent = 'Zaloguj się, aby rywalizować w oficjalnym rankingu online';
+    if (myRankInsight) myRankInsight.textContent = 'Zarejestruj konto i zdobywaj nagrody za mecze!';
+    return;
   }
 
   // Sortowanie wg aktywnej kategorii
@@ -15388,6 +15546,17 @@ function pose(m,dt,tt){
     }
   }
 
+  if (p.lungeTimer > 0) {
+    const lungeP = Math.sin((1 - p.lungeTimer / 18) * Math.PI);
+    hR += lungeP * 1.5;
+    kR -= lungeP * 0.45;
+    tTorZ -= lungeP * 0.28;
+    tTorX += lungeP * 0.15;
+    aR -= lungeP * 0.6;
+    aL += lungeP * 0.6;
+    tJump -= lungeP * 3.5;
+  }
+
   hL=T1(hL,1.45,m.sl);hR=T1(hR,.7,m.sl);
   o.L.hip.rotation.z=hL;o.Rg.hip.rotation.z=hR;
   o.L.hip.rotation.x=hipLx;o.Rg.hip.rotation.x=hipRx;
@@ -15417,6 +15586,7 @@ const pts=new T.Points(pg,new T.PointsMaterial({size:6,vertexColors:true,transpa
 const cc={},pcol=c=>cc[c]||(cc[c]=(()=>{try{return new T.Color(String(c).replace(/rgba?\(([^)]+)\)/,(_,a)=>'rgb('+a.split(',').slice(0,3).join(',')+')'));}catch(e){return new T.Color(1,1,1);}})());
 const spRing=new T.Mesh(new T.RingGeometry(40,46,48),new T.MeshBasicMaterial({color:0x00f0ff,transparent:true,opacity:.9,side:T.DoubleSide}));spRing.rotation.x=-Math.PI/2;spRing.position.y=.8;spRing.visible=false;scene.add(spRing);
 const meRing=new T.Mesh(new T.RingGeometry(21,25,40),new T.MeshBasicMaterial({color:0x00e676,transparent:true,opacity:.9,side:T.DoubleSide}));meRing.rotation.x=-Math.PI/2;meRing.position.y=.8;scene.add(meRing);
+const nextRing=new T.Mesh(new T.RingGeometry(18,21,32),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.55,side:T.DoubleSide}));nextRing.rotation.x=-Math.PI/2;nextRing.position.y=.75;nextRing.visible=false;scene.add(nextRing);
 const models=new Map(),rc=new T.Raycaster(),nd=new T.Vector2(),V=new T.Vector3();let sw=0,sh=0,last=performance.now(),tt=0;
 G.pick=()=>{nd.set(mouse.screenX/canvas.width*2-1,-(mouse.screenY/canvas.height*2-1));rc.setFromCamera(nd,cam);const o=rc.ray.origin,d=rc.ray.direction;if(d.y<-.01){const t=-o.y/d.y;mouse.worldX=o.x+d.x*t;mouse.worldY=o.z+d.z*t;}};
 G.proj=(x,y,z)=>{V.set(x,z,y).project(cam);return[(V.x+1)/2*canvas.width,(1-V.y)/2*canvas.height];};
@@ -15436,10 +15606,12 @@ function render3D(){
   ballMesh.position.set(ball.x,BR+(ball.z||0)*.85,ball.y);
   const pw=!!(ball.isPowerShot||ball.isFinesseShot)&&Math.hypot(ball.vx,ball.vy)>6;ballM.emissiveIntensity=pw?.55:0;ballLight.intensity=pw?1.6:0;ballLight.position.copy(ballMesh.position);
   // zawodnicy + sędzia
-  const mine=getControlledPlayerForSlot(localSlotIdx);meRing.visible=false;
+  const mine=getControlledPlayerForSlot(localSlotIdx);meRing.visible=false;nextRing.visible=false;
+  const nextTarget=(typeof getNextPlayerSwitchCandidate==='function')?getNextPlayerSwitchCandidate():null;
   for(const p of allPlayers){let m=models.get(p);if(!m){m=build(p,false);models.set(p,m);}
     m.o.root.visible=!p.sentOff;if(p.sentOff)continue;refresh(m);pose(m,dt,tt);
-    if(p===mine){meRing.visible=true;meRing.position.set(p.x,.8,p.y);meRing.scale.setScalar(1+Math.sin(tt*6)*.06);}}
+    if(p===mine){meRing.visible=true;meRing.position.set(p.x,.8,p.y);meRing.scale.setScalar(1+Math.sin(tt*6)*.06);}
+    else if(p===nextTarget&&!p.sentOff){nextRing.visible=true;nextRing.position.set(p.x,.75,p.y);}}
   let rm=models.get(referee);if(!rm){referee.team='ref';referee.role='REF';referee.number=0;referee.cardName='SĘDZIA';referee.skinColor='#d2a679';referee.hairColor='#1a1a1a';referee.baseSpeed=3;referee.trickTimer=0;rm=build(referee,true);models.set(referee,rm);}
   refresh(rm);pose(rm,dt,tt);
   // pierścień stałego fragmentu
