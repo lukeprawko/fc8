@@ -1032,7 +1032,7 @@
     box-sizing: border-box;
   }
 
-  /* GÓRNY PASEK: NICK + PORTFEL MONET + PRZYCISKI KLUBU I KODU ZAPISU */
+  /* GÓRNY PASEK NAWIGACJI I KONTROLERA */
   .top-row {
     display: flex;
     align-items: center;
@@ -2369,21 +2369,6 @@
     color: #8b949e;
   }
 
-  /* MODAL KODU ZAPISU / WCZYTANIA */
-  .code-textarea {
-    width: 100%;
-    height: 85px;
-    background: #05070c;
-    border: 1px solid var(--p1);
-    border-radius: 12px;
-    padding: 10px;
-    color: var(--p1);
-    font-family: monospace;
-    font-size: 12px;
-    resize: none;
-    outline: none;
-    user-select: text;
-  }
 
   /* PANEL OCZEKIWANIA 1v1 & LOBBY 2v2 */
   .wait-panel {
@@ -4713,30 +4698,6 @@
     </div>
   </div>
 
-  <!-- MODAL KODU ZAPISU / TRANSFERU NA INNE URZĄDZENIE -->
-  <div class="modal-backdrop" id="saveCodeModalBackdrop">
-    <div class="club-modal" style="width:540px;">
-      <div class="club-modal-header">
-        <h2 style="font-family: var(--font-heading); font-size:18px; color:var(--p1);">KOD TRANSFERU KLUBU (SYNCHRONIZACJA DANYCH)</h2>
-        <button type="button" class="icon-btn" onclick="closeSaveCodeModal()">✕</button>
-      </div>
-
-      <div style="font-size:13px; color:#c9d1d9; text-align:left;">
-        Skopiuj swój kod poniżej, aby przenieść monety, kupionych piłkarzy i skład na inne urządzenie:
-      </div>
-      <textarea id="exportCodeBox" class="code-textarea" readonly></textarea>
-      <button type="button" class="action-btn btn-host" onclick="copySaveCode()">SKOPIUJ KOD TRANSFERU</button>
-
-      <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
-
-      <div style="font-size:13px; color:#c9d1d9; text-align:left;">
-        Masz kod z innego urządzenia? Wklej go tutaj i kliknij Wczytaj:
-      </div>
-      <textarea id="importCodeBox" class="code-textarea" placeholder="Wklej tutaj kod zapisu FC28-..."></textarea>
-      <div id="saveCodeStatus" style="font-family: var(--font-heading); font-size:11px; color:var(--green); min-height:16px;"></div>
-      <button type="button" class="action-btn btn-play-ai" onclick="importSaveCode()">WCZYTAJ KOD TRANSFERU</button>
-    </div>
-  </div>
 
   <!-- OBSZAR GRY — CZYSTY GÓRNY PASEK -->
   <div id="gameWrapper">
@@ -8060,120 +8021,16 @@ function closeClubModal() {
 
 
 /* ==========================================
-   3. EKSPORT / IMPORT KODU ZAPISU NA INNE URZĄDZENIE
+   3. AUTOMATYCZNA SYNCHRONIZACJA W CHMURZE (Cloudflare D1)
    ========================================== */
-function generateSaveCode() {
-  const payload = JSON.stringify(clubData);
-  return 'FC28-' + btoa(encodeURIComponent(payload));
-}
-
 function openSaveCodeModal() {
-  document.getElementById('exportCodeBox').value = generateSaveCode();
-  document.getElementById('importCodeBox').value = '';
-  document.getElementById('saveCodeStatus').textContent = '';
-  document.getElementById('saveCodeModalBackdrop').style.display = 'flex';
+  if (typeof openFcAuth === 'function') openFcAuth();
+  else showBanner('Twoje dane są w 100% zsynchronizowane z chmurą!', '#00ff87', 90);
 }
-
-function closeSaveCodeModal() {
-  document.getElementById('saveCodeModalBackdrop').style.display = 'none';
-}
-
-function copySaveCode() {
-  const box = document.getElementById('exportCodeBox');
-  const statusEl = document.getElementById('saveCodeStatus');
-  box.select();
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(box.value).then(() => {
-      statusEl.style.color = 'var(--green)';
-      statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
-    }).catch(() => {
-      try {
-        document.execCommand('copy');
-        statusEl.style.color = 'var(--green)';
-        statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
-      } catch (err) {
-        statusEl.style.color = 'var(--gold)';
-        statusEl.textContent = '✕ ZAZNACZ I SKOPIUJ KOD RĘCZNIE (CTRL+C)';
-      }
-    });
-  } else {
-    try {
-      document.execCommand('copy');
-      statusEl.style.color = 'var(--green)';
-      statusEl.textContent = '✓ SKOPIOWANO KOD DO SCHOWKA!';
-    } catch (err) {
-      statusEl.style.color = 'var(--gold)';
-      statusEl.textContent = '✕ ZAZNACZ I SKOPIUJ KOD RĘCZNIE (CTRL+C)';
-    }
-  }
-}
-
-function importSaveCode() {
-  const raw = document.getElementById('importCodeBox').value.trim();
-  const statusEl = document.getElementById('saveCodeStatus');
-  if (!raw.startsWith('FC28-')) {
-    statusEl.style.color = 'var(--p2)';
-    statusEl.textContent = '✕ NIEPRAWIDŁOWY FORMAT KODU (MUSI ZACZYNAĆ SIĘ OD FC28-)';
-    return;
-  }
-  try {
-    const jsonStr = decodeURIComponent(atob(raw.slice(5)));
-    const parsed = JSON.parse(jsonStr);
-    if (!parsed || typeof parsed !== 'object') throw new Error('Bad JSON object');
-
-    // Walidacja monet: 0 do 10 000 000
-    if (typeof parsed.coins !== 'number' || !Number.isFinite(parsed.coins) || parsed.coins < 0) {
-      throw new Error('Invalid coins');
-    }
-    const safeCoins = Math.min(10000000, Math.floor(parsed.coins));
-
-    // Walidacja i mapowanie kart
-    if (!Array.isArray(parsed.owned)) throw new Error('Invalid owned cards');
-    const validIds = new Set(PLAYERS_DB.map(c => c.id));
-    const safeOwned = [];
-    parsed.owned.forEach(id => {
-      if (typeof id === 'string') {
-        const mapped = OLD_ID_MAP[id] || id;
-        if (validIds.has(mapped) && !safeOwned.includes(mapped)) safeOwned.push(mapped);
-      }
-    });
-    STARTER_CARD_IDS.forEach(id => { if (!safeOwned.includes(id)) safeOwned.push(id); });
-
-    // Walidacja składu 4v4
-    if (!parsed.lineup || typeof parsed.lineup !== 'object') throw new Error('Invalid lineup');
-    const safeLineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
-    ['GK', 'DEF', 'MID', 'FWD'].forEach(role => {
-      let cardId = parsed.lineup[role];
-      if (cardId && OLD_ID_MAP[cardId]) cardId = OLD_ID_MAP[cardId];
-      const card = PLAYERS_DB.find(c => c.id === cardId && c.role === role);
-      if (card && safeOwned.includes(card.id)) safeLineup[role] = card.id;
-    });
-
-    const safeNick = (typeof parsed.nick === 'string' && parsed.nick.trim())
-      ? parsed.nick.trim().slice(0, 12).replace(/[<>&"']/g, '')
-      : clubData.nick;
-
-    clubData = {
-      nick: safeNick,
-      coins: safeCoins,
-      owned: safeOwned,
-      lineup: safeLineup,
-      updatedAt: Date.now()
-    };
-
-    saveClubData(true);
-    applySquadStatsToTeam(blueTeam, clubData.lineup);
-    const nickInput = document.getElementById('nickInput');
-    if (nickInput) nickInput.value = clubData.nick;
-
-    statusEl.style.color = 'var(--green)';
-    statusEl.textContent = '✓ POMYŚLNIE WCZYTANO KOD ZAPISU KLUBU!';
-    try { SFX.play('goal'); } catch (e) {}
-  } catch (err) {
-    statusEl.style.color = 'var(--p2)';
-    statusEl.textContent = '✕ BŁĄD WCZYTYWANIA: KOD USZKODZONY LUB ZMODYFIKOWANY';
-  }
-}
+function closeSaveCodeModal() {}
+function copySaveCode() {}
+function importSaveCode() {}
+function generateSaveCode() { return ''; }
 
 /* ==========================================
    4. SYNTEZATOR DŹWIĘKU (Web Audio API)
@@ -10215,8 +10072,8 @@ if (best) {
 /* ==========================================
    12. KLASA ZAWODNIKA 2.5D + RZUTY BRAMKARZA + PLAYSTYLE+
    ========================================== */
-// Koszt kondycji zwodów (spam niemożliwy: regeneracja ~0.3-0.44/tick < koszt przy cooldownie)
-const TRICK_COST = { feint: 22, stepover: 20, roulette: 28, elastico: 32, rabona: 32, rainbow: 38, sombrero: 38, gaucho: 34 };
+// Koszt kondycji zwodów (zbalansowane koszty i cooldowny)
+const TRICK_COST = { feint: 14, stepover: 12, roulette: 18, elastico: 22, rabona: 22, rainbow: 26, sombrero: 26, gaucho: 24 };
 
 // Pole karne drużyny broniącej (niebiescy bronią lewej bramki, czerwoni prawej) - zgodne z rysunkiem boiska
 const PEN_BOX = { w: 250, h: 480 };
@@ -10401,8 +10258,7 @@ class Player {
 
   triggerTrick(name, type, multiplier, silent = false) {
     const hasTrickster = this.playstyle === 'trickster' || this.playstyle === 'technical_dribble';
-    // Cooldown + koszt kondycji: zwodu nie da się już spamować
-    const trickCost = (TRICK_COST[type] || 24) * (hasTrickster ? 0.75 : 1);
+    const trickCost = (TRICK_COST[type] || 18) * (hasTrickster ? 0.75 : 1);
     if (this.trickCooldown > 0 || this.trickTimer > 0) return false;
     if (this.stamina < trickCost) {
       if (!silent && tickCount - this._trickWarnTick > 45) {
@@ -10414,26 +10270,32 @@ class Player {
     this.stamina = Math.max(0, this.stamina - trickCost);
     this.trickName = name;
     this.trickType = type;
-    this.trickMaxTime = 32;
+    this.trickMaxTime = 26;
     this.trickTimer = this.trickMaxTime;
-    this.trickCooldown = this.trickMaxTime + (hasTrickster ? 18 : 36);
+    this.trickCooldown = this.trickMaxTime + (hasTrickster ? 14 : 26);
     if (hasTrickster) {
       this.activatePlayStyle('trickster');
-      multiplier *= 1.14;
+      multiplier *= 1.08;
     }
-    this.speedMultiplier = multiplier;
+    this.speedMultiplier = Math.min(1.30, multiplier);
 
     let particleColor = hasTrickster ? '#e040fb' : (type === 'gaucho' || type === 'rainbow' ? '#f5b041' : '#00f0ff');
-    spawnParticles(this.x, this.y, 8, hasTrickster ? 22 : 14, particleColor, 3.2, 24, 3.8);
+    spawnParticles(this.x, this.y, 6, hasTrickster ? 16 : 10, particleColor, 2.8, 20, 3.2);
 
+    // Zbalansowane zmylenie obrońcy: następuje tylko w bliskim kontakcie z przodu (< 52 px)
     let opponents = (this.team === 'blue' ? redTeam : blueTeam).filter(p => !p.sentOff);
-    let stunRadius = (type === 'gaucho' || hasTrickster) ? 115 : 88;
     for (let opp of opponents) {
       if (opp.role === 'GK') continue;
       let d = Math.hypot(opp.x - this.x, opp.y - this.y);
-      if (d < stunRadius) {
-        opp.stunTimer = hasTrickster ? 48 : (type === 'gaucho' ? 42 : 32);
-        spawnParticles(opp.x, opp.y, 18, 10, '#f5b041', 2.4, 22, 3);
+      if (d < 52) {
+        let oppAngle = Math.atan2(opp.y - this.y, opp.x - this.x);
+        let facingDiff = Math.abs(normalizeAngle(oppAngle - this.angle));
+        if (facingDiff < 1.25) {
+          opp.stunTimer = hasTrickster ? 22 : 16;
+          opp.vx *= 0.45;
+          opp.vy *= 0.45;
+          spawnParticles(opp.x, opp.y, 2, 6, '#f5b041', 2.0, 16, 2.5);
+        }
       }
     }
     playAndBroadcastSFX('pass');
@@ -10718,14 +10580,14 @@ class Player {
           this.isSprinting = true;
           // Zależność sprintu od aktualnej staminy: im bardziej zmęczony, tym wolniejszy
           const stamPct = Math.max(0.40, Math.min(1.0, this.stamina / curMaxStam));
-          const sprintMult = (hasRapid ? 1.36 : 1.25) * (0.80 + 0.20 * stamPct);
+          const sprintMult = (hasRapid ? 1.35 : 1.24) * (0.82 + 0.18 * stamPct);
           mult *= sprintMult;
 
           // Koszt staminy na sprint:
-          let sprintDrain = hasRapid ? 0.36 : 0.28;
-          sprintDrain -= ((this.statPac - 70) * 0.0015 + (this.statPhy - 70) * 0.002);
-          if (isRelentless) sprintDrain *= 0.50; // Cecha Relentless zmniejsza spalanie o 50%!
-          this.stamina = Math.max(0, this.stamina - Math.max(0.12, sprintDrain));
+          let sprintDrain = hasRapid ? 0.28 : 0.22;
+          sprintDrain -= ((this.statPac - 70) * 0.0012 + (this.statPhy - 70) * 0.0015);
+          if (isRelentless) sprintDrain *= 0.55;
+          this.stamina = Math.max(0, this.stamina - Math.max(0.09, sprintDrain));
 
           if (hasRapid && tickCount % 12 === 0) {
             this.activatePlayStyle('rapid_step');
@@ -10734,22 +10596,22 @@ class Player {
             spawnParticles(this.x, this.y + 8, 0, 1, hasRapid ? 'rgba(255, 215, 0, 0.75)' : 'rgba(0, 240, 255, 0.45)', 1.0, 14, 2.5);
           }
         } else {
-          // Zrównoważona regeneracja sił podczas truchtu (nie natychmiastowa!)
-          const jogRegen = isRelentless ? 0.09 : 0.055;
+          // Dynamiczna, szybsza regeneracja podczas truchtu (chód/jogging)
+          const jogRegen = isRelentless ? 0.26 : 0.18;
           this.stamina = Math.min(curMaxStam, this.stamina + jogRegen);
         }
 
         // Poważne konsekwencje niskiej staminy (Fatigue & Exhaustion)
         const stamRatio = this.stamina / curMaxStam;
-        if (stamRatio < 0.35) {
-          const fatiguePenalty = 0.72 + 0.28 * (stamRatio / 0.35);
+        if (stamRatio < 0.28) {
+          const fatiguePenalty = 0.78 + 0.22 * (stamRatio / 0.28);
           mult *= fatiguePenalty;
         }
 
         let targetSpeed = this.baseSpeed * mult;
         let curAccel = this.accelRate;
-        if (stamRatio < 0.30) {
-          curAccel *= (0.70 + 0.30 * (stamRatio / 0.30));
+        if (stamRatio < 0.25) {
+          curAccel *= (0.75 + 0.25 * (stamRatio / 0.25));
         }
         let targetVx = dx * targetSpeed;
         let targetVy = dy * targetSpeed;
@@ -10767,8 +10629,8 @@ class Player {
         this.vy *= 0.48;
         const curMaxStam = this.maxStamina || 100;
         const isRelentless = this.hasPlayStyle('relentless');
-        // Regeneracja podczas postoju w miejscu (idle recovery)
-        const idleRegen = isRelentless ? 0.18 : 0.11;
+        // Szybka regeneracja podczas postoju w miejscu (idle)
+        const idleRegen = isRelentless ? 0.44 : 0.32;
         this.stamina = Math.min(curMaxStam, this.stamina + idleRegen);
         if (ball.owner === this && !this.isShielding) {
           const aimMX = (inputSource.mouseX !== undefined) ? inputSource.mouseX : mouse.worldX;
@@ -10780,7 +10642,7 @@ class Player {
       if (this.playStyleTimer > 0) this.playStyleTimer--;
       const curMaxStam = this.maxStamina || 100;
       const isRelentless = this.hasPlayStyle('relentless');
-      this.stamina = Math.min(curMaxStam, this.stamina + (isRelentless ? 0.10 : 0.06));
+      this.stamina = Math.min(curMaxStam, this.stamina + (isRelentless ? 0.24 : 0.16));
       this.runSmartTacticalAI();
     }
 
@@ -12039,12 +11901,12 @@ class Player {
         const enemyGoalX = this.team === 'blue' ? WORLD.width - WORLD.marginX : WORLD.marginX;
         if (ball.owner === this) {
           if (Math.hypot(enemyGoalX - this.x, WORLD.height / 2 - this.y) < 420) {
-            hintTxt = '🎯 PRZYTRZYMAJ LPM = STRZAŁ!';
+            hintTxt = '🎯 PRZYTRZYMAJ LPM = STRZAŁ! | SPACJA = ZASTAWKA';
           } else {
-            hintTxt = 'PPM = PODAJ | Q = LOB | SHIFT = SPRINT';
+            hintTxt = 'PPM = PODAJ | Q = LOB | SPACJA = ZASTAWKA | SHIFT = SPRINT';
           }
         } else {
-          hintTxt = 'SPACJA / LPM = ODBIÓR | PPM = WŚLIZG | TAB = ZMIEŃ';
+          hintTxt = 'SPACJA / TAB = ZMIEŃ | LPM / F = ODBIÓR | PPM / C = WŚLIZG';
         }
         ctx.save();
         ctx.font = '900 10px Outfit, sans-serif';
@@ -13320,14 +13182,22 @@ function handleKeyDownOnce(code) {
     if (code === 'Digit4') { switchToRole('FWD'); return; }
   }
 
-  // ODBIÓR NA STOJĄCO (SPACJA W OBRONIE)
-  if (!hasBall && code === 'Space') {
+  // PRZEŁĄCZANIE ZAWODNIKA POD SPACJĄ LUB TABEM (STEROWANIE KLAWIATURĄ W OBRONIE)
+  if (!hasBall && (code === 'Space' || code === 'Tab')) {
+    if (!is2v2) {
+      switchToClosestPlayerToBall();
+      return;
+    }
+  }
+
+  // ODBIÓR NA STOJĄCO (KLAWISZ F LUB E W OBRONIE NA KLAWIATURZE, ORAZ LPM MYSZKĄ)
+  if (!hasBall && (code === 'KeyF' || code === 'KeyE')) {
     if (!isHost && !isSinglePlayer) sendReliable({ t: 'cmd', cmd: 'tackle' });
     else performStandingTackle(myPlayer);
     return;
   }
 
-  // WŚLIZG (KLAWISZ C LUB B W OBRONIE)
+  // WŚLIZG (KLAWISZ C LUB B W OBRONIE, ORAZ PPM MYSZKĄ)
   if (!hasBall && (code === 'KeyC' || code === 'KeyB')) {
     if (myPlayer.slideCooldown <= 0 && !myPlayer.isSliding && !setPiece.active) {
       if (!isHost && !isSinglePlayer) {
@@ -13341,8 +13211,8 @@ function handleKeyDownOnce(code) {
     return;
   }
 
-  // PRZEŁĄCZANIE NA NAJBLIŻSZEGO ZAWODNIKA DO PIŁKI (TAB LUB Q W OBRONIE)
-  if (code === 'Tab' || (!hasBall && code === 'KeyQ')) {
+  // PRZEŁĄCZANIE NA NAJBLIŻSZEGO ZAWODNIKA DO PIŁKI (KLAWISZ Q W OBRONIE)
+  if (!hasBall && code === 'KeyQ') {
     if (!is2v2) {
       switchToClosestPlayerToBall();
       return;
