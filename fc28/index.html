@@ -107,17 +107,17 @@
   }
 
   .hub-panel {
-    background: var(--panel);
-    backdrop-filter: blur(22px);
-    border: 1px solid rgba(0, 240, 255, 0.22);
-    border-radius: 24px;
-    padding: 20px 22px;
-    width: 860px;
+    background: rgba(11, 16, 28, 0.92);
+    backdrop-filter: blur(32px);
+    border: 1.5px solid rgba(0, 240, 255, 0.28);
+    border-radius: 28px;
+    padding: 26px 30px;
+    width: 1040px;
     max-width: 96vw;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 240, 255, 0.08);
+    box-shadow: 0 35px 95px rgba(0, 0, 0, 0.95), 0 0 55px rgba(0, 240, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     box-sizing: border-box;
   }
 
@@ -228,6 +228,233 @@
   }
   .top-nav-btn.gold-btn:hover {
     box-shadow: 0 0 22px rgba(245, 176, 65, 0.45);
+  }
+
+  
+  .top-row-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .top-nav-btn.active-tab {
+    background: rgba(0, 240, 255, 0.22);
+    border-color: var(--p1);
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+  }
+  .squad-preview-strip {
+    background: linear-gradient(145deg, rgba(14, 20, 36, 0.9) 0%, rgba(8, 12, 22, 0.95) 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.22);
+    border-radius: 22px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-sizing: border-box;
+    width: 100%;
+    box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.05);
+  }
+  .squad-strip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .squad-header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .squad-title-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  .squad-title-main {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+  }
+  .squad-header-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .squad-ovr-pill, .squad-chem-pill {
+    background: rgba(0, 240, 255, 0.12);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--p1);
+    letter-spacing: 1px;
+  }
+  .squad-chem-pill {
+    background: rgba(0, 255, 136, 0.12);
+    border-color: rgba(0, 255, 136, 0.35);
+    color: #00ff88;
+  }
+  .squad-manage-btn {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.22), rgba(184, 69, 255, 0.25));
+    border: 1.5px solid var(--gold);
+    border-radius: 12px;
+    padding: 7px 16px;
+    color: #ffffff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 0.8px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.25);
+  }
+  .squad-manage-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.55);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.38), rgba(184, 69, 255, 0.42));
+  }
+  .squad-cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .ea-squad-card {
+    background: linear-gradient(155deg, #18233c 0%, #0d1527 50%, #111a2f 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.28);
+    border-radius: 18px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+  }
+  .ea-squad-card:hover {
+    transform: translateY(-5px) scale(1.03);
+    border-color: var(--p1);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.4);
+  }
+  .ea-squad-card.is-gold {
+    background: linear-gradient(155deg, #2c2514 0%, #151c2e 50%, #201a0d 100%);
+    border-color: rgba(255, 215, 0, 0.55);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 215, 0, 0.18);
+  }
+  .ea-squad-card.is-gold:hover {
+    border-color: var(--gold);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.55);
+  }
+  .ea-squad-card.is-icon {
+    background: linear-gradient(155deg, #3d3112 0%, #1f2a42 50%, #302409 100%);
+    border-color: #ffd700;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.38);
+  }
+  .ea-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  .ea-card-ovr {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  .ea-card-pos {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--p1);
+    letter-spacing: 1px;
+  }
+  .ea-card-flag {
+    font-size: 15px;
+  }
+  .ea-card-photo-wrap {
+    width: 72px;
+    height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 2px 0 6px;
+  }
+  .ea-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8));
+    transition: transform 0.2s;
+  }
+  .ea-squad-card:hover .ea-card-img {
+    transform: scale(1.08);
+  }
+  .ea-card-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 3px;
+  }
+  .ea-card-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-align: center;
+  }
+  .ea-card-stats {
+    font-size: 9px;
+    font-weight: 800;
+    color: #8b949e;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .ea-card-ps {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    color: #050811;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8.5px;
+    font-weight: 900;
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+  }
+  .ea-card-ps-empty {
+    font-size: 8px;
+    font-weight: 700;
+    color: #484f58;
+    margin-top: 3px;
+    letter-spacing: 1px;
   }
 
   /* PODGLĄD AKTYWNEGO SKŁADU W MENU */
@@ -1531,7 +1758,7 @@
     width: 100%;
     aspect-ratio: 1100 / 660;
   }
-  .squad-hud { position:absolute; top:8px; z-index:5; pointer-events:none; display:flex; flex-direction:column; gap:3px; font-family:'Orbitron',sans-serif; }
+  .squad-hud { display: none !important; }
   .squad-hud.left { left:10px; } .squad-hud.right { right:10px; align-items:flex-end; }
   .sq-row { display:flex; align-items:center; gap:6px; background:rgba(6,10,20,.72); border:1px solid rgba(255,255,255,.12); border-radius:7px; padding:2px 7px; font-size:10px; font-weight:800; color:#fff; white-space:nowrap; }
   .squad-hud.left .sq-row { border-left:3px solid var(--p1); } .squad-hud.right .sq-row { border-right:3px solid var(--p2); }
@@ -2012,9 +2239,24 @@
     opacity: 0;
     pointer-events: none;
   }
+  @keyframes packViolentRumble {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
+    15% { transform: translate(-7px, 5px) rotate(-2.5deg) scale(1.04); }
+    30% { transform: translate(7px, -6px) rotate(2.5deg) scale(1.03); }
+    45% { transform: translate(-6px, -7px) rotate(-1.5deg) scale(1.06); }
+    60% { transform: translate(6px, 7px) rotate(2deg) scale(1.04); }
+    75% { transform: translate(-5px, 4px) rotate(-2deg) scale(1.07); }
+    90% { transform: translate(5px, -5px) rotate(1.5deg) scale(1.08); }
+  }
+  .pack-ripping {
+    animation: packViolentRumble 0.12s infinite linear !important;
+    box-shadow: 0 0 60px rgba(0, 240, 255, 0.8), 0 0 100px rgba(255, 215, 0, 0.7) !important;
+  }
   .pack-ripping .pack-seam-laser {
     opacity: 1;
-    animation: laserSlice 0.5s forwards ease-in-out;
+    height: 6px;
+    box-shadow: 0 0 25px #00f0ff, 0 0 45px #ffd700, 0 0 60px #ffffff;
+    animation: laserSlice 0.4s forwards ease-in-out;
   }
   @keyframes laserSlice {
     0% { transform: translateX(0); opacity: 0; }
@@ -2789,7 +3031,7 @@
     </div>
 
     <div class="hub-panel" id="mainPanel">
-      <!-- GÓRNY WIERSZ: MONETY + KLUB & PACZKI + STATUS KONTA -->
+      <!-- GÓRNY WIERSZ: MONETY + NAWIGACJA EA FC + STATUS KONTA -->
       <div class="top-row">
         <div class="nick-box" id="nickBox" title="Nick konta" style="display:none">
           <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
@@ -2797,21 +3039,37 @@
         </div>
 
         <div class="top-row-left">
-          <div class="coins-badge" title="Monety FC (Zarabiasz za mecze i gole!)">
-            <span>🪙</span>
+          <div class="coins-badge" title="Monety FC (Zarabiasz za wygrane mecze i gole!)">
+            <span style="font-size:16px;">🪙</span>
             <span id="menuCoinsDisplay">0</span>
+            <span style="font-size:10px; color:#c9d1d9; opacity:0.8; letter-spacing:1px; margin-left:2px;">MONET</span>
           </div>
         </div>
 
-        <div class="top-row-right">
+        <div class="top-row-nav">
+          <button type="button" class="top-nav-btn active-tab" onclick="void(0)" title="Główna Arena Meczowa">
+            <span>⚽</span>
+            <span>ARENA</span>
+          </button>
+          <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('SQUAD'); openClubModal()" title="Zarządzaj składem i formacją">
+            <span>🛡️</span>
+            <span>SKŁAD</span>
+          </button>
+          <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS'); openClubModal()" title="Sklep z Paczkami FUT">
+            <span>📦</span>
+            <span>SKLEP PACZEK</span>
+          </button>
           <button type="button" class="top-nav-btn" onclick="openLeaderboardModal()" style="border-color: rgba(255, 215, 0, 0.45); color: var(--gold);" title="Globalna Tabela Liderów i Statystyki">
             <span>🏆</span>
             <span>RANKING</span>
           </button>
-          <button type="button" class="top-nav-btn gold-btn" onclick="openClubModal()" title="Otwórz pełnoekranowy Ultimate Klub & Paczki">
-            <span>⚽</span>
-            <span>KLUB & PACZKI</span>
+          <button type="button" class="top-nav-btn" onclick="openSaveCodeModal()" style="border-color: rgba(0, 240, 255, 0.35);" title="Kod zapisu i transfer danych">
+            <span>💾</span>
+            <span>KOD ZAPISU</span>
           </button>
+        </div>
+
+        <div class="top-row-right">
           <div class="fc-auth-user is-auth" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i wyloguj" style="display:none;">● TRYB GOŚCIA</div>
           <button type="button" class="account-top-btn" id="fcAccountButton" onclick="openFcAuth()">🔑 ZALOGUJ SIĘ</button>
         </div>
@@ -3036,6 +3294,7 @@
 
   <!-- MODAL ANIMACJI OTWARCIA PACZKI -->
   <div class="modal-backdrop" id="packOpeningModal" style="display:none; z-index:11000; background:rgba(2,4,10,0.96); backdrop-filter:blur(20px);">
+    <canvas id="packConfettiCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:11005;"></canvas>
     <div class="pack-opening-wrapper">
       <!-- Faza 1: Płonąca koperta 3D do kliknięcia -->
       <div id="packFoilStage" class="pack-stage-container">
@@ -3160,7 +3419,7 @@
       <canvas id="field" width="1100" height="660"></canvas>
       <div id="squadHudBlue" class="squad-hud left"></div>
       <div id="squadHudRed" class="squad-hud right"></div>
-      <div class="player-switcher-bar" id="playerSwitcherBar"></div>
+      <!-- playerSwitcherBar removed for clean in-match screen -->
 
       <!-- MODAL ZWYCIĘSTWA + NAGRODA MONET -->
       <div id="victoryModal">
@@ -6001,6 +6260,116 @@ function openPackAnimationModal(card, isDuplicate, refund) {
   }, 2800);
 }
 
+
+/* ==================================================
+   ULTRA-CINEMATIC PACK CONFETTI & FIREWORKS ENGINE
+   ================================================== */
+let packConfettiAnimId = null;
+function launchPackConfetti(isIcon = false, isWalkout = false) {
+  const canvas = document.getElementById('packConfettiCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const width = canvas.width = window.innerWidth * dpr;
+  const height = canvas.height = window.innerHeight * dpr;
+  ctx.scale(dpr, dpr);
+
+  const colors = isIcon
+    ? ['#ffd700', '#fff3a8', '#ffffff', '#ffaa00', '#f39c12']
+    : (isWalkout
+        ? ['#ffd700', '#00f0ff', '#ff0055', '#ffffff', '#b845ff']
+        : ['#00f0ff', '#ffffff', '#00ff88', '#2ecc71', '#ffd700']);
+
+  const particleCount = isIcon ? 280 : (isWalkout ? 220 : 160);
+  const particles = [];
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  for (let i = 0; i < particleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 6 + Math.random() * 22;
+    particles.push({
+      x: centerX + (Math.random() - 0.5) * 60,
+      y: centerY + (Math.random() - 0.5) * 60,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - (4 + Math.random() * 8),
+      size: 5 + Math.random() * 9,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotX: Math.random() * 360,
+      rotY: Math.random() * 360,
+      rotZ: Math.random() * 360,
+      rotSpeedX: (Math.random() - 0.5) * 16,
+      rotSpeedY: (Math.random() - 0.5) * 16,
+      rotSpeedZ: (Math.random() - 0.5) * 16,
+      alpha: 1,
+      gravity: 0.28 + Math.random() * 0.16,
+      drag: 0.965,
+      isSpark: Math.random() < 0.35,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.08 + Math.random() * 0.1
+    });
+  }
+
+  if (packConfettiAnimId) cancelAnimationFrame(packConfettiAnimId);
+
+  const startTime = performance.now();
+  function animateConfetti(now) {
+    const elapsed = now - startTime;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    let alive = 0;
+    for (let p of particles) {
+      if (p.alpha <= 0.01) continue;
+      alive++;
+
+      p.vx *= p.drag;
+      p.vy = (p.vy + p.gravity) * p.drag;
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.sin(p.wobble) * 1.5;
+      p.y += p.vy;
+
+      p.rotX += p.rotSpeedX;
+      p.rotY += p.rotSpeedY;
+      p.rotZ += p.rotSpeedZ;
+
+      if (elapsed > 1800) {
+        p.alpha -= 0.018;
+      }
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.globalAlpha = Math.max(0, p.alpha);
+
+      if (p.isSpark) {
+        // Lśniąca gwiazda/iskra
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Metaliczny, obracający się w 3D pasek konfetti
+        const scaleX = Math.cos(p.rotX * Math.PI / 180);
+        const scaleY = Math.cos(p.rotY * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = isIcon ? 8 : 4;
+        ctx.fillRect(-p.size / 2 * scaleX, -p.size / 2 * scaleY, p.size * Math.abs(scaleX), (p.size * 1.5) * Math.abs(scaleY));
+      }
+      ctx.restore();
+    }
+
+    if (alive > 0 && elapsed < 4500) {
+      packConfettiAnimId = requestAnimationFrame(animateConfetti);
+    } else {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      packConfettiAnimId = null;
+    }
+  }
+  packConfettiAnimId = requestAnimationFrame(animateConfetti);
+}
+
 function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDropIsDuplicate, refund = currentDropRefund) {
   if (packOpeningInProgress) return;
   packOpeningInProgress = true;
@@ -6088,6 +6457,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
         const fut = revealedWrap.querySelector('.fut-card');
         if (fut) fut.classList.add('card-revealed-anim');
       }
+      launchPackConfetti(isIcon, isWalkout);
       try { SFX.play('card_slam'); } catch (e) {}
     };
 
@@ -6137,6 +6507,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
             if (banner) banner.textContent = isIcon ? '👑 IKONA LEGEND FUT! 👑' : '🔥 OFICJALNY WALKOUT! 🔥';
             if (sub) sub.textContent = `${card.name} • ${card.ovr} OVR`;
           }
+          launchPackConfetti(isIcon, isWalkout);
           try {
             SFX.play('walkout_hit');
             SFX.play('icon_fanfare');
@@ -6195,39 +6566,70 @@ function updateMenuSquadStrip() {
 
   const roles = ['GK', 'DEF', 'MID', 'FWD'];
   const rl = { GK: 'BR', DEF: 'ŚO', MID: 'ŚP', FWD: 'N' };
+  const rFull = { GK: 'BRAMKARZ', DEF: 'OBROŃCA', MID: 'POMOCNIK', FWD: 'NAPASTNIK' };
   const squadCards = roles.map((r, i) => getCardById(clubData.lineup?.[r]) || getCardById(STARTER_CARD_IDS[i]));
   const avgOvr = Math.round(squadCards.reduce((acc, c) => acc + (c ? c.ovr : 75), 0) / 4);
 
-  let html = `<div class="squad-strip-label">TWÓJ SKŁAD<br><span style="color:var(--gold); font-size:12px;">OVR ${avgOvr}</span></div>`;
+  let html = `
+    <div class="squad-strip-header">
+      <div class="squad-header-title">
+        <span class="squad-title-tag">ULTIMATE TEAM</span>
+        <div class="squad-title-main">TWÓJ WYJŚCIOWY SKŁAD</div>
+      </div>
+      <div class="squad-header-badges">
+        <div class="squad-ovr-pill">OVR <strong>${avgOvr}</strong></div>
+        <div class="squad-chem-pill">ZGRANIE <strong>33/33</strong></div>
+        <button type="button" class="squad-manage-btn" onclick="switchClubTab('SQUAD'); openClubModal();">
+          <span>⚙️ ZARZĄDZAJ SKŁADEM & TAKTYKĄ</span>
+        </button>
+      </div>
+    </div>
+    <div class="squad-cards-row">
+  `;
+
   for (let i = 0; i < roles.length; i++) {
     const r = roles[i];
     const card = squadCards[i] || { ovr: 75, pac: 75, sho: 75, name: 'PIŁKARZ' };
     const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
-    let statText = '';
+    const isGold = (card.ovr >= 84);
+    const isIcon = (card.ovr >= 90);
+
+    let stat1 = '', stat2 = '';
     if (r === 'GK') {
-      const par = card.div || card.def || 75;
-      const ref = card.ref || card.ovr || 75;
-      statText = `${rl[r]} • PAR ${par} • REF ${ref}`;
+      stat1 = `PAR ${card.div || card.def || 75}`;
+      stat2 = `REF ${card.ref || card.ovr || 75}`;
     } else if (r === 'DEF') {
-      statText = `${rl[r]} • OBR ${card.def || 75} • TEM ${card.pac || 75}`;
+      stat1 = `OBR ${card.def || 75}`;
+      stat2 = `TEM ${card.pac || 75}`;
     } else if (r === 'MID') {
-      statText = `${rl[r]} • POD ${card.pas || 75} • TEM ${card.pac || 75}`;
+      stat1 = `POD ${card.pas || 75}`;
+      stat2 = `TEM ${card.pac || 75}`;
     } else {
-      statText = `${rl[r]} • TEM ${card.pac || 75} • STR ${card.sho || 75}`;
+      stat1 = `TEM ${card.pac || 75}`;
+      stat2 = `STR ${card.sho || 75}`;
     }
 
+    const flagEmoji = PLAYER_NATIONS[card.id] || '⚽';
+
     html += `
-      <div class="mini-fut-card ${ps ? 'gold-tier' : ''}" onclick="switchClubTab('SQUAD'); openClubModal();" title="Twój skład (${rl[r]}): ${card.name}">
-        <div class="mini-ovr">${card.ovr}</div>
-        <img src="assets/players/${card.id}.webp" style="width:28px; height:32px; object-fit:contain; border-radius:4px; margin-right:4px;" onerror="this.style.display='none';">
-        <div class="mini-info">
-          <span class="mini-name">${card.name}</span>
-          <span class="mini-pos">${statText}</span>
+      <div class="ea-squad-card ${isIcon ? 'is-icon' : (isGold ? 'is-gold' : '')}" onclick="switchClubTab('SQUAD'); openClubModal();" title="Kliknij, aby zarządzać kartą (${rFull[r]}): ${card.name}">
+        <div class="ea-card-top">
+          <div class="ea-card-ovr">${card.ovr}</div>
+          <div class="ea-card-pos">${rl[r]}</div>
+          <div class="ea-card-flag" title="${PLAYER_COUNTRIES[card.id] || ''}">${flagEmoji}</div>
         </div>
-        ${ps ? `<span class="ps-diamond" title="${ps.name}: ${ps.desc}"><img src="assets/playstyles/${card.playstyle}.webp" style="width:14px; height:14px; vertical-align:middle; margin-right:2px;" onerror="this.style.display='none';">${ps.name}</span>` : ''}
+        <div class="ea-card-photo-wrap">
+          <img src="assets/players/${card.id}.webp" class="ea-card-img" alt="${card.name}" onerror="this.style.opacity='0.2';">
+        </div>
+        <div class="ea-card-bottom">
+          <div class="ea-card-name">${card.name}</div>
+          <div class="ea-card-stats">${stat1} • ${stat2}</div>
+          ${ps ? `<div class="ea-card-ps" title="${ps.name}: ${ps.desc}">⚡ ${ps.name}</div>` : '<div class="ea-card-ps-empty">KLASYK</div>'}
+        </div>
       </div>
     `;
   }
+  html += `</div>`;
   strip.innerHTML = html;
 }
 
@@ -7634,7 +8036,7 @@ const chargeState = {
   type: null,
   power: 0,
   maxPower: 100,
-  rate: 1.25,
+  rate: 1.85,
   start(type) {
     if (isInputLocked()) return;
     if (setPiece.active && setPiece.delay > 0) return;
@@ -8089,7 +8491,7 @@ const ball = {
         this._carryOwner = p;
       } else {
         const angDiff = normalizeAngle(offsetAngle - this._carryAngle);
-        const followRate = Math.abs(angDiff) > 1.2 ? 0.82 : (p.isSprinting ? 0.52 : 0.68);
+        const followRate = Math.abs(angDiff) > 1.0 ? 0.94 : (p.isSprinting ? 0.74 : 0.88);
         this._carryAngle += angDiff * followRate;
       }
       this.x = p.x + Math.cos(this._carryAngle) * carryDist;
@@ -8482,7 +8884,7 @@ class Player {
     this.playstyle = null;
     this.activePlayStyle = null;
     this.playStyleTimer = 0;
-    this.accelRate = 0.22;
+    this.accelRate = 0.38;
     this.strength = 75;
     this.dribbleTightness = 20;
 
@@ -8565,7 +8967,7 @@ class Player {
     }
 
     // Przyspieszenie: karty 90+ osiągają sprint natychmiast, słabe karty potrzebują rozbiegu
-    this.accelRate = 0.16 + pacCurve * 0.12;
+    this.accelRate = 0.34 + pacCurve * 0.16 + (Math.max(60, this.statDri || 75) - 75) * 0.003;
     // Siła zastawki i walki bark w bark
     this.strength = (this.statPhy || 75) * 0.60 + (this.statDef || 75) * 0.25 + (this.statSho || 75) * 0.15;
     if (this.playstyle === 'bruiser') this.strength *= 1.12;
@@ -8950,8 +9352,8 @@ class Player {
         }
         this.isMoving = true;
       } else {
-        this.vx *= 0.62;
-        this.vy *= 0.62;
+        this.vx *= 0.48;
+        this.vy *= 0.48;
         this.stamina = Math.min(100, this.stamina + 0.44);
         if (ball.owner === this && !this.isShielding) {
           const aimMX = (inputSource.mouseX !== undefined) ? inputSource.mouseX : mouse.worldX;
@@ -10403,7 +10805,7 @@ function switchToPlayer(targetPlayer) {
   updateSquadHud();
 }
 
-function cycleControlledPlayer(direction = 1) {
+function switchToClosestPlayerToBall() {
   if (is2v2) return;
   const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
   const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
@@ -10411,10 +10813,23 @@ function cycleControlledPlayer(direction = 1) {
   const activeCandidates = teamArr.filter(p => !p.sentOff);
   if (activeCandidates.length === 0) return;
 
-  let curIdx = activeCandidates.indexOf(current);
-  if (curIdx === -1) curIdx = 0;
-  const nextIdx = (curIdx + direction + activeCandidates.length) % activeCandidates.length;
-  switchToPlayer(activeCandidates[nextIdx]);
+  // Sortuj zawodników rosnąco według odległości euklidesowej od piłki
+  const sorted = [...activeCandidates].sort((a, b) => {
+    const distA = Math.hypot(a.x - ball.x, a.y - ball.y);
+    const distB = Math.hypot(b.x - ball.x, b.y - ball.y);
+    return distA - distB;
+  });
+
+  // Jeśli gracz już kontroluje najbliższego piłki, przełącz na drugiego najbliższego (taktyczne krycie i pressing!)
+  let target = sorted[0];
+  if (target === current && sorted.length > 1) {
+    target = sorted[1];
+  }
+  switchToPlayer(target);
+}
+
+function cycleControlledPlayer(direction = 1) {
+  switchToClosestPlayerToBall();
 }
 
 function switchToRole(role) {
@@ -10486,13 +10901,15 @@ function getControlledPlayerForSlot(slotIdx) {
     if (setPiece.active && setPiece.team === team && setPiece.taker && !setPiece.taker.sentOff) {
       return setPiece.taker;
     }
-    // Jeśli gracz wybrał manualnie zawodnika (np. Bramkarza, Obrońcę, Pomocnika, Napastnika), respektuj ten wybór!
+    // 1. Gdy drużyna ma piłkę, ZAWSZE kontroluj gracza z piłką! (Automatyczne przejęcie po podaniu)
+    if (ball.owner && ball.owner.team === team && !ball.owner.sentOff) {
+      if (team === 'blue') manualOverrideBlue = null;
+      else manualOverrideRed = null;
+      return ball.owner;
+    }
+    // 2. Jeśli gracz manualnie przełączył się na zawodnika w obronie:
     if (manualOverride && manualOverride.team === team && !manualOverride.sentOff) {
       return manualOverride;
-    }
-    // Jeśli drużyna ma piłkę, kontroluj posiadacza piłki:
-    if (ball.owner && ball.owner.team === team && !ball.owner.sentOff) {
-      return ball.owner;
     }
     let available = teamArr.filter(p => !p.sentOff && p.role !== 'GK');
     if (available.length === 0) available = teamArr.filter(p => !p.sentOff);
@@ -11117,9 +11534,8 @@ function handleRemotePlayerCommand(slotIdx, data) {
     } else {
       const cur = getControlledPlayerForSlot(slotIdx);
       const candidates = teamArr.filter(p => !p.sentOff);
-      let curIdx = candidates.indexOf(cur);
-      if (curIdx === -1) curIdx = 0;
-      target = candidates[(curIdx + 1) % candidates.length];
+      const sorted = [...candidates].sort((a, b) => Math.hypot(a.x - ball.x, a.y - ball.y) - Math.hypot(b.x - ball.x, b.y - ball.y));
+      target = (sorted[0] === cur && sorted.length > 1) ? sorted[1] : (sorted[0] || cur);
     }
     if (target && !target.sentOff) {
       if (team === 'blue') manualOverrideBlue = target;
