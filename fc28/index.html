@@ -2517,6 +2517,193 @@
     box-shadow: 0 0 20px var(--p1);
     animation: radarPulse 1.4s infinite cubic-bezier(0.2, 0.8, 0.4, 1);
   }
+
+  /* NOWOCZESNY DOLNY PASEK PRZEŁĄCZANIA ZAWODNIKÓW (EA FC 28 TACTICAL SWITCHER) */
+  .player-switcher-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(6, 10, 20, 0.94);
+    border: 1.5px solid rgba(0, 240, 255, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 240, 255, 0.25);
+    backdrop-filter: blur(20px);
+    z-index: 100;
+    pointer-events: auto;
+  }
+  @media (max-width: 768px) {
+    .player-switcher-bar {
+      bottom: 6px;
+      gap: 4px;
+      padding: 4px 8px;
+      transform: translateX(-50%) scale(0.9);
+    }
+  }
+  .sw-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 6px 12px;
+    color: #c9d1d9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    user-select: none;
+  }
+  .sw-btn:hover {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: #00f0ff;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 240, 255, 0.25);
+  }
+  .sw-btn.active {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(10, 25, 55, 0.95) 100%);
+    border-color: #00f0ff;
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.5);
+    transform: translateY(-1px);
+  }
+  .sw-key {
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 9px;
+    font-weight: 900;
+    color: #ffd700;
+  }
+  .sw-role {
+    font-size: 10px;
+    font-weight: 900;
+  }
+  .sw-name {
+    color: #ffffff;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sw-ovr {
+    font-size: 10px;
+    color: var(--gold);
+    font-weight: 900;
+  }
+  .sw-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #00f0ff;
+    box-shadow: 0 0 8px #00f0ff;
+    animation: swPulse 1.2s infinite ease-in-out;
+  }
+  @keyframes swPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.4; }
+  }
+  .sw-cycle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(245, 176, 65, 0.25) 0%, rgba(20, 15, 5, 0.9) 100%);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 6px 14px;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    user-select: none;
+  }
+  .sw-cycle-btn:hover {
+    background: var(--gold);
+    color: #000;
+    box-shadow: 0 0 18px rgba(245, 176, 65, 0.6);
+    transform: translateY(-2px);
+  }
+
+  /* LISTA SKŁADU W BOCZNYCH PASKACH Z PRZEŁĄCZANIEM */
+  .sq-row {
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sq-row:hover {
+    background: rgba(0, 240, 255, 0.15);
+    border-left: 3px solid #00f0ff;
+  }
+  .sq-row.is-controlled {
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.3) 0%, rgba(5, 15, 30, 0.85) 100%);
+    border-left: 3px solid #00f0ff;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+  }
+  .sq-ctrl-tag {
+    font-size: 9px;
+    font-weight: 900;
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.2);
+    border: 1px solid #00f0ff;
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin-left: auto;
+  }
+
+  /* TRZYSTOPNIOWY SKLEP Z PACZKAMI (3 PACK TIERS) */
+  .pack-tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    max-width: 1040px;
+    width: 100%;
+    margin: 20px auto 0;
+  }
+  @media (max-width: 860px) {
+    .pack-tiers-grid { grid-template-columns: 1fr; }
+  }
+  .pack-tier-card {
+    background: radial-gradient(circle at 50% 0%, rgba(20, 32, 60, 0.88) 0%, rgba(6, 10, 20, 0.96) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  }
+  .pack-tier-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: #00f0ff;
+    box-shadow: 0 20px 50px rgba(0, 240, 255, 0.3);
+  }
+  .pack-tier-card.tier-ultimate {
+    border-color: rgba(245, 176, 65, 0.5);
+  }
+  .pack-tier-card.tier-ultimate:hover {
+    border-color: var(--gold);
+    box-shadow: 0 20px 50px rgba(245, 176, 65, 0.5);
+  }
+
 </style>
 
 </head>
@@ -2973,6 +3160,7 @@
       <canvas id="field" width="1100" height="660"></canvas>
       <div id="squadHudBlue" class="squad-hud left"></div>
       <div id="squadHudRed" class="squad-hud right"></div>
+      <div class="player-switcher-bar" id="playerSwitcherBar"></div>
 
       <!-- MODAL ZWYCIĘSTWA + NAGRODA MONET -->
       <div id="victoryModal">
@@ -5499,51 +5687,103 @@ function renderPackStore() {
   const ownedCount = Array.isArray(clubData.owned) ? clubData.owned.length : 0;
   const coins = Number(clubData.coins) || 0;
   const isAuth = !!fcCurrentUser;
-  const canAfford = isAuth && coins >= 500;
+
+  const packs = [
+    {
+      tier: 'standard',
+      name: 'PACZKA STANDARD',
+      sub: 'KARTY 75+ OVR',
+      price: 100,
+      desc: '1 gwarantowany zawodnik 75+ OVR z szansą na gwiazdę i PlayStyle.',
+      odds: '🥉 75-79: 75% • ⭐ 80-83: 20% • 🌟 84+: 5%',
+      badge: '🥉 PODSTAWOWA',
+      accentColor: '#8b949e',
+      glowColor: 'rgba(139, 148, 158, 0.4)'
+    },
+    {
+      tier: 'premium',
+      name: 'PACZKA PREMIUM',
+      sub: 'KARTY 80+ OVR • PLAYSTYLE+',
+      price: 250,
+      desc: '1 gwarantowany zawodnik 80+ OVR z podwyższoną szansą na styl gry.',
+      odds: '⭐ 80-83: 65% • 🌟 84-86: 25% • 🔥 87+: 10%',
+      badge: '⭐ NAJCZĘŚCIEJ WYBIERANA',
+      accentColor: '#00f0ff',
+      glowColor: 'rgba(0, 240, 255, 0.45)'
+    },
+    {
+      tier: 'ultimate',
+      name: 'PACZKA ULTIMATE',
+      sub: 'ŚWIATOWA KLASA 84+ • IKONY',
+      price: 500,
+      desc: 'Gwarantowany gracz 84+ OVR ze stylem gry+! Szansa na Walkout i Ikony!',
+      odds: '🌟 84-86: 70% • 🔥 87-89: 24% • 👑 90+ IKONA: 6%',
+      badge: '👑 NAJLEPSZY DROP',
+      accentColor: '#ffd700',
+      glowColor: 'rgba(255, 215, 0, 0.55)'
+    }
+  ];
 
   container.innerHTML = `
-    <div class="pack-store-hero-fs">
-      <div class="pack-3d-box" onclick="openPack('ultimate')" title="Kliknij aby otworzyć paczkę!">
-        <div class="pack-foil-glow"></div>
-        <div class="pack-fc-logo">CYBERFC 28</div>
-        <div class="pack-title">PACZKA ULTIMATE</div>
-        <div class="pack-sub">GWARANTOWANY 1 ZAWODNIK FUT</div>
-        <div style="font-family:'Orbitron'; font-size:22px; font-weight:900; color:#ffd700; margin-top:12px;">500 🪙</div>
-      </div>
-
-      <div>
-        <h2 style="font-family:'Orbitron'; font-size:24px; color:#fff; margin-bottom:8px; letter-spacing:1px;">PACZKA ULTIMATE FUT</h2>
-        <p style="font-size:14px; color:#8b949e; max-width:540px; margin:auto; line-height:1.5;">
-          Otwieraj paczki za monety, odkrywaj karty ze złotymi PlayStyle+ i legendami futbolu! Każda paczka gwarantuje 1 pełną kartę do Twojego składu 4v4.
+    <div style="padding:20px 16px; max-width:1150px; margin:0 auto; text-align:center;">
+      <div style="margin-bottom:20px;">
+        <h2 style="font-family:'Orbitron'; font-size:26px; color:#fff; letter-spacing:2px; margin-bottom:6px;">
+          SKLEP Z PACZKAMI FUT 28
+        </h2>
+        <p style="font-size:14px; color:#8b949e; max-width:620px; margin:auto; line-height:1.5;">
+          Otwieraj paczki za zdobyte monety, odkrywaj oficjalne karty licencjonowanych piłkarzy z prawdziwymi zdjęciami i wzmacniaj swój skład 4v4!
         </p>
       </div>
 
-      <div class="pack-odds-badge" style="justify-content:center;">
-        <span class="pack-odd-pill" style="border-color:#8b949e;">🥉 72-79 PODSTAWA: 65%</span>
-        <span class="pack-odd-pill" style="border-color:#ffd700; color:#ffd700;">⭐ 80-83 ZŁOTA: 20%</span>
-        <span class="pack-odd-pill" style="border-color:#ff9900; color:#ffb300;">🌟 84-86 GWIAZDA: 10%</span>
-        <span class="pack-odd-pill" style="border-color:#ff0055; color:#ff6b8a; font-weight:900;">🔥 87-89 WALKOUT: 4%</span>
-        <span class="pack-odd-pill" style="border-color:#00f0ff; color:#00f0ff; font-weight:900;">👑 90+ IKONA: 1%</span>
+      <div class="pack-tiers-grid">
+        ${packs.map(p => {
+          const canAfford = isAuth && coins >= p.price;
+          return `
+            <div class="pack-tier-card ${p.tier === 'ultimate' ? 'tier-ultimate' : ''}" style="border-color:${p.accentColor}; box-shadow:0 10px 30px ${p.glowColor};">
+              <div style="font-family:'Orbitron'; font-size:10px; font-weight:900; color:${p.accentColor}; letter-spacing:1.5px; padding:3px 10px; border-radius:12px; background:rgba(0,0,0,0.6); border:1px solid ${p.accentColor};">
+                ${p.badge}
+              </div>
+
+              <div class="pack-3d-box" onclick="openPack('${p.tier}')" style="width:165px; height:225px; margin:8px auto; cursor:pointer;" title="Kliknij, aby otworzyć: ${p.name}">
+                <div class="pack-foil-glow" style="background:radial-gradient(circle, ${p.glowColor} 0%, transparent 70%);"></div>
+                <div class="pack-fc-logo">CYBERFC 28</div>
+                <div class="pack-title" style="font-size:14px;">${p.name}</div>
+                <div class="pack-sub" style="font-size:9px;">${p.sub}</div>
+                <div style="font-family:'Orbitron'; font-size:20px; font-weight:900; color:${p.accentColor}; margin-top:14px;">
+                  ${p.price} 🪙
+                </div>
+              </div>
+
+              <div style="font-size:12px; color:#8b949e; line-height:1.4; min-height:34px;">
+                ${p.desc}
+              </div>
+
+              <div style="font-family:'Orbitron'; font-size:10px; color:${p.accentColor}; font-weight:800; background:rgba(0,0,0,0.5); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); width:100%;">
+                ${p.odds}
+              </div>
+
+              <div style="width:100%; margin-top:6px;">
+                ${!isAuth ? `
+                  <button type="button" class="action-btn" style="width:100%; padding:12px; font-size:12px; font-weight:900; background:rgba(0,240,255,0.2); border-color:#00f0ff;" onclick="openFcAuth()">
+                    🔒 ZALOGUJ SIĘ (${p.price} 🪙)
+                  </button>
+                ` : (canAfford ? `
+                  <button type="button" class="action-btn btn-host" style="width:100%; padding:12px; font-size:12px; font-weight:900; background:linear-gradient(135deg, ${p.accentColor} 0%, #ff8800 100%); color:#000;" onclick="openPack('${p.tier}')">
+                    ⚡ OTWÓRZ (${p.price} 🪙)
+                  </button>
+                ` : `
+                  <button type="button" class="action-btn" style="width:100%; padding:12px; font-size:11px; background:#21262d; color:#8b949e;" disabled>
+                    🔒 BRAKUJE ${p.price - coins} 🪙
+                  </button>
+                `)}
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
 
-      <div>
-        ${!isAuth ? `
-          <button type="button" class="pack-open-big-btn" onclick="openFcAuth()">
-            🔒 ZALOGUJ SIĘ, ABY OTWIERAĆ PACZKI (500 🪙 NA START)
-          </button>
-        ` : (canAfford ? `
-          <button type="button" class="pack-open-big-btn" onclick="openPack('ultimate')">
-            ⚡ OTWÓRZ PACZKĘ (500 🪙)
-          </button>
-        ` : `
-          <button type="button" class="pack-open-big-btn" disabled>
-            🔒 BRAKUJE ${500 - coins} 🪙 MONET (ROZEGRAJ MECZ!)
-          </button>
-        `)}
-      </div>
-
-      <div style="font-size:13px; color:#8b949e; font-family:'Orbitron';">
-        KARTY W TWOIM KLUBIE: <span style="color:var(--gold); font-weight:800;">${ownedCount}</span> / ${totalCards} (${Math.round((ownedCount / totalCards) * 100)}%)
+      <div style="margin-top:24px; font-size:13px; color:#8b949e; font-family:'Orbitron';">
+        KARTY W TWOIM KLUBIE: <span style="color:var(--gold); font-weight:900;">${ownedCount}</span> / ${totalCards} (${Math.round((ownedCount / totalCards) * 100)}%)
       </div>
     </div>
   `;
@@ -5674,14 +5914,19 @@ async function openPack(packType = 'ultimate') {
     return;
   }
 
-  const PACK_COST = 500;
-  if (typeof clubData.coins !== 'number' || clubData.coins < PACK_COST) {
-    const diff = PACK_COST - (clubData.coins || 0);
+  const PACK_PRICES = {
+    standard: 100,
+    premium: 250,
+    ultimate: 500
+  };
+  const packCost = PACK_PRICES[packType] || 500;
+  if (typeof clubData.coins !== 'number' || clubData.coins < packCost) {
+    const diff = packCost - (clubData.coins || 0);
     alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Rozegraj mecz przeciwko botom lub online, aby zdobyć monety.`);
     return;
   }
 
-  // Wywołanie autorytatywnego backendu Cloudflare D1
+  // Wywołanie autorytatywnego backendu Cloudflare D1 z wybranym typem paczki
   try {
     const res = await fetch(`${FC_API_URL}/api/club/open-pack`, {
       method: 'POST',
@@ -5689,7 +5934,7 @@ async function openPack(packType = 'ultimate') {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ tier: 'ultimate' })
+      body: JSON.stringify({ tier: packType })
     });
     const data = await res.json();
     if (!res.ok || !data.success || !data.result) {
@@ -10130,8 +10375,100 @@ function applySquadStatsToTeam(teamArr, lineupObj) {
   if (teamArr[3] && fwdCard) teamArr[3].applyCardStats(fwdCard);
 }
 
+let lastTrackedControlled = null;
 let manualOverrideBlue = null;
 let manualOverrideRed = null;
+
+function switchToPlayer(targetPlayer) {
+  if (!targetPlayer || targetPlayer.sentOff) return;
+  const team = targetPlayer.team;
+  if (team === 'blue') manualOverrideBlue = targetPlayer;
+  else manualOverrideRed = targetPlayer;
+
+  if (!isHost && !isSinglePlayer) {
+    const targetIdx = allPlayers.indexOf(targetPlayer);
+    sendReliable({ t: 'cmd', cmd: 'switchPlayer', targetIdx: targetIdx, targetRole: targetPlayer.role });
+    if (syncedControllers) {
+      syncedControllers[localSlotIdx] = targetIdx;
+    }
+  }
+
+  try {
+    const roleNames = { GK: 'BRAMKARZ (BR)', DEF: 'OBROŃCA (ŚO)', MID: 'POMOCNIK (ŚP)', FWD: 'NAPASTNIK (N)' };
+    const pName = (targetPlayer.cardName || targetPlayer.role).toUpperCase();
+    spawnFloater(targetPlayer.x, targetPlayer.y - 20, `KONTROLA: ${pName} [${roleNames[targetPlayer.role] || targetPlayer.role}]`, targetPlayer.team === 'blue' ? '#00f0ff' : '#ffd700');
+    spawnParticles(targetPlayer.x, targetPlayer.y, 4, 8, targetPlayer.team === 'blue' ? '#00f0ff' : '#ffd700', 2.0, 14, 2.5);
+  } catch(e) {}
+
+  updateSquadHud();
+}
+
+function cycleControlledPlayer(direction = 1) {
+  if (is2v2) return;
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+  const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+  const current = getControlledPlayerForSlot(localSlotIdx);
+  const activeCandidates = teamArr.filter(p => !p.sentOff);
+  if (activeCandidates.length === 0) return;
+
+  let curIdx = activeCandidates.indexOf(current);
+  if (curIdx === -1) curIdx = 0;
+  const nextIdx = (curIdx + direction + activeCandidates.length) % activeCandidates.length;
+  switchToPlayer(activeCandidates[nextIdx]);
+}
+
+function switchToRole(role) {
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+  const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+  const target = teamArr.find(p => p.role === role && !p.sentOff);
+  if (target) switchToPlayer(target);
+}
+
+function switchToPlayerByIndex(idx) {
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+  const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+  if (teamArr && teamArr[idx] && !teamArr[idx].sentOff) {
+    switchToPlayer(teamArr[idx]);
+  }
+}
+
+function updatePlayerSwitcherBar() {
+  const bar = document.getElementById('playerSwitcherBar');
+  if (!bar) return;
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+  const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+  const myP = getControlledPlayerForSlot(localSlotIdx);
+
+  const roles = ['GK', 'DEF', 'MID', 'FWD'];
+  const roleNames = { GK: '🧤 BR', DEF: '🛡️ ŚO', MID: '🎯 ŚP', FWD: '⚡ N' };
+  const keys = ['1', '2', '3', '4'];
+
+  let html = '';
+  roles.forEach((role, idx) => {
+    const p = teamArr.find(player => player.role === role);
+    if (!p) return;
+    const isCtrl = (p === myP);
+    const pName = (p.cardName || role).toUpperCase();
+    html += `
+      <button type="button" class="sw-btn ${isCtrl ? 'active' : ''}" onclick="switchToRole('${role}')" title="Klawisz [${keys[idx]}]: Kontroluj ${pName} (${role})">
+        <span class="sw-key">${keys[idx]}</span>
+        <span class="sw-role">${roleNames[role]}</span>
+        <span class="sw-name">${pName.slice(0, 10)}</span>
+        <span class="sw-ovr">⭐${p.ovr}</span>
+        ${isCtrl ? '<span class="sw-pulse-dot"></span>' : ''}
+      </button>
+    `;
+  });
+
+  html += `
+    <button type="button" class="sw-cycle-btn" onclick="cycleControlledPlayer(1)" title="Naciśnij SPACJĘ lub TAB, aby przełączać zawodników">
+      <span class="sw-key">TAB / SPACJA</span>
+      <span class="sw-cycle-txt">⇥ PRZEŁĄCZ</span>
+    </button>
+  `;
+
+  bar.innerHTML = html;
+}
 
 function getControlledPlayerForSlot(slotIdx) {
   // W trybie gościa sieciowego używaj DOKŁADNIE gracza przypisanego przez hosta w pakiecie sync!
@@ -10149,13 +10486,13 @@ function getControlledPlayerForSlot(slotIdx) {
     if (setPiece.active && setPiece.team === team && setPiece.taker && !setPiece.taker.sentOff) {
       return setPiece.taker;
     }
-    if (ball.owner && ball.owner.team === team && !ball.owner.sentOff) {
-      if (team === 'blue') manualOverrideBlue = null;
-      else manualOverrideRed = null;
-      return ball.owner;
-    }
+    // Jeśli gracz wybrał manualnie zawodnika (np. Bramkarza, Obrońcę, Pomocnika, Napastnika), respektuj ten wybór!
     if (manualOverride && manualOverride.team === team && !manualOverride.sentOff) {
       return manualOverride;
+    }
+    // Jeśli drużyna ma piłkę, kontroluj posiadacza piłki:
+    if (ball.owner && ball.owner.team === team && !ball.owner.sentOff) {
+      return ball.owner;
     }
     let available = teamArr.filter(p => !p.sentOff && p.role !== 'GK');
     if (available.length === 0) available = teamArr.filter(p => !p.sentOff);
@@ -10201,10 +10538,26 @@ function setDefaultTeamPositions() {
 function updateSquadHud() {
   const esc = t => String(t).replace(/[<>&"']/g, '');
   const rl = { GK: 'BR', DEF: 'ŚO', MID: 'ŚP', FWD: 'N' };
-  const html = arr => arr.map(p => `<div class="sq-row"><span class="sq-role">${rl[p.role] || ''}</span><span>${esc(p.cardName)}</span><span class="sq-ovr">${p.ovr}</span></div>`).join('');
+  const roleIcons = { GK: '🧤', DEF: '🛡️', MID: '🎯', FWD: '⚡' };
+  const myP = getControlledPlayerForSlot(localSlotIdx);
+  const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+
+  const html = (arr, isMyTeam) => arr.map((p, idx) => {
+    const isCtrl = (p === myP);
+    const clickAction = isMyTeam ? `onclick="switchToPlayerByIndex(${idx})"` : '';
+    return `<div class="sq-row ${isCtrl ? 'is-controlled' : ''}" ${clickAction} title="Kliknij, aby kontrolować: ${esc(p.cardName)}">
+      <span class="sq-role">${roleIcons[p.role] || ''} ${rl[p.role] || ''}</span>
+      <span class="sq-name">${esc(p.cardName)}</span>
+      <span class="sq-ovr">${p.ovr}</span>
+      ${isCtrl ? '<span class="sq-ctrl-tag">🎮 TY</span>' : ''}
+    </div>`;
+  }).join('');
+
   const b = document.getElementById('squadHudBlue'), r = document.getElementById('squadHudRed');
-  if (b) b.innerHTML = html(blueTeam);
-  if (r) r.innerHTML = html(redTeam);
+  if (b) b.innerHTML = html(blueTeam, myTeam === 'blue');
+  if (r) r.innerHTML = html(redTeam, myTeam === 'red');
+
+  updatePlayerSwitcherBar();
 }
 
 function launchGame() {
@@ -10753,13 +11106,24 @@ function handleRemotePlayerCommand(slotIdx, data) {
       if (!player.isMoving) player.angle = toMouse;
       player.startSlide();
     }
-  } else if (data.cmd === 'switchPlayer' && !hasBall && !is2v2) {
+  } else if (data.cmd === 'switchPlayer' && !is2v2) {
     const team = slotIdx < 2 ? 'blue' : 'red';
     const teamArr = team === 'blue' ? blueTeam : redTeam;
-    let candidates = teamArr.filter(p => !p.sentOff && p.role !== 'GK' && p !== player);
-    if (candidates.length > 0) {
-      if (team === 'blue') manualOverrideBlue = candidates[0];
-      else manualOverrideRed = candidates[0];
+    let target = null;
+    if (data.targetIdx !== undefined && allPlayers[data.targetIdx]) {
+      target = allPlayers[data.targetIdx];
+    } else if (data.targetRole) {
+      target = teamArr.find(p => p.role === data.targetRole && !p.sentOff);
+    } else {
+      const cur = getControlledPlayerForSlot(slotIdx);
+      const candidates = teamArr.filter(p => !p.sentOff);
+      let curIdx = candidates.indexOf(cur);
+      if (curIdx === -1) curIdx = 0;
+      target = candidates[(curIdx + 1) % candidates.length];
+    }
+    if (target && !target.sentOff) {
+      if (team === 'blue') manualOverrideBlue = target;
+      else manualOverrideRed = target;
     }
   } else if (data.cmd === 'directTrick' && hasBall && !setPiece.active && player.trickTimer <= 0) {
     player.triggerTrick(data.trickName || 'ZWÓD', data.trickType || 'feint', data.trickMult || 1.34, true);
@@ -10882,11 +11246,13 @@ canvas.addEventListener('mousedown', e => {
 
   const hasBall = (ball.owner === myPlayer);
 
-  // Środkowy przycisk myszy (kółko) = Tęcza / Rainbow flick
+  // Środkowy przycisk myszy (kółko) = Tęcza przy piłce lub zmiana gracza
   if (e.button === 1) {
     e.preventDefault();
     if (hasBall) {
       triggerDirectTrick(myPlayer, 'rainbow', 'TĘCZA & FLICK', 1.40);
+    } else {
+      cycleControlledPlayer(1);
     }
     return;
   }
@@ -10897,6 +11263,14 @@ canvas.addEventListener('mousedown', e => {
     if (hasBall) {
       chargeState.start('shot');
     } else {
+      // Kliknięcie w zawodnika z własnej drużyny przełącza natychmiast kontrolę!
+      const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
+      const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
+      const clickedMate = teamArr.find(p => !p.sentOff && Math.hypot(p.x - mouse.worldX, p.y - mouse.worldY) < 32);
+      if (clickedMate && clickedMate !== myPlayer) {
+        switchToPlayer(clickedMate);
+        return;
+      }
       if (!isHost && !isSinglePlayer) sendReliable({ t: 'cmd', cmd: 'tackle' });
       else performStandingTackle(myPlayer);
     }
@@ -10959,7 +11333,7 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('keydown', e => {
   if (!gameStarted || matchEnded) return;
-  if (["Space", "ShiftLeft", "ShiftRight", "KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "KeyF", "KeyC", "KeyV", "KeyX", "KeyZ", "KeyM", "Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
+  if (["Space", "Tab", "ShiftLeft", "ShiftRight", "KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "KeyF", "KeyC", "KeyV", "KeyX", "KeyZ", "KeyM", "Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
     e.preventDefault();
   }
   if (isInputLocked()) return;
@@ -11019,12 +11393,20 @@ function handleKeyDownOnce(code) {
         spawnParticles(myPlayer.x, myPlayer.y, 0, 6, '#f5b041', 2.2, 18, 3);
       }
     }
-  } else if (code === 'Space' && !is2v2) {
-    if (!isHost && !isSinglePlayer) {
-      sendReliable({ t: 'cmd', cmd: 'switchPlayer' });
-    } else {
-      let candidates = blueTeam.filter(p => !p.sentOff && p.role !== 'GK' && p !== myPlayer);
-      if (candidates.length > 0) manualOverrideBlue = candidates[0];
+  }
+
+  // PRZEŁĄCZANIE MIĘDZY KAŻDYM ZAWODNIKIEM (GK, DEF, MID, FWD)
+  if (!hasBall) {
+    if (code === 'Digit1') { switchToRole('GK'); return; }
+    if (code === 'Digit2') { switchToRole('DEF'); return; }
+    if (code === 'Digit3') { switchToRole('MID'); return; }
+    if (code === 'Digit4') { switchToRole('FWD'); return; }
+  }
+
+  if (code === 'Tab' || (code === 'Space' && (!hasBall || !myPlayer.isShielding)) || (code === 'KeyQ' && !hasBall)) {
+    if (!is2v2) {
+      cycleControlledPlayer(1);
+      return;
     }
   }
 }
@@ -11292,7 +11674,7 @@ function applyNetworkSync(st) {
    17. RENDEROWANIE STADIONU 2.5D, MINIMAPY I ASYSTENTA
    ========================================== */
 function drawStadium25D() {
-  ctx.fillStyle = '#0c1811';
+  ctx.fillStyle = '#060a14';
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
   const pitchX = WORLD.marginX;
@@ -11300,26 +11682,68 @@ function drawStadium25D() {
   const pitchW = WORLD.width - WORLD.marginX * 2;
   const pitchH = WORLD.height - WORLD.marginY * 2;
 
-  const stripeCount = 16;
+  // 1. 20 pasów Premier League z bogatym gradientem
+  const stripeCount = 20;
   const stripeW = pitchW / stripeCount;
   for (let i = 0; i < stripeCount; i++) {
-    ctx.fillStyle = i % 2 === 0 ? '#1f6328' : '#25702f';
-    ctx.fillRect(pitchX + i * stripeW, pitchY, stripeW + 1, pitchH);
+    const x = pitchX + i * stripeW;
+    const grad = ctx.createLinearGradient(x, 0, x + stripeW, 0);
+    if (i % 2 === 0) {
+      grad.addColorStop(0, '#1c5a27');
+      grad.addColorStop(0.5, '#22692e');
+      grad.addColorStop(1, '#1e5f29');
+    } else {
+      grad.addColorStop(0, '#16481f');
+      grad.addColorStop(0.5, '#1b5424');
+      grad.addColorStop(1, '#174b20');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, pitchY, stripeW + 1, pitchH);
   }
 
-  ctx.fillStyle = '#080c16';
-  ctx.fillRect(pitchX - 20, pitchY - 36, pitchW + 40, 22);
-  ctx.fillStyle = '#00f0ff';
-  ctx.fillRect(pitchX - 20, pitchY - 14, pitchW + 40, 2);
+  // 2. Koncentryczne koła koszenia na środku
+  const cx = WORLD.width / 2, cy = WORLD.height / 2;
+  for (let r = 260; r >= 50; r -= 45) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = (r % 90 === 0) ? 'rgba(34, 105, 46, 0.12)' : 'rgba(22, 72, 31, 0.12)';
+    ctx.fill();
+  }
 
-  ctx.fillStyle = '#f5b041';
+  // 3. Wytarcie murawy w polach bramkowych i karnych
+  const wearGradL = ctx.createRadialGradient(pitchX + 60, cy, 10, pitchX + 60, cy, 170);
+  wearGradL.addColorStop(0, 'rgba(125, 105, 65, 0.28)');
+  wearGradL.addColorStop(0.45, 'rgba(95, 80, 50, 0.16)');
+  wearGradL.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = wearGradL;
+  ctx.fillRect(pitchX, cy - 180, 200, 360);
+
+  const wearGradR = ctx.createRadialGradient(pitchX + pitchW - 60, cy, 10, pitchX + pitchW - 60, cy, 170);
+  wearGradR.addColorStop(0, 'rgba(125, 105, 65, 0.28)');
+  wearGradR.addColorStop(0.45, 'rgba(95, 80, 50, 0.16)');
+  wearGradR.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = wearGradR;
+  ctx.fillRect(pitchX + pitchW - 200, cy - 180, 200, 360);
+
+  // 4. Bandy reklamowe LED
+  ctx.fillStyle = '#080c16';
+  ctx.fillRect(pitchX - 20, pitchY - 36, pitchW + 40, 24);
+  const ledGrad = ctx.createLinearGradient(pitchX, 0, pitchX + pitchW, 0);
+  ledGrad.addColorStop(0, '#00f0ff');
+  ledGrad.addColorStop(0.5, '#ffd700');
+  ledGrad.addColorStop(1, '#00f0ff');
+  ctx.fillStyle = ledGrad;
+  ctx.fillRect(pitchX - 20, pitchY - 12, pitchW + 40, 2.5);
+
   ctx.font = '900 11px Orbitron, sans-serif';
   ctx.textAlign = 'center';
+  ctx.fillStyle = '#00f0ff';
   for (let bx = pitchX + 180; bx < pitchX + pitchW; bx += 360) {
-    ctx.fillText("🏆 CYBERFC 28 • ULTIMATE PLAYSTYLE+ ARENA 🏆", bx, pitchY - 21);
+    ctx.fillText("⚡ EA SPORTS FC 28 • ULTIMATE TEAM ARENA • 4v4 PRO ⚡", bx, pitchY - 21);
   }
 
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+  // 5. Linie boiska
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.94)';
   ctx.lineWidth = 4;
   ctx.strokeRect(pitchX, pitchY, pitchW, pitchH);
 
@@ -11639,6 +12063,12 @@ function updateFixedStep() {
     const redActive = getControlledPlayerForSlot(2) || redTeam[1];
     if (blueActive) document.getElementById('staminaBarBlue').style.width = blueActive.stamina + '%';
     if (redActive) document.getElementById('staminaBarRed').style.width = redActive.stamina + '%';
+
+    const currentControlled = getControlledPlayerForSlot(localSlotIdx);
+    if (currentControlled !== lastTrackedControlled) {
+      lastTrackedControlled = currentControlled;
+      updateSquadHud();
+    }
   }
 
   updateParticles();
@@ -12809,18 +13239,65 @@ scene.add(sun,sun.target);
 /* --- murawa z liniami --- */
 const pitchTex=ctex(2048,1138,(g,w,h)=>{
   const sx=w/PW,sy=h/PH;
-  // Bogatszy, nasycony wzór pasów murawy (18 pasów w stylu Premier League):
-  for(let i=0;i<18;i++){
-    g.fillStyle=i%2?'#22682d':'#1b5424';
-    g.fillRect(i*w/18,0,w/18+1,h);
+  // 1. Podkład murawy w stylu Premier League (20 pasów o bogatym kontraście i naturalnym cieniowaniu)
+  const stripeN = 20;
+  for(let i=0;i<stripeN;i++){
+    const grad = g.createLinearGradient(i*w/stripeN, 0, (i+1)*w/stripeN, 0);
+    if (i % 2 === 0) {
+      grad.addColorStop(0, '#1c5a27');
+      grad.addColorStop(0.5, '#22692e');
+      grad.addColorStop(1, '#1e5f29');
+    } else {
+      grad.addColorStop(0, '#16481f');
+      grad.addColorStop(0.5, '#1b5424');
+      grad.addColorStop(1, '#174b20');
+    }
+    g.fillStyle = grad;
+    g.fillRect(i*w/stripeN, 0, w/stripeN + 1, h);
   }
-  // Subtelne ziarno źdźbeł trawy dla fotorealistycznej głębi
-  for(let i=0;i<55000;i++){
-    g.fillStyle=Math.random()<.5?`rgba(10,38,14,${Math.random()*.09})`:`rgba(130,225,95,${Math.random()*.08})`;
-    g.fillRect(Math.random()*w,Math.random()*h,2,2+Math.random()*5);
+
+  // 2. Koncentryczne kołowe pasy koszenia w środku boiska (wzór Wembley / Emirates)
+  const cx = w / 2, cy = h / 2;
+  for (let r = 460; r >= 60; r -= 65) {
+    g.beginPath();
+    g.arc(cx, cy, r, 0, Math.PI * 2);
+    g.fillStyle = (r % 130 === 0) ? 'rgba(34, 105, 46, 0.12)' : 'rgba(22, 72, 31, 0.12)';
+    g.fill();
   }
-  g.strokeStyle='rgba(255,255,255,.95)';g.fillStyle='#fff';g.lineWidth=5.5;
+
+  // 3. Naturalne wytarcie murawy w polach bramkowych i karnych (autentyczny wygląd stadionu)
+  const wearGradL = g.createRadialGradient(100*sx, cy, 15, 100*sx, cy, 210*sx);
+  wearGradL.addColorStop(0, 'rgba(125, 105, 65, 0.28)');
+  wearGradL.addColorStop(0.45, 'rgba(95, 80, 50, 0.16)');
+  wearGradL.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  g.fillStyle = wearGradL;
+  g.fillRect(0, cy - 220*sy, 240*sx, 440*sy);
+
+  const wearGradR = g.createRadialGradient(w - 100*sx, cy, 15, w - 100*sx, cy, 210*sx);
+  wearGradR.addColorStop(0, 'rgba(125, 105, 65, 0.28)');
+  wearGradR.addColorStop(0.45, 'rgba(95, 80, 50, 0.16)');
+  wearGradR.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  g.fillStyle = wearGradR;
+  g.fillRect(w - 240*sx, cy - 220*sy, 240*sx, 440*sy);
+
+  // 4. Ziarno źdźbeł trawy (90,000 cząstek o zróżnicowanej jasności i cieniach)
+  for(let i=0;i<90000;i++){
+    const rnd = Math.random();
+    g.fillStyle = rnd < 0.4 ? 'rgba(8, 30, 12, 0.12)' : (rnd < 0.8 ? 'rgba(145, 235, 105, 0.09)' : 'rgba(215, 255, 165, 0.07)');
+    g.fillRect(Math.random()*w, Math.random()*h, 1.8, 1.8 + Math.random()*4.5);
+  }
+
+  // 5. Profesjonalne kredowe linie boiska (z subtelną dyfuzją kredy)
+  g.strokeStyle='rgba(255,255,255,0.22)';
+  g.lineWidth=9;
   const L=(x,y,a,b)=>g.strokeRect(x*sx,y*sy,a*sx,b*sy),C=(x,y,r,a0=0,a1=7)=>{g.beginPath();g.ellipse(x*sx,y*sy,r*sx,r*sy,0,a0,a1);g.stroke();};
+  L(0,0,PW,PH);
+  g.beginPath();g.moveTo(PW/2*sx,0);g.lineTo(PW/2*sx,h);g.stroke();C(PW/2,PH/2,115);
+  [[0,PH/2-210,210,420],[PW-210,PH/2-210,210,420],[0,PH/2-125,75,250],[PW-75,PH/2-125,75,250]].forEach(a=>L(...a));
+
+  g.strokeStyle='rgba(255,255,255,0.96)';
+  g.fillStyle='#ffffff';
+  g.lineWidth=5.5;
   L(0,0,PW,PH);g.beginPath();g.moveTo(PW/2*sx,0);g.lineTo(PW/2*sx,h);g.stroke();C(PW/2,PH/2,115);
   [[0,PH/2-210,210,420],[PW-210,PH/2-210,210,420],[0,PH/2-125,75,250],[PW-75,PH/2-125,75,250]].forEach(a=>L(...a));
   [[0,0,0,1.57],[PW,0,1.57,3.14],[0,PH,-1.57,0],[PW,PH,3.14,4.71]].forEach(c=>C(c[0],c[1],18,c[2],c[3]));
@@ -12942,8 +13419,19 @@ function build(p,isRef){
   const eyeM=mm({color:0x14110f,roughness:.3});[1,-1].forEach(s=>{const e=new T.Mesh(new T.SphereGeometry(.62,8,6),eyeM);e.position.set(4.1,.9,s*1.9);head.add(e);const ea=new T.Mesh(new T.SphereGeometry(1.1,8,6),m.mskin);ea.position.set(0,-.2,s*4.5);ea.scale.set(.6,1.1,.6);head.add(ea);});
   const nose=new T.Mesh(new T.ConeGeometry(.8,1.8,8),m.mskin);nose.rotation.z=-Math.PI/2;nose.position.set(4.9,-.5,0);head.add(nose);
   m.hairG=new T.Group();head.add(m.hairG);
+  // Prawdziwa twarz piłkarza z portretu (assets/players/*.webp)
+  m.faceM = new T.MeshBasicMaterial({ transparent: true, side: T.DoubleSide, depthWrite: false });
+  const faceDecal = new T.Mesh(new T.PlaneGeometry(6.6, 7.6), m.faceM);
+  faceDecal.position.set(4.65, 0.1, 0);
+  faceDecal.rotation.y = Math.PI / 2;
+  if (!isRef) head.add(faceDecal);
   m.numM=new T.MeshStandardMaterial({transparent:true,depthWrite:false,roughness:.8,polygonOffset:true,polygonOffsetFactor:-2});
   const dec=new T.Mesh(new T.PlaneGeometry(10,14),m.numM);dec.rotation.y=-Math.PI/2;dec.position.set(-4.4,9.4,0);if(!isRef)tor.add(dec);
+  // Emblemat klubowy na klatce piersiowej
+  m.crestM = new T.MeshStandardMaterial({transparent:true,depthWrite:false,roughness:.7});
+  const crestDec = new T.Mesh(new T.PlaneGeometry(5.2, 5.2), m.crestM);
+  crestDec.position.set(4.35, 9.5, 0);crestDec.rotation.y = Math.PI / 2;
+  if (!isRef) tor.add(crestDec);
   const mkArm=s=>{
     const sh=new T.Group();sh.position.set(0,15.6,s*8.2);
     sh.add(cap(2.4,4,m.mj,0,-4.4,0));const cuff=new T.Mesh(new T.CylinderGeometry(2.55,2.55,1,10),m.ma);cuff.position.y=-8.2;sh.add(cuff);
@@ -12983,6 +13471,27 @@ function refresh(m){
   m.mj.color.set(jc);m.ms.color.set(gk?'#1b1f2a':kit.s);m.mk.color.set(m.isRef?'#111':kit.j);m.ma.color.set(kit.a);m.mg.color.set(p.team==='blue'?'#ff5a00':'#fff');
   m.mskin.color.set(p.skinColor||'#e0ac69');m.mh.color.set(p.hairColor||'#222');m.mb.color.set(BOOTS[h%BOOTS.length]);
   hairStyle(m,m.isRef?0:(h>>3)%5,p.hairColor||'#222');if(!m.isRef)numTex(m,p.cardName,p.number);
+  if (!m.isRef && p.cardId && m.faceM && m.curFace !== p.cardId) {
+    m.curFace = p.cardId;
+    new T.TextureLoader().load(`assets/players/${p.cardId}.webp`, (tex) => {
+      tex.colorSpace = T.SRGBColorSpace;
+      m.faceM.map = tex;
+      m.faceM.needsUpdate = true;
+    });
+  }
+  if (!m.isRef && m.crestM && !m.crestLoaded) {
+    m.crestLoaded = true;
+    m.crestM.map = ctex(128, 128, (g, w, h) => {
+      g.textAlign = 'center';
+      g.fillStyle = p.team === 'blue' ? '#00f0ff' : '#ffd700';
+      g.font = '900 36px Orbitron, sans-serif';
+      g.fillText('FC28', w / 2, 55);
+      g.fillStyle = '#ffffff';
+      g.font = '800 20px Orbitron, sans-serif';
+      g.fillText('PRO', w / 2, 95);
+    });
+    m.crestM.needsUpdate = true;
+  }
   const phy=Math.max(50,Math.min(99,p.statPhy||75)),hs=(gk?1.07:1)*(.96+((h>>5)%9)*.01);
   m.o.root.scale.set(1.2*(.95+(phy-50)/49*.1),1.2*hs,1.2*(.93+(phy-50)/49*.16));
 }
