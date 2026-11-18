@@ -114,6 +114,8 @@
      TOP NAVIGATION BAR (EA SPORTS FC 28 CONSOLE BAR)
      ========================================================= */
   .ea-fc-header {
+    flex-wrap: nowrap;
+    gap: 12px;
     width: 100%;
     background: rgba(11, 16, 28, 0.92);
     backdrop-filter: blur(20px);
@@ -1368,16 +1370,13 @@
 
   /* PODGLĄD AKTYWNEGO SKŁADU W MENU */
   .squad-preview-strip {
-    background: rgba(8, 12, 22, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 8px 12px;
-    display: grid;
-    grid-template-columns: 88px repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    align-items: center;
-    box-sizing: border-box;
     width: 100%;
+    display: block;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 4px 0 10px;
+    box-sizing: border-box;
   }
   .squad-strip-label {
     font-family: var(--font-heading);
@@ -3997,6 +3996,245 @@
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
     border-color: rgba(255, 255, 255, 0.2);
+  }
+
+
+  /* AAA EA SPORTS FC ULTIMATE TEAM SQUAD CARDS */
+  .ea-squad-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .squad-preview-strip {
+    width: 100% !important;
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 6px 0 12px 0 !important;
+  }
+
+  .squad-cards-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .ea-squad-card {
+    background: linear-gradient(165deg, #1a233a 0%, #0e1526 50%, #121c32 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 14px !important;
+    padding: 10px 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    position: relative !important;
+    cursor: pointer !important;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .ea-squad-card:hover {
+    transform: translateY(-5px) scale(1.03) !important;
+    border-color: var(--fc-volt) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 18px var(--fc-volt-glow) !important;
+  }
+
+  .ea-squad-card.is-gold {
+    background: linear-gradient(165deg, #34280f 0%, #181d2c 50%, #281e08 100%) !important;
+    border-color: rgba(245, 197, 24, 0.6) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 197, 24, 0.2) !important;
+  }
+
+  .ea-squad-card.is-icon {
+    background: linear-gradient(165deg, #3f320d 0%, #1d253c 50%, #342707 100%) !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 22px rgba(255, 215, 0, 0.35) !important;
+  }
+
+  .ea-card-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    padding: 0 4px !important;
+  }
+
+  .ea-card-ovr {
+    font-family: var(--font-heading) !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    color: var(--fc-gold) !important;
+    line-height: 1 !important;
+  }
+
+  .ea-card-pos {
+    font-family: var(--font-heading) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: var(--fc-cyan) !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .ea-card-flag {
+    font-size: 14px !important;
+  }
+
+  .ea-card-photo-wrap {
+    width: 68px !important;
+    height: 78px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    margin: 4px 0 !important;
+  }
+
+  .ea-card-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9)) !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .ea-squad-card:hover .ea-card-img {
+    transform: scale(1.08) !important;
+  }
+
+  .ea-card-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .ea-card-name {
+    font-family: var(--font-heading) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    text-transform: uppercase !important;
+    margin-bottom: 3px !important;
+  }
+
+  .ea-card-stats {
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    color: var(--fc-text-sub) !important;
+    letter-spacing: 0.5px !important;
+    white-space: nowrap !important;
+    margin-bottom: 3px !important;
+  }
+
+  .ea-card-ps {
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    color: #ffd700 !important;
+    background: rgba(255, 215, 0, 0.15) !important;
+    border: 1px solid rgba(255, 215, 0, 0.35) !important;
+    border-radius: 6px !important;
+    padding: 2px 5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 95% !important;
+  }
+
+  .ea-card-ps-empty {
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    color: #586069 !important;
+    padding: 2px 0 !important;
+  }
+
+
+  /* STYLOWANIE PROMOCYJNEJ PACZKI FUT */
+  .ea-pack-promo-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .ea-pack-promo-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    margin: 4px 0 8px 0;
+  }
+
+  .ea-pack-3d-box {
+    width: 82px !important;
+    height: 105px !important;
+    background: linear-gradient(135deg, #46340e 0%, #1a2236 50%, #5a430d 100%) !important;
+    border: 2px solid var(--fc-gold) !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 25px rgba(245, 197, 24, 0.4), inset 0 0 15px rgba(245, 197, 24, 0.2) !important;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .ea-pack-3d-box:hover {
+    transform: scale(1.06) rotate(-1deg) !important;
+    box-shadow: 0 0 32px rgba(245, 197, 24, 0.6), inset 0 0 20px rgba(245, 197, 24, 0.3) !important;
+  }
+
+  .ea-pack-badge {
+    font-family: var(--font-heading) !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: var(--fc-gold) !important;
+    line-height: 1 !important;
+  }
+
+  .ea-pack-label {
+    font-family: var(--font-heading) !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    letter-spacing: 1px !important;
+    margin-top: 4px !important;
+  }
+
+  .ea-pack-promo-desc {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ea-pack-highlight {
+    font-size: 12px;
+    color: #e2e8f0;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .ea-pack-chances {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fc-volt);
   }
 
 </style>
@@ -13773,21 +14011,12 @@ function switchAuthTab(tab) {
     if (loginBtn) loginBtn.classList.add('active');
     if (submitBtn) {
       submitBtn.textContent = 'ZALOGUJ SIĘ';
-      submitBtn.style.background = 'linear-gradient(135deg, #00f0ff, #00c6a7)';
+      submitBtn.style.background = 'linear-gradient(135deg, #00ff87, #00d4ff)';
     }
     if (switchPrompt) {
       switchPrompt.innerHTML = 'Nie masz jeszcze konta? <a href="javascript:void(0)" onclick="switchAuthTab(\'register\')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zarejestruj się za darmo (+500 🪙)</a>';
     }
   }
-}
-
-function showAuthAlert(message, type = 'error') {
-  const el = document.getElementById('fcAuthAlert');
-  if (!el) return;
-  el.className = 'fc-auth-alert ' + type;
-  const icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : '⏳');
-  el.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-  el.style.display = 'flex';
 }
 
 function clearInputError(input) {
@@ -13803,6 +14032,19 @@ function togglePasswordVisibility() {
   if (pass) {
     pass.type = pass.type === 'password' ? 'text' : 'password';
   }
+}
+
+function showAuthAlert(msg, type = 'info') {
+  const el = document.getElementById('fcAuthAlert');
+  if (!el) return;
+  if (!msg) {
+    el.style.display = 'none';
+    el.textContent = '';
+    return;
+  }
+  el.style.display = 'block';
+  el.className = 'fc-auth-alert ' + (type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'));
+  el.innerHTML = (type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ')) + msg;
 }
 
 function submitAuthForm() {
@@ -13930,7 +14172,7 @@ async function fcLoadCloudProfile() {
       fcSetSessionToken('');
       fcCurrentUser = null;
       clubData.nick = 'GOŚĆ';
-      clubData.coins = 0;
+      clubData.coins = 500;
       clubData.owned = [...STARTER_CARD_IDS];
       clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
       fcUpdateAuthUi();
@@ -13981,6 +14223,11 @@ async function fcLoadCloudProfile() {
     }
   } catch (err) {
     console.warn('FC28 Cloudflare profile load warning:', err);
+    if (!Number.isFinite(clubData.coins) || clubData.coins <= 0) {
+      clubData.coins = 500;
+    }
+    fcUpdateAuthUi();
+    updateMenuClubUI();
   }
   return false;
 }
@@ -14074,7 +14321,7 @@ async function fcLogin() {
     if (!res.ok || !data.success) {
       if (passInput) passInput.classList.add('fc-input-error');
       const msg = data.message || 'Nieprawidłowy nick lub hasło.';
-      showAuthAlert(`${msg} Jeśli nie posiadasz jeszcze konta, kliknij zakładkę "NOWE KONTO".`, 'error');
+      showAuthAlert(`${msg} Jeśli nie zakładałeś jeszcze tego konta, przełącz na zakładkę "NOWE KONTO (+500 COINS)" powyżej!`, 'error');
       return;
     }
 
@@ -14234,6 +14481,8 @@ window.showAuthAlert = showAuthAlert;
 
 loadClubData();
 applySquadStatsToTeam(blueTeam, clubData.lineup);
+updateMenuSquadStrip();
+updateMenuClubUI();
 fcInitAccounts();
 
 Object.assign(window, {
