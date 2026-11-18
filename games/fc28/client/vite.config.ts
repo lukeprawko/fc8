@@ -6,6 +6,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: './',
+    define: {
+      'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'https://fc28-backend.plugames640.workers.dev')
+    },
     resolve: {
       alias: {
         '@games/shared': path.resolve(__dirname, '../../../packages/shared/src')

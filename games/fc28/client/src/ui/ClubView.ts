@@ -20,7 +20,7 @@ export class ClubView {
    * Otwarcie paczki przez zapytanie do serwera (Authoritative Backend)
    */
   public async openPack(tier: 'standard' | 'premium' | 'ultimate'): Promise<PackOpenResult | null> {
-    const apiBase = import.meta.env.VITE_API_URL || '';
+    const apiBase = import.meta.env.VITE_API_URL || 'https://fc28-backend.plugames640.workers.dev';
     const token = localStorage.getItem('fc28_auth_token');
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -52,7 +52,7 @@ export class ClubView {
    * Zapis składu na serwerze (z weryfikacją posiadania kart)
    */
   public async saveLineup(lineup: SquadLineup): Promise<boolean> {
-    const apiBase = import.meta.env.VITE_API_URL || '';
+    const apiBase = import.meta.env.VITE_API_URL || 'https://fc28-backend.plugames640.workers.dev';
     const token = localStorage.getItem('fc28_auth_token');
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };

@@ -7803,7 +7803,7 @@ const ball = {
       this.isPowerShot = false;
       let p = this.owner;
       this.lastTouchTeam = p.team;
-      let carryDist = p.isShielding ? 15 : 20;
+      let carryDist = p.isShielding ? 14 : (p.isSprinting ? 18.5 : 16.5);
       let offsetAngle = p.angle;
       let extraZ = 0;
 
@@ -7811,35 +7811,37 @@ const ball = {
         carryDist = 4;
         extraZ = 28;
       } else if ((setPiece.active && setPiece.type === 'KICKOFF') || matchPhase === 'KICKOFF_WAIT') {
-        carryDist = 16;
+        carryDist = 15;
         extraZ = 0;
       } else if (p.trickTimer > 0) {
         let progress = 1 - (p.trickTimer / p.trickMaxTime);
         if (p.trickType === 'roulette') {
           offsetAngle = p.angle + progress * Math.PI * 2;
-          carryDist = 22;
+          carryDist = 20;
         } else if (p.trickType === 'feint') {
           offsetAngle = p.angle + Math.sin(progress * Math.PI * 2) * 0.75;
-          carryDist = 23;
+          carryDist = 21;
         } else if (p.trickType === 'elastico' || p.trickType === 'rabona') {
           let whip = progress < 0.45 ? -1.0 : 0.95;
           offsetAngle = p.angle + whip;
-          carryDist = 24;
+          carryDist = 22;
         } else if (p.trickType === 'sombrero' || p.trickType === 'rainbow' || p.trickType === 'gaucho') {
-          carryDist = 14 + progress * 22;
+          carryDist = 14 + progress * 20;
           extraZ = Math.sin(progress * Math.PI) * 48;
         }
       } else if (p.isMoving) {
-        carryDist = 20 + Math.sin(p.animCycle * 0.5) * 2.5;
+        carryDist = (p.isSprinting ? 18.5 : 16.5) + Math.sin(p.animCycle * 0.5) * 1.8;
       }
 
-      // Piłka "podąża" za kątem zawodnika z lekkim opóźnieniem zamiast skakać wokół niego
+      // Ultra-płynne, dynamiczne prowadzenie piłki tuż przy nodze (błyskawiczne zwroty, zero opóźnienia za plecy)
       const directCarry = p.trickTimer > 0 || p.isShielding || setPiece.active || matchPhase === 'KICKOFF_WAIT';
       if (this._carryOwner !== p || this._carryAngle === undefined || directCarry) {
         this._carryAngle = offsetAngle;
         this._carryOwner = p;
       } else {
-        this._carryAngle += normalizeAngle(offsetAngle - this._carryAngle) * 0.30;
+        const angDiff = normalizeAngle(offsetAngle - this._carryAngle);
+        const followRate = Math.abs(angDiff) > 1.2 ? 0.82 : (p.isSprinting ? 0.52 : 0.68);
+        this._carryAngle += angDiff * followRate;
       }
       this.x = p.x + Math.cos(this._carryAngle) * carryDist;
       this.y = p.y + Math.sin(this._carryAngle) * carryDist;
@@ -8191,6 +8193,19 @@ function inPenaltyBox(defTeam, x, y, pad = 0) {
   return x >= x0 && x <= x1 && Math.abs(y - WORLD.height / 2) <= PEN_BOX.h / 2 + pad;
 }
 
+// Pamięć podręczna prawdziwych portretów 95 licencjonowanych piłkarzy dla silnika 2.5D
+const PLAYER_HEAD_IMAGES = {};
+function getPlayerHeadImage(cardId) {
+  if (!cardId) return null;
+  let entry = PLAYER_HEAD_IMAGES[cardId];
+  if (!entry) {
+    entry = new Image();
+    entry.src = `assets/players/${cardId}.webp`;
+    PLAYER_HEAD_IMAGES[cardId] = entry;
+  }
+  return (entry.complete && entry.naturalWidth > 0) ? entry : null;
+}
+
 class Player {
   constructor(x, y, team, role, number, skinColor, hairColor) {
     this.x = x;
@@ -8273,6 +8288,7 @@ class Player {
     if (!card) return;
     this.cardId = card.id;
     this.cardName = card.name;
+    try { getPlayerHeadImage(card.id); } catch (e) {}
     this.ovr = card.ovr || 75;
     this.statPac = card.pac || 75;
     this.statSho = card.sho || 75;
@@ -9681,36 +9697,45 @@ class Player {
     ctx.fillRect(rx - 1, ry - 1, 2.5, 1.5);
     ctx.restore();
 
-    // Tułów 3D
+    // Tułów 3D z numerem na plecach i wzorem koszulki
     let primaryColor = this.team === 'blue'
-      ? (isGk ? '#00bfa5' : '#00b4db')
-      : (isGk ? '#f5b041' : '#ff0055');
-    let secondaryColor = this.team === 'blue' ? '#b2ebf2' : '#ffcdd2';
+      ? (isGk ? '#00bfa5' : '#0072ff')
+      : (isGk ? '#f5b041' : '#e50914');
+    let secondaryColor = this.team === 'blue'
+      ? (isGk ? '#e0f7fa' : '#00f0ff')
+      : (isGk ? '#fff3e0' : '#ff5252');
 
-    let bodyGrad = ctx.createRadialGradient(-4, -6, 2, 0, -4, this.radius);
+    let bodyGrad = ctx.createRadialGradient(-3, -5, 2, 0, -4, this.radius);
     bodyGrad.addColorStop(0, secondaryColor);
-    bodyGrad.addColorStop(0.35, primaryColor);
-    bodyGrad.addColorStop(1, '#080b12');
+    bodyGrad.addColorStop(0.40, primaryColor);
+    bodyGrad.addColorStop(1, '#05070d');
 
     ctx.beginPath();
-    ctx.ellipse(0, -4, this.radius * 0.95, this.radius * 0.80, renderAngle * 0.15, 0, Math.PI * 2);
+    ctx.ellipse(0, -4, this.radius * 0.98, this.radius * 0.82, renderAngle * 0.15, 0, Math.PI * 2);
     ctx.fillStyle = bodyGrad;
     ctx.fill();
-    ctx.lineWidth = 1.8;
+    ctx.lineWidth = 2.0;
     ctx.strokeStyle = '#080b12';
     ctx.stroke();
 
+    // Paski i dynamiczne akcenty na koszulkach
     ctx.beginPath();
-    ctx.arc(0, -4, this.radius * 0.82, renderAngle + 1.1, renderAngle + 2.0);
-    ctx.arc(0, -4, this.radius * 0.82, renderAngle - 2.0, renderAngle - 1.1);
+    ctx.arc(0, -4, this.radius * 0.84, renderAngle + 1.15, renderAngle + 1.95);
+    ctx.arc(0, -4, this.radius * 0.84, renderAngle - 1.95, renderAngle - 1.15);
     ctx.strokeStyle = secondaryColor;
-    ctx.lineWidth = 2.8;
+    ctx.lineWidth = 2.4;
     ctx.stroke();
 
+    // Numer zawodnika na koszulce (np. #1 dla GK, #10 dla Messiego, #9 dla Haalanda / Mbappe)
+    const squadNum = this.number || (this.role === 'GK' ? 1 : (this.role === 'DEF' ? 4 : (this.role === 'MID' ? 8 : 9)));
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 10px Orbitron, sans-serif';
+    ctx.font = '900 11px Orbitron, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(this.ovr, -fwdX * 4, -2.5);
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 3;
+    ctx.fillText(squadNum, -fwdX * 5, -4 - fwdY * 3);
+    ctx.shadowBlur = 0;
 
     // Ramiona i ręce / rękawice
     let armSwing = this.isMoving ? -Math.sin(this.animCycle) * 7.2 : 0;
@@ -9745,7 +9770,7 @@ class Player {
       ctx.stroke();
     }
 
-    // Głowa 3D z obracaniem do piłki
+    // Głowa z autentycznym portretem piłkarza (Prawdziwe twarze z assets/players/*.webp)
     let ballDx = ball.x - this.x;
     let ballDy = ball.y - this.y;
     let toBallAngle = Math.atan2(ballDy, ballDx);
@@ -9756,58 +9781,190 @@ class Player {
     let headFwdY = Math.sin(finalHeadAngle);
     let headX = headFwdX * 3.5;
     let headY = -13 + headFwdY * 2;
+    const headRadius = 11.5;
+    const headImg = getPlayerHeadImage(this.cardId);
 
-    let headGrad = ctx.createRadialGradient(headX - 2, headY - 2, 1, headX, headY, 10);
-    headGrad.addColorStop(0, '#ffffff');
-    headGrad.addColorStop(0.35, this.skinColor);
-    headGrad.addColorStop(1, '#4e342e');
+    ctx.save();
+    ctx.translate(headX, headY);
 
+    // Cień głowy / obwódka 3D
     ctx.beginPath();
-    ctx.arc(headX, headY, 9.8, 0, Math.PI * 2);
-    ctx.fillStyle = headGrad;
-    ctx.fill();
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = '#1b1b1b';
-    ctx.stroke();
-
-    ctx.fillStyle = this.hairColor;
-    ctx.beginPath();
-    ctx.arc(headX - headFwdX * 2.2, headY - 1.5, 9.0, finalHeadAngle + Math.PI * 0.42, finalHeadAngle + Math.PI * 1.58);
+    ctx.arc(0, 0, headRadius + 1.8, 0, Math.PI * 2);
+    ctx.fillStyle = this.team === 'blue' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(255, 0, 85, 0.45)';
     ctx.fill();
 
+    // Rysowanie zdjęcia piłkarza z zaokrągloną maską
+    if (headImg) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(headImg, -headRadius, -headRadius, headRadius * 2, headRadius * 2);
+      ctx.restore();
+
+      // Złoty lub drużynowy pierścień wokół twarzy
+      ctx.beginPath();
+      ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = this.playstyle ? '#f5b041' : (this.team === 'blue' ? '#00f0ff' : '#ff0055');
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    } else {
+      // Fallback cieniowany 3D jeśli zdjęcie się jeszcze ładuje
+      let headGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, headRadius);
+      headGrad.addColorStop(0, '#ffffff');
+      headGrad.addColorStop(0.35, this.skinColor || '#ffdbac');
+      headGrad.addColorStop(1, '#4e342e');
+      ctx.beginPath();
+      ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+      ctx.fillStyle = headGrad;
+      ctx.fill();
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = '#1b1b1b';
+      ctx.stroke();
+
+      ctx.fillStyle = this.hairColor || '#2c1b18';
+      ctx.beginPath();
+      ctx.arc(-headFwdX * 2.2, -1.5, headRadius * 0.9, finalHeadAngle + Math.PI * 0.42, finalHeadAngle + Math.PI * 1.58);
+      ctx.fill();
+    }
+
+    // Unikalne, oryginalne akcesoria gwiazd (Kaszkiet Jaszyna, Warkoczyki Gullita, Opaska Ronaldinho, Kucyk Haalanda, Broda Messiego)
+    if (this.cardId === 'gk_yashin') {
+      ctx.save();
+      ctx.fillStyle = '#111317';
+      ctx.beginPath();
+      ctx.ellipse(0, -5, headRadius * 1.1, headRadius * 0.65, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0a0c10';
+      ctx.beginPath();
+      ctx.ellipse(headFwdX * 4, -4 + headFwdY * 2, headRadius * 0.9, 4, finalHeadAngle, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (this.cardId === 'mid_gullit') {
+      ctx.save();
+      ctx.fillStyle = '#140c0a';
+      for (let d = -3; d <= 3; d++) {
+        let da = finalHeadAngle + Math.PI + d * 0.35;
+        ctx.beginPath();
+        ctx.ellipse(Math.cos(da) * (headRadius + 2), Math.sin(da) * (headRadius + 2) + 2, 3.2, 7, da, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    } else if (this.cardId === 'mid_ronaldinho') {
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, -3, headRadius * 0.95, finalHeadAngle - 1.2, finalHeadAngle + 1.2);
+      ctx.stroke();
+      ctx.restore();
+    } else if (this.cardId === 'fwd_haaland') {
+      ctx.save();
+      ctx.fillStyle = '#f7d377';
+      ctx.beginPath();
+      ctx.arc(-headFwdX * (headRadius + 1), -4 - headFwdY * 2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (this.cardId === 'fwd_messi') {
+      ctx.save();
+      ctx.fillStyle = '#5c3826';
+      ctx.beginPath();
+      ctx.arc(headFwdX * 3, 2 + headFwdY * 3, 5.5, finalHeadAngle - 0.8, finalHeadAngle + 0.8);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.restore();
     ctx.restore();
     this.drawOverlays(controllerLabel, isLocalHuman);
   }
 
   drawOverlays(controllerLabel, isLocalHuman) {
-    if (this.playstyle && PLAYSTYLES[this.playstyle]) {
-      const ps = PLAYSTYLES[this.playstyle];
+    // 1. Nazwisko i OVR zawodnika w nowoczesnym stylu EA FC (zaokrąglony panel z mini portretem)
+    const displayName = (this.cardName || this.role).toUpperCase();
+    const ovrText = `${this.ovr || 75}`;
+    const ps = (this.playstyle && PLAYSTYLES[this.playstyle]) ? PLAYSTYLES[this.playstyle] : null;
+
+    ctx.save();
+    ctx.font = '800 10px Orbitron, sans-serif';
+    const textWidth = ctx.measureText(displayName).width;
+    const badgeW = Math.max(76, textWidth + (ps ? 46 : 34));
+    const badgeH = 18;
+    const badgeX = this.x - badgeW / 2;
+    const badgeY = this.y - 39;
+
+    // Tło plakietki EA FC
+    ctx.beginPath();
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+    ctx.fillStyle = 'rgba(5, 8, 15, 0.88)';
+    ctx.fill();
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = this.playstyle ? 'rgba(245, 176, 65, 0.75)' : (this.team === 'blue' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(255, 0, 85, 0.45)');
+    ctx.stroke();
+
+    // Mini portret piłkarza lub kółko barwy
+    const miniImg = getPlayerHeadImage(this.cardId);
+    if (miniImg) {
       ctx.save();
-      ctx.font = '900 10px Orbitron, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#f5b041';
-      ctx.shadowColor = '#000';
-      ctx.shadowBlur = 4;
-      ctx.fillText(`${ps.icon} ${this.cardName} (${this.ovr})`, this.x, this.y - 31);
+      ctx.beginPath();
+      ctx.arc(badgeX + 10, badgeY + badgeH / 2, 6.5, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(miniImg, badgeX + 3.5, badgeY + badgeH / 2 - 6.5, 13, 13);
       ctx.restore();
     } else {
+      ctx.beginPath();
+      ctx.arc(badgeX + 10, badgeY + badgeH / 2, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = this.team === 'blue' ? '#00f0ff' : '#ff0055';
+      ctx.fill();
+    }
+
+    // Nazwisko
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(displayName, badgeX + 20, badgeY + badgeH / 2);
+
+    // OVR
+    ctx.font = '900 9px Orbitron, sans-serif';
+    ctx.fillStyle = this.ovr >= 90 ? '#ffd700' : (this.ovr >= 85 ? '#00f0ff' : '#a0aec0');
+    ctx.textAlign = 'right';
+    ctx.fillText(ovrText, badgeX + badgeW - (ps ? 16 : 6), badgeY + badgeH / 2);
+
+    // PlayStyle+ Ikona
+    if (ps) {
+      ctx.font = '10px sans-serif';
+      ctx.fillText(ps.icon, badgeX + badgeW - 3, badgeY + badgeH / 2);
+    }
+    ctx.restore();
+
+    // Pasek staminy przy sprincie / zmęczeniu
+    if (this.stamina < 96) {
+      const stamW = 46, stamH = 3.5;
+      const sx = this.x - stamW / 2, sy = badgeY + badgeH + 3;
+      const pct = Math.max(0, Math.min(1, this.stamina / 100));
       ctx.save();
-      ctx.font = '700 9px Orbitron, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
-      ctx.fillText(`${this.cardName} (${this.ovr})`, this.x, this.y - 31);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(sx, sy, stamW, stamH);
+      ctx.fillStyle = pct > 0.4 ? '#00e676' : (pct > 0.2 ? '#f5b041' : '#ff0055');
+      ctx.fillRect(sx, sy, stamW * pct, stamH);
       ctx.restore();
     }
 
+    // Trójkąt gracza sterowanego (EA FC Diamond Cursor)
     if (controllerLabel) {
       let bounce = Math.sin(tickCount * 0.14) * 2.5;
+      const cy = badgeY - 7 + bounce;
+      ctx.save();
+      ctx.shadowColor = isLocalHuman ? '#00e676' : (this.team === 'blue' ? '#00f0ff' : '#ff0055');
+      ctx.shadowBlur = 8;
       ctx.beginPath();
-      ctx.moveTo(this.x, this.y - 42 + bounce);
-      ctx.lineTo(this.x - 6, this.y - 51 + bounce);
-      ctx.lineTo(this.x + 6, this.y - 51 + bounce);
+      ctx.moveTo(this.x, cy);
+      ctx.lineTo(this.x - 7, cy - 9);
+      ctx.lineTo(this.x + 7, cy - 9);
       ctx.closePath();
       ctx.fillStyle = isLocalHuman ? '#00e676' : (this.team === 'blue' ? '#00f0ff' : '#ff0055');
       ctx.fill();
+      ctx.restore();
 
       if (isLocalHuman && showNewPlayerAssist) {
         let hintTxt = '';
@@ -11486,8 +11643,8 @@ function updateFixedStep() {
 
 // Kolizje zawodników: mniejszy hitbox ciała, waga zależna od siły, wymiana pędu, 2 iteracje i pilnowanie granic boiska
 function resolvePlayerCollisions() {
-  const BODY = 15;
-  const massOf = p => Math.max(0.6, 1 + ((p.strength || 75) - 75) * 0.012 + (p.isShielding ? 0.35 : 0) + (p.isSliding ? 0.25 : 0) + (ball.owner === p ? 0.10 : 0));
+  const BODY = 16.5;
+  const massOf = p => Math.max(0.65, 1 + ((p.strength || 75) - 75) * 0.015 + (p.isShielding ? 0.40 : 0) + (p.isSliding ? 0.30 : 0) + (ball.owner === p ? 0.12 : 0));
   for (let pass = 0; pass < 2; pass++) {
     for (let i = 0; i < allPlayers.length; i++) {
       const p1 = allPlayers[i];

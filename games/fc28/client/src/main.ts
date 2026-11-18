@@ -144,7 +144,7 @@ function setupUIHandlers() {
   btnAuthSubmit?.addEventListener('click', async () => {
     const userInp = (document.getElementById('authUsername') as HTMLInputElement)?.value;
     const passInp = (document.getElementById('authPassword') as HTMLInputElement)?.value;
-    const apiBase = import.meta.env.VITE_API_URL || '';
+    const apiBase = import.meta.env.VITE_API_URL || 'https://fc28-backend.plugames640.workers.dev';
     const endpoint = isAuthRegisterMode ? `${apiBase}/api/auth/register` : `${apiBase}/api/auth/login`;
 
     try {

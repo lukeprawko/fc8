@@ -55,7 +55,7 @@ export class GameClient {
     this.token = token;
 
     return new Promise((resolve) => {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://fc28-backend.plugames640.workers.dev';
       let wsUrl: string;
 
       if (apiUrl) {

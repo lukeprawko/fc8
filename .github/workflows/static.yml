@@ -36,12 +36,17 @@ jobs:
         run: |
           mkdir -p _site/assets
           cp index.html pingpong.html fc28.html _site/
+          [ -f statki.html ] && cp statki.html _site/ || true
+          [ -f stickmanwalki.html ] && cp stickmanwalki.html _site/ || true
           [ -f kaczki.html ] && cp kaczki.html _site/ || true
           [ -f sitemap.xml ] && cp sitemap.xml _site/ || true
           [ -f robots.txt ] && cp robots.txt _site/ || true
           [ -f CNAME ] && cp CNAME _site/ || true
           [ -f site.webmanifest ] && cp site.webmanifest _site/ || true
           cp -R assets/. _site/assets/
+          if [ -d fc28 ]; then
+            cp -R fc28 _site/fc28
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
