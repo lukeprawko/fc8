@@ -3855,6 +3855,150 @@
     box-shadow: 0 20px 50px rgba(245, 176, 65, 0.5);
   }
 
+
+  /* 3-KAFELKOWY MINIMALISTYCZNY UKŁAD EA SPORTS FC */
+  .ea-dashboard-layout-3col {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr 0.95fr;
+    gap: 16px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  @media (max-width: 1100px) {
+    .ea-dashboard-layout-3col {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .ea-clean-control-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .ea-control-label {
+    font-family: var(--font-heading);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    color: var(--fc-text-sub);
+    text-transform: uppercase;
+  }
+
+  .ea-pill-selector {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ea-pill-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(8, 12, 22, 0.7);
+    border: 1px solid var(--panel-border);
+    color: var(--fc-text-sub);
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .ea-pill-btn:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .ea-pill-btn.active {
+    background: rgba(0, 255, 135, 0.12);
+    border-color: var(--fc-volt);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
+  }
+
+  .ea-hero-btn {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00ff87 0%, #00d4ff 100%);
+    color: #050811;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 255, 135, 0.35);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ea-hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 255, 135, 0.5);
+    filter: brightness(1.08);
+  }
+
+  .ea-cta-row.single-cta {
+    margin-top: 4px;
+  }
+
+  .ea-tile-quick-links {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .ea-sub-link-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--fc-text-sub);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .ea-sub-link-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .ea-icon-action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fc-text-sub);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ea-icon-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
 </style>
 
 </head>
@@ -3949,13 +4093,13 @@
 
       <nav class="ea-fc-nav">
         <button type="button" class="ea-nav-btn active" id="navBtnArena" onclick="void(0)">
-          <span>CENTRUM MECZOWE</span>
+          <span>MECZ</span>
         </button>
         <button type="button" class="ea-nav-btn" id="navBtnSquad" onclick="switchClubTab('SQUAD'); openClubModal()">
-          <span>MÓJ SKŁAD</span>
+          <span>SKŁAD</span>
         </button>
         <button type="button" class="ea-nav-btn" id="navBtnPacks" onclick="switchClubTab('PACKS'); openClubModal()">
-          <span>SKLEP PACZEK</span>
+          <span>PACZKI</span>
         </button>
         <button type="button" class="ea-nav-btn" id="navBtnRanking" onclick="openLeaderboardModal()">
           <span>RANKING</span>
@@ -3963,174 +4107,177 @@
       </nav>
 
       <div class="ea-fc-user-area">
-        <div class="coins-badge ea-coins-badge" title="Twoje Monety FC">
+        <div class="coins-badge ea-coins-badge" onclick="switchClubTab('PACKS'); openClubModal()" title="Twoje Monety FC (Kliknij, aby otworzyć paczkę)">
           <span class="coin-disc">FC</span>
-          <span id="menuCoinsDisplay">0</span>
+          <span id="menuCoinsDisplay">500</span>
           <span class="coin-lbl">COINS</span>
         </div>
 
-        <div class="ea-user-chip" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i profilem">
+        <div class="ea-user-chip" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i synchronizacją Cloudflare D1">
           <span class="user-status-dot"></span>
           <span class="user-name-text">TRYB GOŚCIA</span>
-          <span class="user-div-tag">DIV 1</span>
+          <span class="user-div-tag">LOKALNY</span>
         </div>
 
-        <button type="button" class="account-top-btn ea-btn-login" id="fcAccountButton" onclick="openFcAuth()">ZALOGUJ</button>
+        <button type="button" class="account-top-btn ea-btn-login" id="fcAccountButton" onclick="openFcAuth()" style="display:none;">KONTO</button>
 
-        <button type="button" class="ea-sync-btn" onclick="openSaveCodeModal()" title="Kopia zapasowa, synchronizacja i transfer danych konta">
-          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-          <span>TRANSFER DANYCH</span>
+        <button type="button" class="ea-icon-action-btn" onclick="toggleFullscreen()" title="Pełny ekran (F11)">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
     </header>
 
     <!-- WIDESCREEN EA FC DASHBOARD GRID -->
     <div class="ea-dashboard" id="mainPanel">
-      <div class="ea-dashboard-layout">
+      <div class="ea-dashboard-layout-3col">
         
-        <!-- LEWA GŁÓWNA KARTA: CENTRUM ROZGRYWKI / PLAY HUB -->
+        <!-- KAFEL 1: CENTRUM ROZGRYWKI (PLAY HUB) -->
         <section class="ea-play-card">
           <div class="ea-play-header">
             <div class="ea-play-tag-row">
               <span class="ea-badge-volt">ARENA 3D</span>
-              <span class="ea-reward-tag">+100 MONET ZA WYGRANY MECZ</span>
+              <span class="ea-reward-tag">+100 MONET ZA MECZ</span>
             </div>
-            <h2 class="ea-play-title">CENTRUM ROZGRYWKI</h2>
+            <h2 class="ea-play-title">CENTRUM MECZU</h2>
             <p class="ea-play-desc">Wkrocz na pełnowymiarowy stadion 3D ze zbalansowaną fizyką Rapier, PlayStyles+ i autentycznymi modelami gwiazd.</p>
           </div>
 
           <!-- Przełącznik trybu SOLO vs MULTIPLAYER -->
           <div class="ea-mode-segment-bar">
             <button type="button" class="ea-segment-btn active" id="segSoloTab" onclick="switchMatchTab('SOLO')">
-              SOLO ARENA (AI)
+              SOLO (AI)
             </button>
             <button type="button" class="ea-segment-btn" id="segMpTab" onclick="switchMatchTab('MP')">
-              MULTIPLAYER (ONLINE P2P)
+              ONLINE (P2P)
             </button>
           </div>
 
           <!-- SEKCJA SOLO ARENA -->
           <div class="ea-match-content" id="eaMatchSoloView">
-            <div class="ea-options-row">
-              <div class="ea-opt-group">
-                <span class="ea-opt-label">POZIOM RYWALI AI:</span>
-                <div class="ai-tiers">
-                  <button type="button" class="tier-btn" id="ai-easy" onclick="setAiTier('easy')">AMATOR</button>
-                  <button type="button" class="tier-btn active" id="ai-medium" onclick="setAiTier('medium')">ZAWODOWIEC</button>
-                  <button type="button" class="tier-btn" id="ai-hard" onclick="setAiTier('hard')">KLASA ŚWIATOWA</button>
-                </div>
-              </div>
-
-              <div class="ea-opt-group">
-                <span class="ea-opt-label">PARTNERZY Z DRUŻYNY:</span>
-                <div class="ai-tiers">
-                  <button type="button" class="tier-btn ally-tier" id="ally-easy" onclick="setAllyAiTier('easy')">AMATOR</button>
-                  <button type="button" class="tier-btn ally-tier active" id="ally-medium" onclick="setAllyAiTier('medium')">ZAWODOWIEC</button>
-                  <button type="button" class="tier-btn ally-tier" id="ally-hard" onclick="setAllyAiTier('hard')">KLASA ŚWIATOWA</button>
-                </div>
+            <div class="ea-clean-control-section">
+              <div class="ea-control-label">FORMAT SPOTKANIA</div>
+              <div class="ea-pill-selector">
+                <button type="button" class="ea-pill-btn active" id="solo-fmt-1v1" onclick="setSoloSubMode('1v1')">1 VS 1</button>
+                <button type="button" class="ea-pill-btn" id="solo-fmt-2v2" onclick="setSoloSubMode('2v2')">2 VS 2 CO-OP</button>
               </div>
             </div>
 
-            <div class="ea-cta-row">
-              <button type="button" class="action-btn ea-btn-volt" onclick="startSingleplayer()">
-                <span>ROZPOCZNIJ MECZ 1 VS 1 ➔</span>
-              </button>
-              <button type="button" class="action-btn ea-btn-sub" onclick="startSolo2v2()">
-                <span>MECZ 2 VS 2 CO-OP ➔</span>
+            <div class="ea-clean-control-section">
+              <div class="ea-control-label">POZIOM TRUDNOŚCI AI</div>
+              <div class="ai-tiers">
+                <button type="button" class="tier-btn" id="ai-easy" onclick="setMatchAiDifficulty('easy')">AMATOR</button>
+                <button type="button" class="tier-btn active" id="ai-medium" onclick="setMatchAiDifficulty('medium')">ZAWODOWIEC</button>
+                <button type="button" class="tier-btn" id="ai-hard" onclick="setMatchAiDifficulty('hard')">KLASA ŚWIATOWA</button>
+              </div>
+              <!-- Ukryte przyciski dla kompatybilności wstecznej AI sojuszników -->
+              <div style="display:none;" aria-hidden="true">
+                <button id="ally-easy" onclick="setAllyAiTier('easy')"></button>
+                <button id="ally-medium" onclick="setAllyAiTier('medium')"></button>
+                <button id="ally-hard" onclick="setAllyAiTier('hard')"></button>
+              </div>
+            </div>
+
+            <div class="ea-cta-row single-cta">
+              <button type="button" class="action-btn ea-btn-volt ea-hero-btn" onclick="launchCurrentSoloMatch()">
+                <span>ROZPOCZNIJ MECZ ➔</span>
               </button>
             </div>
           </div>
 
-          <!-- SEKCJA MULTIPLAYER P2P -->
+          <!-- SEKCJA MULTIPLAYER (ONLINE P2P) -->
           <div class="ea-match-content" id="eaMatchMpView" style="display:none;">
-            <div class="ea-options-row">
-              <div class="ea-opt-group" style="width:100%;">
-                <span class="ea-opt-label">TRYB SIECIOWY:</span>
-                <div class="mp-tiers">
-                  <button type="button" class="tier-btn mp-mode active" id="mp-1v1" onclick="setMpMode('1v1')">
-                    1 VS 1 POJEDYNEK
-                  </button>
-                  <button type="button" class="tier-btn mp-mode" id="mp-2v2" onclick="setMpMode('2v2')">
-                    2 VS 2 LOBBY
-                  </button>
-                </div>
+            <div class="ea-clean-control-section">
+              <div class="ea-control-label">TRYB SIECIOWY</div>
+              <div class="ea-pill-selector">
+                <button type="button" class="ea-pill-btn active" id="mp-1v1" onclick="setMpMode('1v1')">1 VS 1 POJEDYNEK</button>
+                <button type="button" class="ea-pill-btn" id="mp-2v2" onclick="setMpMode('2v2')">2 VS 2 LOBBY</button>
               </div>
             </div>
 
             <div class="ea-cta-row">
               <button type="button" class="action-btn ea-btn-volt" id="btnQuickMatch" onclick="startQuickMatchmaking()">
-                <span>⚡ SZYBKI MECZ ONLINE</span>
+                <span>⚡ SZYBKI MECZ</span>
               </button>
               <button type="button" class="action-btn ea-btn-sub" onclick="createRoom()">
-                <span>STWÓRZ POKÓJ DLA ZNAJOMEGO</span>
+                <span>STWÓRZ POKÓJ</span>
               </button>
             </div>
 
-            <div class="ea-join-container">
-              <input id="joinInput" maxlength="6" placeholder="KOD POKOJU (6 ZNAKÓW)">
-              <button type="button" class="action-btn ea-btn-join" onclick="joinRoom()">
-                DOŁĄCZ
-              </button>
+            <div class="ea-clean-control-section" style="margin-top: 10px;">
+              <div class="ea-control-label">DOŁĄCZ DO POKOJU PRZEZ KOD</div>
+              <div class="ea-join-container">
+                <input type="text" class="room-code-input" id="joinCodeInput" placeholder="WPISZ 6-ZNAKOWY KOD..." maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="characters">
+                <button type="button" class="action-btn ea-btn-join" onclick="joinRoom()">
+                  <span>DOŁĄCZ</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- KAFEL 2: TWÓJ WYJŚCIOWY SKŁAD -->
+        <section class="ea-tile-card ea-squad-tile">
+          <div class="ea-tile-header">
+            <div class="ea-tile-title-group">
+              <span class="ea-tile-sub">ULTIMATE TEAM</span>
+              <h3 class="ea-tile-heading">TWÓJ SKŁAD</h3>
+            </div>
+            <div class="ea-tile-meta">
+              <span class="ea-badge-gold" id="menuOvrBadge">OVR 88</span>
+              <span class="ea-badge-volt">CHEM 33/33</span>
             </div>
           </div>
 
-          <div id="statusMsg"></div>
+          <!-- Kontener na 4 karty składu -->
+          <div class="squad-preview-strip" id="menuSquadStrip"></div>
+
+          <button type="button" class="ea-tile-cta" onclick="switchClubTab('SQUAD'); openClubModal();">
+            <span>ZARZĄDZAJ SKŁADEM & TAKTYKĄ ➔</span>
+          </button>
         </section>
 
-        <!-- PRAWA KOLUMNA: DWA KAFLOWE BLOKI (SKŁAD I SKLEP) -->
-        <div class="ea-sidebar-column">
-          
-          <!-- KAFEL 1: TWÓJ SKŁAD -->
-          <section class="ea-tile-card">
-            <div class="ea-tile-header">
-              <div class="ea-tile-title-group">
-                <span class="ea-tile-sub">ULTIMATE TEAM</span>
-                <h3 class="ea-tile-heading">TWÓJ WYJŚCIOWY SKŁAD</h3>
-              </div>
-              <div class="ea-tile-meta">
-                <span class="ea-badge-gold" id="menuOvrBadge">OVR 88</span>
-                <span class="ea-badge-volt">CHEM 33/33</span>
+        <!-- KAFEL 3: SKLEP Z PACZKAMI & RANKING -->
+        <section class="ea-tile-card ea-pack-promo-card">
+          <div class="ea-tile-header">
+            <div class="ea-tile-title-group">
+              <span class="ea-tile-sub gold-text">SKLEP ULTIMATE TEAM</span>
+              <h3 class="ea-tile-heading">PACZKI FUT</h3>
+            </div>
+            <div class="ea-pack-cost">
+              <span class="ea-pack-price">100</span>
+              <span class="ea-pack-coin-lbl">COINS</span>
+            </div>
+          </div>
+
+          <div class="ea-pack-promo-body">
+            <div class="ea-pack-3d-box" onclick="switchClubTab('PACKS'); openClubModal();" title="Kliknij, aby otworzyć paczkę!">
+              <div class="ea-pack-foil"></div>
+              <div class="ea-pack-badge">85+</div>
+              <div class="ea-pack-label">PRIME PACK</div>
+            </div>
+            <div class="ea-pack-promo-desc">
+              <p class="ea-pack-highlight">Gwarantowane karty rzadkich gwiazd, legendy i PlayStyles+.</p>
+              <div class="ea-pack-chances">
+                <span>ZŁOTO 80+: 100%</span>
+                <span>IKONY: 15%</span>
               </div>
             </div>
+          </div>
 
-            <!-- Kontener na 4 karty składu -->
-            <div class="squad-preview-strip" id="menuSquadStrip"></div>
+          <button type="button" class="ea-tile-cta gold-cta" onclick="switchClubTab('PACKS'); openClubModal();">
+            <span>OTWÓRZ PACZKI FUT ➔</span>
+          </button>
 
-            <button type="button" class="ea-tile-cta" onclick="switchClubTab('SQUAD'); openClubModal();">
-              <span>ZARZĄDZAJ SKŁADEM & TAKTYKĄ ➔</span>
+          <div class="ea-tile-quick-links">
+            <button type="button" class="ea-sub-link-btn" onclick="openLeaderboardModal()">
+              <span>🏆 RANKING GRACZY</span>
             </button>
-          </section>
-
-          <!-- KAFEL 2: SKLEP Z PACZKAMI -->
-          <section class="ea-tile-card ea-pack-promo-card">
-            <div class="ea-tile-header">
-              <div class="ea-tile-title-group">
-                <span class="ea-tile-sub gold-text">SKLEP ULTIMATE TEAM</span>
-                <h3 class="ea-tile-heading">PACZKA MISTRZÓW PRIME</h3>
-              </div>
-              <div class="ea-pack-cost">
-                <span class="ea-pack-price">100</span>
-                <span class="ea-pack-coin-lbl">COINS</span>
-              </div>
-            </div>
-
-            <div class="ea-pack-promo-body">
-              <div class="ea-pack-3d-box">
-                <div class="ea-pack-foil"></div>
-                <div class="ea-pack-badge">85+</div>
-                <div class="ea-pack-label">PRIME PACK</div>
-              </div>
-              <div class="ea-pack-promo-desc">
-                Gwarantowane 4 karty z gwiazdami światowego futbolu, wysoka szansa na Ikony oraz złote PlayStyles+!
-              </div>
-            </div>
-
-            <button type="button" class="ea-tile-cta gold-cta" onclick="switchClubTab('PACKS'); openClubModal();">
-              <span>OTWÓRZ PACZKĘ W SKLEPIE ➔</span>
+            <button type="button" class="ea-sub-link-btn" onclick="openFcAuth()">
+              <span>👤 SYNCHRO / KONTO</span>
             </button>
-          </section>
+          </div>
+        </section>
 
-        </div>
       </div>
     </div>
 
@@ -4427,6 +4574,33 @@
 </div>
 
 <script>
+
+
+// ==========================================
+// EA FC 28 CLEAN CONTROLLER HELPERS
+// ==========================================
+window.selectedSoloFormat = '1v1';
+
+window.setSoloSubMode = function(mode) {
+  window.selectedSoloFormat = mode;
+  const b1 = document.getElementById('solo-fmt-1v1');
+  const b2 = document.getElementById('solo-fmt-2v2');
+  if (b1) b1.classList.toggle('active', mode === '1v1');
+  if (b2) b2.classList.toggle('active', mode === '2v2');
+};
+
+window.setMatchAiDifficulty = function(level) {
+  setAiTier(level);
+  setAllyAiTier(level);
+};
+
+window.launchCurrentSoloMatch = function() {
+  if (window.selectedSoloFormat === '2v2') {
+    startSolo2v2();
+  } else {
+    startSingleplayer();
+  }
+};
 
 window.switchMatchTab = function(tab) {
   const soloView = document.getElementById('eaMatchSoloView');
