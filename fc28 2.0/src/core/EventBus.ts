@@ -1,0 +1,59 @@
+/**
+ * CYBERFC 28 — Decoupled Typed Event Bus
+ * Enables clean communication across gameplay, physics, network, audio, and UI systems.
+ */
+
+export type GameEventCallback<T = any> = (data: T) => void;
+
+export class EventBus {
+  private static instance: EventBus;
+  private listeners: Map<string, Set<GameEventCallback>> = new Map();
+
+  private constructor() {}
+
+  public static getInstance(): EventBus {
+    if (!EventBus.instance) {
+      EventBus.instance = new EventBus();
+    }
+    return EventBus.instance;
+  }
+
+  public on<T = any>(event: string, callback: GameEventCallback<T>): () => void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)!.add(callback);
+
+    // Return unsubscribe function
+    return () => this.off(event, callback);
+  }
+
+  public off<T = any>(event: string, callback: GameEventCallback<T>): void {
+    const set = this.listeners.get(event);
+    if (set) {
+      set.delete(callback);
+      if (set.size === 0) {
+        this.listeners.delete(event);
+      }
+    }
+  }
+
+  public emit<T = any>(event: string, data?: T): void {
+    const set = this.listeners.get(event);
+    if (set) {
+      set.forEach(cb => {
+        try {
+          cb(data);
+        } catch (err) {
+          console.error(`[EventBus] Error in event listener for '${event}':`, err);
+        }
+      });
+    }
+  }
+
+  public clear(): void {
+    this.listeners.clear();
+  }
+}
+
+export const events = EventBus.getInstance();

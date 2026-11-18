@@ -1,0 +1,27 @@
+{
+  "name": "cyberfc-28-nextgen",
+  "version": "2.0.0",
+  "description": "CYBERFC 28 — Full AAA-Quality 3D Football Simulation Engine",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "@dimforge/rapier3d-compat": "^0.13.1",
+    "colyseus.js": "^0.15.16",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.160.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
+    "vitest": "^1.2.2"
+  }
+}
