@@ -14,12 +14,12 @@ Oficjalne repozytorium platformy gier **JDR Games** z flagowym projektem **CYBER
 
 1. **Nowoczesny Dashboard EA FC 28 Ultimate Team**:
    - Szklany interfejs (*glassmorphism*, `backdrop-filter: blur(32px)`).
-   - Globalny pasek nawigacji: Monety 🪙, Skład, Sklep z Paczkami, Ranking, Kod Zapisu i Profil Konta.
+   - Globalny pasek nawigacji: Monety 🪙, Skład, Sklep z Paczkami, Globalny Ranking i Profil Konta.
    - Prezentacja składu wyjściowego z prawdziwymi portretami 95 piłkarzy, OVR i stylami PlayStyle+.
 
 2. **Czysty Ekran Meczowy & Inteligentne Przełączanie Zawodników**:
    - Usunięto zbędne nakładki interfejsu (brak bocznych pasków i dolnego zasłaniacza) — na ekranie widać wyłącznie boisko 3D, piłkę, zawodników, nazwiska nad głowami oraz wynik.
-   - Klawisze <kbd>Spacja</kbd>, <kbd>Tab</kbd>, <kbd>Q</kbd> w obronie oraz środkowy przycisk myszy przełączają Cię **zawsze na zawodnika znajdującego się najbliżej piłki** (lub drugiego najbliższego przy asekuracji).
+   - Klawisze <kbd>Spacja</kbd> i <kbd>Tab</kbd> w obronie przełączają sterowanie między zawodnikami z pola najbliższymi piłki.
    - Automatyczne przejęcie kontroli nad zawodnikiem przyjmującym podanie.
 
 3. **Kinowe Otwieranie Paczek (FUT Pack Opening & Walkout)**:
@@ -37,8 +37,8 @@ Oficjalne repozytorium platformy gier **JDR Games** z flagowym projektem **CYBER
    - Płynne, zwinne przyspieszenie bez opóźnień i bez efektu ślizgania się po lodzie.
 
 6. **Chmura i Multiplayer P2P**:
-   - Autoryzacja i zapis chmurowy przez Cloudflare Workers & D1.
-   - Tryb gościa z jednorazowym kodem transferu danych (`FC28_...`).
+   - Pełna autoryzacja, zapis chmurowy oraz globalny ranking na Cloudflare Workers & D1.
+   - Automatyczna synchronizacja postępów bez potrzeby ręcznych kodów.
    - Szybki matchmaking online, prywatne pokoje kodem oraz Lobby 2v2.
 
 ---

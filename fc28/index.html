@@ -8021,7 +8021,7 @@ function closeClubModal() {
 
 
 /* ==========================================
-   3. AUTOMATYCZNA SYNCHRONIZACJA W CHMURZE (Cloudflare D1)
+   3. AUTOMATYCZNA SYNCHRONIZACJA W CHMURZE (Cloudflare D1) & ZARZĄDZANIE KONTEM
    ========================================== */
 function openSaveCodeModal() {
   if (typeof openFcAuth === 'function') openFcAuth();
@@ -8031,6 +8031,38 @@ function closeSaveCodeModal() {}
 function copySaveCode() {}
 function importSaveCode() {}
 function generateSaveCode() { return ''; }
+
+// Wygodne komendy konsoli (F12) do doładowania monet i kart:
+window.addCoins = function(amount = 10000) {
+  if (typeof amount !== 'number' || isNaN(amount)) amount = 10000;
+  clubData.coins = Math.max(0, Math.min(99999999, (clubData.coins || 0) + Math.floor(amount)));
+  saveClubData(true);
+  const coinsDisplay = document.getElementById('menuCoinsDisplay');
+  if (coinsDisplay) coinsDisplay.textContent = clubData.coins.toLocaleString();
+  try { SFX.play('goal'); } catch(e) {}
+  showBanner(`🪙 DODANO ${amount.toLocaleString()} MONET! SALDO: ${clubData.coins.toLocaleString()}`, '#ffd700', 120);
+  console.log(`[FC28] Nowe saldo: ${clubData.coins} monet. Zsynchronizowano z bazą Cloudflare D1!`);
+  return clubData.coins;
+};
+
+window.setCoins = function(amount = 999999) {
+  clubData.coins = Math.max(0, Math.min(99999999, Math.floor(amount)));
+  saveClubData(true);
+  const coinsDisplay = document.getElementById('menuCoinsDisplay');
+  if (coinsDisplay) coinsDisplay.textContent = clubData.coins.toLocaleString();
+  try { SFX.play('goal'); } catch(e) {}
+  showBanner(`🪙 USTAWIONO MONETY NA: ${clubData.coins.toLocaleString()}`, '#ffd700', 120);
+  return clubData.coins;
+};
+
+window.unlockAllCards = function() {
+  const allIds = PLAYERS_DB.map(c => c.id);
+  clubData.owned = Array.from(new Set([...clubData.owned, ...allIds]));
+  saveClubData(true);
+  try { SFX.play('goal'); } catch(e) {}
+  showBanner('🌟 ODBLOKOWANO WSZYSTKIE 95 KART W BAZIE!', '#00ff87', 120);
+  return clubData.owned.length;
+};
 
 /* ==========================================
    4. SYNTEZATOR DŹWIĘKU (Web Audio API)
@@ -11277,28 +11309,12 @@ class Player {
 
       if (carrier) {
         const d = dist(this, carrier);
-        if (d < 42 && this.tackleCd <= 0) {
-          this.tackleCd = 40 + Math.round((1 - cfg.vision) * 38);
-          let ch = 0.35 + ((this.statDef || 75) - (carrier.statDri || 75)) * 0.005 + cfg.vision * 0.12
-            - (carrier.isShielding ? 0.14 : 0) - (carrier.trickTimer > 0 ? 0.16 : 0)
-            + (this.playstyle === 'press_proven' ? 0.06 : 0) - (carrier.playstyle === 'bruiser' ? 0.06 : 0);
-          ch = clamp(ch, 0.12, 0.64);
+        // BOT UŻYWA AKTYWNEGO ODBIORU PIŁKI (STANDING TACKLE & WYKROK)
+        if (d <= 68 && this.tackleCd <= 0) {
+          this.tackleCd = 32 + Math.round((1 - cfg.vision) * 22);
           this.angle = Math.atan2(carrier.y - this.y, carrier.x - this.x);
-          this.lungeTimer = 12;
-          if (Math.random() < ch) {
-            carrier.stunTimer = 10;
-            ball.owner = null;
-            ball.lastKicker = carrier;
-            ball.lastTouchTeam = this.team;
-            ball.kickCooldown = 12;
-            ball.vx = Math.cos(this.angle) * 2.8;
-            ball.vy = Math.sin(this.angle) * 2.8;
-            ball.vz = 0; ball.z = 0;
-            playAndBroadcastSFX('pass');
-          } else {
-            this.aiDecisionCooldown = Math.max(this.aiDecisionCooldown, 10);
-          }
-        } else if (d > 50 && d < 90 && this.slideCooldown <= 0 && Math.random() < cfg.slideChance &&
+          performStandingTackle(this);
+        } else if (d > 55 && d < 105 && this.slideCooldown <= 0 && Math.random() < (cfg.slideChance * 1.5) &&
                    (carrier.vx * (ownGoalX - carrier.x) + carrier.vy * (cy - carrier.y)) > 0) {
           this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
           this.startSlide();
@@ -11354,6 +11370,13 @@ class Player {
 
     tx = clamp(tx, WORLD.marginX + 65, WORLD.width - WORLD.marginX - 65);
     ty = clamp(ty, WORLD.marginY + 45, WORLD.height - WORLD.marginY - 45);
+
+    if (carrier && dist(this, carrier) <= 60 && this.tackleCd <= 0) {
+      this.tackleCd = 35 + Math.round((1 - cfg.vision) * 20);
+      this.angle = Math.atan2(carrier.y - this.y, carrier.x - this.x);
+      performStandingTackle(this);
+    }
+
     this.moveTowards(tx, ty, (0.88 + cfg.vision * 0.08) * cfg.speedMult, Math.hypot(tx - this.x, ty - this.y) > 165 && this.stamina > 30);
   }
 
@@ -12078,6 +12101,9 @@ function switchToPlayer(targetPlayer) {
   if (team === 'blue') manualOverrideBlue = targetPlayer;
   else manualOverrideRed = targetPlayer;
 
+  // Wyzeruj ewentualny lunge po przełączeniu, aby zawodnik nie wykonywał niepożądanego odbicia
+  targetPlayer.lungeTimer = 0;
+
   if (!isHost && !isSinglePlayer) {
     const targetIdx = allPlayers.indexOf(targetPlayer);
     sendReliable({ t: 'cmd', cmd: 'switchPlayer', targetIdx: targetIdx, targetRole: targetPlayer.role });
@@ -12086,22 +12112,23 @@ function switchToPlayer(targetPlayer) {
     }
   }
 
-  // Czysta zmiana zawodnika bez spamu tekstem na murawie (EA FC broadcast style)
+  try {
+    SFX.play('kick');
+    const pName = (targetPlayer.cardName || targetPlayer.role).toUpperCase();
+    spawnFloater(targetPlayer.x, targetPlayer.y - 18, `⇥ ${pName}`, '#00ff87');
+  } catch (e) {}
 
   updateSquadHud();
 }
 
-function switchToClosestPlayerToBall() {
+function cycleControlledPlayer(direction = 1) {
   if (is2v2) return;
   const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
   const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
   const current = getControlledPlayerForSlot(localSlotIdx);
-  const activeCandidates = teamArr.filter(p => !p.sentOff);
-  if (activeCandidates.length === 0) return;
-
-  // W obronie priorytet mają zawodnicy z pola (DEF, MID, FWD), aby nie wyrywać bramkarza z linii!
-  const outfield = activeCandidates.filter(p => p.role !== 'GK');
-  const pool = outfield.length > 0 ? outfield : activeCandidates;
+  const outfield = teamArr.filter(p => !p.sentOff && p.role !== 'GK');
+  const pool = outfield.length > 0 ? outfield : teamArr.filter(p => !p.sentOff);
+  if (pool.length === 0) return;
 
   // Sortuj zawodników rosnąco według odległości euklidesowej od piłki
   const sorted = [...pool].sort((a, b) => {
@@ -12110,12 +12137,16 @@ function switchToClosestPlayerToBall() {
     return distA - distB;
   });
 
-  // Jeśli gracz już kontroluje najbliższego piłki, przełącz na drugiego najbliższego (taktyczne krycie i pressing!)
-  let target = sorted[0];
-  if (target === current && sorted.length > 1) {
-    target = sorted[1];
-  }
+  // Cyklicznie przełączaj na kolejnego zawodnika z listy odległości od piłki
+  let curIdx = sorted.indexOf(current);
+  let nextIdx = (curIdx + direction + sorted.length) % sorted.length;
+  let target = sorted[nextIdx];
+
   switchToPlayer(target);
+}
+
+function switchToClosestPlayerToBall() {
+  cycleControlledPlayer(1);
 }
 
 function getNextPlayerSwitchCandidate() {
@@ -12133,8 +12164,9 @@ function getNextPlayerSwitchCandidate() {
     return distA - distB;
   });
 
-  if (sorted[0] === current && sorted.length > 1) return sorted[1];
-  return sorted[0] !== current ? sorted[0] : null;
+  let curIdx = sorted.indexOf(current);
+  let nextIdx = (curIdx + 1) % sorted.length;
+  return sorted[nextIdx] !== current ? sorted[nextIdx] : null;
 }
 
 function cycleControlledPlayer(direction = 1) {
@@ -13182,10 +13214,10 @@ function handleKeyDownOnce(code) {
     if (code === 'Digit4') { switchToRole('FWD'); return; }
   }
 
-  // PRZEŁĄCZANIE ZAWODNIKA POD SPACJĄ LUB TABEM (STEROWANIE KLAWIATURĄ W OBRONIE)
-  if (!hasBall && (code === 'Space' || code === 'Tab')) {
+  // PRZEŁĄCZANIE ZAWODNIKA POD SPACJĄ, TABEM LUB Q (STEROWANIE KLAWIATURĄ W OBRONIE)
+  if (!hasBall && (code === 'Space' || code === 'Tab' || code === 'KeyQ')) {
     if (!is2v2) {
-      switchToClosestPlayerToBall();
+      cycleControlledPlayer(1);
       return;
     }
   }
@@ -13209,14 +13241,6 @@ function handleKeyDownOnce(code) {
       }
     }
     return;
-  }
-
-  // PRZEŁĄCZANIE NA NAJBLIŻSZEGO ZAWODNIKA DO PIŁKI (KLAWISZ Q W OBRONIE)
-  if (!hasBall && code === 'KeyQ') {
-    if (!is2v2) {
-      switchToClosestPlayerToBall();
-      return;
-    }
   }
 }
 
