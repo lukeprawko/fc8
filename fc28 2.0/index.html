@@ -3893,8 +3893,8 @@
     <div id="fcAuthLoggedOutView">
       <!-- Zakładki wyboru: Logowanie / Rejestracja -->
       <div class="fc-auth-tabs">
-        <button type="button" class="fc-auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">🔑 LOGOWANIE</button>
-        <button type="button" class="fc-auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">✨ NOWE KONTO (+500 🪙)</button>
+        <button type="button" class="fc-auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">LOGOWANIE</button>
+        <button type="button" class="fc-auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">NOWE KONTO (+500 COINS)</button>
       </div>
 
       <!-- Widoczny Alert / Komunikat błędu lub sukcesu -->
@@ -3919,7 +3919,7 @@
 
       <!-- Główny przycisk akcji -->
       <button class="fc-auth-action" id="fcAuthSubmitBtn" type="button" onclick="submitAuthForm()" style="width:100%; margin-top:14px; padding:15px; font-size:12px;">
-        🔑 ZALOGUJ SIĘ
+        ZALOGUJ SIĘ
       </button>
 
       <!-- Przełącznik pomocniczy pod przyciskiem -->
@@ -9202,15 +9202,15 @@ const camera = {
   shake: 0,
   update() {
     let myPlayer = getControlledPlayerForSlot(localSlotIdx);
-    let focusX = ball.x + ball.vx * 8.5;
-    let focusY = ball.y + ball.vy * 5.5;
+    let focusX = ball.x + ball.vx * 2.2;
+    let focusY = ball.y + ball.vy * 1.4;
 
     if (matchPhase === 'KICKOFF_WAIT') {
       focusX = WORLD.width / 2;
       focusY = WORLD.height / 2;
     } else if (myPlayer) {
-      focusX = focusX * 0.70 + myPlayer.x * 0.30;
-      focusY = focusY * 0.70 + myPlayer.y * 0.30;
+      focusX = focusX * 0.65 + myPlayer.x * 0.35;
+      focusY = focusY * 0.65 + myPlayer.y * 0.35;
     }
 
     let distToGoal = Math.min(
@@ -9529,7 +9529,7 @@ const ball = {
               this.vx -= 1.75 * vn * nx;
               this.vy -= 1.75 * vn * ny;
               if (speed > 6) {
-                camera.shake = 5;
+                camera.shake = 0.8;
                 playAndBroadcastSFX('kick');
                 spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
               }
@@ -9546,7 +9546,7 @@ const ball = {
           this.vx = (leftSide ? 1 : -1) * Math.abs(this.vx) * 0.55;
           this.vz = -Math.abs(this.vz) * 0.35 - 0.8;
           this.x = leftSide ? WORLD.marginX + 2 : WORLD.width - WORLD.marginX - 2;
-          camera.shake = 5;
+          camera.shake = 0.8;
           playAndBroadcastSFX('kick');
           spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
         }
@@ -9658,7 +9658,7 @@ if (best) {
             if (isSave) {
               if (p.team === 'blue') matchStats.savesBlue++; else matchStats.savesRed++;
               playAndBroadcastSFX('save');
-              camera.shake = 5;
+              camera.shake = 0.8;
               spawnParticles(this.x, this.y, 8, 16, '#f5b041', 3.4, 22, 3.8);
             }
             // Zdolność pewnego chwytu piłki zależy od statystyk bramkarza (statHan / OVR):
@@ -9955,7 +9955,7 @@ class Player {
     this.activePlayStyle = styleKey;
     this.playStyleTimer = 65; // ~1.1 sekundy efektownej prezentacji diamentu PlayStyle+
     if (styleKey === 'power_shot') {
-      camera.shake = 6;
+      camera.shake = 0.8;
       spawnParticles(this.x, this.y, 4, 18, '#ff0055', 3.8, 26, 4.2);
     } else if (styleKey === 'rapid_step') {
       spawnParticles(this.x, this.y + 6, 0, 10, '#ffd700', 2.8, 20, 3);
@@ -10191,7 +10191,7 @@ class Player {
         ball.owner = this;
         ball.lastTouchTeam = this.team;
         cleanlyWonBall = true;
-        camera.shake = 4;
+        camera.shake = 0.8;
         spawnParticles(ball.x, ball.y, 2, 10, '#ffffff', 2.6, 18, 3.5);
       }
 
@@ -10376,7 +10376,7 @@ class Player {
       ball.vx = 0; ball.vy = 0; ball.vz = 0; ball.z = 0;
       this.angle = a;
       this.lungeTimer = 14;
-      camera.shake = 5;
+      camera.shake = 0.8;
       playAndBroadcastSFX('save');
       spawnParticles(c.x, c.y, 8, 14, '#f5b041', 3.0, 22, 3.6);
       spawnFloater(this.x, this.y, '🧤 odbiór', this.team === 'blue' ? '#00f0ff' : '#ff6b8a');
@@ -10745,7 +10745,7 @@ class Player {
 
         if (this.team === 'blue') matchStats.shotsBlue++; else matchStats.shotsRed++;
         ball.kick(this, Math.atan2(aimY - this.y, enemyGoalX - this.x), shotSpeed, shotLift, 16, isPS, isFin);
-        camera.shake = isPS ? 6 : 4;
+        camera.shake = 1.0;
         this.holdTicks = 0;
         this.aiDecisionCooldown = cfg.reactDelay + 14;
         return;
@@ -12064,7 +12064,7 @@ function triggerGoal(msg, color, concedingTeam) {
 
   playAndBroadcastSFX('goal');
   showTempBanner(msg, `${scoreBlue} : ${scoreRed} (+20 🪙)`, color, 85);
-  camera.shake = 14;
+  camera.shake = 1.5;
   updateScoreboardUI();
 
   const confettiColors = ['#00f0ff', '#ff0055', '#f5b041', '#00e676', '#ffffff'];
@@ -12328,7 +12328,7 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     aimAngle += spreadAngle;
 
     ball.kick(player, aimAngle, shotSpeed, shotLift, 16, hasPowerShot, hasFinesse, false);
-    camera.shake = (hasPowerShot ? 7 : 3) + ratio * 6;
+    camera.shake = 1.2;
     spawnParticles(player.x, player.y, 2, hasPowerShot ? 18 : 9, hasPowerShot ? '#ff0055' : (hasFinesse ? '#ffb300' : '#00f0ff'), 3.6, 22, 4);
   } else if (type === 'lowPass') {
     const hasIncisive = player.playstyle === 'incisive_pass';
@@ -12428,7 +12428,7 @@ function handleFoul(offender, victim) {
   victim.stunTimer = 24;
   offender.isSliding = false;
   offender.slideTimer = 0;
-  camera.shake = 5;
+  camera.shake = 0.8;
 
   if (offender.team === 'blue') matchStats.foulsBlue++; else matchStats.foulsRed++;
 
@@ -13601,7 +13601,7 @@ function switchAuthTab(tab) {
     if (regBtn) regBtn.classList.remove('active');
     if (loginBtn) loginBtn.classList.add('active');
     if (submitBtn) {
-      submitBtn.textContent = '🔑 ZALOGUJ SIĘ';
+      submitBtn.textContent = 'ZALOGUJ SIĘ';
       submitBtn.style.background = 'linear-gradient(135deg, #00f0ff, #00c6a7)';
     }
     if (switchPrompt) {
@@ -13689,16 +13689,25 @@ function fcUpdateAuthUi() {
   const authTitle = document.getElementById('fcAuthTitle');
 
   const isAuth = !!fcCurrentUser;
-  const displayName = isAuth ? (fcCurrentUser.username || clubData.nick || 'GRACZ') : 'GOŚĆ';
+  const displayName = isAuth ? (fcCurrentUser.username || clubData.nick || 'GRACZ') : (clubData.nick && clubData.nick !== 'GOŚĆ' ? clubData.nick : 'TRYB GOŚCIA');
 
   if (label) {
+    label.style.display = 'inline-flex';
+    const nameText = label.querySelector('.user-name-text');
+    const divTag = label.querySelector('.user-div-tag');
+    if (nameText) {
+      nameText.textContent = displayName;
+    }
+    if (divTag) {
+      divTag.textContent = isAuth ? 'D1 SYNC' : 'LOKALNY';
+      divTag.style.color = isAuth ? 'var(--fc-volt)' : 'var(--fc-gold)';
+    }
     if (isAuth) {
-      label.style.display = 'inline-flex';
-      label.textContent = '● ' + displayName;
       label.classList.add('is-auth');
+      label.title = 'Konto: ' + displayName + ' (Baza danych Cloudflare D1: POŁĄCZONO)';
     } else {
-      label.style.display = 'none';
       label.classList.remove('is-auth');
+      label.title = 'Profil lokalny. Kliknij, aby zalogować się do chmury D1.';
     }
   }
 
@@ -13707,7 +13716,7 @@ function fcUpdateAuthUi() {
       btn.style.display = 'none';
     } else {
       btn.style.display = 'inline-flex';
-      btn.textContent = '🔑 ZALOGUJ SIĘ';
+      btn.textContent = 'ZALOGUJ D1';
     }
   }
 
@@ -13729,10 +13738,11 @@ async function fcLoadCloudProfile() {
   const token = fcGetSessionToken();
   if (!token) {
     fcCurrentUser = null;
-    clubData.nick = 'GOŚĆ';
-    clubData.coins = 0;
-    clubData.owned = [...STARTER_CARD_IDS];
-    clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
+    loadClubData();
+    if (typeof clubData.coins !== 'number' || clubData.coins <= 0) {
+      clubData.coins = 500;
+      saveClubData(false);
+    }
     fcUpdateAuthUi();
     updateMenuClubUI();
     return false;
@@ -14985,7 +14995,7 @@ function render3D(){
   const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;tt+=dt;
   const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;
   if(w!==sw||h!==sh){sw=w;sh=h;R.setPixelRatio(Math.min(devicePixelRatio||1,1.75));R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
-  const z=camera.zoom,d=820/z,pit=.81,sk=camera.shake||0;
+  const z=camera.zoom,d=820/z,pit=.81,sk=Math.min(camera.shake||0, 1.2);
   cam.position.set(camera.x+(Math.random()-.5)*sk,d*Math.sin(pit)+(Math.random()-.5)*sk,camera.y+d*Math.cos(pit));cam.lookAt(camera.x,0,camera.y-14);cam.updateMatrixWorld();
   sun.target.position.set(camera.x,0,camera.y);sun.position.set(camera.x-360,860,camera.y+400);
   updateAdBoards(tt);
