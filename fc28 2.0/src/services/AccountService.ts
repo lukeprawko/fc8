@@ -88,7 +88,15 @@ export class AccountService {
       }
       return { success: false, message: data.message || 'Błąd rejestracji' };
     } catch (err: any) {
-      return { success: false, message: 'Błąd połączenia z serwerem logowania: ' + (err.message || 'Offline') };
+      console.warn('[AccountService] Cloudflare offline/blocked, fallback to local session:', err);
+      this.setUserSession({
+        id: 'local_' + Date.now(),
+        username: username.trim(),
+        isGuest: false,
+        token: 'LOCAL_' + Date.now(),
+        createdAt: Date.now()
+      });
+      return { success: true, user: this.currentUser!, message: 'Zalogowano lokalnie (offline)' };
     }
   }
 
@@ -117,7 +125,15 @@ export class AccountService {
       }
       return { success: false, message: data.message || 'Nieprawidłowy nick lub hasło' };
     } catch (err: any) {
-      return { success: false, message: 'Błąd sieci: ' + (err.message || 'Serwer offline') };
+      console.warn('[AccountService] Cloudflare offline/blocked, fallback to local session:', err);
+      this.setUserSession({
+        id: 'local_' + Date.now(),
+        username: username.trim(),
+        isGuest: false,
+        token: 'LOCAL_' + Date.now(),
+        createdAt: Date.now()
+      });
+      return { success: true, user: this.currentUser!, message: 'Zalogowano lokalnie (offline)' };
     }
   }
 
