@@ -69,7 +69,7 @@ export class AccountService {
     }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/register`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username.trim(), password })
@@ -78,25 +78,18 @@ export class AccountService {
       const data = await res.json();
       if (res.ok && data.success) {
         this.setUserSession({
-          id: data.userId || String(Date.now()),
+          id: (data.user && data.user.id) || data.userId || String(Date.now()),
           username: username.trim(),
           isGuest: false,
           token: data.token,
           createdAt: Date.now()
         });
-        return { success: true, user: this.currentUser! };
+        return { success: true, user: this.currentUser!, token: data.token };
       }
       return { success: false, message: data.message || 'Błąd rejestracji' };
     } catch (err: any) {
-      console.warn('[AccountService] Cloudflare offline/blocked, fallback to local session:', err);
-      this.setUserSession({
-        id: 'local_' + Date.now(),
-        username: username.trim(),
-        isGuest: false,
-        token: 'LOCAL_' + Date.now(),
-        createdAt: Date.now()
-      });
-      return { success: true, user: this.currentUser!, message: 'Zalogowano lokalnie (offline)' };
+      console.error('[AccountService] Błąd połączenia z Cloudflare:', err);
+      return { success: false, message: 'Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie.' };
     }
   }
 
@@ -106,7 +99,7 @@ export class AccountService {
     }
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/login`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username.trim(), password })
@@ -115,25 +108,18 @@ export class AccountService {
       const data = await res.json();
       if (res.ok && data.success) {
         this.setUserSession({
-          id: data.userId || String(Date.now()),
+          id: (data.user && data.user.id) || data.userId || String(Date.now()),
           username: username.trim(),
           isGuest: false,
           token: data.token,
           createdAt: Date.now()
         });
-        return { success: true, user: this.currentUser!, clubData: data.clubData };
+        return { success: true, user: this.currentUser!, token: data.token, clubData: data.clubData };
       }
       return { success: false, message: data.message || 'Nieprawidłowy nick lub hasło' };
     } catch (err: any) {
-      console.warn('[AccountService] Cloudflare offline/blocked, fallback to local session:', err);
-      this.setUserSession({
-        id: 'local_' + Date.now(),
-        username: username.trim(),
-        isGuest: false,
-        token: 'LOCAL_' + Date.now(),
-        createdAt: Date.now()
-      });
-      return { success: true, user: this.currentUser!, message: 'Zalogowano lokalnie (offline)' };
+      console.error('[AccountService] Błąd połączenia z Cloudflare:', err);
+      return { success: false, message: 'Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie.' };
     }
   }
 

@@ -7590,7 +7590,7 @@ async function openPack(packType = 'ultimate') {
   // Wywołanie backendu Cloudflare D1 z wybranym typem paczki
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(`${FC_API_URL}/api/club/open-pack`, {
       method: 'POST',
       headers: {
@@ -7603,8 +7603,8 @@ async function openPack(packType = 'ultimate') {
     clearTimeout(timeoutId);
     const data = await res.json();
     if (!res.ok || !data.success || !data.result) {
-      console.warn('Serwer paczek zwrócił błąd, losowanie lokalne:', data?.message);
-      openPackLocally();
+      console.warn('Serwer paczek zwrócił błąd:', data?.message);
+      alert(data?.message || 'Nie udało się otworzyć paczki w chmurze.');
       return;
     }
 
@@ -7623,8 +7623,8 @@ async function openPack(packType = 'ultimate') {
 
     openPackAnimationModal(card, isDuplicate, refundCoins);
   } catch (err) {
-    console.warn('Połączenie z Cloudflare niedostępne (np. blokada OSE w szkole), losowanie paczki lokalnie:', err);
-    openPackLocally();
+    console.error('Błąd połączenia z serwerem podczas otwierania paczki:', err);
+    alert('Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie.');
   }
 }
 
@@ -14312,7 +14312,7 @@ async function fcLoadCloudProfile() {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(`${FC_API_URL}/api/auth/me`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -14322,14 +14322,17 @@ async function fcLoadCloudProfile() {
     clearTimeout(timeoutId);
 
     if (!res.ok) {
-      fcSetSessionToken('');
-      fcCurrentUser = null;
-      clubData.nick = 'GOŚĆ';
-      clubData.coins = 500;
-      clubData.owned = [...STARTER_CARD_IDS];
-      clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
-      fcUpdateAuthUi();
-      updateMenuClubUI();
+      if (res.status === 401) {
+        fcSetSessionToken('');
+        fcCurrentUser = null;
+        clubData.nick = 'GOŚĆ';
+        clubData.coins = 500;
+        clubData.owned = [...STARTER_CARD_IDS];
+        clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
+        fcUpdateAuthUi();
+        updateMenuClubUI();
+        return false;
+      }
       return false;
     }
 
@@ -14397,7 +14400,7 @@ async function syncLineupToCloud() {
   if (!token || !fcCurrentUser || fcCurrentUser.isLocal || token.startsWith('LOCAL_')) return;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     await fetch(`${FC_API_URL}/api/club/lineup`, {
       method: 'POST',
       headers: {
@@ -14431,7 +14434,7 @@ async function syncMatchRewardToCloud(outcome, goals) {
   if (!token || !fcCurrentUser || fcCurrentUser.isLocal || token.startsWith('LOCAL_')) return;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(`${FC_API_URL}/api/club/match-reward`, {
       method: 'POST',
       headers: {
@@ -14520,12 +14523,11 @@ async function fcLogin() {
     return;
   }
 
-  showAuthAlert('Logowanie do konta ' + nick + '...', 'info');
-  let networkFailed = false;
+  showAuthAlert('Logowanie do konta ' + nick + ' (Cloudflare D1)...', 'info');
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(`${FC_API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -14537,80 +14539,24 @@ async function fcLogin() {
     if (!res.ok || !data.success) {
       if (passInput) passInput.classList.add('fc-input-error');
       const msg = data.message || 'Nieprawidłowy nick lub hasło.';
-      showAuthAlert(`${msg} Jeśli nie zakładałeś jeszcze tego konta, przełącz na zakładkę "NOWE KONTO (+500 COINS)" powyżej!`, 'error');
+      showAuthAlert(`${msg} Jeśli nie posiadasz jeszcze konta, przełącz na "NOWE KONTO (+500 COINS)" powyżej!`, 'error');
       return;
     }
 
     if (data.token) fcSetSessionToken(data.token);
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
-    await fcLoadCloudProfile();
-    showAuthAlert('Zalogowano pomyślnie jako ' + nick + '! Pobieranie klubu...', 'success');
-    setTimeout(closeFcAuth, 600);
+    const synced = await fcLoadCloudProfile();
+    if (synced) {
+      showAuthAlert('Zalogowano pomyślnie! Pełna synchronizacja z Cloudflare D1 aktywna.', 'success');
+      setTimeout(closeFcAuth, 600);
+    } else {
+      showAuthAlert('Zalogowano, ale wystąpił problem przy pobieraniu klubu. Sprawdź połączenie.', 'error');
+    }
     return;
   } catch (err) {
-    console.warn('Połączenie z Cloudflare niedostępne (np. blokada OSE w szkole), przełączam na tryb lokalny:', err);
-    networkFailed = true;
-  }
-
-  // Automatyczny fallback do profilu lokalnego na wypadek braku łączności z serwerem Cloudflare
-  if (networkFailed) {
-    const accs = getLocalAccounts();
-    const key = nick.toLowerCase();
-    const localAcc = accs[key];
-
-    if (localAcc) {
-      if (localAcc.password && localAcc.password !== pass) {
-        if (passInput) passInput.classList.add('fc-input-error');
-        showAuthAlert('Niepoprawne hasło do profilu lokalnego na tym komputerze.', 'error');
-        return;
-      }
-      fcSetSessionToken('LOCAL_' + Date.now() + '_' + Math.random().toString(36).substring(2));
-      try { localStorage.setItem('FC28_USER_NICK', localAcc.username); } catch (e) {}
-      fcCurrentUser = { username: localAcc.username, isLocal: true };
-      clubData = {
-        nick: localAcc.username,
-        coins: typeof localAcc.coins === 'number' ? localAcc.coins : 500,
-        owned: Array.isArray(localAcc.owned) && localAcc.owned.length ? localAcc.owned : [...STARTER_CARD_IDS],
-        lineup: localAcc.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
-        updatedAt: Date.now()
-      };
-      saveClubData(false);
-      fcUpdateAuthUi();
-      updateMenuClubUI();
-      showAuthAlert('⚡ Zalogowano w trybie lokalnym offline jako ' + localAcc.username + ' (serwer w chmurze zablokowany przez sieć). Postęp zapisany!', 'success');
-      setTimeout(closeFcAuth, 1200);
-      return;
-    } else {
-      // Jeśli konto nie istniało lokalnie, stwórz je automatycznie, by użytkownik mógł od razu grać!
-      accs[key] = {
-        username: nick,
-        password: pass,
-        coins: 500,
-        owned: [...STARTER_CARD_IDS],
-        lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      };
-      saveLocalAccounts(accs);
-
-      fcSetSessionToken('LOCAL_' + Date.now() + '_' + Math.random().toString(36).substring(2));
-      try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
-      fcCurrentUser = { username: nick, isLocal: true };
-      clubData = {
-        nick: nick,
-        coins: 500,
-        owned: [...STARTER_CARD_IDS],
-        lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
-        updatedAt: Date.now()
-      };
-      saveClubData(false);
-      fcUpdateAuthUi();
-      updateMenuClubUI();
-      showAuthAlert('⚡ Brak połączenia z serwerem Cloudflare (blokada OSE w szkole). Utworzono profil lokalny "' + nick + '" (+500 🪙). Miłej gry!', 'success');
-      setTimeout(closeFcAuth, 1400);
-      return;
-    }
+    console.error('Błąd połączenia z serwerem podczas logowania:', err);
+    showAuthAlert('⚡ Błąd połączenia z bazą Cloudflare. Upewnij się, że masz internet lub kliknij "GRAJ OFFLINE" poniżej.', 'error');
   }
 }
 
@@ -14639,12 +14585,11 @@ async function fcRegister() {
     return;
   }
 
-  showAuthAlert('Tworzenie konta (500 🪙 na start)...', 'info');
-  let networkFailed = false;
+  showAuthAlert('Tworzenie konta w chmurze Cloudflare D1 (+500 🪙)...', 'info');
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(`${FC_API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -14667,50 +14612,12 @@ async function fcRegister() {
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
     await fcLoadCloudProfile();
-    showAuthAlert('Konto utworzone pomyślnie! Odebrano 500 🪙 i karty startowe.', 'success');
+    showAuthAlert('Konto utworzone w chmurze! Odebrano 500 🪙 i karty startowe.', 'success');
     setTimeout(closeFcAuth, 700);
     return;
   } catch (err) {
-    console.warn('Rejestracja w Cloudflare niedostępna, zapisuję profil lokalnie:', err);
-    networkFailed = true;
-  }
-
-  if (networkFailed) {
-    const accs = getLocalAccounts();
-    const key = nick.toLowerCase();
-    if (accs[key]) {
-      if (nickInput) nickInput.classList.add('fc-input-error');
-      showAuthAlert(`Nick "${nick}" jest już utworzony na tym komputerze! Przełącz na "LOGOWANIE".`, 'error');
-      return;
-    }
-
-    accs[key] = {
-      username: nick,
-      password: pass,
-      coins: 500,
-      owned: [...STARTER_CARD_IDS],
-      lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    saveLocalAccounts(accs);
-
-    fcSetSessionToken('LOCAL_' + Date.now() + '_' + Math.random().toString(36).substring(2));
-    try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
-    fcCurrentUser = { username: nick, isLocal: true };
-    clubData = {
-      nick: nick,
-      coins: 500,
-      owned: [...STARTER_CARD_IDS],
-      lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
-      updatedAt: Date.now()
-    };
-    saveClubData(false);
-    fcUpdateAuthUi();
-    updateMenuClubUI();
-    showAuthAlert('⚡ Utworzono konto w trybie lokalnym offline (serwer zablokowany przez OSE/szkołę). 500 🪙 i karty przyznane!', 'success');
-    setTimeout(closeFcAuth, 1200);
-    return;
+    console.error('Błąd rejestracji w Cloudflare:', err);
+    showAuthAlert('⚡ Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie lub użyj przycisku "GRAJ OFFLINE" poniżej.', 'error');
   }
 }
 
