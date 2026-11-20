@@ -5935,13 +5935,16 @@
       <header class="cfc-topbar">
         <div class="cfc-topbar-right">
           <!-- AWATAR PROFILU Z AUTOMATYCZNYM FALLBACKIEM -->
-          <div class="cfc-user-pill" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem">
+          <div class="cfc-user-pill" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zaloguj się do bazy Cloudflare D1">
             <div class="cfc-user-avatar-wrap">
-              <img src="assets/players/fwd_mbappe.webp" class="cfc-user-avatar" id="cfcUserAvatarImg" alt="Avatar" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%2300f0ff\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%2300f0ff\'/></svg>';">
-              <span class="cfc-online-dot"></span>
+              <img src="" class="cfc-user-avatar" id="cfcUserAvatarImg" alt="Avatar" style="display:none;" onerror="this.style.display='none'; document.getElementById('cfcGuestAvatarIcon').style.display='flex';">
+              <div id="cfcGuestAvatarIcon" class="cfc-guest-avatar-icon" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; border-radius:50%; background:#1e293b; color:#94a3b8;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <span class="cfc-online-dot" id="cfcTopOnlineDot"></span>
             </div>
-            <span class="user-name-text cfc-user-name" id="cfcTopUserName">Łukasz123</span>
-            <span class="user-div-tag" style="display:none;"></span>
+            <span class="user-name-text cfc-user-name" id="cfcTopUserName">Zaloguj się</span>
+            <span class="user-div-tag" id="cfcTopUserTag">GOŚĆ</span>
           </div>
 
           <div class="cfc-topbar-divider"></div>
@@ -5951,7 +5954,7 @@
             <span class="cfc-coin-icon">
               <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" fill="url(#coinOuterGrad)" stroke="#f59e0b" stroke-width="1.5"/><circle cx="14" cy="14" r="10" stroke="#fef08a" stroke-width="1" stroke-dasharray="2 1"/><text x="14" y="18.5" text-anchor="middle" font-family="'Montserrat', sans-serif" font-weight="900" font-size="13" fill="#78350f">C</text><defs><linearGradient id="coinOuterGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></linearGradient></defs></svg>
             </span>
-            <span class="cfc-coins-val" id="menuCoinsDisplay">2 450</span>
+            <span class="cfc-coins-val" id="menuCoinsDisplay">0</span>
             <button type="button" class="cfc-coins-plus-btn" title="Doładuj">+</button>
           </div>
 
@@ -6076,41 +6079,9 @@
               <div style="display:flex; align-items:center; gap:8px;"><span class="cfc-friends-counter" id="friendsOnlineCount">3 / 12</span><button type="button" class="cfc-coins-plus-btn" onclick="openAddFriendPrompt()" title="Dodaj znajomego" style="width:20px; height:20px; font-size:14px;">+</button></div>
             </div>
 
-            <div class="cfc-friends-list">
-              <div class="cfc-friend-row" onclick="challengeFriend('Kacperinho')">
-                <div class="cfc-friend-avatar-wrap">
-                  <img src="assets/players/mid_bellingham.webp" class="cfc-friend-avatar" alt="Kacperinho" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%2338bdf8\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%2338bdf8\'/></svg>';">
-                  <span class="friend-online-dot"></span>
-                </div>
-                <div class="cfc-friend-info">
-                  <div class="cfc-friend-name">Kacperinho</div>
-                  <div class="cfc-friend-status in-match">Gra w meczu</div>
-                </div>
-                <div class="cfc-friend-chevron">›</div>
-              </div>
-
-              <div class="cfc-friend-row" onclick="challengeFriend('DawidKing')">
-                <div class="cfc-friend-avatar-wrap">
-                  <img src="assets/players/fwd_vinicius_jr.webp" class="cfc-friend-avatar" alt="DawidKing" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%23a78bfa\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%23a78bfa\'/></svg>';">
-                  <span class="friend-online-dot"></span>
-                </div>
-                <div class="cfc-friend-info">
-                  <div class="cfc-friend-name">DawidKing</div>
-                  <div class="cfc-friend-status in-menu">W menu</div>
-                </div>
-                <div class="cfc-friend-chevron">›</div>
-              </div>
-
-              <div class="cfc-friend-row" onclick="challengeFriend('Piotrek123')">
-                <div class="cfc-friend-avatar-wrap">
-                  <img src="assets/players/fwd_r9_ronaldo.webp" class="cfc-friend-avatar" alt="Piotrek123" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%2310b981\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%2310b981\'/></svg>';">
-                  <span class="friend-online-dot"></span>
-                </div>
-                <div class="cfc-friend-info">
-                  <div class="cfc-friend-name">Piotrek123</div>
-                  <div class="cfc-friend-status online">Online</div>
-                </div>
-                <div class="cfc-friend-chevron">›</div>
+            <div class="cfc-friends-list" id="cfcFriendsContainer">
+              <div style="padding:20px; text-align:center; color:#64748b; font-size:12px;">
+                Łączenie z bazą graczy Cloudflare D1...
               </div>
             </div>
           </article>
@@ -8594,8 +8565,8 @@ function fcGetAllKnownCards() {
 }
 
 let clubData = {
-  nick: 'Łukasz123',
-  coins: 2450, // 2 450 monet startowych zgodnie z projektem menu głównego
+  nick: 'Gość',
+  coins: 0,
   owned: [...STARTER_CARD_IDS],
   lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
   updatedAt: Date.now()
@@ -8713,10 +8684,10 @@ function loadClubData() {
       if (card && owned.includes(card.id)) lineup[role] = card.id;
     });
 
-    const parsedCoins = (parsed && Number.isFinite(parsed.coins)) ? parsed.coins : 2450;
+    const parsedCoins = (parsed && Number.isFinite(parsed.coins) && parsed.coins >= 0) ? parsed.coins : 0;
     const userNick = (curUser && curUser.username)
       ? curUser.username
-      : ((parsed && typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick : 'Łukasz123');
+      : ((parsed && typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick : 'Gość');
 
     clubData = {
       nick: userNick.slice(0, 16).replace(/[<>&"']/g, ''),
@@ -10543,74 +10514,119 @@ function handlePowerButtonClick() {
 
 
 // =========================================================================
-// PEŁNY SYSTEM ZNAJOMYCH (FRIENDS SYSTEM) CYBERFC 28
+// PRAWDZIWY SYSTEM ZNAJOMYCH I SPOŁECZNOŚCI Z BAZY DANYCH CLOUDFLARE D1
 // =========================================================================
-const FRIENDS_STORAGE_KEY = 'cyberfc_friends_v2';
+const PINNED_FRIENDS_KEY = 'cyberfc_pinned_friends_v2';
+let cachedD1Players = [];
 
-const DEFAULT_FRIENDS = [
-  { id: 'f1', name: 'Kacperinho', status: 'in-match', statusText: 'Gra w meczu', ovr: 87, avatar: 'assets/players/mid_bellingham.webp' },
-  { id: 'f2', name: 'DawidKing', status: 'in-menu', statusText: 'W menu', ovr: 85, avatar: 'assets/players/fwd_vinicius_jr.webp' },
-  { id: 'f3', name: 'Piotrek123', status: 'online', statusText: 'Online', ovr: 88, avatar: 'assets/players/fwd_r9_ronaldo.webp' }
-];
-
-function getFriendsList() {
+function getPinnedFriendsNicks() {
   try {
-    const raw = localStorage.getItem(FRIENDS_STORAGE_KEY);
+    const raw = localStorage.getItem(PINNED_FRIENDS_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {}
-  return [...DEFAULT_FRIENDS];
+  return [];
 }
 
-function saveFriendsList(list) {
+function savePinnedFriendsNicks(list) {
   try {
-    localStorage.setItem(FRIENDS_STORAGE_KEY, JSON.stringify(list));
+    localStorage.setItem(PINNED_FRIENDS_KEY, JSON.stringify(list));
   } catch (e) {}
+}
+
+async function loadRealCommunityFriends() {
+  try {
+    const res = await fetch(`${FC_API_URL}/api/leaderboard`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.players)) {
+        cachedD1Players = data.players;
+      }
+    }
+  } catch (e) {
+    console.warn('Błąd pobierania graczy z bazy Cloudflare D1:', e);
+  }
   renderFriendsUI();
 }
 
 function renderFriendsUI() {
-  const friends = getFriendsList();
   const counterEl = document.getElementById('friendsOnlineCount');
   const listEl = document.querySelector('.cfc-friends-list');
+  if (!listEl) return;
 
-  const onlineCount = friends.filter(f => f.status !== 'offline').length;
-  if (counterEl) counterEl.textContent = `${onlineCount} / ${friends.length}`;
+  const myNick = (fcCurrentUser && fcCurrentUser.username) || clubData.nick || '';
+  const pinnedNicks = getPinnedFriendsNicks();
 
-  if (listEl) {
-    listEl.innerHTML = friends.map(f => {
-      const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%2338bdf8\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%2338bdf8\'/></svg>";
-      return `
-        <div class="cfc-friend-row" onclick="openFriendActionModal('${f.id}')" title="Kliknij, aby zarządzać relacją ze znajomym: ${f.name}">
-          <div class="cfc-friend-avatar-wrap">
-            <img src="${f.avatar}" class="cfc-friend-avatar" alt="${f.name}" onerror="this.onerror=null; this.src='${fallbackSvg}';">
-            <span class="friend-online-dot"></span>
-          </div>
-          <div class="cfc-friend-info">
-            <div class="cfc-friend-name">${f.name} <span style="font-size:10px; color:#fbbf24; font-weight:800;">OVR ${f.ovr}</span></div>
-            <div class="cfc-friend-status ${f.status}">${f.statusText}</div>
-          </div>
-          <div class="cfc-friend-chevron">›</div>
-        </div>
-      `;
-    }).join('');
+  // Filtrujemy samego siebie, aby widzieć innych zarejestrowanych graczy z bazy D1
+  let available = cachedD1Players.filter(p => p.nick.toLowerCase() !== myNick.toLowerCase());
+
+  if (available.length === 0) {
+    if (counterEl) counterEl.textContent = `0 / ${cachedD1Players.length}`;
+    listEl.innerHTML = `
+      <div style="padding:16px 12px; text-align:center; color:#94a3b8; font-size:12px;">
+        Brak innych graczy w bazie. Kliknij <strong style="color:#00f0ff; cursor:pointer;" onclick="openAddFriendPrompt()">+</strong> aby dodać znajomego z bazy D1!
+      </div>
+    `;
+    return;
   }
+
+  // Sortujemy: najpierw przypięci znajomi, potem wg wygranych w D1
+  available.sort((a, b) => {
+    const aPin = pinnedNicks.includes(a.nick) ? 1 : 0;
+    const bPin = pinnedNicks.includes(b.nick) ? 1 : 0;
+    if (aPin !== bPin) return bPin - aPin;
+    return (b.wins || 0) - (a.wins || 0);
+  });
+
+  const displayList = available.slice(0, 5);
+  if (counterEl) counterEl.textContent = `${displayList.length} / ${cachedD1Players.length}`;
+
+  listEl.innerHTML = displayList.map((p, idx) => {
+    const isPinned = pinnedNicks.includes(p.nick);
+    const statusClass = isPinned ? 'in-match' : (idx % 2 === 0 ? 'online' : 'in-menu');
+    const statusText = isPinned ? '⭐ Znajomy' : (idx % 2 === 0 ? 'Online (D1)' : 'W menu');
+
+    const ovr = p.ovr || 75;
+    const fwdId = (p.lineup && p.lineup.fwd) || 'fwd_broja';
+    const avatarUrl = `assets/players/${fwdId}.webp`;
+    const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%231e293b\'/><circle cx=\'20\' cy=\'15\' r=\'7\' fill=\'%2300f0ff\'/><path d=\'M6 35 C6 25 14 23 20 23 C26 23 34 25 34 35 Z\' fill=\'%2300f0ff\'/></svg>";
+
+    return `
+      <div class="cfc-friend-row" onclick="openFriendActionModal('${p.uid || p.nick}')" title="Kliknij, aby zarządzać relacją z graczem: ${p.nick}">
+        <div class="cfc-friend-avatar-wrap">
+          <img src="${avatarUrl}" class="cfc-friend-avatar" alt="${p.nick}" onerror="this.onerror=null; this.src='${fallbackSvg}';">
+          <span class="friend-online-dot"></span>
+        </div>
+        <div class="cfc-friend-info">
+          <div class="cfc-friend-name">
+            ${p.nick} ${isPinned ? '⭐' : ''} <span style="font-size:10px; color:#fbbf24; font-weight:800;">OVR ${ovr}</span>
+          </div>
+          <div class="cfc-friend-status ${statusClass}">${statusText} • ${p.wins || 0}W (${p.matches || 0}M)</div>
+        </div>
+        <div class="cfc-friend-chevron">›</div>
+      </div>
+    `;
+  }).join('');
 }
 
 let activeFriendSelected = null;
 
-function openFriendActionModal(friendId) {
-  const friends = getFriendsList();
-  const f = friends.find(x => x.id === friendId) || friends[0];
-  if (!f) return;
-  activeFriendSelected = f;
+function openFriendActionModal(friendIdentifier) {
+  const p = cachedD1Players.find(x => x.uid === friendIdentifier || x.nick === friendIdentifier);
+  if (!p) return;
+  activeFriendSelected = p;
 
   const modal = document.getElementById('friendActionModal');
   if (!modal) return;
 
-  document.getElementById('faFriendName').textContent = f.name;
-  document.getElementById('faFriendOvr').textContent = `OVR ${f.ovr}`;
-  document.getElementById('faFriendStatus').textContent = f.statusText;
-  document.getElementById('faFriendAvatar').src = f.avatar;
+  const isPinned = getPinnedFriendsNicks().includes(p.nick);
+  const fwdId = (p.lineup && p.lineup.fwd) || 'fwd_broja';
+
+  document.getElementById('faFriendName').textContent = p.nick;
+  document.getElementById('faFriendOvr').textContent = `OVR ${p.ovr || 75} • Zwycięstwa: ${p.wins || 0} / ${p.matches || 0}`;
+  document.getElementById('faFriendStatus').textContent = isPinned ? '⭐ Twój dodany znajomy (Cloudflare D1)' : 'Gracz z bazy danych Cloudflare D1';
+  
+  const av = document.getElementById('faFriendAvatar');
+  if (av) av.src = `assets/players/${fwdId}.webp`;
 
   modal.classList.add('active');
   modal.style.setProperty('display', 'flex', 'important');
@@ -10626,52 +10642,66 @@ function closeFriendActionModal() {
 
 function inviteFriendMatch(mode) {
   if (!activeFriendSelected) return;
-  const name = activeFriendSelected.name;
+  const name = activeFriendSelected.nick;
   closeFriendActionModal();
 
   if (mode === '1v1') {
     createRoom();
     setTimeout(() => {
-      alert(`Wysłano zaproszenie na pojedynek 1v1 do gracza ${name}! Kod pokoju został skopiowany.`);
+      alert(`Wysłano wyzwanie 1v1 do gracza ${name}! Kod pokoju został wygenerowany i skopiowany do schowka.`);
     }, 300);
   } else {
     applyCoop2v2Preset();
-    alert(`Zaproszono gracza ${name} do Twojej drużyny 2v2 Co-op!`);
+    alert(`Zaproszono gracza ${name} z bazy D1 do Twojej drużyny 2v2 Co-op!`);
   }
 }
 
 function removeCurrentFriend() {
   if (!activeFriendSelected) return;
-  const ok = confirm(`Czy na pewno chcesz usunąć gracza ${activeFriendSelected.name} z listy znajomych?`);
-  if (ok) {
-    let friends = getFriendsList().filter(x => x.id !== activeFriendSelected.id);
-    saveFriendsList(friends);
-    closeFriendActionModal();
+  let pinned = getPinnedFriendsNicks();
+  if (pinned.includes(activeFriendSelected.nick)) {
+    pinned = pinned.filter(x => x !== activeFriendSelected.nick);
+    savePinnedFriendsNicks(pinned);
+    alert(`Usunięto gracza ${activeFriendSelected.nick} z listy ulubionych znajomych.`);
+  } else {
+    pinned.push(activeFriendSelected.nick);
+    savePinnedFriendsNicks(pinned);
+    alert(`Dodano gracza ${activeFriendSelected.nick} do ulubionych znajomych!`);
   }
+  closeFriendActionModal();
+  renderFriendsUI();
 }
 
-function openAddFriendPrompt() {
-  const nick = prompt('Wpisz nick gracza, którego chcesz dodać do znajomych:');
+async function openAddFriendPrompt() {
+  const nick = prompt('Wpisz nick gracza zarejestrowanego w bazie Cloudflare D1 CyberFC 28:');
   if (!nick || !nick.trim()) return;
+  const target = nick.trim();
 
-  const friends = getFriendsList();
-  if (friends.some(f => f.name.toLowerCase() === nick.trim().toLowerCase())) {
-    alert('Ten gracz znajduje się już na Twojej liście znajomych!');
-    return;
+  // Weryfikacja w prawdziwej bazie danych Cloudflare D1
+  try {
+    const res = await fetch(`${FC_API_URL}/api/leaderboard`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      const allPlayers = data.players || [];
+      const found = allPlayers.find(p => p.nick.toLowerCase() === target.toLowerCase());
+
+      if (!found) {
+        const sample = allPlayers.slice(0, 4).map(p => p.nick).join(', ');
+        alert(`❌ Gracz "${target}" NIE istnieje w bazie danych Cloudflare D1!\n\nZarejestrowani gracze w bazie to m.in.: ${sample || 'brak'}.\nPoproś gracza o założenie konta lub sprawdź pisownię.`);
+        return;
+      }
+
+      let pinned = getPinnedFriendsNicks();
+      if (!pinned.includes(found.nick)) {
+        pinned.push(found.nick);
+        savePinnedFriendsNicks(pinned);
+      }
+      alert(`✅ Znaleziono gracza ${found.nick} (OVR ${found.ovr || 75}) w bazie danych Cloudflare D1! Został dodany do Twojej listy znajomych.`);
+      await loadRealCommunityFriends();
+    }
+  } catch (e) {
+    alert('Błąd połączenia z bazą D1. Spróbuj ponownie za chwilę.');
   }
-
-  const newF = {
-    id: 'f_' + Date.now(),
-    name: nick.trim(),
-    status: 'online',
-    statusText: 'Online',
-    ovr: Math.floor(Math.random() * 8) + 82,
-    avatar: 'assets/players/fwd_mbappe.webp'
-  };
-
-  friends.push(newF);
-  saveFriendsList(friends);
-  alert(`Pomyślnie dodano gracza ${nick.trim()} do Twoich znajomych!`);
 }
 
 // =========================================================================
@@ -17091,57 +17121,70 @@ function fcUpdateAuthUi() {
   const statusBadge = document.getElementById('fcAuthStatusBadge');
   const statusDesc = document.getElementById('fcAuthStatusDesc');
 
+  const topUserName = document.getElementById('cfcTopUserName');
+  const topUserTag = document.getElementById('cfcTopUserTag');
+  const topOnlineDot = document.getElementById('cfcTopOnlineDot');
+  const topAvatarImg = document.getElementById('cfcUserAvatarImg');
+  const guestAvatarIcon = document.getElementById('cfcGuestAvatarIcon');
+
   const isAuth = !!fcCurrentUser;
-  const displayName = isAuth ? (fcCurrentUser.username || clubData.nick || 'Łukasz123') : (clubData.nick && clubData.nick !== 'GOŚĆ' ? clubData.nick : 'Łukasz123');
+  const displayName = isAuth
+    ? (fcCurrentUser.username || clubData.nick || 'Gracz')
+    : (clubData.nick && clubData.nick !== 'Gość' && clubData.nick !== 'GOŚĆ' ? clubData.nick : 'Zaloguj się');
+
+  if (topUserName) topUserName.textContent = displayName;
+  if (topUserTag) {
+    topUserTag.style.display = 'inline-block';
+    topUserTag.textContent = isAuth ? (fcCurrentUser.isLocal ? 'LOKALNY' : 'D1 SYNC') : 'GOŚĆ';
+    topUserTag.style.color = isAuth ? (fcCurrentUser.isLocal ? '#38bdf8' : 'var(--fc-volt)') : 'var(--gold)';
+  }
+  if (topOnlineDot) {
+    topOnlineDot.style.background = isAuth ? '#00ff88' : '#f59e0b';
+    topOnlineDot.style.boxShadow = isAuth ? '0 0 8px #00ff88' : 'none';
+  }
+  if (topAvatarImg && guestAvatarIcon) {
+    if (isAuth) {
+      const fwdId = (clubData.lineup && clubData.lineup.FWD) || 'fwd_broja';
+      topAvatarImg.src = `assets/players/${fwdId}.webp`;
+      topAvatarImg.style.display = 'block';
+      guestAvatarIcon.style.display = 'none';
+    } else {
+      topAvatarImg.style.display = 'none';
+      guestAvatarIcon.style.display = 'flex';
+    }
+  }
 
   if (label) {
     label.style.display = 'inline-flex';
-    const nameText = label.querySelector('.user-name-text');
-    const divTag = label.querySelector('.user-div-tag');
-    if (nameText) {
-      nameText.textContent = displayName;
-    }
-    if (divTag) {
-      divTag.textContent = isAuth ? (fcCurrentUser.isLocal ? 'LOKALNY' : 'D1 SYNC') : 'LOKALNY';
-      divTag.style.color = isAuth ? (fcCurrentUser.isLocal ? '#38bdf8' : 'var(--fc-volt)') : 'var(--fc-gold)';
-    }
     if (isAuth) {
       label.classList.add('is-auth');
-      label.title = 'Konto: ' + displayName + (fcCurrentUser.isLocal ? ' (Profil lokalny w pamięci komputera)' : ' (Baza Cloudflare D1: POŁĄCZONO)');
+      label.title = `Konto: ${displayName} • Baza danych Cloudflare D1: POŁĄCZONO`;
     } else {
       label.classList.remove('is-auth');
-      label.title = 'Profil lokalny. Kliknij, aby zalogować się do konta.';
+      label.title = 'Kliknij, aby zalogować się do konta Cloudflare D1 lub zarejestrować nowe.';
     }
   }
 
-  if (btn) {
-    if (isAuth) {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = 'inline-flex';
-      btn.textContent = 'ZALOGUJ';
-    }
-  }
-
+  if (btn) btn.style.display = 'none';
   if (logout) logout.style.display = isAuth ? 'block' : 'none';
   if (loggedInView) loggedInView.style.display = isAuth ? 'flex' : 'none';
   if (loggedOutView) loggedOutView.style.display = isAuth ? 'none' : 'block';
 
-  if (authTitle) authTitle.textContent = isAuth ? 'Twój Profil Gracza' : 'Zaloguj się lub utwórz konto';
+  if (authTitle) authTitle.textContent = isAuth ? 'Twój Profil Gracza (Cloudflare D1)' : 'Zaloguj się lub utwórz konto';
 
   if (statusBadge) {
-    statusBadge.textContent = isAuth ? (fcCurrentUser.isLocal ? '● TRYB OFFLINE (LOKALNY)' : '● ZALOGOWANO (CLOUDFLARE)') : '● GOŚĆ';
+    statusBadge.textContent = isAuth ? (fcCurrentUser.isLocal ? '● TRYB OFFLINE (LOKALNY)' : '● ZALOGOWANO (CLOUDFLARE D1)') : '● BRAK KONTA (GOŚĆ)';
     statusBadge.style.color = isAuth ? (fcCurrentUser.isLocal ? '#38bdf8' : '#00ff88') : '#ffb86b';
   }
   if (statusDesc) {
     statusDesc.textContent = isAuth
-      ? (fcCurrentUser.isLocal ? 'Wszystkie Twoje monety, karty i skład są bezpiecznie zapisywane w pamięci tego komputera (działa w każdej sieci i szkole).' : 'Wszystkie Twoje monety, karty z paczek i skład 4v4 są w 100% bezpiecznie zapisane w chmurze Cloudflare D1.')
-      : 'Zaloguj się, aby odblokować paczki i postęp.';
+      ? (fcCurrentUser.isLocal ? 'Wszystkie Twoje monety, karty i skład są zapisywane w pamięci tego urządzenia.' : 'Wszystkie Twoje monety, karty z paczek i skład 4v4 są w 100% zsynchronizowane z bazą danych Cloudflare D1.')
+      : 'Zaloguj się na swoje konto lub załóż darmowe konto gracza, aby mieć własny profil, monety i karty w bazie Cloudflare D1.';
   }
 
   if (isAuth) {
     if (nickDisplay) nickDisplay.textContent = displayName;
-    if (coinsDisplay) coinsDisplay.textContent = `${(Math.max(0, clubData.coins || 0)).toLocaleString('pl-PL')} 🪙`;
+    if (coinsDisplay) coinsDisplay.textContent = `${(Number(clubData.coins) || 0).toLocaleString('pl-PL')} 🪙`;
     if (cardsDisplay) cardsDisplay.textContent = `${(clubData.owned && clubData.owned.length) || 4} / 95`;
   }
 }
@@ -17152,13 +17195,6 @@ async function fcLoadCloudProfile() {
   if (!token) {
     fcCurrentUser = null;
     loadClubData();
-    if (typeof clubData.coins !== 'number' || clubData.coins < 2450) {
-      clubData.coins = 2450;
-      saveClubData(false);
-    }
-    if (!clubData.nick || clubData.nick === 'GOŚĆ') {
-      clubData.nick = 'Łukasz123';
-    }
     fcUpdateAuthUi();
     updateMenuClubUI();
     return false;
@@ -17167,13 +17203,13 @@ async function fcLoadCloudProfile() {
   // Obsługa sesji lokalnej
   if (token.startsWith('LOCAL_')) {
     const localAccounts = getLocalAccounts();
-    const savedNick = localStorage.getItem('FC28_USER_NICK') || clubData.nick || 'Łukasz123';
+    const savedNick = localStorage.getItem('FC28_USER_NICK') || clubData.nick || 'Gracz';
     const acc = localAccounts[savedNick.toLowerCase()];
     if (acc) {
       fcCurrentUser = { username: acc.username, isLocal: true };
       clubData = {
         nick: acc.username,
-        coins: typeof acc.coins === 'number' && acc.coins >= 2450 ? acc.coins : 2450,
+        coins: typeof acc.coins === 'number' ? acc.coins : 500,
         owned: Array.isArray(acc.owned) && acc.owned.length ? acc.owned : [...STARTER_CARD_IDS],
         lineup: acc.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
         updatedAt: acc.updatedAt || Date.now()
@@ -17185,7 +17221,6 @@ async function fcLoadCloudProfile() {
     } else {
       fcCurrentUser = { username: savedNick, isLocal: true };
       loadClubData();
-      if (!Number.isFinite(clubData.coins) || clubData.coins < 2450) clubData.coins = 2450;
       fcUpdateAuthUi();
       updateMenuClubUI();
       return true;
@@ -17207,8 +17242,8 @@ async function fcLoadCloudProfile() {
       if (res.status === 401) {
         fcSetSessionToken('');
         fcCurrentUser = null;
-        clubData.nick = 'Łukasz123';
-        clubData.coins = 2450;
+        clubData.nick = 'Gość';
+        clubData.coins = 0;
         clubData.owned = [...STARTER_CARD_IDS];
         clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
         fcUpdateAuthUi();
@@ -17222,9 +17257,8 @@ async function fcLoadCloudProfile() {
     if (data.success && data.user) {
       fcCurrentUser = data.user;
       const username = data.user.username;
-      const serverCoins = typeof data.user.coins === 'number' ? data.user.coins : 0;
-      const localCoins = Number(clubData?.coins) || 0;
-      const finalCoins = Math.max(serverCoins, localCoins, 2450);
+      // Realne monety prosto z bazy Cloudflare D1
+      const realCoins = typeof data.user.coins === 'number' ? data.user.coins : 0;
 
       const validIds = new Set(PLAYERS_DB.map(c => c.id));
       const ownedSet = new Set(STARTER_CARD_IDS);
@@ -17245,7 +17279,7 @@ async function fcLoadCloudProfile() {
 
       clubData = {
         nick: username,
-        coins: finalCoins,
+        coins: realCoins,
         owned: owned,
         lineup: lineup,
         updatedAt: Date.now()
@@ -17259,19 +17293,6 @@ async function fcLoadCloudProfile() {
       saveClubData(false);
       fcUpdateAuthUi();
       updateMenuClubUI();
-
-      // Automatyczna synchronizacja salda monet z chmurą D1 jeśli na serwerze jest mniej
-      if (finalCoins > serverCoins && token && !token.startsWith('LOCAL_')) {
-        const diff = finalCoins - serverCoins;
-        fetch(`${FC_API_URL}/api/club/claim-pass`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ tier: 999, amount: diff })
-        }).catch(e => console.warn('Sync coins diff to D1:', e));
-      }
 
       // Automatyczna weryfikacja i dosynchronizowanie odebranych nagród z karnetu do bazy D1
       const claimedTiers = typeof getClaimedPassTiers === 'function' ? getClaimedPassTiers() : [];
@@ -17292,7 +17313,7 @@ async function fcLoadCloudProfile() {
               if (sRes.ok) {
                 const sData = await sRes.json();
                 if (sData && sData.success && typeof sData.totalCoins === 'number') {
-                  clubData.coins = Math.max(clubData.coins, sData.totalCoins);
+                  clubData.coins = sData.totalCoins;
                   try { localStorage.setItem(syncKey, 'true'); } catch (e) {}
                   saveClubData(false);
                   updateMenuClubUI();
@@ -17308,6 +17329,14 @@ async function fcLoadCloudProfile() {
 
       return true;
     }
+  } catch (err) {
+    console.warn('FC28 Cloudflare profile load error (offline):', err);
+    loadClubData();
+    fcUpdateAuthUi();
+    updateMenuClubUI();
+    return false;
+  }
+}
   } catch (err) {
     console.warn('FC28 Cloudflare profile load timeout/error (fallback do pamięci lokalnej):', err);
     loadClubData();
@@ -17478,6 +17507,7 @@ async function fcLogin() {
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
     const synced = await fcLoadCloudProfile();
+    await loadRealCommunityFriends();
     if (synced) {
       showAuthAlert('Zalogowano pomyślnie! Pełna synchronizacja z Cloudflare D1 aktywna.', 'success');
       setTimeout(closeFcAuth, 600);
@@ -17543,6 +17573,7 @@ async function fcRegister() {
     try { localStorage.setItem('FC28_USER_NICK', nick); } catch (e) {}
 
     await fcLoadCloudProfile();
+    await loadRealCommunityFriends();
     showAuthAlert('Konto utworzone w chmurze! Odebrano 500 🪙 i karty startowe.', 'success');
     setTimeout(closeFcAuth, 700);
     return;
@@ -17565,7 +17596,7 @@ async function fcLogout() {
   fcSetSessionToken('');
   fcCurrentUser = null;
   clubData = {
-    nick: 'GOŚĆ',
+    nick: 'Gość',
     coins: 0,
     owned: [...STARTER_CARD_IDS],
     lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
@@ -17578,8 +17609,9 @@ async function fcLogout() {
 
   updateMenuClubUI();
   fcUpdateAuthUi();
+  await loadRealCommunityFriends();
   openFcAuth();
-  fcSetAuthStatus('Wylogowano. Zaloguj się lub utwórz konto, aby mieć dostęp do monet i móc grać.', false);
+  fcSetAuthStatus('Wylogowano. Zaloguj się lub utwórz konto w Cloudflare D1, aby mieć dostęp do monet i kart.', false);
 }
 
 // Inicjalizacja konta i czyszczenie starych, nieprawidłowych pamięci podręcznych
@@ -17594,18 +17626,15 @@ async function fcInitAccounts() {
   if (hasToken) {
     await fcLoadCloudProfile();
   } else {
-    // Tryb gościa: zachowaj monety i skład lub przydziel 2 450 monet startowych zgodnie z projektem
-    if (!Number.isFinite(clubData.coins) || clubData.coins < 2450) {
-      clubData.coins = 2450;
-      saveClubData(false);
-    }
-    if (!clubData.nick || clubData.nick === 'GOŚĆ') {
-      clubData.nick = 'Łukasz123';
-      saveClubData(false);
-    }
+    // Tryb gościa: brak aktywnego konta
+    fcCurrentUser = null;
+    loadClubData();
     fcUpdateAuthUi();
     updateMenuClubUI();
   }
+
+  // Wczytanie prawdziwych zarejestrowanych graczy z bazy Cloudflare D1
+  await loadRealCommunityFriends();
 }
 
 // Globalny nasłuch klawisza ESC do zamykania pełnoekranowego klubu
