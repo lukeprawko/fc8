@@ -874,7 +874,43 @@
   }
   .cfc-mini-card.tier-rare::before { background: var(--volt); }
 
-  .cfc-mini-card:hover {
+  
+.mini-card-photo-wrap {
+  width: 100% !important;
+  height: 98px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  margin: 3px 0 !important;
+}
+
+.mini-card-img {
+  width: 78px !important;
+  height: 94px !important;
+  border-radius: 12px !important;
+  object-fit: cover !important;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65)) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(10, 15, 25, 0.7) !important;
+  transition: transform 0.22s ease !important;
+}
+.cfc-mini-card:hover .mini-card-img {
+  transform: scale(1.05) !important;
+  border-color: rgba(18, 242, 150, 0.5) !important;
+}
+.is-icon .mini-card-img {
+  border-color: rgba(242, 201, 76, 0.65) !important;
+  box-shadow: 0 0 14px rgba(242, 201, 76, 0.3) !important;
+}
+.is-gold .mini-card-img {
+  border-color: rgba(242, 201, 76, 0.35) !important;
+}
+.is-cyan .mini-card-img {
+  border-color: rgba(0, 240, 255, 0.4) !important;
+}
+
+.cfc-mini-card:hover {
     transform: translateY(-3px);
     border-color: var(--glass-border-hover);
   }
@@ -2240,19 +2276,67 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 52px !important;
-  margin: 3px 0 !important;
+  min-height: 64px !important;
+  margin: 5px 0 !important;
 }
 
 .mini-card-avatar img,
 .card-avatar-img {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 50% !important;
+  width: var(--avatar-size, 58px) !important;
+  height: var(--avatar-size, 58px) !important;
+  border-radius: 14px !important;
   object-fit: cover !important;
-  object-position: center 20% !important;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  object-position: center 18% !important;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(10, 15, 25, 0.7) !important;
+  transition: transform 0.2s ease, border-color 0.2s ease !important;
+}
+
+.tier-icon .card-avatar-img {
+  border-color: rgba(242, 201, 76, 0.65) !important;
+  box-shadow: 0 0 16px rgba(242, 201, 76, 0.3) !important;
+}
+.tier-gold .card-avatar-img {
+  border-color: rgba(242, 201, 76, 0.4) !important;
+}
+
+.cfc-mini-card {
+  position: relative !important;
+  border-radius: 14px !important;
+  padding: 10px 10px 9px !important;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.07) 0%, rgba(12, 16, 26, 0.84) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  min-height: 154px !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  transition: all 0.22s var(--ease) !important;
+}
+.cfc-mini-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(18, 242, 150, 0.45) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 3D PACK SHOP GRAPHICS & CONTAINERS */
+.pack-art-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 10px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pack-card:hover .pack-art-container {
+  transform: scale(1.04) translateY(-4px);
+}
+.pack-svg-art {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 .mini-card-name {
@@ -2776,35 +2860,123 @@
         <div class="pack-grid">
           <div class="pack-card">
             <span class="iso-badge">GWARANTOWANY 78+ OVR</span>
-            <div class="pack-box">
-              <span style="font-family:var(--font-heading); font-size:10px; font-weight:800; letter-spacing:0.14em; color:var(--text-secondary);">CYBERFC 28</span>
-              <div style="font-family:var(--font-heading); font-size:17px; font-weight:900; line-height:1.15;">PACZKA<br>STANDARD</div>
-              <span class="pack-price-val" style="font-family:var(--font-heading); font-size:15px; font-weight:900; color:var(--gold);">1 000 C</span>
+            <div class="pack-art-container">
+              <svg class="pack-svg-art" width="160" height="215" viewBox="0 0 170 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="foilStd" x1="0" y1="0" x2="170" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="25%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#60a5fa"/>
+      <stop offset="75%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="shineStd" x1="0" y1="0" x2="170" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.4)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#foilStd)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+  <path d="M10 20 h150 M10 24 h150 M10 206 h150 M10 210 h150" stroke="rgba(0,0,0,0.5)" stroke-width="1.2"/>
+  <path d="M10 21 h150 M10 25 h150 M10 207 h150 M10 211 h150" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+  <path d="M10 8 L85 70 L160 8" fill="rgba(255,255,255,0.08)"/>
+  <path d="M10 222 L85 160 L160 222" fill="rgba(0,0,0,0.25)"/>
+  <polygon points="85,65 130,85 130,140 85,168 40,140 40,85" fill="#0b1329" stroke="#60a5fa" stroke-width="2"/>
+  <polygon points="85,73 122,90 122,135 85,158 48,135 48,90" fill="url(#foilStd)" opacity="0.6"/>
+  <text x="85" y="105" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="2">FC 28</text>
+  <text x="85" y="125" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="800" font-size="11" fill="#93c5fd" letter-spacing="1">STANDARD</text>
+  <circle cx="85" cy="144" r="3" fill="#60a5fa"/>
+  <rect x="52" y="178" width="66" height="20" rx="10" fill="#1e3a8a" stroke="#60a5fa" stroke-width="1"/>
+  <text x="85" y="192" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="10" fill="#ffffff" letter-spacing="0.5">78+ OVR</text>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#shineStd)" opacity="0.25" style="mix-blend-mode: overlay;"/>
+</svg>
             </div>
             <p style="font-size:12.5px; color:var(--text-secondary);">Solidne wzmocnienie składu z szansą na zawodnika złotego.</p>
-            <button type="button" class="btn-glass" style="width:100%;" onclick="openPack('Paczka Standard', 1000, 78)">Otwórz za 1 000</button>
+            <button type="button" class="btn-glass" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="openPack('Paczka Standard', 1000, 78)">
+              <span>Otwórz za 1 000</span>
+              <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
+            </button>
           </div>
 
           <div class="pack-card" style="border-color: var(--volt-border);">
             <span class="status-tag">POLECANA • 84+ OVR</span>
-            <div class="pack-box premium">
-              <span style="font-family:var(--font-heading); font-size:10px; font-weight:800; letter-spacing:0.14em; color:var(--volt);">CYBERFC 28</span>
-              <div style="font-family:var(--font-heading); font-size:17px; font-weight:900; line-height:1.15;">PACZKA<br>PREMIUM</div>
-              <span class="pack-price-val" style="font-family:var(--font-heading); font-size:15px; font-weight:900; color:var(--gold);">2 500 C</span>
+            <div class="pack-art-container">
+              <svg class="pack-svg-art" width="160" height="215" viewBox="0 0 170 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="foilPrem" x1="0" y1="0" x2="170" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="25%" stop-color="#064e3b"/>
+      <stop offset="50%" stop-color="#12f296"/>
+      <stop offset="75%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="shinePrem" x1="0" y1="0" x2="170" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.45)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#foilPrem)" stroke="#12f296" stroke-width="1.5"/>
+  <path d="M10 20 h150 M10 24 h150 M10 206 h150 M10 210 h150" stroke="rgba(0,0,0,0.5)" stroke-width="1.2"/>
+  <path d="M10 21 h150 M10 25 h150 M10 207 h150 M10 211 h150" stroke="rgba(18,242,150,0.4)" stroke-width="0.8"/>
+  <path d="M25 45 l15 -10 l15 10 l-15 10 z M55 45 l15 -10 l15 10 l-15 10 z M85 45 l15 -10 l15 10 l-15 10 z" stroke="rgba(18,242,150,0.2)" stroke-width="1" fill="none"/>
+  <path d="M25 180 l15 -10 l15 10 l-15 10 z M55 180 l15 -10 l15 10 l-15 10 z M85 180 l15 -10 l15 10 l-15 10 z" stroke="rgba(18,242,150,0.2)" stroke-width="1" fill="none"/>
+  <polygon points="85,60 135,82 135,142 85,172 35,142 35,82" fill="#042017" stroke="#12f296" stroke-width="2"/>
+  <polygon points="85,68 126,87 126,137 85,162 44,137 44,87" fill="url(#foilPrem)" opacity="0.6"/>
+  <text x="85" y="103" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="2">FC 28</text>
+  <text x="85" y="123" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="800" font-size="11" fill="#12f296" letter-spacing="1">PREMIUM</text>
+  <circle cx="85" cy="142" r="3.5" fill="#12f296"/>
+  <rect x="52" y="180" width="66" height="20" rx="10" fill="#064e3b" stroke="#12f296" stroke-width="1.2"/>
+  <text x="85" y="194" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="10" fill="#12f296" letter-spacing="0.5">84+ OVR</text>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#shinePrem)" opacity="0.3" style="mix-blend-mode: overlay;"/>
+</svg>
             </div>
             <p style="font-size:12.5px; color:var(--text-secondary);">Gwarantowana gwiazda 84+ z wysoką szansą na PlayStyle+.</p>
-            <button type="button" class="btn-primary" style="width:100%;" onclick="openPack('Paczka Premium', 2500, 84)">Otwórz za 2 500</button>
+            <button type="button" class="btn-primary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="openPack('Paczka Premium', 2500, 84)">
+              <span>Otwórz za 2 500</span>
+              <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
+            </button>
           </div>
 
           <div class="pack-card ultimate">
             <span class="cfc-season-tag">87+ / SZANSA NA IKONĘ</span>
-            <div class="pack-box ultimate">
-              <span style="font-family:var(--font-heading); font-size:10px; font-weight:800; letter-spacing:0.14em; color:var(--gold);">CYBERFC 28</span>
-              <div style="font-family:var(--font-heading); font-size:17px; font-weight:900; line-height:1.15; color:#fef3c7;">PACZKA<br>ULTIMATE</div>
-              <span class="pack-price-val" style="font-family:var(--font-heading); font-size:15px; font-weight:900; color:var(--gold);">5 000 C</span>
+            <div class="pack-art-container">
+              <svg class="pack-svg-art" width="160" height="215" viewBox="0 0 170 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="foilUlt" x1="0" y1="0" x2="170" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="20%" stop-color="#78350f"/>
+      <stop offset="45%" stop-color="#fef08a"/>
+      <stop offset="70%" stop-color="#451a03"/>
+      <stop offset="90%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="shineUlt" x1="0" y1="0" x2="170" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.6)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#foilUlt)" stroke="#fde047" stroke-width="1.8"/>
+  <path d="M10 20 h150 M10 24 h150 M10 206 h150 M10 210 h150" stroke="rgba(0,0,0,0.6)" stroke-width="1.2"/>
+  <path d="M10 21 h150 M10 25 h150 M10 207 h150 M10 211 h150" stroke="rgba(254,240,138,0.5)" stroke-width="0.8"/>
+  <path d="M85 8 L160 115 L85 222 L10 115 Z" fill="none" stroke="rgba(254,240,138,0.3)" stroke-width="1.2"/>
+  <polygon points="85,58 138,82 138,144 85,174 32,144 32,82" fill="#1c1103" stroke="#fbbf24" stroke-width="2.2"/>
+  <polygon points="85,66 129,87 129,139 85,164 41,139 41,87" fill="url(#foilUlt)" opacity="0.65"/>
+  <path d="M73 84 L76 77 L85 82 L94 77 L97 84 Z" fill="#fef08a" stroke="#d97706" stroke-width="0.8"/>
+  <text x="85" y="105" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="2">FC 28</text>
+  <text x="85" y="124" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="800" font-size="11" fill="#fef08a" letter-spacing="1">ULTIMATE</text>
+  <circle cx="85" cy="144" r="3.5" fill="#fbbf24"/>
+  <rect x="44" y="180" width="82" height="20" rx="10" fill="#78350f" stroke="#fbbf24" stroke-width="1.2"/>
+  <text x="85" y="194" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="900" font-size="10" fill="#fef08a" letter-spacing="0.5">87+ • IKONA</text>
+  <rect x="10" y="8" width="150" height="214" rx="14" fill="url(#shineUlt)" opacity="0.4" style="mix-blend-mode: overlay;"/>
+</svg>
             </div>
             <p style="font-size:12.5px; color:var(--text-secondary);">Elitarny zawodnik 87+ OVR oraz największa szansa na kartę Ikony.</p>
-            <button type="button" class="btn-glass gold" style="width:100%;" onclick="openPack('Paczka Ultimate', 5000, 87)">Otwórz za 5 000</button>
+            <button type="button" class="btn-glass gold" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="openPack('Paczka Ultimate', 5000, 87)">
+              <span>Otwórz za 5 000</span>
+              <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -3225,10 +3397,18 @@
         </div>
 
         <div class="util-btns">
-          <button type="button" class="icon-btn" id="assistBtn" onclick="toggleAssist()" title="Podpowiedzi Trenera">💡 POMOC: WYŁ</button>
-          <button type="button" class="icon-btn" id="mouseModeBtn" onclick="toggleMouseControl()" title="Przełącz sterowanie ruchem myszką [M]">🖱️ MYSZKA: WYŁ</button>
-          <button type="button" class="icon-btn" id="muteBtn" onclick="toggleMute()" title="Dźwięk">🔊</button>
-          <button type="button" class="icon-btn" onclick="location.reload()" title="Wyjdź do Menu">🚪</button>
+          <button type="button" class="icon-btn" id="assistBtn" onclick="toggleAssist()" title="Podpowiedzi Trenera">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg> POMOC: WYŁ
+          </button>
+          <button type="button" class="icon-btn" id="mouseModeBtn" onclick="toggleMouseControl()" title="Przełącz sterowanie ruchem myszką [M]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg> MYSZKA: WYŁ
+          </button>
+          <button type="button" class="icon-btn" id="muteBtn" onclick="toggleMute()" title="Wycisz/Włącz dźwięk">
+            <svg id="muteIconSvg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+          <button type="button" class="icon-btn" onclick="location.reload()" title="Wyjdź do Menu">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -3243,7 +3423,7 @@
         <h2 id="winnerTitle">KONIEC MECZU!</h2>
         <div style="font-family: var(--font-heading); font-size:32px; font-weight:900; margin:4px 0;" id="winnerSub">0 : 0</div>
         <div id="matchCoinsReward" style="font-family: var(--font-heading); font-size:15px; color:var(--gold); font-weight:900; margin-bottom:6px;">
-          NAGRODA ZA MECZ 🪙
+          NAGRODA ZA MECZ <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
         </div>
         <div class="stats-box">
           <div class="p1-color" id="statShotsBlue">0</div>
@@ -3358,151 +3538,151 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 const PLAYSTYLES = {
   cat_reflex: {
     name: 'KOT NA LINII+',
-    icon: '🧤',
+    icon: 'GK',
     color: '#00e676',
     desc: 'Bramkarz rzuca się dalej, wyżej i błyskawicznie wybija strzały z okienka.'
   },
   far_reach: {
     name: 'ZASIĘG BRAMKARZA+',
-    icon: '🦅',
+    icon: 'FLY',
     color: '#00f0ff',
     desc: 'Ekstremalny zasięg interwencji bramkarza; broni trudne strzały z dystansu i wyciąga piłki spod poprzeczki.'
   },
   close_down: {
     name: 'SKRACANIE KĄTA 1v1+',
-    icon: '🛡️',
+    icon: 'DEF',
     color: '#ffb300',
     desc: 'Błyskawiczny wybieg i skracanie kąta w sytuacjach sam na sam, obezwładnianie napastników w polu karnym.'
   },
   deflector: {
     name: 'PEWNY CHWYT & PARADA+',
-    icon: '🧤',
+    icon: 'GK',
     color: '#55e6c1',
     desc: 'Bramkarz nie wylewa piłki przed siebie – paruje pewnie poza linię końcową na rożny lub chwyta do koszyczka.'
   },
   cross_catcher: {
     name: 'WŁADCA POWIETRZA+',
-    icon: '🦅',
+    icon: 'FLY',
     color: '#fab1a0',
     desc: 'Dominacja w powietrzu przy dośrodkowaniach, rzutach rożnych i wysokich piłkach lobowanych.'
   },
   far_throw: {
     name: 'DALEKI WYRZUT+',
-    icon: '🎯',
+    icon: 'AIM',
     color: '#74b9ff',
     desc: 'Laserowo precyzyjne, dalekie wznowienie gry ręką lub nogą rozpoczynające błyskawiczny kontratak.'
   },
   footwork: {
     name: 'GRA NOGAMI+',
-    icon: '👟',
+    icon: 'KICK',
     color: '#a29bfe',
     desc: 'Pewne rozegranie piłki pod presją rywala i błyskawiczne interwencje nogami przy strzałach po ziemi.'
   },
   anticipate: {
     name: 'CZYTANIE GRY+',
-    icon: '🧠',
+    icon: 'IQ',
     color: '#00f0ff',
     desc: 'Zawodnik przewiduje ruchy rywala, ma wydłużony zasięg czystego odbioru i przecina podania bez faulu.'
   },
   intercept_wall: {
     name: 'ZŁOTY MUR+',
-    icon: '🧱',
+    icon: 'WALL',
     color: '#00f0ff',
     desc: 'Zwiększony zasięg odbioru, niszczenie zastawek rywali i blokowanie podań.'
   },
   incisive_pass: {
     name: 'PROSTOPADŁE PODANIE+',
-    icon: '🎯',
+    icon: 'AIM',
     color: '#f5b041',
     desc: 'Podania otwierające drogę do bramki są o 25% szybsze i perfekcyjnie wymierzone w tempo.'
   },
   long_ball: {
     name: 'DŁUGIE PODANIE+',
-    icon: '🛰️',
+    icon: 'SAT',
     color: '#6c5ce7',
     desc: 'Celniejsze przerzuty i precyzyjne długie podania za linię obrony.'
   },
   tiki_taka: {
     name: 'TIKI-TAKA+',
-    icon: '🔺',
+    icon: 'TRI',
     color: '#74b9ff',
     desc: 'Szybsze, dokładniejsze krótkie podania i perfekcyjna gra na jeden kontakt.'
   },
   quick_step: {
     name: 'SZYBKI KROK+',
-    icon: '⚡',
+    icon: 'SPD',
     color: '#ffd700',
     desc: 'Eksplozywne przyspieszenie w pierwszych krokach po starcie sprintu oraz natychmiastowe odejście po zwodzie.'
   },
   rapid_step: {
     name: 'SZYBKI SPRINT+',
-    icon: '⚡',
+    icon: 'SPD',
     color: '#ffd700',
     desc: 'Maksymalna prędkość sprintu z piłką i złote smugi oszałamiające rywali.'
   },
   technical_dribble: {
     name: 'KONTROLA PIŁKI+',
-    icon: '🪄',
+    icon: 'MAG',
     color: '#fd79a8',
     desc: 'Piłka przyklejona do stopy, ciaśniejszy promień skrętu i pełna kontrola pod pressingiem.'
   },
   first_touch: {
     name: 'PIERWSZE PRZYJĘCIE+',
-    icon: '🧲',
+    icon: 'MAGN',
     color: '#55e6c1',
     desc: 'Idealne przyjęcie piłki bez utraty prędkości biegu; natychmiastowa gotowość do strzału lub podania.'
   },
   trickster: {
     name: 'TRICKSTER+',
-    icon: '✨',
+    icon: 'FLAIR',
     color: '#e040fb',
     desc: 'Błyskawiczne zwody 360°, tęcze i elastico z gwiezdną smugą mylącą obrońców.'
   },
   power_shot: {
     name: 'POTĘŻNY STRZAŁ+',
-    icon: '🚀',
+    icon: 'ROCK',
     color: '#ff0055',
     desc: 'Pocisk armatni o prędkości do 140 km/h z ognistą smugą i potężnym wstrząsem bramki.'
   },
   finesse_shot: {
     name: 'STRZAŁ ROGALIK+',
-    icon: '💫',
+    icon: 'CURV',
     color: '#ffb300',
     desc: 'Techniczne uderzenie ze skręcającą rotacją i podwyższoną precyzją w narożniki bramki.'
   },
   trivela: {
     name: 'TRIVELA+',
-    icon: '🎯',
+    icon: 'AIM',
     color: '#ff7675',
     desc: 'Podkręcone uderzenie lub podanie zewnętrzną częścią stopy o nieprzewidywalnej rotacji.'
   },
   bruiser: {
     name: 'TWARDY ZAWODNIK+',
-    icon: '💪',
+    icon: 'PWR',
     color: '#e17055',
     desc: 'Maksymalna siła w starciach bark w bark, odporność na przepychanie i niszczenie dryblingów.'
   },
   relentless: {
     name: 'NIEUSTĘPLIWOŚĆ+',
-    icon: '🔋',
+    icon: 'ENG',
     color: '#00cec9',
     desc: 'Wyjątkowa wytrzymałość, minimalna utrata sił w sprincie i błyskawiczna regeneracja kondycji.'
   },
   press_proven: {
     name: 'ZASTAWKA / PRESSING+',
-    icon: '🔥',
+    icon: 'FIRE',
     color: '#ff7675',
     desc: 'Perfekcyjne zastawianie piłki ciałem pod naciskiem rywala oraz skuteczny doskok w pressingu.'
   },
   block: {
     name: 'BLOK+',
-    icon: '🛡️',
+    icon: 'DEF',
     color: '#b2bec3',
     desc: 'Większy zasięg automatycznego blokowania strzałów i przecinania uderzeń na bramkę.'
   },
   jockey: {
     name: 'PŁYNNE KRYCIE+',
-    icon: '🛡️',
+    icon: 'DEF',
     color: '#81ecec',
     desc: 'Zwinne poruszanie się w pozycji bocznej; natychmiastowa reakcja na zwody napastnika.'
   }
@@ -5272,101 +5452,101 @@ const PLAYERS_DB = [
 ];
 
 const PLAYER_NATIONS = {
-  "def_branthwaite": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "def_chalobah": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "def_disasi": "🇫🇷",
-  "def_lacroix": "🇫🇷",
-  "def_pavlovic": "🇷🇸",
-  "def_livramento": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "def_kerkez": "🇭🇺",
-  "def_hincapie": "🇪🇨",
-  "def_tapsoba": "🇧🇫",
-  "def_torres": "🇪🇸",
-  "def_min_jae": "🇰🇷",
-  "def_ligt": "🇳🇱",
-  "def_romero": "🇦🇷",
-  "def_konate": "🇫🇷",
-  "def_araujo": "🇺🇾",
-  "def_bastoni": "🇮🇹",
-  "def_saliba": "🇫🇷",
-  "def_van_dijk": "🇳🇱",
-  "def_mendes": "🇵🇹",
-  "def_hakimi": "🇲🇦",
-  "def_maldini": "🇮🇹",
-  "def_cafu": "🇧🇷",
-  "def_roberto_carlos": "🇧🇷",
-  "def_cannavaro": "🇮🇹",
-  "def_nesta": "🇮🇹",
-  "mid_soucek": "🇨🇿",
-  "mid_gallagher": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "mid_mount": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "mid_tielemans": "🇧🇪",
-  "mid_maddison": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "mid_merino": "🇪🇸",
-  "mid_mac_allister": "🇦🇷",
-  "mid_enzo_fernandez": "🇦🇷",
-  "mid_caicedo": "🇪🇨",
-  "mid_bruno_guimaraes": "🇧🇷",
-  "mid_odegaard": "🇳🇴",
-  "mid_szoboszlai": "🇭🇺",
-  "mid_barella": "🇮🇹",
-  "mid_valverde": "🇺🇾",
-  "mid_rice": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "mid_kimmich": "🇩🇪",
-  "mid_bellingham": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "mid_pedri": "🇪🇸",
-  "mid_vitinha": "🇵🇹",
-  "mid_rodri": "🇪🇸",
-  "mid_zidane": "🇫🇷",
-  "mid_ronaldinho": "🇧🇷",
-  "mid_gullit": "🇳🇱",
-  "mid_pirlo": "🇮🇹",
-  "mid_xavi": "🇪🇸",
-  "fwd_broja": "🇦🇱",
-  "fwd_archer": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "fwd_ferguson": "🇮🇪",
-  "fwd_beto": "🇵🇹",
-  "fwd_jackson": "🇸🇳",
-  "fwd_solanke": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "fwd_hojlund": "🇩🇰",
-  "fwd_david": "🇨🇦",
-  "fwd_watkins": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "fwd_nunez": "🇺🇾",
-  "fwd_lautaro_martinez": "🇦🇷",
-  "fwd_isak": "🇸🇪",
-  "fwd_gyokeres": "🇸🇪",
-  "fwd_julian_alvarez": "🇦🇷",
-  "fwd_saka": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "fwd_raphinha": "🇧🇷",
-  "fwd_luis_diaz": "🇨🇴",
-  "fwd_kvaratskhelia": "🇬🇪",
-  "fwd_vinicius_jr": "🇧🇷",
-  "fwd_mbappe": "🇫🇷",
-  "fwd_r9_ronaldo": "🇧🇷",
-  "fwd_pele": "🇧🇷",
-  "fwd_cruyff": "🇳🇱",
-  "fwd_eusebio": "🇵🇹",
-  "fwd_henry": "🇫🇷",
-  "gk_bazunu": "🇮🇪",
-  "gk_trafford": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "gk_johnstone": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "gk_kelleher": "🇮🇪",
-  "gk_henderson": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "gk_onana": "🇨🇲",
-  "gk_raya": "🇪🇸",
-  "gk_vicario": "🇮🇹",
-  "gk_emi_martinez": "🇦🇷",
-  "gk_maignan": "🇫🇷",
-  "gk_oblak": "🇸🇮",
-  "gk_donnarumma": "🇮🇹",
-  "gk_ter_stegen": "🇩🇪",
-  "gk_alisson": "🇧🇷",
-  "gk_courtois": "🇧🇪",
-  "gk_yashin": "⭐",
-  "gk_buffon": "🇮🇹",
-  "gk_casillas": "🇪🇸",
-  "gk_van_der_sar": "🇳🇱",
-  "gk_cech": "🇨🇿"
+  "def_branthwaite": "EN",
+  "def_chalobah": "EN",
+  "def_disasi": "FR",
+  "def_lacroix": "FR",
+  "def_pavlovic": "RS",
+  "def_livramento": "EN",
+  "def_kerkez": "HU",
+  "def_hincapie": "EC",
+  "def_tapsoba": "BF",
+  "def_torres": "ES",
+  "def_min_jae": "KR",
+  "def_ligt": "NL",
+  "def_romero": "AR",
+  "def_konate": "FR",
+  "def_araujo": "UY",
+  "def_bastoni": "IT",
+  "def_saliba": "FR",
+  "def_van_dijk": "NL",
+  "def_mendes": "PT",
+  "def_hakimi": "MA",
+  "def_maldini": "IT",
+  "def_cafu": "BR",
+  "def_roberto_carlos": "BR",
+  "def_cannavaro": "IT",
+  "def_nesta": "IT",
+  "mid_soucek": "CZ",
+  "mid_gallagher": "EN",
+  "mid_mount": "EN",
+  "mid_tielemans": "BE",
+  "mid_maddison": "EN",
+  "mid_merino": "ES",
+  "mid_mac_allister": "AR",
+  "mid_enzo_fernandez": "AR",
+  "mid_caicedo": "EC",
+  "mid_bruno_guimaraes": "BR",
+  "mid_odegaard": "NO",
+  "mid_szoboszlai": "HU",
+  "mid_barella": "IT",
+  "mid_valverde": "UY",
+  "mid_rice": "EN",
+  "mid_kimmich": "DE",
+  "mid_bellingham": "EN",
+  "mid_pedri": "ES",
+  "mid_vitinha": "PT",
+  "mid_rodri": "ES",
+  "mid_zidane": "FR",
+  "mid_ronaldinho": "BR",
+  "mid_gullit": "NL",
+  "mid_pirlo": "IT",
+  "mid_xavi": "ES",
+  "fwd_broja": "AL",
+  "fwd_archer": "EN",
+  "fwd_ferguson": "IE",
+  "fwd_beto": "PT",
+  "fwd_jackson": "SN",
+  "fwd_solanke": "EN",
+  "fwd_hojlund": "DK",
+  "fwd_david": "CA",
+  "fwd_watkins": "EN",
+  "fwd_nunez": "UY",
+  "fwd_lautaro_martinez": "AR",
+  "fwd_isak": "SE",
+  "fwd_gyokeres": "SE",
+  "fwd_julian_alvarez": "AR",
+  "fwd_saka": "EN",
+  "fwd_raphinha": "BR",
+  "fwd_luis_diaz": "CO",
+  "fwd_kvaratskhelia": "GE",
+  "fwd_vinicius_jr": "BR",
+  "fwd_mbappe": "FR",
+  "fwd_r9_ronaldo": "BR",
+  "fwd_pele": "BR",
+  "fwd_cruyff": "NL",
+  "fwd_eusebio": "PT",
+  "fwd_henry": "FR",
+  "gk_bazunu": "IE",
+  "gk_trafford": "EN",
+  "gk_johnstone": "EN",
+  "gk_kelleher": "IE",
+  "gk_henderson": "EN",
+  "gk_onana": "CM",
+  "gk_raya": "ES",
+  "gk_vicario": "IT",
+  "gk_emi_martinez": "AR",
+  "gk_maignan": "FR",
+  "gk_oblak": "SI",
+  "gk_donnarumma": "IT",
+  "gk_ter_stegen": "DE",
+  "gk_alisson": "BR",
+  "gk_courtois": "BE",
+  "gk_yashin": "",
+  "gk_buffon": "IT",
+  "gk_casillas": "ES",
+  "gk_van_der_sar": "NL",
+  "gk_cech": "CZ"
 };
 
 
@@ -5571,9 +5751,9 @@ function getCardTier(card) {
 }
 
 function getCardTierLabel(tier) {
-  if (tier === 'icon') return '👑 IKONA LEGEND';
-  if (tier === 'toty') return '💎 TOTY PRISM';
-  if (tier === 'gold-rare') return '⭐ GOLD RARE';
+  if (tier === 'icon') return 'IKONA LEGEND';
+  if (tier === 'toty') return 'TOTY PRISM';
+  if (tier === 'gold-rare') return ' GOLD RARE';
   if (tier === 'gold-common') return 'GOLD COMMON';
   if (tier === 'silver') return 'SILVER';
   return 'BRONZE';
@@ -5642,7 +5822,7 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   const ps = c.playstyle ? PLAYSTYLES[c.playstyle] : null;
   const tier = getCardTier(c);
   const tierLabel = getCardTierLabel(tier);
-  const nationFlag = PLAYER_NATIONS[c.id] || '⚽';
+  const nationFlag = PLAYER_NATIONS[c.id] || 'FC';
 
   const isGk = c.role === 'GK';
   const s1L = isGk ? 'DIV' : 'TEM', s1V = isGk ? (c.div || c.def) : c.pac;
@@ -5664,7 +5844,7 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   let btnHtml = '';
   if (!isRevealed) {
     if (isEquipped) {
-      btnHtml = `<button type="button" class="action-btn" style="background:#238636; border-color:#00e676; padding:8px; font-size:11px; font-weight:900;" disabled>✓ W SKŁADZIE</button>`;
+      btnHtml = `<button type="button" class="action-btn" style="background:#238636; border-color:#00e676; padding:8px; font-size:11px; font-weight:900;" disabled>W SKŁADZIE</button>`;
     } else if (isOwned) {
       btnHtml = `<button type="button" class="action-btn btn-host" style="padding:8px; font-size:11px; font-weight:900;" onclick="event.stopPropagation(); equipCard('${c.id}')">WYSTAW DO SKŁADU</button>`;
     } else {
@@ -5819,8 +5999,8 @@ function renderPackStore() {
       sub: 'KARTY 75+ OVR',
       price: 1000,
       desc: '1 gwarantowany zawodnik 75+ OVR z szansą na gwiazdę i PlayStyle.',
-      odds: '🥉 75-79: 75% • ⭐ 80-83: 20% • 🌟 84+: 5%',
-      badge: '🥉 PODSTAWOWA',
+      odds: '75-79: 75% • 80-83: 20% • 84+: 5%',
+      badge: 'PODSTAWOWA',
       accentColor: '#8b949e',
       glowColor: 'rgba(139, 148, 158, 0.4)'
     },
@@ -5830,8 +6010,8 @@ function renderPackStore() {
       sub: 'KARTY 80+ OVR • PLAYSTYLE+',
       price: 2500,
       desc: '1 gwarantowany zawodnik 80+ OVR z podwyższoną szansą na styl gry.',
-      odds: '⭐ 80-83: 65% • 🌟 84-86: 25% • 🔥 87+: 10%',
-      badge: '⭐ NAJCZĘŚCIEJ WYBIERANA',
+      odds: '80-83: 65% • 84-86: 25% • 87+: 10%',
+      badge: ' NAJCZĘŚCIEJ WYBIERANA',
       accentColor: '#00f0ff',
       glowColor: 'rgba(0, 240, 255, 0.45)'
     },
@@ -5841,8 +6021,8 @@ function renderPackStore() {
       sub: 'ŚWIATOWA KLASA 84+ • IKONY',
       price: 5000,
       desc: 'Gwarantowany gracz 84+ OVR ze stylem gry+! Szansa na Walkout i Ikony!',
-      odds: '🌟 84-86: 70% • 🔥 87-89: 24% • 👑 90+ IKONA: 6%',
-      badge: '👑 NAJLEPSZY DROP',
+      odds: '84-86: 70% • 87-89: 24% • 90+ IKONA: 6%',
+      badge: 'NAJLEPSZY DROP',
       accentColor: '#ffd700',
       glowColor: 'rgba(255, 215, 0, 0.55)'
     }
@@ -5874,7 +6054,7 @@ function renderPackStore() {
                 <div class="pack-title" style="font-size:14px;">${p.name}</div>
                 <div class="pack-sub" style="font-size:9px;">${p.sub}</div>
                 <div style="font-family: var(--font-heading); font-size:20px; font-weight:900; color:${p.accentColor}; margin-top:14px;">
-                  ${p.price} 🪙
+                  ${p.price} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
                 </div>
               </div>
 
@@ -5889,15 +6069,15 @@ function renderPackStore() {
               <div style="width:100%; margin-top:6px;">
                 ${!isAuth ? `
                   <button type="button" class="action-btn" style="width:100%; padding:12px; font-size:12px; font-weight:900; background:rgba(0,240,255,0.2); border-color:#00f0ff;" onclick="openFcAuth()">
-                    🔒 ZALOGUJ SIĘ (${p.price} 🪙)
+                    ZALOGUJ SIĘ (${p.price} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)
                   </button>
                 ` : (canAfford ? `
                   <button type="button" class="action-btn btn-host" style="width:100%; padding:12px; font-size:12px; font-weight:900; background:linear-gradient(135deg, ${p.accentColor} 0%, #ff8800 100%); color:#000;" onclick="openPack('${p.tier}')">
-                    ⚡ OTWÓRZ (${p.price} 🪙)
+                    OTWÓRZ (${p.price} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)
                   </button>
                 ` : `
                   <button type="button" class="action-btn" style="width:100%; padding:12px; font-size:11px; background:#21262d; color:#8b949e;" disabled>
-                    🔒 BRAKUJE ${p.price - coins} 🪙
+                    BRAKUJE ${p.price - coins} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
                   </button>
                 `)}
               </div>
@@ -5945,7 +6125,7 @@ async function buyMarketCard(cardId, price) {
   const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
   if (!fcCurrentUser || !token) {
     openFcAuth();
-    fcSetAuthStatus('🔒 Zaloguj się, aby kupować zawodników na rynku transferowym!', false);
+    fcSetAuthStatus('Zaloguj się, aby kupować zawodników na rynku transferowym!', false);
     return;
   }
   const card = getCardById(cardId);
@@ -5956,10 +6136,10 @@ async function buyMarketCard(cardId, price) {
   }
   const coins = Number(clubData.coins) || 0;
   if (coins < price) {
-    alert(`Niewystarczająca liczba monet! Karta kosztuje ${price} 🪙, a w klubie posiadasz ${coins} 🪙. Rozegraj mecze lub odbierz nagrody z karnetu!`);
+    alert(`Niewystarczająca liczba monet! Karta kosztuje ${price} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>, a w klubie posiadasz ${coins} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>. Rozegraj mecze lub odbierz nagrody z karnetu!`);
     return;
   }
-  if (!confirm(`Czy na pewno chcesz kupić kartę ${card.name} (${card.ovr} OVR) za ${price} 🪙 monet?`)) return;
+  if (!confirm(`Czy na pewno chcesz kupić kartę ${card.name} (${card.ovr} OVR) za ${price} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> monet?`)) return;
 
   clubData.coins = coins - price;
   if (!Array.isArray(clubData.owned)) clubData.owned = [...STARTER_CARD_IDS];
@@ -5975,14 +6155,14 @@ async function buyMarketCard(cardId, price) {
   updateMenuClubUI();
   if (typeof fcUpdateAuthUi === 'function') fcUpdateAuthUi();
   renderTransferMarket();
-  alert(`🎉 Gratulacje! ${card.name} (${card.ovr} OVR) dołączył do Twojego klubu!`);
+  alert(`Gratulacje! ${card.name} (${card.ovr} OVR) dołączył do Twojego klubu!`);
 }
 
 function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
   const price = getCardMarketPrice(card);
   const tier = getCardTier(card);
   const tierLabel = getCardTierLabel(tier);
-  const nationFlag = PLAYER_NATIONS[card.id] || '⚽';
+  const nationFlag = PLAYER_NATIONS[card.id] || 'FC';
   const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
 
   const isGk = card.role === 'GK';
@@ -6004,7 +6184,7 @@ function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
   return `
     <div class="market-card-item tier-${tier} ${isOwned ? 'is-owned' : ''}">
       ${isOwned ? `
-        <div class="market-card-badge-owned">POSIADANY ✔️</div>
+        <div class="market-card-badge-owned">POSIADANY (W KLUBIE)</div>
       ` : ''}
 
       <div class="market-card-content" onclick="openPlayerBioModal('${card.id}')" title="Kliknij, aby otworzyć profil: ${card.name}">
@@ -6039,7 +6219,7 @@ function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
         <div class="market-card-playstyle-box">
           ${ps ? `
             <div class="m-ps-badge" title="${ps.name}: ${ps.desc}">
-              <span class="m-ps-star">⭐</span>
+              <span class="m-ps-star"></span>
               <span class="m-ps-title">${ps.name}</span>
             </div>
           ` : `
@@ -6051,7 +6231,7 @@ function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
       <div class="market-card-buy-bar">
         <div class="m-price-tag">
           <span class="m-price-val">${price.toLocaleString()}</span>
-          <span class="m-price-coin">🪙</span>
+          <span class="m-price-coin"><svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></span>
         </div>
 
         ${isOwned ? `
@@ -6060,15 +6240,15 @@ function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
           </button>
         ` : (!isAuth ? `
           <button type="button" class="market-action-btn btn-auth" onclick="openFcAuth()">
-            🔒 ZALOGUJ SIĘ
+            ZALOGUJ SIĘ
           </button>
         ` : (canAfford ? `
           <button type="button" class="market-action-btn btn-buy" onclick="buyMarketCard('${card.id}', ${price})">
-            ⚡ KUP TERAZ
+            KUP TERAZ
           </button>
         ` : `
           <button type="button" class="market-action-btn btn-deficit" disabled>
-            BRAKUJE ${(price - coins).toLocaleString()} 🪙
+            BRAKUJE ${(price - coins).toLocaleString()} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
           </button>
         `))}
       </div>
@@ -6114,13 +6294,13 @@ function renderTransferMarket() {
             RYNEK TRANSFEROWY FUT 28
           </h2>
           <p class="market-subtitle">
-            Kupuj konkretne gwiazdy futbolu bezpośrednio za monety 🪙 lub przeglądaj oferty transferowe z całego świata!
+            Kupuj konkretne gwiazdy futbolu bezpośrednio za monety <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> lub przeglądaj oferty transferowe z całego świata!
           </p>
         </div>
 
         <div class="market-balance-widget">
           <span class="market-balance-lbl">TWOJE MONETY:</span>
-          <span class="market-balance-val">${coins.toLocaleString()} 🪙</span>
+          <span class="market-balance-val">${coins.toLocaleString()} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></span>
         </div>
       </div>
 
@@ -6136,7 +6316,7 @@ function renderTransferMarket() {
         <div class="market-search-box">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" value="${activeMarketSearch}" placeholder="Szukaj po nazwisku..." oninput="setMarketSearch(this.value)">
-          ${activeMarketSearch ? `<button type="button" class="market-search-clear" onclick="setMarketSearch('')">✕</button>` : ''}
+          ${activeMarketSearch ? `<button type="button" class="market-search-clear" onclick="setMarketSearch('')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
         </div>
 
         <div class="market-counter-pill">
@@ -6240,7 +6420,7 @@ function autoBuildBestSquad() {
   applySquadStatsToTeam(blueTeam, clubData.lineup);
   renderSquadBuilder();
   updateMenuSquadStrip();
-  alert('⚡ Automatycznie wystawiono najmocniejszy możliwy skład z Twojego klubu!');
+  alert('Automatycznie wystawiono najmocniejszy możliwy skład z Twojego klubu!');
 }
 
 function renderPitchCardHtml(c, role, pts, meta) {
@@ -6253,11 +6433,11 @@ function renderPitchCardHtml(c, role, pts, meta) {
           </span>
         </div>
         <div style="text-align:center; padding:30px 10px; color:#8b949e;">
-          <div style="font-size:32px; margin-bottom:8px;">➕</div>
+          <div style="font-size:32px; margin-bottom:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
           <div style="font-family:var(--font-heading); font-size:12px; font-weight:800; color:#fff;">WYBIERZ ZAWODNIKA</div>
         </div>
         <button type="button" class="pitch-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
-          ➕ WYBIERZ ZAWODNIKA
+          WYBIERZ ZAWODNIKA
         </button>
       </div>
     `;
@@ -6266,7 +6446,7 @@ function renderPitchCardHtml(c, role, pts, meta) {
   const ps = c.playstyle ? PLAYSTYLES[c.playstyle] : null;
   const tier = getCardTier(c);
   const tierLabel = getCardTierLabel(tier);
-  const nationFlag = PLAYER_NATIONS[c.id] || '⚽';
+  const nationFlag = PLAYER_NATIONS[c.id] || 'FC';
 
   const isGk = c.role === 'GK';
   const s1L = isGk ? 'DIV' : 'TEM', s1V = isGk ? (c.div || c.def) : c.pac;
@@ -6321,7 +6501,7 @@ function renderPitchCardHtml(c, role, pts, meta) {
         <div class="pitch-card-ps-bar">
           ${ps ? `
             <div class="pitch-ps-pill" title="${ps.desc}">
-              <span class="ps-ico">⭐</span>
+              <span class="ps-ico"></span>
               <span class="ps-txt">${ps.name}</span>
             </div>
           ` : `
@@ -6331,7 +6511,7 @@ function renderPitchCardHtml(c, role, pts, meta) {
       </div>
 
       <button type="button" class="pitch-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
-        🔄 ZMIEŃ ZAWODNIKA
+        ZMIEŃ ZAWODNIKA
       </button>
     </div>
   `;
@@ -6346,10 +6526,10 @@ function renderSquadBuilder() {
   const activeStyles = chem.cards.filter(c => c && c.playstyle).map(c => PLAYSTYLES[c.playstyle]?.name).filter(Boolean);
 
   const roleMeta = {
-    FWD: { name: 'NAPASTNIK (N)', icon: '⚡', color: '#ef4444', desc: 'Atak i wykończenie akcji' },
-    MID: { name: 'POMOCNIK (ŚP)', icon: '🎯', color: '#f59e0b', desc: 'Rozegranie i wizja gry' },
-    DEF: { name: 'OBROŃCA (ŚO)', icon: '🛡️', color: '#3b82f6', desc: 'Odbiór i blokowanie strzałów' },
-    GK:  { name: 'BRAMKARZ (BR)', icon: '🧤', color: '#00e5ff', desc: 'Parady i refleks na linii' }
+    FWD: { name: 'NAPASTNIK (N)', icon: 'SPD', color: '#ef4444', desc: 'Atak i wykończenie akcji' },
+    MID: { name: 'POMOCNIK (ŚP)', icon: 'AIM', color: '#f59e0b', desc: 'Rozegranie i wizja gry' },
+    DEF: { name: 'OBROŃCA (ŚO)', icon: 'DEF', color: '#3b82f6', desc: 'Odbiór i blokowanie strzałów' },
+    GK:  { name: 'BRAMKARZ (BR)', icon: 'GK', color: '#00e5ff', desc: 'Parady i refleks na linii' }
   };
 
   // Generowanie slotów taktycznych
@@ -6386,21 +6566,21 @@ function renderSquadBuilder() {
             </div>
           </div>
           <button type="button" class="action-btn" onclick="closeSquadBenchDrawer()" style="padding:6px 14px; font-size:12px;">
-            ✕ ZAMKNIJ
+            ZAMKNIJ
           </button>
         </div>
 
         ${candidates.length === 0 ? `
           <div style="text-align:center; padding:30px 20px; color:#8b949e; font-family:'Outfit';">
-            <div style="font-size:28px; margin-bottom:8px;">📦</div>
+            <div style="font-size:28px; margin-bottom:8px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
             <div>Brak innych zawodników na pozycję <strong>${roleMeta[curRole].name}</strong> w Twoim klubie.</div>
             <div style="font-size:12px; margin-top:6px; color:#c9d1d9;">Otwórz paczki FUT lub kup zawodnika na rynku transferowym!</div>
             <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
               <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS')" style="padding:8px 18px;">
-                🎁 SKLEP PACZEK
+                SKLEP PACZEK
               </button>
               <button type="button" class="action-btn" onclick="switchClubTab('MARKET')" style="padding:8px 18px; border-color:#00f0ff; color:#00f0ff;">
-                🛒 RYNEK TRANSFEROWY
+                RYNEK TRANSFEROWY
               </button>
             </div>
           </div>
@@ -6448,7 +6628,7 @@ function renderSquadBuilder() {
                     </div>
 
                     <button type="button" class="top-nav-btn gold-btn" style="width:100%; margin-top:8px; padding:6px 12px; font-size:11px;" onclick="equipCard('${cand.id}'); closeSquadBenchDrawer();">
-                      ⚡ WSTAW DO SKŁADU
+                       WSTAW DO SKŁADU
                     </button>
                   </div>
                 </div>
@@ -6465,13 +6645,13 @@ function renderSquadBuilder() {
       <div class="squad-stats-bar-fut">
         <div class="squad-kpi-item">
           <span class="squad-kpi-lbl">ŚREDNIA OCENA</span>
-          <div class="squad-kpi-val" style="color:var(--gold);">⭐ ${chem.avgOvr} OVR</div>
+          <div class="squad-kpi-val" style="color:var(--gold);"> ${chem.avgOvr} OVR</div>
         </div>
 
         <div class="squad-kpi-item">
           <span class="squad-kpi-lbl">ZGRANIE ZESPOŁU</span>
           <div class="squad-kpi-val" style="color:#00f0ff; display:flex; align-items:center; gap:8px;">
-            💎 ${chem.totalChemistry} <span style="font-size:13px; color:#8b949e;">/ 33</span>
+            DIAMENT ${chem.totalChemistry} <span style="font-size:13px; color:#8b949e;">/ 33</span>
           </div>
         </div>
 
@@ -6489,10 +6669,10 @@ function renderSquadBuilder() {
 
         <div style="display:flex; gap:8px;">
           <button type="button" class="action-btn" onclick="autoBuildBestSquad()" style="padding:8px 14px; font-size:11px; background:rgba(0,240,255,0.12); border-color:#00f0ff; color:#00f0ff;">
-            ⚡ AUTO-SKŁAD
+             AUTO-SKŁAD
           </button>
           <button type="button" class="top-nav-btn gold-btn" onclick="closeClubModal()" style="padding:8px 16px; font-size:11px;">
-            ⚽ GRAJ TYM SKŁADEM
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="10"/></svg> GRAJ TYM SKŁADEM
           </button>
         </div>
       </div>
@@ -6511,7 +6691,7 @@ function renderSquadBuilder() {
       ${benchDrawerHtml}
 
       <div style="text-align:center; font-size:12px; color:#8b949e; font-family: var(--font-heading); margin-top:4px;">
-        💡 Kliknij <strong style="color:var(--p1);">„ZMIEŃ ZAWODNIKA”</strong> lub w dowolną kartę, aby wysunąć ławkę rezerwowych z analizą różnic statystyk.
+        Kliknij <strong style="color:var(--p1);">„ZMIEŃ ZAWODNIKA”</strong> lub w dowolną kartę, aby wysunąć ławkę rezerwowych z analizą różnic statystyk.
       </div>
     </div>
   `;
@@ -6639,7 +6819,7 @@ function renderClubCards() {
           const tier = getCardTier(c);
           const tierLabel = getCardTierLabel(tier);
           const ps = c.playstyle ? PLAYSTYLES[c.playstyle] : null;
-          const flag = PLAYER_NATIONS[c.id] || '⚽';
+          const flag = PLAYER_NATIONS[c.id] || 'FC';
           const isGk = c.role === 'GK';
 
           const s1 = isGk ? (c.div || c.def) : c.pac;
@@ -6663,7 +6843,7 @@ function renderClubCards() {
                   ${c.role}
                 </span>
               </td>
-              <td><strong style="color:var(--gold); font-size:14px; font-family:var(--font-heading);">⭐ ${c.ovr}</strong></td>
+              <td><strong style="color:var(--gold); font-size:14px; font-family:var(--font-heading);"> ${c.ovr}</strong></td>
               <td class="tbl-stat-val" style="color:${getFutStatColor(s1)};">${s1}</td>
               <td class="tbl-stat-val" style="color:${getFutStatColor(s2)};">${s2}</td>
               <td class="tbl-stat-val" style="color:${getFutStatColor(s3)};">${s3}</td>
@@ -6671,19 +6851,19 @@ function renderClubCards() {
               <td class="tbl-stat-val" style="color:${getFutStatColor(s5)};">${s5}</td>
               <td class="tbl-stat-val" style="color:${getFutStatColor(s6)};">${s6}</td>
               <td>
-                ${ps ? `<span style="font-size:11px; font-weight:800; color:#00f0ff; background:rgba(0,240,255,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.3);">💎 ${ps.name}</span>` : `<span style="color:#8b949e;">—</span>`}
+                ${ps ? `<span style="font-size:11px; font-weight:800; color:#00f0ff; background:rgba(0,240,255,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.3);">DIAMENT ${ps.name}</span>` : `<span style="color:#8b949e;">—</span>`}
               </td>
               <td>
-                ${isEquipped ? `<span style="color:#00e676; font-weight:800; font-size:11px;">W SKŁADZIE</span>` : (isOwned ? `<span style="color:#00f0ff; font-weight:800; font-size:11px;">W KLUBIE</span>` : `<span style="color:#8b949e; font-size:11px;">🔒 ZABLOKOWANA</span>`)}
+                ${isEquipped ? `<span style="color:#00e676; font-weight:800; font-size:11px;">W SKŁADZIE</span>` : (isOwned ? `<span style="color:#00f0ff; font-weight:800; font-size:11px;">W KLUBIE</span>` : `<span style="color:#8b949e; font-size:11px;">BLOKADA: ZABLOKOWANA</span>`)}
               </td>
               <td style="text-align:right;">
                 <div style="display:inline-flex; gap:6px;">
                   <button type="button" class="action-btn" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); openPlayerBioModal('${c.id}')">
-                    🔍 PROFIL
+                    PROFIL
                   </button>
                   ${isOwned && !isEquipped ? `
                     <button type="button" class="action-btn btn-host" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); equipCard('${c.id}')">
-                      ⚡ WYSTAW
+                       WYSTAW
                     </button>
                   ` : ''}
                 </div>
@@ -6778,7 +6958,7 @@ function openPlayerBioModal(cardId) {
   const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
   const tier = getCardTier(card);
   const tierLabel = getCardTierLabel(tier);
-  const nationFlag = PLAYER_NATIONS[card.id] || '⚽';
+  const nationFlag = PLAYER_NATIONS[card.id] || 'FC';
   const countryName = PLAYER_COUNTRIES[card.id] || 'Nieznany';
 
   // Wartość szybkiej sprzedaży na podstawie OVR
@@ -6799,7 +6979,7 @@ function openPlayerBioModal(cardId) {
   const assistsOrClean = isGk ? (isEquipped ? 7 : 0) : (isEquipped ? 11 : 0);
 
   content.innerHTML = `
-    <button type="button" onclick="closePlayerBioModal()" style="position:absolute; top:18px; right:20px; background:transparent; border:none; color:#8b949e; font-size:24px; cursor:pointer; z-index:10;">✕</button>
+    <button type="button" onclick="closePlayerBioModal()" style="position:absolute; top:18px; right:20px; background:transparent; border:none; color:#8b949e; font-size:24px; cursor:pointer; z-index:10;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
 
     <div class="bio-left-card-pane">
       <div style="transform:scale(1.05); transform-origin:top center;">
@@ -6862,21 +7042,21 @@ function openPlayerBioModal(cardId) {
       <div style="display:flex; gap:12px; margin-top:6px; flex-wrap:wrap;">
         ${isOwned && !isEquipped ? `
           <button type="button" class="top-nav-btn gold-btn" style="flex:1; padding:10px;" onclick="equipCard('${card.id}'); closePlayerBioModal();">
-            ⚡ WYSTAW DO SKŁADU
+             WYSTAW DO SKŁADU
           </button>
         ` : (isEquipped ? `
           <button type="button" class="action-btn" style="flex:1; background:#238636; border-color:#00e676; padding:10px;" disabled>
-            ✓ W PODSTAWOWYM SKŁADZIE
+            W PODSTAWOWYM SKŁADZIE
           </button>
         ` : `
           <button type="button" class="action-btn" style="flex:1; padding:10px;" onclick="closePlayerBioModal(); switchClubTab('PACKS');">
-            🔒 ODBLOKUJ W PACZKACH FUT
+            BLOKADA: ODBLOKUJ W PACZKACH FUT
           </button>
         `)}
 
         ${isOwned && !isEquipped && !STARTER_CARD_IDS.includes(card.id) ? `
           <button type="button" class="action-btn" style="background:rgba(255,23,68,0.15); border-color:#ff1744; color:#ff5252; padding:10px 16px;" onclick="quickSellCard('${card.id}', ${quickSellValue})">
-            💰 Szybka sprzedaż: +${quickSellValue} 🪙
+            Szybka sprzedaż: +${quickSellValue} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>
           </button>
         ` : ''}
       </div>
@@ -6903,7 +7083,7 @@ function quickSellCard(cardId, coinsValue) {
   }
   const card = getCardById(cardId);
   const name = card ? card.name : cardId;
-  if (!confirm(`Czy na pewno chcesz szybko sprzedać ${name} za ${coinsValue} 🪙 monet?`)) return;
+  if (!confirm(`Czy na pewno chcesz szybko sprzedać ${name} za ${coinsValue} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> monet?`)) return;
 
   clubData.owned = clubData.owned.filter(id => id !== cardId);
   clubData.coins = (Number(clubData.coins) || 0) + coinsValue;
@@ -6914,7 +7094,7 @@ function quickSellCard(cardId, coinsValue) {
   fcUpdateAuthUi();
   closePlayerBioModal();
   renderClubCards();
-  alert(`Sprzedano ${name}! Na Twoje konto wpłynęło +${coinsValue} 🪙.`);
+  alert(`Sprzedano ${name}! Na Twoje konto wpłynęło +${coinsValue} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>.`);
 }
 
 async function openPack(packType = 'ultimate') {
@@ -6928,7 +7108,7 @@ async function openPack(packType = 'ultimate') {
 
   if (currentCoins < packCost) {
     const diff = packCost - currentCoins;
-    alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Odbierz monety z Karnetu Sezonowego (Poziom 12 daje 1 000 🪙) lub wygraj mecz, aby zdobyć monety.`);
+    alert(`BLOKADA: Brakuje Ci ${diff} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> monet! Odbierz monety z Karnetu Sezonowego (Poziom 12 daje 1 000 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>) lub wygraj mecz, aby zdobyć monety.`);
     return;
   }
 
@@ -7217,13 +7397,13 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
           badge.style.background = 'rgba(255, 179, 0, 0.2)';
           badge.style.borderColor = '#ffb300';
           badge.style.color = '#ffb300';
-          badge.textContent = `⚠️ DUPLIKAT! Szybka sprzedaż: +${refund} 🪙`;
+          badge.textContent = `DUPLIKAT! Szybka sprzedaż: +${refund} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>`;
           try { SFX.play('coins_collect'); } catch (e) {}
         } else {
           badge.style.background = 'rgba(0, 255, 136, 0.2)';
           badge.style.borderColor = '#00ff88';
           badge.style.color = '#00ff88';
-          badge.textContent = isIcon ? '👑 LEGENDA FUT ZDOBYTA!' : (isWalkout ? '🔥 EFEKTOWNY WALKOUT!' : '🎉 NOWY ZAWODNIK W TWOIM KLUBIE!');
+          badge.textContent = isIcon ? 'LEGENDA FUT ZDOBYTA!' : (isWalkout ? ' EFEKTOWNY WALKOUT!' : 'NOWY ZAWODNIK W TWOIM KLUBIE!');
           if (hasPs) {
             try { SFX.play('ps_flare'); } catch (e) {}
           }
@@ -7240,7 +7420,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
           const diffColor = diff > 0 ? '#00ff88' : (diff === 0 ? '#00f0ff' : '#8b949e');
           squadComp.style.display = 'block';
           squadComp.innerHTML = `
-            <span>Obecny ${card.role}: <strong>${curCard.name}</strong> (${curCard.ovr} OVR) ➔ Nowy: <strong>${card.name}</strong> (${card.ovr} OVR)</span>
+            <span>Obecny ${card.role}: <strong>${curCard.name}</strong> (${curCard.ovr} OVR) › Nowy: <strong>${card.name}</strong> (${card.ovr} OVR)</span>
             <span style="color:${diffColor}; font-weight:900; margin-left:6px;">(${diffSign} OVR)</span>
           `;
         } else {
@@ -7281,7 +7461,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
         walkoutTimerIds.push(setTimeout(() => {
           if (flagBox) {
             flagBox.style.display = 'inline-flex';
-            if (flagEmoji) flagEmoji.textContent = PLAYER_NATIONS[card.id] || '⚽';
+            if (flagEmoji) flagEmoji.textContent = PLAYER_NATIONS[card.id] || 'FC';
             if (countryName) countryName.textContent = PLAYER_COUNTRIES[card.id] || 'NARODOWOŚĆ';
           }
           try { SFX.play('walkout_step'); } catch (e) {}
@@ -7300,7 +7480,7 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
         walkoutTimerIds.push(setTimeout(() => {
           if (bannerBox) {
             bannerBox.style.display = 'block';
-            if (banner) banner.textContent = isIcon ? '👑 IKONA LEGEND FUT! 👑' : '🔥 OFICJALNY WALKOUT! 🔥';
+            if (banner) banner.textContent = isIcon ? 'KORONA IKONA LEGEND FUT! KORONA' : ' OFICJALNY WALKOUT! ';
             if (sub) sub.textContent = `${card.name} • ${card.ovr} OVR`;
           }
           launchPackConfetti(isIcon, isWalkout);
@@ -7356,6 +7536,15 @@ function equipCard(cardId) {
   applySquadStatsToTeam(blueTeam, clubData.lineup);
 }
 
+
+function getPlayerAvatarStyle(id) {
+  if (id === 'mid_soucek') return 'object-position: 72% 20% !important;';
+  if (id === 'gk_buffon') return 'object-position: 80% 25% !important;';
+  if (id === 'fwd_broja') return 'object-position: 58% 22% !important;';
+  if (id === 'def_livramento') return 'object-position: 50% 18% !important;';
+  return 'object-position: center 18% !important;';
+}
+
 function updateMenuSquadStrip() {
   const strip = document.getElementById('menuSquadStrip');
   if (!strip) return;
@@ -7387,7 +7576,7 @@ function updateMenuSquadStrip() {
     else if (isGold) tierClass = 'is-gold';
     else if (isCyan) tierClass = 'is-cyan';
 
-    const flagEmoji = PLAYER_NATIONS[card.id] || '⚽';
+    const flagEmoji = PLAYER_NATIONS[card.id] || 'FC';
     const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'><circle cx=\'32\' cy=\'24\' r=\'14\' fill=\'%23475569\'/><path d=\'M12 56 C12 42 22 38 32 38 C42 38 52 42 52 56 Z\' fill=\'%23475569\'/></svg>";
 
     // Nazwisko gracza (ostatni człon nazwy)
@@ -7400,7 +7589,7 @@ function updateMenuSquadStrip() {
           <span class="mini-card-pos">${rl[r]}</span>
         </div>
         <div class="mini-card-photo-wrap">
-          <img src="assets/players/${card.id}.webp" class="mini-card-img" alt="${card.name}" onerror="this.onerror=null; this.src='${fallbackSvg}';">
+          <img src="assets/players/${card.id}.webp" class="mini-card-img" style="${getPlayerAvatarStyle(card.id)}" alt="${card.name}" onerror="this.onerror=null; this.src='${fallbackSvg}';">
         </div>
         <div class="mini-card-name">${shortName}</div>
         <div class="mini-card-bottom">
@@ -7580,13 +7769,13 @@ function renderFriendsUI() {
     return (b.wins || 0) - (a.wins || 0);
   });
 
-  const displayList = available.slice(0, 5);
+  const displayList = available.slice(0, Math.max(7, pinnedNicks.length + 2));
   if (counterEl) counterEl.textContent = `${displayList.length} / ${cachedD1Players.length}`;
 
   listEl.innerHTML = displayList.map((p, idx) => {
     const isPinned = pinnedNicks.includes(p.nick);
     const statusClass = isPinned ? 'in-match' : (idx % 2 === 0 ? 'online' : 'in-menu');
-    const statusText = isPinned ? '⭐ Znajomy' : (idx % 2 === 0 ? 'Online (D1)' : 'W menu');
+    const statusText = isPinned ? 'Znajomy (D1)' : (idx % 2 === 0 ? 'Online (D1)' : 'W menu');
 
     const ovr = p.ovr || 75;
     const fwdId = (p.lineup && p.lineup.fwd) || 'fwd_broja';
@@ -7601,7 +7790,7 @@ function renderFriendsUI() {
         </div>
         <div class="cfc-friend-info">
           <div class="cfc-friend-name">
-            ${p.nick} ${isPinned ? '⭐' : ''} <span style="font-size:10px; color:#fbbf24; font-weight:800;">OVR ${ovr}</span>
+            ${p.nick} ${isPinned ? '' : ''} <span style="font-size:10px; color:#fbbf24; font-weight:800;">OVR ${ovr}</span>
           </div>
           <div class="cfc-friend-status ${statusClass}">${statusText} • ${p.wins || 0}W (${p.matches || 0}M)</div>
         </div>
@@ -7626,7 +7815,7 @@ function openFriendActionModal(friendIdentifier) {
 
   document.getElementById('faFriendName').textContent = p.nick;
   document.getElementById('faFriendOvr').textContent = `OVR ${p.ovr || 75} • Zwycięstwa: ${p.wins || 0} / ${p.matches || 0}`;
-  document.getElementById('faFriendStatus').textContent = isPinned ? '⭐ Twój dodany znajomy (Cloudflare D1)' : 'Gracz z bazy danych Cloudflare D1';
+  document.getElementById('faFriendStatus').textContent = isPinned ? 'Twój dodany znajomy (Cloudflare D1)' : 'Gracz z bazy danych Cloudflare D1';
   
   const av = document.getElementById('faFriendAvatar');
   if (av) av.src = `assets/players/${fwdId}.webp`;
@@ -7690,7 +7879,7 @@ async function openAddFriendPrompt() {
 
       if (!found) {
         const sample = allPlayers.slice(0, 4).map(p => p.nick).join(', ');
-        alert(`❌ Gracz "${target}" NIE istnieje w bazie danych Cloudflare D1!\n\nZarejestrowani gracze w bazie to m.in.: ${sample || 'brak'}.\nPoproś gracza o założenie konta lub sprawdź pisownię.`);
+        alert(`Gracz "${target}" NIE istnieje w bazie danych Cloudflare D1!\n\nZarejestrowani gracze w bazie to m.in.: ${sample || 'brak'}.\nPoproś gracza o założenie konta lub sprawdź pisownię.`);
         return;
       }
 
@@ -7699,7 +7888,7 @@ async function openAddFriendPrompt() {
         pinned.push(found.nick);
         savePinnedFriendsNicks(pinned);
       }
-      alert(`✅ Znaleziono gracza ${found.nick} (OVR ${found.ovr || 75}) w bazie danych Cloudflare D1! Został dodany do Twojej listy znajomych.`);
+      alert(`Znaleziono gracza ${found.nick} (OVR ${found.ovr || 75}) w bazie danych Cloudflare D1! Został dodany do Twojej listy znajomych.`);
       await loadRealCommunityFriends();
     }
   } catch (e) {
@@ -7744,14 +7933,14 @@ async function updateRealOnlineCount() {
 const PASS_STORAGE_KEY = 'cyberfc_pass_claimed_v1';
 
 const SEASON_PASS_TIERS = [
-  { lvl: 1, name: '500 Monet FC', icon: '🪙', type: 'coins', amount: 500 },
-  { lvl: 5, name: 'Złota Paczka Kart 80+', icon: '📦', type: 'pack', desc: 'Gwarantowana karta złota' },
-  { lvl: 10, name: 'Herb FC JDR Cyber Gold', icon: '🛡️', type: 'crest', desc: 'Złoty herb klubowy' },
-  { lvl: 12, name: '1 000 Monet FC', icon: '🪙', type: 'coins', amount: 1000 },
-  { lvl: 15, name: 'Rzadka Paczka Gwiazd 85+', icon: '⭐', type: 'pack', desc: 'Gwarantowana gwiazda 85+' },
-  { lvl: 20, name: 'Legenda Ikona Klubu', icon: '👑', type: 'player', desc: 'Karta Ikony do składu' },
-  { lvl: 30, name: 'Mega Zestaw PlayStyle+', icon: '⚡', type: 'playstyle', desc: 'Złote perki PlayStyles+' },
-  { lvl: 50, name: 'Wybór Ikony (Pelé / Ronaldo / Zidane)', icon: '🏆', type: 'icon_pick', desc: 'Najwyższa nagroda sezonu' }
+  { lvl: 1, name: '500 Monet FC', icon: '<svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', type: 'coins', amount: 500 },
+  { lvl: 5, name: 'Złota Paczka Kart 80+', icon: 'PACK', type: 'pack', desc: 'Gwarantowana karta złota' },
+  { lvl: 10, name: 'Herb FC JDR Cyber Gold', icon: 'DEF', type: 'crest', desc: 'Złoty herb klubowy' },
+  { lvl: 12, name: '1 000 Monet FC', icon: '<svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', type: 'coins', amount: 1000 },
+  { lvl: 15, name: 'Rzadka Paczka Gwiazd 85+', icon: '', type: 'pack', desc: 'Gwarantowana gwiazda 85+' },
+  { lvl: 20, name: 'Legenda Ikona Klubu', icon: 'KORONA', type: 'player', desc: 'Karta Ikony do składu' },
+  { lvl: 30, name: 'Mega Zestaw PlayStyle+', icon: 'SPD', type: 'playstyle', desc: 'Złote perki PlayStyles+' },
+  { lvl: 50, name: 'Wybór Ikony (Pelé / Ronaldo / Zidane)', icon: 'CUP', type: 'icon_pick', desc: 'Najwyższa nagroda sezonu' }
 ];
 
 function getClaimedPassTiers() {
@@ -7776,7 +7965,7 @@ function renderSeasonPassTrack() {
 
     let actionBtn = '';
     if (isClaimed) {
-      actionBtn = `<span style="color:#10b981; font-weight:800; font-size:12px;">ODEBRANO ✔</span>`;
+      actionBtn = `<span style="color:#10b981; font-weight:800; font-size:12px;">ODEBRANO </span>`;
     } else if (canClaim) {
       actionBtn = `<button type="button" class="cfc-tier-btn-claim" onclick="claimSeasonPassTier(${t.lvl}, ${t.amount || 0})">ODBIERZ NAGRODĘ</button>`;
     } else {
@@ -7842,7 +8031,7 @@ async function claimSeasonPassTier(lvl, amount) {
   }
 
   try { SFX.play('goal'); } catch (e) {}
-  alert(`🎉 Gratulacje! Pomyślnie odebrano nagrodę za Poziom ${lvl}!`);
+  alert(`Gratulacje! Pomyślnie odebrano nagrodę za Poziom ${lvl}!`);
   renderSeasonPassTrack();
 }
 
@@ -8127,14 +8316,19 @@ const SFX = {
 
 function toggleMute() {
   SFX.muted = !SFX.muted;
-  document.getElementById('muteBtn').textContent = SFX.muted ? '🔇' : '🔊';
+  const mi = document.getElementById('muteIconSvg');
+   if (mi) {
+     mi.innerHTML = SFX.muted 
+       ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>'
+       : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+   }
 }
 
 let showNewPlayerAssist = false;
 function toggleAssist() {
   showNewPlayerAssist = !showNewPlayerAssist;
   const btn = document.getElementById('assistBtn');
-  btn.textContent = showNewPlayerAssist ? '💡 POMOC: WŁ' : '💡 POMOC: WYŁ';
+  btn.innerHTML = (showNewPlayerAssist ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg> POMOC: WŁ' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg> POMOC: WYŁ');
   btn.classList.toggle('active-assist', showNewPlayerAssist);
 }
 
@@ -8787,7 +8981,7 @@ function renderLobby2v2UI() {
       occupiedCount++;
       const isMe = !data.isBot && ((isHost && data.peerId === 'host') || (!isHost && peer && data.peerId === peer.id));
       nickSpan.className = 'slot-nick' + (data.isBot ? ' bot-nick' : '');
-      nickSpan.textContent = (data.isBot ? '🤖 ' : '') + data.nick;
+      nickSpan.textContent = (data.isBot ? 'BOT ' : '') + data.nick;
       leftDiv.appendChild(nickSpan);
 
       if (isMe) {
@@ -8818,7 +9012,7 @@ function renderLobby2v2UI() {
         const remBtn = document.createElement('button');
         remBtn.type = 'button';
         remBtn.className = 'slot-mini-btn remove-bot';
-        remBtn.textContent = '✕ USUŃ';
+        remBtn.textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> USUŃ';
         remBtn.onclick = (ev) => toggleLobbyBot(i, ev);
         ctrlDiv.appendChild(remBtn);
       }
@@ -9379,7 +9573,7 @@ const referee = {
       ctx.fillStyle = '#c6ff00';
       ctx.shadowColor = '#000';
       ctx.shadowBlur = 6;
-      ctx.fillText("🔊 GWIZDEK!", this.x, this.y - 42);
+      ctx.fillText("GWIZDEK!", this.x, this.y - 42);
       ctx.restore();
     }
   }
@@ -9888,11 +10082,11 @@ if (best) {
               this.lastKicker = p;
               this.lastTouchTeam = p.team;
               // Dyskretna informacja nad zawodnikiem bez zasłaniania ekranu wielkim banerem
-              spawnFloater(p.x, p.y, `🧤 PARADA (${p.cardName})!`, p.team === 'blue' ? '#00f0ff' : '#ff0055');
+              spawnFloater(p.x, p.y, `GK PARADA (${p.cardName})!`, p.team === 'blue' ? '#00f0ff' : '#ff0055');
               return;
             }
 
-            if (isSave) spawnFloater(p.x, p.y, '🧤 CHWYT!', p.team === 'blue' ? '#00f0ff' : '#ff0055');
+            if (isSave) spawnFloater(p.x, p.y, 'GK CHWYT!', p.team === 'blue' ? '#00f0ff' : '#ff0055');
             grab();
           } else if (!mateKick && speed > 11.5) {
             // Blok strzału/podania rywala: piłka odbija się, nie przykleja
@@ -10195,7 +10389,7 @@ class Player {
     if (this.stamina < trickCost) {
       if (!silent && tickCount - this._trickWarnTick > 45) {
         this._trickWarnTick = tickCount;
-        spawnFloater(this.x, this.y, '😮‍💨 brak kondycji', '#ff6b8a');
+        spawnFloater(this.x, this.y, 'Brak kondycji', '#ff6b8a');
       }
       return false;
     }
@@ -10616,7 +10810,7 @@ class Player {
       camera.shake = 0.8;
       playAndBroadcastSFX('save');
       spawnParticles(c.x, c.y, 8, 14, '#f5b041', 3.0, 22, 3.6);
-      spawnFloater(this.x, this.y, '🧤 odbiór', this.team === 'blue' ? '#00f0ff' : '#ff6b8a');
+      spawnFloater(this.x, this.y, 'GK odbiór', this.team === 'blue' ? '#00f0ff' : '#ff6b8a');
       return false;
     }
 
@@ -11834,7 +12028,7 @@ class Player {
         const enemyGoalX = this.team === 'blue' ? WORLD.width - WORLD.marginX : WORLD.marginX;
         if (ball.owner === this) {
           if (Math.hypot(enemyGoalX - this.x, WORLD.height / 2 - this.y) < 420) {
-            hintTxt = '🎯 PRZYTRZYMAJ LPM = STRZAŁ! | SPACJA = ZASTAWKA';
+            hintTxt = 'AIM PRZYTRZYMAJ LPM = STRZAŁ! | SPACJA = ZASTAWKA';
           } else {
             hintTxt = 'PPM = PODAJ | Q = LOB | SPACJA = ZASTAWKA | SHIFT = SPRINT';
           }
@@ -11904,7 +12098,7 @@ class Player {
       ctx.fillStyle = shieldCol;
       ctx.shadowColor = '#000';
       ctx.shadowBlur = 4;
-      ctx.fillText(`🛡️ ZASTAWKA (${Math.round(this.stamina)}%)`, this.x, this.y + 36);
+      ctx.fillText(`DEF ZASTAWKA (${Math.round(this.stamina)}%)`, this.x, this.y + 36);
       ctx.restore();
     }
 
@@ -12104,7 +12298,7 @@ function updatePlayerSwitcherBar() {
   const myP = getControlledPlayerForSlot(localSlotIdx);
 
   const roles = ['GK', 'DEF', 'MID', 'FWD'];
-  const roleNames = { GK: '🧤 BR', DEF: '🛡️ ŚO', MID: '🎯 ŚP', FWD: '⚡ N' };
+  const roleNames = { GK: 'GK BR', DEF: 'DEF ŚO', MID: 'AIM ŚP', FWD: ' N' };
   const keys = ['1', '2', '3', '4'];
 
   let html = '';
@@ -12118,7 +12312,7 @@ function updatePlayerSwitcherBar() {
         <span class="sw-key">${keys[idx]}</span>
         <span class="sw-role">${roleNames[role]}</span>
         <span class="sw-name">${pName.slice(0, 10)}</span>
-        <span class="sw-ovr">⭐${p.ovr}</span>
+        <span class="sw-ovr">${p.ovr}</span>
         ${isCtrl ? '<span class="sw-pulse-dot"></span>' : ''}
       </button>
     `;
@@ -12204,7 +12398,7 @@ function setDefaultTeamPositions() {
 function updateSquadHud() {
   const esc = t => String(t).replace(/[<>&"']/g, '');
   const rl = { GK: 'BR', DEF: 'ŚO', MID: 'ŚP', FWD: 'N' };
-  const roleIcons = { GK: '🧤', DEF: '🛡️', MID: '🎯', FWD: '⚡' };
+  const roleIcons = { GK: 'GK', DEF: 'DEF', MID: 'AIM', FWD: '' };
   const myP = getControlledPlayerForSlot(localSlotIdx);
   const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
 
@@ -12215,7 +12409,7 @@ function updateSquadHud() {
       <span class="sq-role">${roleIcons[p.role] || ''} ${rl[p.role] || ''}</span>
       <span class="sq-name">${esc(p.cardName)}</span>
       <span class="sq-ovr">${p.ovr}</span>
-      ${isCtrl ? '<span class="sq-ctrl-tag">🎮 TY</span>' : ''}
+      ${isCtrl ? '<span class="sq-ctrl-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; display:inline-block;"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/></svg> TY</span>' : ''}
     </div>`;
   }).join('');
 
@@ -12227,9 +12421,26 @@ function updateSquadHud() {
 }
 
 function launchGame() {
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('bgCanvas').style.display = 'none';
-  document.getElementById('gameWrapper').style.display = 'flex';
+  const appLayer = document.querySelector('.app-layer');
+  if (appLayer) appLayer.style.display = 'none';
+  const menuEl = document.getElementById('menu');
+  if (menuEl) menuEl.style.display = 'none';
+  const bgCanvas = document.getElementById('bgCanvas');
+  if (bgCanvas) bgCanvas.style.display = 'none';
+
+  // Bezpieczne zamknięcie wszystkich modalnych nakładek i tła
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+  });
+
+  window.scrollTo(0, 0);
+
+  const gw = document.getElementById('gameWrapper');
+  if (gw) {
+    gw.style.display = 'flex';
+    gw.style.marginTop = '10px';
+  }
   document.getElementById('victoryModal').style.display = 'none';
   document.getElementById('disconnectModal').style.display = 'none';
 
@@ -12343,7 +12554,7 @@ function triggerGoal(msg, color, concedingTeam) {
   }
 
   playAndBroadcastSFX('goal');
-  showTempBanner(msg, `${scoreBlue} : ${scoreRed} (+20 🪙)`, color, 85);
+  showTempBanner(msg, `${scoreBlue} : ${scoreRed} (+20 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)`, color, 85);
   camera.shake = 1.5;
   updateScoreboardUI();
 
@@ -12409,11 +12620,11 @@ function triggerSetPiece(type, team, x, y, extraSubText = "") {
   const teamName = team === 'blue' ? blueNick.toUpperCase() : redNick.toUpperCase();
   const col = team === 'blue' ? '#00f0ff' : '#ff0055';
   // Bez wielkich komunikatów na pół ekranu przy stałych fragmentach
-  if (type === 'THROW_IN') spawnFloater(x, y, `🚩 AUT • ${teamName}`, col);
-  else if (type === 'CORNER') spawnFloater(x, y, `🚩 RZUT ROŻNY • ${teamName}`, col);
-  else if (type === 'FREE_KICK') spawnFloater(x, y, `⚠️ RZUT WOLNY • ${teamName}`, '#f5b041');
+  if (type === 'THROW_IN') spawnFloater(x, y, `AUT • ${teamName}`, col);
+  else if (type === 'CORNER') spawnFloater(x, y, `RZUT ROŻNY • ${teamName}`, col);
+  else if (type === 'FREE_KICK') spawnFloater(x, y, `RZUT WOLNY • ${teamName}`, '#f5b041');
   else if (type === 'PENALTY') showTempBanner(`RZUT KARNY • ${teamName}!`, extraSubText || "Strzał z 11 metrów", "#ff0055", 85);
-  else spawnFloater(x, y, `⚽ OD BRAMKI • ${teamName}`, col);
+  else spawnFloater(x, y, `OD BRAMKI • ${teamName}`, col);
 }
 
 function endSetPiece() {
@@ -12449,17 +12660,31 @@ function triggerMatchOver() {
   const myTeam = getMyTeamColor();
   const won = (myTeam === 'blue' && scoreBlue > scoreRed) || (myTeam === 'red' && scoreRed > scoreBlue);
   const draw = scoreBlue === scoreRed;
-  const baseReward = won ? 180 : (draw ? 90 : 55);
-  const rewardTier = (isSinglePlayer ? enemyAiLevel : 'medium');
-  const rewardMultiplier = rewardTier === 'hard' ? 1.25 : (rewardTier === 'easy' ? 0.80 : 1.0);
-  const reward = Math.round(baseReward * rewardMultiplier);
-  clubData.coins += reward;
+  const myGoals = (myTeam === 'blue' ? scoreBlue : scoreRed) || 0;
+
+  let reward = 0;
+  if (isSinglePlayer) {
+    // Mecze z botami dają trochę monet (50 - 150 monet)
+    const baseReward = won ? 115 : (draw ? 75 : 45);
+    const rewardTier = (enemyAiLevel === 'hard' || enemyAiLevel === 3) ? 'hard' : ((enemyAiLevel === 'easy' || enemyAiLevel === 1) ? 'easy' : 'medium');
+    const tierMultiplier = rewardTier === 'hard' ? 1.25 : (rewardTier === 'easy' ? 0.85 : 1.0);
+    reward = Math.min(150, Math.max(50, Math.round(baseReward * tierMultiplier + myGoals * 6)));
+  } else {
+    // Mecze online multiplayer dają znacznie więcej kasy (300 - 500 monet)!
+    const baseReward = won ? 420 : (draw ? 350 : 300);
+    reward = Math.min(500, Math.max(300, Math.round(baseReward + myGoals * 15)));
+  }
+
+  clubData.coins = (Number(clubData.coins) || 0) + reward;
+  if (typeof state !== 'undefined' && state) {
+    state.coins = clubData.coins;
+    if (typeof updateCoinsUI === 'function') updateCoinsUI();
+  }
   
   // Rejestracja statystyk do Globalnej Tabeli Liderów
   if (!clubData.stats) clubData.stats = { wins: 0, matches: 0, goals: 0 };
   clubData.stats.matches = (clubData.stats.matches || 0) + 1;
   if (won) clubData.stats.wins = (clubData.stats.wins || 0) + 1;
-  const myGoals = (myTeam === 'blue' ? scoreBlue : scoreRed) || 0;
   clubData.stats.goals = (clubData.stats.goals || 0) + myGoals;
 
   // Zapis do historii ostatnich meczów
@@ -12468,7 +12693,7 @@ function triggerMatchOver() {
     date: new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
     outcome: won ? 'WIN' : (draw ? 'DRAW' : 'LOSS'),
     score: `${scoreBlue} : ${scoreRed}`,
-    opponent: isSinglePlayer ? `Rywal AI (${enemyAiLevel.toUpperCase()})` : (isHost ? redNick : blueNick),
+    opponent: isSinglePlayer ? `Rywal AI (${String(enemyAiLevel || 'medium').toUpperCase()})` : (isHost ? redNick : blueNick),
     rewardCoins: reward
   });
   if (clubData.matchHistory.length > 20) clubData.matchHistory.pop();
@@ -12493,7 +12718,7 @@ function triggerMatchOver() {
   }
 
   document.getElementById('winnerSub').textContent = `${scoreBlue} : ${scoreRed}`;
-  document.getElementById('matchCoinsReward').textContent = `+${reward} 🪙 MONET DO TWOJEGO KLUBU! (RAZEM: ${clubData.coins} 🪙)`;
+  document.getElementById('matchCoinsReward').innerHTML = `+${reward} <svg class="cfc-coin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> MONET DO TWOJEGO KLUBU! (RAZEM: ${clubData.coins} C)`;
   document.getElementById('statShotsBlue').textContent = matchStats.shotsBlue;
   document.getElementById('statShotsRed').textContent = matchStats.shotsRed;
   document.getElementById('statSavesBlue').textContent = matchStats.savesBlue;
@@ -12613,11 +12838,11 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     const isLateTimed = powerPct > 92;
     if (isTimedFinishing) {
       try { SFX.play('timed_perfect'); } catch (e) {}
-      spawnFloater(player.x, player.y - 18, '🟢 PERFEKT TIMING!', '#00ff88');
+      spawnFloater(player.x, player.y - 18, 'PERFEKT TIMING!', '#00ff88');
     } else if (isLateTimed) {
-      spawnFloater(player.x, player.y - 18, '🔴 ZA PÓŹNO', '#ff0055');
+      spawnFloater(player.x, player.y - 18, 'ZA PÓŹNO', '#ff0055');
     } else if (powerPct < 45) {
-      spawnFloater(player.x, player.y - 18, '🟡 ZA WCZEŚNIE', '#ffbb00');
+      spawnFloater(player.x, player.y - 18, 'ZA WCZEŚNIE', '#ffbb00');
     }
 
     const timedMult = isTimedFinishing ? 1.22 : (isLateTimed ? 0.88 : 1.0);
@@ -12886,11 +13111,11 @@ function toggleMouseControl() {
   mouseControlMode = !mouseControlMode;
   const btn = document.getElementById('mouseModeBtn');
   if (btn) {
-    btn.textContent = mouseControlMode ? '🖱️ MYSZKA: WŁ' : '🖱️ MYSZKA: WYŁ';
+    btn.innerHTML = (mouseControlMode ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg> MYSZKA: WŁ' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg> MYSZKA: WYŁ');
     btn.classList.toggle('active-assist', mouseControlMode);
   }
   showTempBanner(
-    mouseControlMode ? '🖱️ STEROWANIE MYSZKĄ: WŁĄCZONE' : '⌨️ STEROWANIE: KLAWIATURA (WASD)',
+    mouseControlMode ? 'STEROWANIE MYSZKĄ: WŁĄCZONE' : 'STEROWANIE: KLAWIATURA (WASD)',
     mouseControlMode ? 'Kieruj zawodnikiem za kursorem | LPM = Podaj/Strzel | Scroll = Tricki' : 'Klawisze WASD + Mysz do celowania',
     mouseControlMode ? '#00f0ff' : '#f5b041',
     48
@@ -12903,7 +13128,7 @@ function triggerDirectTrick(player, type, name, mult) {
     if (player.stamina < (TRICK_COST[type] || 24) * 0.75) {
       if (tickCount - player._trickWarnTick > 45) {
         player._trickWarnTick = tickCount;
-        spawnFloater(player.x, player.y, '😮‍💨 brak kondycji', '#ff6b8a');
+        spawnFloater(player.x, player.y, 'Brak kondycji', '#ff6b8a');
       }
       return;
     }
@@ -13504,7 +13729,7 @@ function drawStadium25D() {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#00f0ff';
   for (let bx = pitchX + 180; bx < pitchX + pitchW; bx += 360) {
-    ctx.fillText("⚡ EA SPORTS FC 28 • ULTIMATE TEAM ARENA • 4v4 PRO ⚡", bx, pitchY - 21);
+    ctx.fillText(" EA SPORTS FC 28 • ULTIMATE TEAM ARENA • 4v4 PRO ", bx, pitchY - 21);
   }
 
   // 5. Linie boiska
@@ -13654,8 +13879,8 @@ function drawMinimapAndBanners() {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffffff';
     const guideText = hasB
-      ? '⚽ PIŁKA: LPM = Podaj/Strzał | PPM = Lob | F/C/V/X lub Scroll = Tricki | Spacja = Zastawka | M = Tryb Myszki'
-      : '🛡️ OBRONA: WASD/Myszka = Bieg | LPM = Odbiór | PPM = Wślizg | Spacja = Zmień gracza | M = Tryb Myszki';
+      ? 'PIŁKA: LPM = Podaj/Strzał | PPM = Lob | F/C/V/X lub Scroll = Tricki | Spacja = Zastawka | M = Tryb Myszki'
+      : 'DEF OBRONA: WASD/Myszka = Bieg | LPM = Odbiór | PPM = Wślizg | Spacja = Zmień gracza | M = Tryb Myszki';
     ctx.fillText(guideText, 26, canvas.height - 24);
   }
 
@@ -14018,7 +14243,7 @@ function switchAuthTab(tab) {
     if (loginBtn) loginBtn.classList.remove('active');
     if (regBtn) regBtn.classList.add('active');
     if (submitBtn) {
-      submitBtn.textContent = '✨ UTWÓRZ KONTO (+500 🪙)';
+      submitBtn.textContent = 'UTWÓRZ KONTO (+500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)';
       submitBtn.style.background = 'linear-gradient(135deg, #00f0ff, #00c6a7)';
     }
     if (switchPrompt) {
@@ -14032,7 +14257,7 @@ function switchAuthTab(tab) {
       submitBtn.style.background = 'linear-gradient(135deg, #00ff87, #00d4ff)';
     }
     if (switchPrompt) {
-      switchPrompt.innerHTML = 'Nie masz jeszcze konta? <a href="javascript:void(0)" onclick="switchAuthTab(\'register\')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zarejestruj się za darmo (+500 🪙)</a>';
+      switchPrompt.innerHTML = 'Nie masz jeszcze konta? <a href="javascript:void(0)" onclick="switchAuthTab(\'register\')" style="color:#00f0ff; text-decoration:underline; font-weight:700;">Zarejestruj się za darmo (+500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)</a>';
     }
   }
 }
@@ -14062,7 +14287,7 @@ function showAuthAlert(msg, type = 'info') {
   }
   el.style.display = 'block';
   el.className = 'fc-auth-alert ' + (type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'));
-  el.innerHTML = (type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ')) + msg;
+  el.innerHTML = (type === 'error' ? 'UWAGA: ' : (type === 'success' ? 'OK: ' : 'INFO: ')) + msg;
 }
 
 function submitAuthForm() {
@@ -14187,7 +14412,7 @@ function fcUpdateAuthUi() {
 
   if (isAuth) {
     if (nickDisplay) nickDisplay.textContent = displayName;
-    if (coinsDisplay) coinsDisplay.textContent = `${(Number(clubData.coins) || 0).toLocaleString('pl-PL')} 🪙`;
+    if (coinsDisplay) coinsDisplay.textContent = `${(Number(clubData.coins) || 0).toLocaleString('pl-PL')} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>`;
     if (cardsDisplay) cardsDisplay.textContent = `${(clubData.owned && clubData.owned.length) || 4} / 95`;
   }
 }
@@ -14371,8 +14596,7 @@ async function syncLineupToCloud() {
 
 // Zapis nagrody za mecz do Cloudflare D1
 async function syncMatchRewardToCloud(outcome, goals) {
-  const coinsWon = outcome === 'win' ? 150 + (goals || 0) * 20 : (outcome === 'draw' ? 60 + (goals || 0) * 15 : 30 + (goals || 0) * 10);
-  clubData.coins = (Number(clubData.coins) || 0) + coinsWon;
+  // Nagroda została już precyzyjnie doliczona do clubData.coins w triggerMatchOver()
   saveClubData(false);
   saveActiveLocalAccount();
   updateMenuClubUI();
@@ -14448,7 +14672,7 @@ function fcLoginOfflineOnly() {
   saveClubData(false);
   fcUpdateAuthUi();
   updateMenuClubUI();
-  showAuthAlert('🎮 Zalogowano w trybie lokalnym jako ' + acc.username + '! Monety (500 🪙) i paczki są aktywne.', 'success');
+  showAuthAlert(' Zalogowano w trybie lokalnym jako ' + acc.username + '! Monety (500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>) i paczki są aktywne.', 'success');
   setTimeout(closeFcAuth, 800);
 }
 
@@ -14505,7 +14729,7 @@ async function fcLogin() {
     return;
   } catch (err) {
     console.error('Błąd połączenia z serwerem podczas logowania:', err);
-    showAuthAlert('⚡ Błąd połączenia z bazą Cloudflare. Upewnij się, że masz internet lub kliknij "GRAJ OFFLINE" poniżej.', 'error');
+    showAuthAlert(' Błąd połączenia z bazą Cloudflare. Upewnij się, że masz internet lub kliknij "GRAJ OFFLINE" poniżej.', 'error');
   }
 }
 
@@ -14534,7 +14758,7 @@ async function fcRegister() {
     return;
   }
 
-  showAuthAlert('Tworzenie konta w chmurze Cloudflare D1 (+500 🪙)...', 'info');
+  showAuthAlert('Tworzenie konta w chmurze Cloudflare D1 (+500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)...', 'info');
 
   try {
     const controller = new AbortController();
@@ -14562,12 +14786,12 @@ async function fcRegister() {
 
     await fcLoadCloudProfile();
     await loadRealCommunityFriends();
-    showAuthAlert('Konto utworzone w chmurze! Odebrano 500 🪙 i karty startowe.', 'success');
+    showAuthAlert('Konto utworzone w chmurze! Odebrano 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> i karty startowe.', 'success');
     setTimeout(closeFcAuth, 700);
     return;
   } catch (err) {
     console.error('Błąd rejestracji w Cloudflare:', err);
-    showAuthAlert('⚡ Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie lub użyj przycisku "GRAJ OFFLINE" poniżej.', 'error');
+    showAuthAlert(' Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie lub użyj przycisku "GRAJ OFFLINE" poniżej.', 'error');
   }
 }
 
@@ -14743,7 +14967,7 @@ async function startQuickMatchmaking() {
   if (wrap) {
     wrap.innerHTML = `
       <button type="button" class="action-btn" style="background:#21262d; border-color:rgba(255,255,255,0.2);" onclick="cancelQuickMatchmaking()">
-        ✕ ANULUJ SZUKANIE
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ANULUJ SZUKANIE
       </button>
     `;
   }
@@ -14918,10 +15142,10 @@ function showMatchmakingTimeoutOffer() {
     </div>
     <div style="display:flex; gap:10px; justify-content:center;">
       <button type="button" class="action-btn btn-host" onclick="playAiFromMatchmaking()" style="font-size:12px; padding:9px 16px;">
-        🤖 GRAJ Z AI PRO
+        GRAJ Z AI PRO
       </button>
       <button type="button" class="action-btn" style="background:#21262d; font-size:12px; padding:9px 16px;" onclick="cancelQuickMatchmaking()">
-        ✕ ANULUJ
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ANULUJ
       </button>
     </div>
   `;
@@ -15007,16 +15231,16 @@ function getLeaderboardMetricVal(p, cat) {
 
 function getPlayerDivision(wins) {
   const tiers = [
-    { div: 10, name: 'Dywizja 10 (Początkujący)', minWins: 0, nextWins: 3, reward: '500 🪙', color: '#94a3b8' },
-    { div: 9,  name: 'Dywizja 9 (Amator)',        minWins: 3, nextWins: 6, reward: '800 🪙', color: '#a3e635' },
-    { div: 8,  name: 'Dywizja 8 (Półprofesjonalista)', minWins: 6, nextWins: 10, reward: '1 200 🪙', color: '#38bdf8' },
-    { div: 7,  name: 'Dywizja 7 (Zawodowiec)',    minWins: 10, nextWins: 15, reward: '1 800 🪙', color: '#818cf8' },
-    { div: 6,  name: 'Dywizja 6 (Klasa Światowa)', minWins: 15, nextWins: 22, reward: '2 500 🪙', color: '#c084fc' },
-    { div: 5,  name: 'Dywizja 5 (Mistrz)',        minWins: 22, nextWins: 30, reward: '3 500 🪙', color: '#f472b6' },
-    { div: 4,  name: 'Dywizja 4 (Pretendent)',    minWins: 30, nextWins: 40, reward: '4 800 🪙', color: '#fb923c' },
-    { div: 3,  name: 'Dywizja 3 (Elita Krajowa)', minWins: 40, nextWins: 55, reward: '6 500 🪙', color: '#facc15' },
-    { div: 2,  name: 'Dywizja 2 (Czempion FUT)',  minWins: 55, nextWins: 75, reward: '8 500 🪙', color: '#f59e0b' },
-    { div: 1,  name: 'Dywizja 1 (CYBER ELITA)',   minWins: 75, nextWins: 999, reward: '15 000 🪙 + IKONA', color: '#00f0ff' }
+    { div: 10, name: 'Dywizja 10 (Początkujący)', minWins: 0, nextWins: 3, reward: '500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#94a3b8' },
+    { div: 9,  name: 'Dywizja 9 (Amator)',        minWins: 3, nextWins: 6, reward: '800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#a3e635' },
+    { div: 8,  name: 'Dywizja 8 (Półprofesjonalista)', minWins: 6, nextWins: 10, reward: '1 200 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#38bdf8' },
+    { div: 7,  name: 'Dywizja 7 (Zawodowiec)',    minWins: 10, nextWins: 15, reward: '1 800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#818cf8' },
+    { div: 6,  name: 'Dywizja 6 (Klasa Światowa)', minWins: 15, nextWins: 22, reward: '2 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#c084fc' },
+    { div: 5,  name: 'Dywizja 5 (Mistrz)',        minWins: 22, nextWins: 30, reward: '3 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#f472b6' },
+    { div: 4,  name: 'Dywizja 4 (Pretendent)',    minWins: 30, nextWins: 40, reward: '4 800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#fb923c' },
+    { div: 3,  name: 'Dywizja 3 (Elita Krajowa)', minWins: 40, nextWins: 55, reward: '6 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#facc15' },
+    { div: 2,  name: 'Dywizja 2 (Czempion FUT)',  minWins: 55, nextWins: 75, reward: '8 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', color: '#f59e0b' },
+    { div: 1,  name: 'Dywizja 1 (CYBER ELITA)',   minWins: 75, nextWins: 999, reward: '15 000 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> + IKONA', color: '#00f0ff' }
   ];
   for (let i = tiers.length - 1; i >= 0; i--) {
     if (wins >= tiers[i].minWins) return tiers[i];
@@ -15030,16 +15254,16 @@ function renderDivisionsView(content, myRankBadge, myRankNick, myRankText, myRan
   const currentNick = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser?.username) || (clubData && clubData.nick) || 'TWÓJ KLUB';
 
   const allDivs = [
-    { div: 10, name: 'Dywizja 10', minWins: 0, nextWins: 3, reward: '500 🪙', badge: '🥉' },
-    { div: 9,  name: 'Dywizja 9', minWins: 3, nextWins: 6, reward: '800 🪙', badge: '🥉' },
-    { div: 8,  name: 'Dywizja 8', minWins: 6, nextWins: 10, reward: '1 200 🪙', badge: '🥈' },
-    { div: 7,  name: 'Dywizja 7', minWins: 10, nextWins: 15, reward: '1 800 🪙', badge: '🥈' },
-    { div: 6,  name: 'Dywizja 6', minWins: 15, nextWins: 22, reward: '2 500 🪙', badge: '🥇' },
-    { div: 5,  name: 'Dywizja 5', minWins: 22, nextWins: 30, reward: '3 500 🪙', badge: '🥇' },
-    { div: 4,  name: 'Dywizja 4', minWins: 30, nextWins: 40, reward: '4 800 🪙', badge: '💎' },
-    { div: 3,  name: 'Dywizja 3', minWins: 40, nextWins: 55, reward: '6 500 🪙', badge: '💎' },
-    { div: 2,  name: 'Dywizja 2', minWins: 55, nextWins: 75, reward: '8 500 🪙', badge: '👑' },
-    { div: 1,  name: 'Dywizja 1 ELITA', minWins: 75, nextWins: 999, reward: '15 000 🪙 + IKONA', badge: '⚡' }
+    { div: 10, name: 'Dywizja 10', minWins: 0, nextWins: 3, reward: '500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '3.' },
+    { div: 9,  name: 'Dywizja 9', minWins: 3, nextWins: 6, reward: '800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '3.' },
+    { div: 8,  name: 'Dywizja 8', minWins: 6, nextWins: 10, reward: '1 200 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '2.' },
+    { div: 7,  name: 'Dywizja 7', minWins: 10, nextWins: 15, reward: '1 800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '2.' },
+    { div: 6,  name: 'Dywizja 6', minWins: 15, nextWins: 22, reward: '2 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '1.' },
+    { div: 5,  name: 'Dywizja 5', minWins: 22, nextWins: 30, reward: '3 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: '1.' },
+    { div: 4,  name: 'Dywizja 4', minWins: 30, nextWins: 40, reward: '4 800 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: 'DIAMENT' },
+    { div: 3,  name: 'Dywizja 3', minWins: 40, nextWins: 55, reward: '6 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: 'DIAMENT' },
+    { div: 2,  name: 'Dywizja 2', minWins: 55, nextWins: 75, reward: '8 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', badge: 'KORONA' },
+    { div: 1,  name: 'Dywizja 1 ELITA', minWins: 75, nextWins: 999, reward: '15 000 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> + IKONA', badge: '' }
   ];
 
   const needed = currentDiv.nextWins === 999 ? 'MAKSYMALNA DYWIZJA' : `${Math.max(0, currentDiv.nextWins - wins)} zwycięstw do awansu`;
@@ -15101,7 +15325,7 @@ function renderDivisionsView(content, myRankBadge, myRankNick, myRankText, myRan
   if (myRankBadge) myRankBadge.textContent = `DIV ${currentDiv.div}`;
   if (myRankNick) myRankNick.textContent = currentNick;
   if (myRankText) myRankText.textContent = `${currentDiv.name} • ${wins} zwycięstw`;
-  if (myRankInsight) myRankInsight.textContent = `⭐ ${needed}!`;
+  if (myRankInsight) myRankInsight.textContent = ` ${needed}!`;
 }
 
 function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, myRankInsight) {
@@ -15113,7 +15337,7 @@ function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, my
   if (history.length === 0) {
     content.innerHTML = `
       <div style="text-align:center; padding:60px 20px; color:#8b949e; font-family:'Outfit', sans-serif;">
-        <div style="font-size:42px; margin-bottom:12px;">📜</div>
+        <div style="font-size:42px; margin-bottom:12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
         <div style="font-size:18px; color:#fff; font-weight:800; margin-bottom:6px;">Brak historii meczów w tej sesji</div>
         <p style="font-size:13px; max-width:440px; margin:auto; line-height:1.5;">
           Rozegraj mecz w trybie 1vs1 Solo lub Szybki Mecz Online, a każdy wynik, bramki i zdobyte monety zostaną tutaj zapisane!
@@ -15135,7 +15359,7 @@ function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, my
             const badgeBg = isWin ? 'rgba(0,255,136,0.18)' : (isDraw ? 'rgba(255,215,0,0.18)' : 'rgba(255,0,85,0.18)');
             const badgeBorder = isWin ? '#00ff88' : (isDraw ? '#ffd700' : '#ff0055');
             const badgeColor = isWin ? '#00ff88' : (isDraw ? '#ffd700' : '#ff0055');
-            const badgeTxt = isWin ? '🟢 WYGRANA' : (isDraw ? '🟡 REMIS' : '🔴 PORAŻKA');
+            const badgeTxt = isWin ? 'WYGRANA' : (isDraw ? 'REMIS' : 'PORAŻKA');
 
             return `
               <div style="background:rgba(11,15,27,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
@@ -15152,7 +15376,7 @@ function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, my
                 </div>
 
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-family:var(--font-heading); font-size:14px; font-weight:900; color:var(--gold);">+${m.rewardCoins} 🪙</span>
+                  <span style="font-family:var(--font-heading); font-size:14px; font-weight:900; color:var(--gold);">+${m.rewardCoins} <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></span>
                 </div>
               </div>
             `;
@@ -15165,7 +15389,7 @@ function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, my
   if (myRankBadge) myRankBadge.textContent = 'MECZE';
   if (myRankNick) myRankNick.textContent = currentNick;
   if (myRankText) myRankText.textContent = `${matches} meczów • ${wins} wygranych (${matches ? Math.round(wins/matches*100) : 0}% winrate)`;
-  if (myRankInsight) myRankInsight.textContent = '⭐ Każdy mecz powiększa Twoje zyski i ranking!';
+  if (myRankInsight) myRankInsight.textContent = ' Każdy mecz powiększa Twoje zyski i ranking!';
 }
 
 async function renderLeaderboardData() {
@@ -15245,7 +15469,7 @@ async function renderLeaderboardData() {
   // Jeśli brak zarejestrowanych graczy w bazie — nie generujemy żadnych fałszywych botów!
   if (players.length === 0) {
     if (podiumEl) podiumEl.innerHTML = '';
-    content.innerHTML = '<div style="text-align:center; padding:50px 20px; color:#8b949e; font-family:\'Outfit\';"><div style="font-size:36px; margin-bottom:12px;">🏆</div>Brak zarejestrowanych graczy w bazie danych.<br><span style="color:#00f0ff; font-weight:700;">Zarejestruj konto i wygraj mecz, aby zostać liderem rankingu!</span></div>';
+    content.innerHTML = '<div style="text-align:center; padding:50px 20px; color:#8b949e; font-family:\'Outfit\';"><div style="font-size:36px; margin-bottom:12px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block;"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>Brak zarejestrowanych graczy w bazie danych.<br><span style="color:#00f0ff; font-weight:700;">Zarejestruj konto i wygraj mecz, aby zostać liderem rankingu!</span></div>';
     if (myRankBadge) myRankBadge.textContent = '-';
     if (myRankNick) myRankNick.textContent = currentNick || 'GOŚĆ';
     if (myRankText) myRankText.textContent = 'Zaloguj się, aby rywalizować w oficjalnym rankingu online';
@@ -15359,9 +15583,9 @@ async function renderLeaderboardData() {
     const wrColor = winRate >= 70 ? '#00ff88' : (winRate >= 50 ? '#00f0ff' : '#8b949e');
 
     let rankBadge = `<span class="lb-rank-badge">${rank}</span>`;
-    if (rank === 1) rankBadge = `<span class="lb-rank-badge lb-rank-1">🥇 1</span>`;
-    else if (rank === 2) rankBadge = `<span class="lb-rank-badge lb-rank-2">🥈 2</span>`;
-    else if (rank === 3) rankBadge = `<span class="lb-rank-badge lb-rank-3">🥉 3</span>`;
+    if (rank === 1) rankBadge = `<span class="lb-rank-badge lb-rank-1">1. 1</span>`;
+    else if (rank === 2) rankBadge = `<span class="lb-rank-badge lb-rank-2">2. 2</span>`;
+    else if (rank === 3) rankBadge = `<span class="lb-rank-badge lb-rank-3">3. 3</span>`;
 
     htmlTable += `
       <tr class="${isMe ? 'is-me' : ''}">
@@ -15391,12 +15615,12 @@ async function renderLeaderboardData() {
   }
   if (myRankInsight) {
     if (myRank === '#1') {
-      myRankInsight.textContent = '👑 JESTEŚ NA SAMYM SZCZYCIE TABELI!';
+      myRankInsight.textContent = 'KORONA JESTEŚ NA SAMYM SZCZYCIE TABELI!';
     } else if (players.length > 0 && myStats.wins < players[0].wins) {
       const diff = players[0].wins - (myStats.wins || 0);
-      myRankInsight.textContent = `🎯 DO 1. MIEJSCA BRAKUJE CI ${diff} ${diff === 1 ? 'WYGRANEJ' : 'WYGRANYCH'}!`;
+      myRankInsight.textContent = `AIM DO 1. MIEJSCA BRAKUJE CI ${diff} ${diff === 1 ? 'WYGRANEJ' : 'WYGRANYCH'}!`;
     } else {
-      myRankInsight.textContent = '⭐ ROZGRYWAJ MECZE ABY POWIĘKSZAĆ PRZEWAGĘ!';
+      myRankInsight.textContent = ' ROZGRYWAJ MECZE ABY POWIĘKSZAĆ PRZEWAGĘ!';
     }
   }
 }
@@ -15523,9 +15747,18 @@ function playerSilhouetteSvg(tier, size = 46) {
     '</svg>';
 }
 
-function renderPlayerImg(p, size = 46) {
+function getPlayerAvatarStyle(id) {
+  if (id === 'mid_soucek') return 'object-position: 72% 20% !important;';
+  if (id === 'gk_buffon') return 'object-position: 80% 25% !important;';
+  if (id === 'fwd_broja') return 'object-position: 58% 22% !important;';
+  if (id === 'def_livramento') return 'object-position: 50% 18% !important;';
+  return 'object-position: center 18% !important;';
+}
+
+function renderPlayerImg(p, size = 58) {
   const primarySrc = 'assets/players/' + p.id + '.webp';
-  return '<img src="' + primarySrc + '" class="card-avatar-img" style="width:' + size + 'px; height:' + size + 'px;" loading="lazy" alt="' + p.name + '" ' +
+  const customPos = getPlayerAvatarStyle(p.id);
+  return '<img src="' + primarySrc + '" class="card-avatar-img" style="width:' + size + 'px !important; height:' + size + 'px !important; --avatar-size:' + size + 'px !important; ' + customPos + '" loading="lazy" alt="' + p.name + '" ' +
     'onerror="if(!this.dataset.triedRoot){this.dataset.triedRoot=\'1\'; this.src=\'/assets/players/' + p.id + '.webp\';}else{this.style.display=\'none\'; this.nextElementSibling.style.display=\'block\';}">' +
     '<div style="display:none;">' + playerSilhouetteSvg(p.tier, size) + '</div>';
 }
@@ -15563,83 +15796,62 @@ function updateTopUserUI() {
 }
 
 function renderHomeSquad() {
-  const strip = document.getElementById('menuSquadStrip');
-  if (!strip) return;
-  const order = ['FWD', 'MID', 'DEF', 'GK'];
-  let total = 0;
-
-  strip.innerHTML = order.map(role => {
-    const p = getPlayer(state.lineup[role]) || PLAYERS[0];
-    total += p.ovr;
-    return '<div class="cfc-mini-card tier-' + p.tier + '" onclick="openClubHub(\'SQUAD\')" title="' + p.name + ' • OVR ' + p.ovr + '">' +
-      '<div class="mini-card-top">' +
-        '<div>' +
-          '<span class="mini-card-ovr">' + p.ovr + '</span>' +
-          '<span class="mini-card-pos">' + p.pos + '</span>' +
-        '</div>' +
-        '<span class="iso-badge">' + p.iso + '</span>' +
-      '</div>' +
-      '<div class="mini-card-avatar">' + renderPlayerImg(p, 44) + '</div>' +
-      '<div class="mini-card-name">' + p.name + '</div>' +
-    '</div>';
-  }).join('');
-
-  const avg = Math.round(total / 4);
-  const homeOvr = document.getElementById('homeSquadOvr');
-  const squadAvg = document.getElementById('squadAvgOvr');
-  if (homeOvr) homeOvr.textContent = 'OGL ' + avg;
-  if (squadAvg) squadAvg.textContent = avg;
+  updateMenuSquadStrip();
 }
 
 function renderFriends() {
-  const list = document.getElementById('friendsList');
-  const counter = document.getElementById('friendsCounter');
-  if (counter) counter.textContent = state.friends.length + ' / 12';
-  if (!list) return;
-
-  if (state.friends.length === 0) {
-    list.innerHTML = '<div style="padding:24px 14px; text-align:center; color:var(--text-muted); font-size:12px;">' +
-      'Brak aktywnych znajomych online.<br><span style="color:var(--text-secondary); font-size:11px;">Użyj przycisku +, aby dodać gracza po nicku.</span>' +
-    '</div>';
-    return;
-  }
-
-  list.innerHTML = state.friends.map(f => '<div class="cfc-friend-row">' +
-    '<div class="friend-avatar">' + f.initials +
-      '<span class="dot-online ' + (f.state === 'in-match' ? 'busy' : '') + '"></span>' +
-    '</div>' +
-    '<div class="friend-meta">' +
-      '<div class="friend-name-line">' +
-        '<span class="friend-name">' + f.nick + '</span>' +
-        '<span class="friend-ovr num">OVR ' + f.ovr + '</span>' +
-      '</div>' +
-      '<div class="friend-status ' + f.state + '">' + f.status + '</div>' +
-    '</div>' +
-    '<button type="button" class="friend-challenge-btn" onclick="challengeFriend(\'' + f.nick + '\')" title="Zaproś gracza ' + f.nick + '" aria-label="Wyzwij ' + f.nick + '">' +
-      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4M15.5 11h.01M18 13h.01"/></svg>' +
-    '</button>' +
-  '</div>').join('');
+  renderFriendsUI();
 }
 
-function addFriend() {
+async function addFriend() {
   const inp = document.getElementById('newFriendNick');
   const val = (inp?.value || '').trim();
   if (!val) {
     showToast('Wpisz nick gracza.', 'danger');
     return;
   }
-  const initials = val.slice(0, 2).toUpperCase();
-  state.friends.push({
-    nick: val,
-    initials,
-    ovr: 82,
-    status: 'Online • W menu',
-    state: 'online'
-  });
+
+  const myNick = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser && fcCurrentUser.username) || (typeof clubData !== 'undefined' && clubData.nick) || (typeof state !== 'undefined' && state.nick) || (typeof myName !== 'undefined' && myName) || '';
+  if (myNick && val.toLowerCase() === myNick.toLowerCase()) {
+    showToast('Nie możesz dodać samego siebie do znajomych!', 'danger');
+    return;
+  }
+
+  // Weryfikacja w Cloudflare D1
+  let found = cachedD1Players.find(p => p.nick.toLowerCase() === val.toLowerCase());
+  if (!found) {
+    try {
+      const res = await fetch(`${FC_API_URL}/api/leaderboard`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.players)) {
+          cachedD1Players = data.players;
+          found = cachedD1Players.find(p => p.nick.toLowerCase() === val.toLowerCase());
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (!found) {
+    const sample = cachedD1Players.slice(0, 3).map(p => p.nick).join(', ');
+    showToast('Nie znaleziono gracza "' + val + '" w bazie D1. Dostępni m.in.: ' + (sample || 'brak'), 'danger');
+    return;
+  }
+
+  let pinned = getPinnedFriendsNicks();
+  if (pinned.includes(found.nick)) {
+    showToast('Gracz ' + found.nick + ' jest już na Twojej liście znajomych!', 'volt');
+    closeModal('addFriendModal');
+    return;
+  }
+
+  pinned.push(found.nick);
+  savePinnedFriendsNicks(pinned);
+
   if (inp) inp.value = '';
   closeModal('addFriendModal');
-  renderFriends();
-  showToast('Dodano znajomego: ' + val, 'volt');
+  renderFriendsUI();
+  showToast('Dodano znajomego z bazy D1: ' + found.nick + ' (OVR ' + (found.ovr || 75) + ')', 'volt');
 }
 
 function challengeFriend(nick) {
@@ -15779,8 +15991,25 @@ function switchClubTab(tab) {
 }
 
 function openPack(name, cost, minOvr) {
+  if (cost === undefined || minOvr === undefined) {
+    const tier = String(name || 'ultimate').toLowerCase();
+    if (tier.includes('standard') || tier === 'silver' || tier === 'bronze') {
+      name = 'Paczka Standard';
+      cost = 1000;
+      minOvr = 78;
+    } else if (tier.includes('premium') || tier === 'gold') {
+      name = 'Paczka Premium';
+      cost = 2500;
+      minOvr = 84;
+    } else {
+      name = 'Paczka Ultimate';
+      cost = 5000;
+      minOvr = 87;
+    }
+  }
+
   if (state.coins < cost) {
-    showToast('Za mało monet na ' + name + '. Brakuje ' + fmt(cost - state.coins) + ' 🪙', 'danger');
+    showToast('Za mało monet na ' + name + '. Brakuje ' + fmt(cost - state.coins) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>', 'danger');
     return;
   }
   state.coins -= cost;
@@ -15806,7 +16035,7 @@ function openPack(name, cost, minOvr) {
   const body = document.getElementById('packRevealBody');
   if (body) {
     body.innerHTML = '<span class="' + (isDup ? 'cfc-season-tag' : 'status-tag') + '">' +
-      (isDup ? 'DUPLIKAT • ZWROT +' + fmt(refund) + ' 🪙' : 'NOWA KARTA W KLUBIE!') +
+      (isDup ? 'DUPLIKAT • ZWROT +' + fmt(refund) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>' : 'NOWA KARTA W KLUBIE!') +
     '</span>' +
     '<div class="fut-card tier-' + drop.tier + '" style="width:230px; cursor:default;">' +
       '<div class="fut-card-head">' +
@@ -15816,7 +16045,7 @@ function openPack(name, cost, minOvr) {
         '</div>' +
         '<span class="cfc-season-tag">' + (drop.tier === 'icon' ? 'IKONA' : 'FUT') + '</span>' +
       '</div>' +
-      '<div style="display:flex; justify-content:center;">' + renderPlayerImg(drop, 60) + '</div>' +
+      '<div style="display:flex; justify-content:center;">' + renderPlayerImg(drop, 80) + '</div>' +
       '<div class="fut-name-block">' +
         '<div class="fut-name">' + drop.name + '</div>' +
         '<div class="fut-club">' + (drop.role === 'GK' ? 'Bramkarz' : drop.role === 'DEF' ? 'Obrońca' : drop.role === 'MID' ? 'Pomocnik' : 'Napastnik') + '</div>' +
@@ -15861,7 +16090,7 @@ function renderTacticalSquad() {
           '<div class="fut-ovr">' + p.ovr + '</div>' +
           '<div class="fut-name" style="font-size:15px;">' + p.name + '</div>' +
         '</div>' +
-        renderPlayerImg(p, 44) +
+        renderPlayerImg(p, 76) +
       '</div>' +
       '<div class="fut-stats-grid">' + statsHtml + '</div>' +
       '<button type="button" class="btn-glass" style="width:100%; padding:7px; font-size:11px;" onclick="openBenchDrawer(\'' + r.key + '\', \'' + r.label + '\')">' +
@@ -15989,7 +16218,7 @@ function renderPlayersView() {
             '</div>' +
             (inLineup ? '<span class="status-tag">SKŁAD</span>' : owned ? '<span class="iso-badge" style="color:var(--volt);">W KLUBIE</span>' : '') +
           '</div>' +
-          '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 46) + '</div>' +
+          '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 84) + '</div>' +
           '<div class="fut-name-block">' +
             '<div class="fut-name">' + p.name + '</div>' +
             '<div class="fut-club">' + (p.role === 'GK' ? 'Bramkarz' : p.role === 'DEF' ? 'Obrońca' : p.role === 'MID' ? 'Pomocnik' : 'Napastnik') + '</div>' +
@@ -16080,7 +16309,7 @@ function openPlayerBio(id) {
           '</div>' +
           '<span class="cfc-season-tag">' + (p.tier === 'icon' ? 'IKONA' : 'FUT') + '</span>' +
         '</div>' +
-        '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 52) + '</div>' +
+        '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 84) + '</div>' +
         '<div class="fut-name-block">' +
           '<div class="fut-name">' + p.name + '</div>' +
           '<div class="fut-club">' + (p.role === 'GK' ? 'Bramkarz' : p.role === 'DEF' ? 'Obrońca' : p.role === 'MID' ? 'Pomocnik' : 'Napastnik') + '</div>' +
@@ -16094,7 +16323,7 @@ function openPlayerBio(id) {
           '<div style="display:flex; flex-direction:column; gap:4px;">' +
             '<span class="font-bold" style="font-size:14px; color:#fff;">Profil Zawodnika</span>' +
             '<span style="font-size:12px; color:var(--text-secondary);">Ocena ogólna: <strong style="color:var(--gold);">' + p.ovr + ' OVR</strong></span>' +
-            '<span style="font-size:12px; color:var(--text-secondary);">Wartość rynkowa: <strong style="color:var(--gold);">' + fmt(p.price) + ' 🪙</strong></span>' +
+            '<span style="font-size:12px; color:var(--text-secondary);">Wartość rynkowa: <strong style="color:var(--gold);">' + fmt(p.price) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></strong></span>' +
           '</div>' +
         '</div>' +
 
@@ -16115,7 +16344,7 @@ function openPlayerBio(id) {
 
         '<div style="display:flex; gap:10px; margin-top:10px;">' +
           (owned && !inLineup ? '<button type="button" class="btn-primary" style="flex:1;" onclick="equipPlayer(\'' + p.id + '\'); closeModal(\'playerBioModal\');">Ustaw w składzie</button>' : '') +
-          (!owned ? '<button type="button" class="btn-primary" style="flex:1;" onclick="buyPlayer(\'' + p.id + '\'); closeModal(\'playerBioModal\');">Kup za ' + fmt(p.price) + ' 🪙</button>' : '') +
+          (!owned ? '<button type="button" class="btn-primary" style="flex:1;" onclick="buyPlayer(\'' + p.id + '\'); closeModal(\'playerBioModal\');">Kup za ' + fmt(p.price) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></button>' : '') +
           '<button type="button" class="btn-glass" style="flex:1;" onclick="closeModal(\'playerBioModal\')">Zamknij</button>' +
         '</div>' +
       '</div>' +
@@ -16142,9 +16371,9 @@ function renderMarket() {
           '<div class="fut-ovr">' + p.ovr + '</div>' +
           '<div class="fut-pos">' + p.pos + ' <span class="iso-badge">' + p.iso + '</span></div>' +
         '</div>' +
-        '<span class="num" style="font-family:var(--font-heading); font-size:13px; font-weight:800; color:var(--gold);">' + fmt(p.price) + ' 🪙</span>' +
+        '<span class="num" style="font-family:var(--font-heading); font-size:13px; font-weight:800; color:var(--gold);">' + fmt(p.price) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></span>' +
       '</div>' +
-      '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 46) + '</div>' +
+      '<div style="display:flex; justify-content:center;">' + renderPlayerImg(p, 84) + '</div>' +
       '<div class="fut-name-block">' +
         '<div class="fut-name">' + p.name + '</div>' +
         '<div class="fut-club">' + (p.role === 'GK' ? 'Bramkarz' : p.role === 'DEF' ? 'Obrońca' : p.role === 'MID' ? 'Pomocnik' : 'Napastnik') + '</div>' +
@@ -16153,7 +16382,7 @@ function renderMarket() {
       '<div onclick="event.stopPropagation()">' +
         (owned ? '<button type="button" class="btn-glass" style="width:100%; padding:7px; font-size:11px; cursor:default; color:var(--volt);" disabled>W Twoim klubie</button>' :
           '<button type="button" class="btn-primary" style="width:100%; padding:7px; font-size:11px;" ' + (canBuy ? '' : 'disabled style="opacity:0.5;"') + ' onclick="buyPlayer(\'' + p.id + '\')">' +
-            (canBuy ? 'Kup zawodnika' : 'Brakuje ' + fmt(p.price - state.coins) + ' 🪙') +
+            (canBuy ? 'Kup zawodnika' : 'Brakuje ' + fmt(p.price - state.coins) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>') +
           '</button>'
         ) +
       '</div>' +
@@ -16165,7 +16394,7 @@ function buyPlayer(id) {
   const p = getPlayer(id);
   if (!p || state.owned.includes(p.id)) return;
   if (state.coins < p.price) {
-    showToast('Brakuje ' + fmt(p.price - state.coins) + ' 🪙 na zakup karty ' + p.name + '.', 'danger');
+    showToast('Brakuje ' + fmt(p.price - state.coins) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg> na zakup karty ' + p.name + '.', 'danger');
     return;
   }
   state.coins -= p.price;
@@ -16199,7 +16428,7 @@ function startSelectedMatch() {
   const diff = state.qpDiff;
 
   if (typeof enemyAiLevel !== 'undefined') {
-    enemyAiLevel = diff === 'Łatwy' ? 1 : diff === 'Średni' ? 2 : 3;
+    enemyAiLevel = (diff === 'Łatwy' || diff === 'easy' || diff === 1) ? 'easy' : ((diff === 'Pro' || diff === 'hard' || diff === 3) ? 'hard' : 'medium');
     allyAiLevel = enemyAiLevel;
   }
 
@@ -16231,7 +16460,7 @@ function renderSeasonPass() {
     '<div class="pass-tier-badge">' + t.lvl + '</div>' +
     '<div class="pass-tier-info">' +
       '<div class="pass-tier-title">' + t.title + '</div>' +
-      '<div class="pass-tier-sub">' + (t.reward > 0 ? '+' + fmt(t.reward) + ' 🪙' : 'Paczka specjalna kart') + '</div>' +
+      '<div class="pass-tier-sub">' + (t.reward > 0 ? '+' + fmt(t.reward) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>' : 'Paczka specjalna kart') + '</div>' +
     '</div>' +
     '<div>' +
       (t.claimed ? '<button type="button" class="btn-glass" style="padding:7px 14px; font-size:11px; opacity:0.6; cursor:default;" disabled>Odebrano</button>' :
@@ -16281,7 +16510,7 @@ function renderAuthModal() {
       '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px;">' +
         '<div class="fut-stat-cell" style="padding:10px;">' +
           '<span class="fut-stat-lbl">MONETY KLUBU</span>' +
-          '<span class="num font-bold" style="font-size:18px; color:var(--gold);">' + fmt(state.coins) + ' 🪙</span>' +
+          '<span class="num font-bold" style="font-size:18px; color:var(--gold);">' + fmt(state.coins) + ' <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg></span>' +
         '</div>' +
         '<div class="fut-stat-cell" style="padding:10px;">' +
           '<span class="fut-stat-lbl">KARTY W KLUBIE</span>' +
@@ -16298,7 +16527,7 @@ function renderAuthModal() {
     body.innerHTML = '<div style="display:flex; flex-direction:column; gap:14px;">' +
       '<div class="hub-nav-pills" style="width:100%; display:grid; grid-template-columns:1fr 1fr;">' +
         '<button type="button" class="hub-tab-btn ' + (state.authTab === 'login' ? 'active' : '') + '" onclick="state.authTab=\'login\'; renderAuthModal();">Logowanie</button>' +
-        '<button type="button" class="hub-tab-btn ' + (state.authTab === 'register' ? 'active' : '') + '" onclick="state.authTab=\'register\'; renderAuthModal();">Nowe Konto (+500 🪙)</button>' +
+        '<button type="button" class="hub-tab-btn ' + (state.authTab === 'register' ? 'active' : '') + '" onclick="state.authTab=\'register\'; renderAuthModal();">Nowe Konto (+500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>)</button>' +
       '</div>' +
       '<div>' +
         '<label style="display:block; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px;">NICK GRACZA</label>' +
@@ -16309,7 +16538,7 @@ function renderAuthModal() {
         '<input type="password" id="authPassInput" class="room-code-input" placeholder="Hasło (min. 6 znaków)..." maxlength="32" style="width:100%; padding:10px 14px; text-transform:none;">' +
       '</div>' +
       '<button type="button" class="btn-primary" style="width:100%; padding:12px; font-size:13px;" onclick="submitAuth()">' +
-        (state.authTab === 'login' ? 'Zaloguj się do bazy D1' : 'Utwórz konto i odbierz 500 🪙') +
+        (state.authTab === 'login' ? 'Zaloguj się do bazy D1' : 'Utwórz konto i odbierz 500 <svg class="cfc-coin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2C94C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; display:inline-block;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 9v6"/></svg>') +
       '</button>' +
       '<button type="button" class="btn-glass" style="width:100%; padding:9px; font-size:11px;" onclick="closeModal(\'authModal\')">Graj jako Gość (Lokalnie)</button>' +
     '</div>';
@@ -17107,7 +17336,7 @@ function drawAim(){
     });
     ctx.font='900 12px Outfit, sans-serif';ctx.textAlign='center';
     ctx.fillStyle='#ffd700';ctx.strokeStyle='rgba(6,10,20,0.9)';ctx.lineWidth=3.5;
-    ctx.strokeText('🎯 NA BRAMKĘ',tipX,tipY-26);ctx.fillText('🎯 NA BRAMKĘ',tipX,tipY-26);
+    ctx.strokeText('AIM NA BRAMKĘ',tipX,tipY-26);ctx.fillText('AIM NA BRAMKĘ',tipX,tipY-26);
     ctx.shadowBlur=0;
   } else if(ch){
     const tagW=58,tagH=22,tagX=tipX-tagW/2,tagY=tipY-32;
@@ -17160,7 +17389,7 @@ function drawAim(){
       ctx.shadowBlur = 0;
 
       // Badge ze statusem timingu nad głową
-      const badgeTxt = isPerfect ? '🟢 PERFEKT' : (isLate ? '🔴 ZA PÓŹNO' : `${Math.round(chargeState.power)}%`);
+      const badgeTxt = isPerfect ? 'PERFEKT' : (isLate ? 'ZA PÓŹNO' : `${Math.round(chargeState.power)}%`);
       const badgeCol = isPerfect ? '#00ff88' : (isLate ? '#ff0055' : '#ffffff');
       ctx.font = '900 12px Outfit, sans-serif';
       ctx.textAlign = 'center';
@@ -17209,7 +17438,7 @@ function drawAim(){
   // Napis nad paskiem
   ctx.textAlign='center';ctx.font='900 11px Outfit, sans-serif';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(0,0,0,0.9)';
   const label=ch
-    ? `${type==='shot'?'⚡ STRZAŁ':type==='lowPass'?'⚽ PODANIE':'🚀 GÓRNE PODANIE'} • MOC ${Math.round(chargeState.power)}%`
+    ? `${type==='shot'?'STRZAŁ':type==='lowPass'?'PODANIE':'GÓRNE PODANIE'} • MOC ${Math.round(chargeState.power)}%`
     : 'LPM (trzymaj) = STRZAŁ  •  PPM = PODANIE  •  Q = LOB';
   ctx.strokeText(label,canvas.width/2,by-8);
   ctx.fillStyle=ch?colHex:'#ffffff';
