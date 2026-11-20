@@ -12141,7 +12141,7 @@ function switchToPlayer(targetPlayer) {
   updateSquadHud();
 }
 
-function cycleControlledPlayer(direction = 1) {
+function switchToClosestPlayerToBall() {
   if (is2v2) return;
   const myTeam = localSlotIdx < 2 ? 'blue' : 'red';
   const teamArr = myTeam === 'blue' ? blueTeam : redTeam;
@@ -12157,16 +12157,19 @@ function cycleControlledPlayer(direction = 1) {
     return distA - distB;
   });
 
-  // Cyklicznie przełączaj na kolejnego zawodnika z listy odległości od piłki
-  let curIdx = sorted.indexOf(current);
-  let nextIdx = (curIdx + direction + sorted.length) % sorted.length;
-  let target = sorted[nextIdx];
-
-  switchToPlayer(target);
+  // Jeśli obecny gracz nie jest najbliższym piłki, natychmiast przełącz na najbliższego!
+  // Jeśli już sterujemy najbliższym, przełącz na 2. najbliższego gracza (cykliczność przełączania)
+  if (sorted[0] !== current) {
+    switchToPlayer(sorted[0]);
+  } else if (sorted.length > 1) {
+    switchToPlayer(sorted[1]);
+  } else {
+    switchToPlayer(sorted[0]);
+  }
 }
 
-function switchToClosestPlayerToBall() {
-  cycleControlledPlayer(1);
+function cycleControlledPlayer(direction = 1) {
+  switchToClosestPlayerToBall();
 }
 
 function getNextPlayerSwitchCandidate() {
@@ -12184,13 +12187,8 @@ function getNextPlayerSwitchCandidate() {
     return distA - distB;
   });
 
-  let curIdx = sorted.indexOf(current);
-  let nextIdx = (curIdx + 1) % sorted.length;
-  return sorted[nextIdx] !== current ? sorted[nextIdx] : null;
-}
-
-function cycleControlledPlayer(direction = 1) {
-  switchToClosestPlayerToBall();
+  if (sorted[0] !== current) return sorted[0];
+  return sorted.length > 1 ? sorted[1] : null;
 }
 
 function switchToRole(role) {
