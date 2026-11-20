@@ -4641,6 +4641,955 @@
     color: var(--fc-volt);
   }
 
+  /* =========================================================
+     CYBERFC 28 NEXTGEN PRO MENU & DASHBOARD (MOCKUP DESIGN SYSTEM)
+     ========================================================= */
+
+  .cfc-menu-root {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 1400px !important;
+    min-height: calc(100vh - 40px) !important;
+    margin: 0 auto !important;
+    gap: 28px !important;
+    box-sizing: border-box !important;
+    padding: 12px 18px 24px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  }
+
+  /* SIDEBAR LEWY */
+  .cfc-sidebar {
+    width: 250px !important;
+    min-width: 240px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 10px 0 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .cfc-sidebar-top {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* BRAND LOGO */
+  .cfc-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 6px;
+    transition: transform 0.2s ease;
+  }
+  .cfc-brand:hover {
+    transform: scale(1.02);
+  }
+  .cfc-brand-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.45));
+  }
+  .cfc-brand-text {
+    font-family: var(--font-heading), 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .cfc-brand-text .brand-num {
+    color: #00f0ff;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.65);
+  }
+
+  /* LISTA NAWIGACJI */
+  .cfc-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cfc-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    border-radius: 18px;
+    font-family: var(--font-heading), 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #8e9bb0;
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    user-select: none;
+  }
+  .cfc-nav-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(3px);
+  }
+  .cfc-nav-btn.active {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.24) 0%, rgba(0, 140, 255, 0.12) 100%) !important;
+    border: 1.5px solid #00f0ff !important;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.35), inset 0 0 16px rgba(0, 240, 255, 0.12) !important;
+  }
+  .cfc-nav-btn.active .cfc-nav-icon {
+    color: #00f0ff;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.7));
+  }
+  .cfc-nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+  }
+
+  /* KARTA PROMO W SIDEBARZE */
+  .cfc-sidebar-promo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(16, 22, 38, 0.75) 0%, rgba(10, 14, 25, 0.85) 100%);
+    border: 1px solid rgba(0, 240, 255, 0.18);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    backdrop-filter: blur(16px);
+    user-select: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .cfc-sidebar-promo:hover {
+    border-color: #00f0ff;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  .cfc-promo-crown {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+  .cfc-promo-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .cfc-promo-title {
+    font-family: var(--font-heading);
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+  }
+  .cfc-promo-desc {
+    font-size: 11px;
+    color: #7e8b9b;
+    line-height: 1.2;
+  }
+  .cfc-promo-arrow {
+    font-size: 18px;
+    color: #00f0ff;
+    font-weight: 700;
+  }
+
+  /* GŁÓWNA STRUKTURA PO PRAWEJ */
+  .cfc-main-layout {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    min-width: 0 !important;
+  }
+
+  /* TOPBAR */
+  .cfc-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 2px 4px 6px;
+    user-select: none;
+  }
+  .cfc-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .cfc-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 12px 4px 6px;
+    border-radius: 24px;
+    background: rgba(14, 18, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+  }
+  .cfc-user-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.3);
+  }
+  .cfc-user-avatar-wrap {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+  .cfc-user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #1e293b;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+  }
+  .cfc-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 9px;
+    height: 9px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid #080c16;
+    box-shadow: 0 0 8px #10b981;
+  }
+  .cfc-user-name {
+    font-family: var(--font-heading);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .cfc-topbar-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .cfc-coins-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 22, 38, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cfc-coins-pill:hover {
+    border-color: #fbbf24;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.25);
+  }
+  .cfc-coins-val {
+    font-family: var(--font-heading);
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .cfc-coins-plus-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    padding: 0;
+    line-height: 1;
+  }
+  .cfc-coins-plus-btn:hover {
+    background: #fbbf24;
+    color: #000000;
+  }
+  .cfc-power-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(18, 24, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #8e9bb0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  .cfc-power-btn:hover {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+    transform: scale(1.06);
+  }
+
+  /* 2X2 DASHBOARD GRID */
+  .cfc-dashboard-grid {
+    display: grid !important;
+    grid-template-columns: 1.55fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 18px !important;
+    width: 100% !important;
+  }
+
+  /* KARTY DASHBOARDU */
+  .cfc-card {
+    background: rgba(11, 15, 27, 0.82) !important;
+    backdrop-filter: blur(28px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 22px !important;
+    padding: 22px 24px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+
+  /* KAFEL 1: HERO "GRAJ TERAZ" */
+  .cfc-hero-play-card {
+    border: 1px solid rgba(0, 240, 255, 0.22) !important;
+    min-height: 250px !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7), 0 0 45px rgba(0, 240, 255, 0.08) !important;
+  }
+  .cfc-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 30%;
+    opacity: 0.45;
+    filter: saturate(1.2);
+    transition: transform 0.5s ease;
+  }
+  .cfc-hero-play-card:hover .cfc-hero-bg {
+    transform: scale(1.03);
+  }
+  .cfc-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(6, 11, 26, 0.94) 0%, rgba(8, 16, 36, 0.65) 50%, rgba(4, 8, 18, 0.96) 100%);
+  }
+  .cfc-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    justify-content: space-between;
+  }
+  .cfc-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-heading);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .cfc-live-badge .live-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: pulseGreen 2s infinite;
+  }
+  .cfc-hero-title {
+    font-family: var(--font-heading), 'Montserrat', sans-serif;
+    font-size: clamp(34px, 3.6vw, 48px);
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ffffff;
+    margin: 2px 0 0;
+    line-height: 1.05;
+  }
+  .cfc-hero-title .cyan-glow {
+    background: linear-gradient(90deg, #00f0ff 0%, #00a2ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.65));
+  }
+  .cfc-hero-sub {
+    font-size: 13.5px;
+    color: #a0aec0;
+    margin: 0 0 14px;
+  }
+  .cfc-cta-play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    background: linear-gradient(90deg, #00f0ff 0%, #0099ff 100%);
+    color: #040914;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 900;
+    padding: 12px 28px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0, 240, 255, 0.45);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  .cfc-cta-play-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 32px rgba(0, 240, 255, 0.7);
+  }
+  .cfc-cta-play-btn .btn-arrow {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  /* NAGŁÓWKI KART (WSPÓLNE) */
+  .cfc-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .cfc-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cfc-card-title {
+    font-family: var(--font-heading);
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .cfc-header-link {
+    background: transparent;
+    border: none;
+    color: #8e9bb0;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+  }
+  .cfc-header-link:hover {
+    color: #00f0ff;
+  }
+
+  /* KAFEL 2: "KARNET SEZONOWY" */
+  .cfc-season-pass-card {
+    border: 1px solid rgba(138, 75, 255, 0.25) !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(138, 75, 255, 0.05) !important;
+    gap: 16px;
+  }
+  .cfc-season-tag {
+    background: rgba(138, 75, 255, 0.2);
+    border: 1px solid rgba(138, 75, 255, 0.4);
+    color: #d8b4fe;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .cfc-pass-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: auto 0;
+  }
+  .cfc-hex-badge {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(180, 83, 9, 0.45));
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+    position: relative;
+  }
+  .cfc-hex-badge .hex-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.05;
+  }
+  .cfc-hex-badge .hex-num {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 900;
+    color: #fbbf24;
+  }
+  .cfc-hex-badge .hex-lbl {
+    font-family: var(--font-heading);
+    font-size: 8.5px;
+    font-weight: 900;
+    color: #fef3c7;
+    letter-spacing: 1.5px;
+  }
+  .cfc-pass-progress-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cfc-pass-prompt {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+  .cfc-progress-track {
+    height: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .cfc-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%);
+    box-shadow: 0 0 12px rgba(217, 70, 239, 0.6);
+  }
+  .cfc-progress-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .cfc-secondary-pill-btn {
+    background: rgba(28, 32, 54, 0.7);
+    border: 1px solid rgba(138, 75, 255, 0.35);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 10px 22px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    user-select: none;
+    width: 100%;
+  }
+  .cfc-secondary-pill-btn:hover {
+    background: rgba(45, 52, 85, 0.85);
+    border-color: #a855f7;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+  }
+
+  /* KAFEL 3: "TWOJA DRUŻYNA" */
+  .cfc-squad-overview-card {
+    border: 1px solid rgba(0, 240, 255, 0.2) !important;
+    gap: 14px;
+  }
+  .cfc-team-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 125px;
+  }
+  .cfc-club-crest-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 16px;
+    background: rgba(14, 20, 36, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .cfc-club-crest-box:hover {
+    transform: scale(1.04);
+    border-color: rgba(0, 240, 255, 0.3);
+  }
+  .cfc-crest-graphic {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .crest-crown {
+    font-size: 15px;
+    margin-bottom: -4px;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+  }
+  .crest-shield {
+    width: 40px;
+    height: 46px;
+    border-radius: 0 0 20px 20px;
+    border: 2px solid #fbbf24;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
+  }
+  .shield-stripe {
+    flex: 1;
+    height: 100%;
+  }
+  .shield-stripe.s-red { background: #dc2626; }
+  .shield-stripe.s-white { background: #f8fafc; }
+  .shield-stripe.s-blue { background: #1d4ed8; }
+  .cfc-club-name {
+    font-family: var(--font-heading);
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .cfc-club-ovr {
+    font-family: var(--font-heading);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #8e9bb0;
+  }
+
+  /* 4 KARTY PIERWSZEGO SKŁADU */
+  .cfc-lineup-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: space-around;
+    overflow-x: auto;
+  }
+  .cfc-mini-card {
+    width: 82px;
+    height: 122px;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    user-select: none;
+  }
+  .cfc-mini-card:hover {
+    transform: translateY(-5px) scale(1.06);
+    z-index: 5;
+  }
+  .cfc-mini-card.is-gold {
+    background: linear-gradient(145deg, #1c180e 0%, #302611 100%);
+    border: 1.5px solid #eab308;
+    box-shadow: 0 0 16px rgba(234, 179, 8, 0.28);
+  }
+  .cfc-mini-card.is-special {
+    background: linear-gradient(145deg, #221230 0%, #3a154c 100%);
+    border: 1.5px solid #d946ef;
+    box-shadow: 0 0 16px rgba(217, 70, 239, 0.28);
+  }
+  .cfc-mini-card.is-dark {
+    background: linear-gradient(145deg, #0e1424 0%, #1a253f 100%);
+    border: 1.5px solid #3b82f6;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.28);
+  }
+  .cfc-mini-card.is-cyan {
+    background: linear-gradient(145deg, #091a24 0%, #0d2f3d 100%);
+    border: 1.5px solid #06b6d4;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.28);
+  }
+  .cfc-mini-card.is-icon {
+    background: linear-gradient(145deg, #262010 0%, #453a1c 100%);
+    border: 1.5px solid #fef08a;
+    box-shadow: 0 0 20px rgba(254, 240, 138, 0.45);
+  }
+  .mini-card-top {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    z-index: 2;
+  }
+  .mini-card-ovr {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+  .mini-card-pos {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    color: #cbd5e1;
+  }
+  .mini-card-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    position: absolute;
+    top: 18px;
+    right: -2px;
+    z-index: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+  }
+  .mini-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+    margin-top: auto;
+    font-size: 11px;
+  }
+
+  /* KAFEL 4: "ZNAJOMI ONLINE" */
+  .cfc-friends-card {
+    gap: 12px;
+  }
+  .cfc-friends-counter {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    color: #8e9bb0;
+  }
+  .cfc-friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cfc-friend-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+  }
+  .cfc-friend-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(3px);
+  }
+  .cfc-friend-avatar-wrap {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .cfc-friend-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .friend-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid #0c101c;
+    box-shadow: 0 0 6px #10b981;
+  }
+  .cfc-friend-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cfc-friend-name {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .cfc-friend-status {
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .cfc-friend-status.in-match { color: #38bdf8; }
+  .cfc-friend-status.in-menu { color: #a78bfa; }
+  .cfc-friend-status.online { color: #10b981; }
+  .cfc-friend-chevron {
+    font-size: 16px;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  /* MODALE CYBERFC 28 */
+  .cfc-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 16, 0.85);
+    backdrop-filter: blur(16px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    animation: cfcFadeIn 0.2s ease;
+  }
+  @keyframes cfcFadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .cfc-modal-card {
+    background: rgba(13, 17, 30, 0.95);
+    border: 1.5px solid rgba(0, 240, 255, 0.25);
+    border-radius: 24px;
+    width: 600px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 240, 255, 0.12);
+    position: relative;
+  }
+  .cfc-modal-card.purple-theme {
+    border-color: rgba(168, 85, 247, 0.35);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(168, 85, 247, 0.15);
+  }
+  .cfc-modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cfc-modal-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 900;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+  .cfc-modal-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #8e9bb0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cfc-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  .cfc-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* MODAL MODES GRID */
+  .cfc-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .cfc-mode-btn {
+    background: rgba(20, 26, 44, 0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+  }
+  .cfc-mode-btn:hover {
+    border-color: #00f0ff;
+    background: rgba(0, 240, 255, 0.08);
+    transform: translateY(-2px);
+  }
+  .cfc-mode-btn-title {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cfc-mode-btn-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.35;
+  }
+
+  /* RESPONSIVE LAYOUT */
+  @media (max-width: 1100px) {
+    .cfc-menu-root {
+      flex-direction: column !important;
+      gap: 16px !important;
+      padding: 10px 10px 20px !important;
+    }
+    .cfc-sidebar {
+      width: 100% !important;
+    }
+    .cfc-nav-list {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+    }
+    .cfc-dashboard-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
 </style>
 
 </head>
@@ -4725,247 +5674,281 @@
 
 
 <div class="app-layer"><!-- MENU GŁÓWNE -->
-  <div id="menu">
-    <!-- GÓRNY PASEK NAWIGACYJNY EA SPORTS FC 28 (PRO CONSOLE & DESKTOP NAVBAR) -->
-    <header class="ea-fc-header">
-      <div class="ea-fc-brand" onclick="location.reload()" title="CYBERFC 28 Ultimate Team">
-        <div class="ea-triangle-crest">
-          <span class="crest-text">FC</span>
-        </div>
-        <div class="ea-brand-info">
-          <span class="ea-brand-title">CYBERFC 28</span>
-          <span class="ea-brand-sub">ULTIMATE TEAM™</span>
-        </div>
-      </div>
-
-      <nav class="ea-fc-nav">
-        <button type="button" class="ea-nav-btn active" id="navBtnArena" onclick="void(0)">
-          <span>MECZ</span>
-        </button>
-        <button type="button" class="ea-nav-btn" id="navBtnSquad" onclick="switchClubTab('SQUAD'); openClubModal()">
-          <span>SKŁAD</span>
-        </button>
-        <button type="button" class="ea-nav-btn" id="navBtnPacks" onclick="switchClubTab('PACKS'); openClubModal()">
-          <span>PACZKI</span>
-        </button>
-        <button type="button" class="ea-nav-btn" id="navBtnRanking" onclick="openLeaderboardModal()">
-          <span>RANKING</span>
-        </button>
-      </nav>
-
-      <div class="ea-fc-user-area">
-        <div class="coins-badge ea-coins-badge" onclick="switchClubTab('PACKS'); openClubModal()" title="Twoje Monety FC (Kliknij, aby otworzyć paczkę)">
-          <span class="coin-disc">FC</span>
-          <span id="menuCoinsDisplay">500</span>
-          <span class="coin-lbl">COINS</span>
+  <div id="menu" class="cfc-menu-root">
+    <!-- LEWY PASEK BOCZNY -->
+    <aside class="cfc-sidebar">
+      <div class="cfc-sidebar-top">
+        <div class="cfc-brand" onclick="location.reload()" title="CYBERFC 28">
+          <div class="cfc-brand-icon">
+            <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+              <defs>
+                <linearGradient id="cfcIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00f0ff" />
+                  <stop offset="100%" stop-color="#3b82f6" />
+                </linearGradient>
+              </defs>
+              <path d="M38 15 C33 8, 17 7, 12 15 C6 23, 6 27, 12 35 C17 42, 33 42, 38 34" stroke="url(#cfcIconGrad)" stroke-width="5" stroke-linecap="round" />
+              <path d="M22 25 L40 25" stroke="#00f0ff" stroke-width="4.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="cfc-brand-text">
+            <span>CYBERFC</span> <span class="brand-num">28</span>
+          </div>
         </div>
 
-        <div class="ea-user-chip" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem i synchronizacją Cloudflare D1">
-          <span class="user-status-dot"></span>
-          <span class="user-name-text">TRYB GOŚCIA</span>
-          <span class="user-div-tag">LOKALNY</span>
-        </div>
-
-        <button type="button" class="account-top-btn ea-btn-login" id="fcAccountButton" onclick="openFcAuth()" style="display:none;">KONTO</button>
-
-        <button type="button" class="ea-icon-action-btn" onclick="toggleFullscreen()" title="Pełny ekran (F11)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- WIDESCREEN EA FC DASHBOARD GRID -->
-    <div class="ea-dashboard" id="mainPanel">
-      <div class="ea-dashboard-layout-3col">
-        
-        <!-- Hidden compatibility elements -->
-        <div id="statusMsg" style="display:none;" aria-hidden="true"></div>
-        <input type="hidden" id="nickInput" value="Gość">
-        <input type="hidden" id="joinInput" value="">
-        <!-- KAFEL 1: CENTRUM ROZGRYWKI (PLAY HUB) -->
-        <section class="ea-play-card">
-          <div class="ea-play-header">
-            <div class="ea-play-tag-row">
-              <span class="ea-badge-volt">ARENA 3D</span>
-              <span class="ea-reward-tag">+100 MONET ZA MECZ</span>
-            </div>
-            <h2 class="ea-play-title">CENTRUM MECZU</h2>
-            <p class="ea-play-desc">Wkrocz na pełnowymiarowy stadion 3D ze zbalansowaną fizyką Rapier, PlayStyles+ i autentycznymi modelami gwiazd.</p>
-          </div>
-
-          <!-- Przełącznik trybu SOLO vs MULTIPLAYER -->
-          <div class="ea-mode-segment-bar">
-            <button type="button" class="ea-segment-btn active" id="segSoloTab" onclick="switchMatchTab('SOLO')">
-              SOLO (AI)
-            </button>
-            <button type="button" class="ea-segment-btn" id="segMpTab" onclick="switchMatchTab('MP')">
-              ONLINE (P2P)
-            </button>
-          </div>
-
-          <!-- SEKCJA SOLO ARENA -->
-          <div class="ea-match-content" id="eaMatchSoloView">
-            <div class="ea-clean-control-section">
-              <div class="ea-control-label">FORMAT SPOTKANIA</div>
-              <div class="ea-pill-selector">
-                <button type="button" class="ea-pill-btn active" id="solo-fmt-1v1" onclick="setSoloSubMode('1v1')">1 VS 1</button>
-                <button type="button" class="ea-pill-btn" id="solo-fmt-2v2" onclick="setSoloSubMode('2v2')">2 VS 2 CO-OP</button>
-              </div>
-            </div>
-
-            <div class="ea-clean-control-section">
-              <div class="ea-control-label">POZIOM TRUDNOŚCI AI</div>
-              <div class="ai-tiers">
-                <button type="button" class="tier-btn" id="ai-easy" onclick="setMatchAiDifficulty('easy')">AMATOR</button>
-                <button type="button" class="tier-btn active" id="ai-medium" onclick="setMatchAiDifficulty('medium')">ZAWODOWIEC</button>
-                <button type="button" class="tier-btn" id="ai-hard" onclick="setMatchAiDifficulty('hard')">KLASA ŚWIATOWA</button>
-              </div>
-              <!-- Ukryte przyciski dla kompatybilności wstecznej AI sojuszników -->
-              <div style="display:none;" aria-hidden="true">
-                <button id="ally-easy" onclick="setAllyAiTier('easy')"></button>
-                <button id="ally-medium" onclick="setAllyAiTier('medium')"></button>
-                <button id="ally-hard" onclick="setAllyAiTier('hard')"></button>
-              </div>
-            </div>
-
-            <div class="ea-cta-row single-cta">
-              <button type="button" class="action-btn ea-btn-volt ea-hero-btn" onclick="launchCurrentSoloMatch()">
-                <span>ROZPOCZNIJ MECZ ➔</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- SEKCJA MULTIPLAYER (ONLINE P2P) -->
-          <div class="ea-match-content" id="eaMatchMpView" style="display:none;">
-            <div class="ea-clean-control-section">
-              <div class="ea-control-label">TRYB SIECIOWY</div>
-              <div class="ea-pill-selector">
-                <button type="button" class="ea-pill-btn active" id="mp-1v1" onclick="setMpMode('1v1')">1 VS 1 POJEDYNEK</button>
-                <button type="button" class="ea-pill-btn" id="mp-2v2" onclick="setMpMode('2v2')">2 VS 2 LOBBY</button>
-              </div>
-            </div>
-
-            <div class="ea-cta-row">
-              <button type="button" class="action-btn ea-btn-volt" id="btnQuickMatch" onclick="startQuickMatchmaking()">
-                <span>⚡ SZYBKI MECZ</span>
-              </button>
-              <button type="button" class="action-btn ea-btn-sub" onclick="createRoom()">
-                <span>STWÓRZ POKÓJ</span>
-              </button>
-            </div>
-
-            <div class="ea-clean-control-section" style="margin-top: 10px;">
-              <div class="ea-control-label">DOŁĄCZ DO POKOJU PRZEZ KOD</div>
-              <div class="ea-join-container">
-                <input type="text" class="room-code-input" id="joinCodeInput" placeholder="WPISZ 6-ZNAKOWY KOD..." maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="characters">
-                <button type="button" class="action-btn ea-btn-join" onclick="joinRoom()">
-                  <span>DOŁĄCZ</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- KAFEL 2: TWÓJ WYJŚCIOWY SKŁAD -->
-        <section class="ea-tile-card ea-squad-tile">
-          <div class="ea-tile-header">
-            <div class="ea-tile-title-group">
-              <span class="ea-tile-sub">ULTIMATE TEAM</span>
-              <h3 class="ea-tile-heading">TWÓJ SKŁAD</h3>
-            </div>
-            <div class="ea-tile-meta">
-              <span class="ea-badge-gold" id="menuOvrBadge">OVR 88</span>
-              <span class="ea-badge-volt">CHEM 33/33</span>
-            </div>
-          </div>
-
-          <!-- Kontener na 4 karty składu -->
-          <div class="squad-preview-strip" id="menuSquadStrip"></div>
-
-          <button type="button" class="ea-tile-cta" onclick="switchClubTab('SQUAD'); openClubModal();">
-            <span>ZARZĄDZAJ SKŁADEM & TAKTYKĄ ➔</span>
+        <nav class="cfc-nav-list">
+          <button type="button" class="cfc-nav-btn active" id="sidebarNavHome" onclick="switchSidebarTab('HOME')">
+            <span class="cfc-nav-icon">🏠</span>
+            <span>Strona główna</span>
           </button>
-        </section>
+          <button type="button" class="cfc-nav-btn" id="sidebarNavMultiplayer" onclick="switchSidebarTab('MULTIPLAYER')">
+            <span class="cfc-nav-icon">👥</span>
+            <span>Gra wieloosobowa</span>
+          </button>
+          <button type="button" class="cfc-nav-btn" id="sidebarNavSquad" onclick="switchClubTab('SQUAD'); openClubModal();">
+            <span class="cfc-nav-icon">🛡️</span>
+            <span>Zarządzaj drużyną</span>
+          </button>
+          <button type="button" class="cfc-nav-btn" id="sidebarNavShop" onclick="switchClubTab('PACKS'); openClubModal();">
+            <span class="cfc-nav-icon">🛒</span>
+            <span>Sklep</span>
+          </button>
+          <button type="button" class="cfc-nav-btn" id="sidebarNavLeaderboard" onclick="openLeaderboardModal()">
+            <span class="cfc-nav-icon">🏆</span>
+            <span>Ranking</span>
+          </button>
+          <button type="button" class="cfc-nav-btn" id="sidebarNavSettings" onclick="openSettingsModal()">
+            <span class="cfc-nav-icon">⚙️</span>
+            <span>Ustawienia</span>
+          </button>
+        </nav>
+      </div>
 
-        <!-- KAFEL 3: SKLEP Z PACZKAMI & RANKING -->
-        <section class="ea-tile-card ea-pack-promo-card">
-          <div class="ea-tile-header">
-            <div class="ea-tile-title-group">
-              <span class="ea-tile-sub gold-text">SKLEP ULTIMATE TEAM</span>
-              <h3 class="ea-tile-heading">PACZKI FUT</h3>
+      <div class="cfc-sidebar-promo" onclick="openCommunityModal()">
+        <div class="cfc-promo-crown">👑</div>
+        <div class="cfc-promo-info">
+          <div class="cfc-promo-title">Dołącz do społeczności!</div>
+          <div class="cfc-promo-desc">Odkryj nowe możliwości gry.</div>
+        </div>
+        <div class="cfc-promo-arrow">›</div>
+      </div>
+    </aside>
+
+    <!-- GŁÓWNY PANEL Z KARTAMI -->
+    <main class="cfc-main-layout" id="mainPanel">
+      <header class="cfc-topbar">
+        <div class="cfc-topbar-right">
+          <div class="cfc-user-pill" id="fcAuthUserLabel" onclick="openFcAuth()" title="Zarządzaj kontem">
+            <div class="cfc-user-avatar-wrap">
+              <img src="assets/players/fwd_haaland.webp" class="cfc-user-avatar" id="cfcUserAvatarImg" alt="Avatar">
+              <span class="cfc-online-dot"></span>
             </div>
-            <div class="ea-pack-cost">
-              <span class="ea-pack-price">100</span>
-              <span class="ea-pack-coin-lbl">COINS</span>
-            </div>
+            <span class="user-name-text cfc-user-name" id="cfcTopUserName">Łukasz123</span>
+            <span class="user-div-tag" style="display:none;"></span>
           </div>
 
-          <div class="ea-pack-promo-body">
-            <div class="ea-pack-3d-box" onclick="switchClubTab('PACKS'); openClubModal();" title="Kliknij, aby otworzyć paczkę!">
-              <div class="ea-pack-foil"></div>
-              <div class="ea-pack-badge">85+</div>
-              <div class="ea-pack-label">PRIME PACK</div>
+          <div class="cfc-topbar-divider"></div>
+
+          <div class="cfc-coins-pill" onclick="switchClubTab('PACKS'); openClubModal();" title="Twoje Monety">
+            <span class="cfc-coin-icon">🪙</span>
+            <span class="cfc-coins-val" id="menuCoinsDisplay">2 450</span>
+            <button type="button" class="cfc-coins-plus-btn">+</button>
+          </div>
+
+          <button type="button" class="cfc-power-btn" onclick="handlePowerButtonClick()" title="Konto i sesja">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+          </button>
+          <button type="button" id="fcAccountButton" onclick="openFcAuth()" style="display:none;"></button>
+        </div>
+      </header>
+
+      <section class="cfc-view-pane active" id="cfcViewHome">
+        <div class="cfc-dashboard-grid">
+          <!-- KAFEL 1: GRAJ TERAZ -->
+          <article class="cfc-card cfc-hero-play-card">
+            <div class="cfc-hero-bg" style="background-image: url('assets/cover_fc28.jpg');"></div>
+            <div class="cfc-hero-overlay"></div>
+            <div class="cfc-hero-content">
+              <div class="cfc-live-badge">
+                <span class="live-dot-pulse"></span>
+                <span>Online: <strong id="heroOnlineCount">642</strong> graczy</span>
+              </div>
+              <h1 class="cfc-hero-title">
+                GRAJ <span class="cyan-glow">TERAZ</span>
+              </h1>
+              <p class="cfc-hero-sub">
+                Stań do rywalizacji z graczami z całego świata!
+              </p>
+              <button type="button" class="cfc-cta-play-btn" onclick="openQuickPlayModal()">
+                <span>▶ Dołącz do gry</span>
+                <span class="btn-arrow">›</span>
+              </button>
             </div>
-            <div class="ea-pack-promo-desc">
-              <p class="ea-pack-highlight">Gwarantowane karty rzadkich gwiazd, legendy i PlayStyles+.</p>
-              <div class="ea-pack-chances">
-                <span>ZŁOTO 80+: 100%</span>
-                <span>IKONY: 15%</span>
+          </article>
+
+          <!-- KAFEL 2: KARNET SEZONOWY -->
+          <article class="cfc-card cfc-season-pass-card">
+            <div class="cfc-card-header">
+              <div class="cfc-header-left">
+                <span>👑</span>
+                <h3 class="cfc-card-title">KARNET SEZONOWY</h3>
+              </div>
+              <span class="cfc-season-tag">Sezon 1</span>
+            </div>
+
+            <div class="cfc-pass-body">
+              <div class="cfc-hex-badge">
+                <div class="hex-content">
+                  <span class="hex-num">85+</span>
+                  <span class="hex-lbl">PREMIUM</span>
+                </div>
+              </div>
+
+              <div class="cfc-pass-progress-box">
+                <div class="cfc-pass-prompt">Zdobądź więcej nagród!</div>
+                <div class="cfc-progress-track">
+                  <div class="cfc-progress-bar" style="width: 24%;"></div>
+                </div>
+                <div class="cfc-progress-label">Poziom 12 / 50</div>
               </div>
             </div>
-          </div>
 
-          <button type="button" class="ea-tile-cta gold-cta" onclick="switchClubTab('PACKS'); openClubModal();">
-            <span>OTWÓRZ PACZKI FUT ➔</span>
-          </button>
-
-          <div class="ea-tile-quick-links">
-            <button type="button" class="ea-sub-link-btn" onclick="openLeaderboardModal()">
-              <span>🏆 RANKING GRACZY</span>
+            <button type="button" class="cfc-secondary-pill-btn" onclick="openSeasonPassModal()">
+              <span>Zobacz nagrody</span>
+              <span>›</span>
             </button>
-            <button type="button" class="ea-sub-link-btn" onclick="openFcAuth()">
-              <span>👤 SYNCHRO / KONTO</span>
-            </button>
+          </article>
+
+          <!-- KAFEL 3: TWOJA DRUŻYNA -->
+          <article class="cfc-card cfc-squad-overview-card">
+            <div class="cfc-card-header">
+              <div class="cfc-header-left">
+                <span>🛡️</span>
+                <h3 class="cfc-card-title">TWOJA DRUŻYNA</h3>
+              </div>
+              <button type="button" class="cfc-header-link" onclick="switchClubTab('SQUAD'); openClubModal();">
+                <span>Zobacz więcej</span>
+                <span>›</span>
+              </button>
+            </div>
+
+            <div class="cfc-team-row">
+              <div class="cfc-club-crest-box" onclick="switchClubTab('SQUAD'); openClubModal();" title="Zarządzaj klubem">
+                <div class="cfc-crest-graphic">
+                  <div class="crest-crown">👑</div>
+                  <div class="crest-shield">
+                    <div class="shield-stripe s-red"></div>
+                    <div class="shield-stripe s-white"></div>
+                    <div class="shield-stripe s-blue"></div>
+                  </div>
+                </div>
+                <div class="cfc-club-name" id="menuClubNameDisplay">FC JDR</div>
+                <div class="cfc-club-ovr" id="menuOvrBadge">OGL 87</div>
+              </div>
+
+              <div class="cfc-lineup-strip" id="menuSquadStrip"></div>
+            </div>
+          </article>
+
+          <!-- KAFEL 4: ZNAJOMI ONLINE -->
+          <article class="cfc-card cfc-friends-card">
+            <div class="cfc-card-header">
+              <div class="cfc-header-left">
+                <span>👥</span>
+                <h3 class="cfc-card-title">Znajomi online</h3>
+              </div>
+              <span class="cfc-friends-counter" id="friendsOnlineCount">3 / 12</span>
+            </div>
+
+            <div class="cfc-friends-list">
+              <div class="cfc-friend-row" onclick="challengeFriend('Kacperinho')">
+                <div class="cfc-friend-avatar-wrap">
+                  <img src="assets/players/fwd_messi.webp" class="cfc-friend-avatar" alt="Kacperinho">
+                  <span class="friend-online-dot"></span>
+                </div>
+                <div class="cfc-friend-info">
+                  <div class="cfc-friend-name">Kacperinho</div>
+                  <div class="cfc-friend-status in-match">Gra w meczu</div>
+                </div>
+                <div class="cfc-friend-chevron">›</div>
+              </div>
+
+              <div class="cfc-friend-row" onclick="challengeFriend('DawidKing')">
+                <div class="cfc-friend-avatar-wrap">
+                  <img src="assets/players/fwd_ronaldo.webp" class="cfc-friend-avatar" alt="DawidKing">
+                  <span class="friend-online-dot"></span>
+                </div>
+                <div class="cfc-friend-info">
+                  <div class="cfc-friend-name">DawidKing</div>
+                  <div class="cfc-friend-status in-menu">W menu</div>
+                </div>
+                <div class="cfc-friend-chevron">›</div>
+              </div>
+
+              <div class="cfc-friend-row" onclick="challengeFriend('Piotrek123')">
+                <div class="cfc-friend-avatar-wrap">
+                  <img src="assets/players/fwd_lewandowski.webp" class="cfc-friend-avatar" alt="Piotrek123">
+                  <span class="friend-online-dot"></span>
+                </div>
+                <div class="cfc-friend-info">
+                  <div class="cfc-friend-name">Piotrek123</div>
+                  <div class="cfc-friend-status online">Online</div>
+                </div>
+                <div class="cfc-friend-chevron">›</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- WIDOK TRYBU SIECIOWEGO -->
+      <section class="cfc-view-pane" id="cfcViewMultiplayer" style="display:none; padding:10px;">
+        <div class="cfc-card" style="gap:16px;">
+          <h2 style="font-family:var(--font-heading); font-size:18px; color:#fff; margin:0;">CENTRUM MECZÓW SIECIOWYCH</h2>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <button type="button" class="cfc-cta-play-btn" onclick="startQuickMatchmaking()">⚡ Szybki Mecz Online</button>
+            <button type="button" class="cfc-secondary-pill-btn" style="width:auto;" onclick="createRoom()">Stwórz Pokój (1v1 / 2v2)</button>
           </div>
-        </section>
+          <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+            <input type="text" class="room-code-input" id="joinCodeInput" placeholder="KOD POKOJU..." maxlength="6" style="background:#141a2c; border:1px solid #3b82f6; color:#fff; padding:10px 14px; border-radius:12px; font-family:var(--font-heading);">
+            <button type="button" class="cfc-cta-play-btn" style="padding:10px 20px;" onclick="joinRoom()">Dołącz</button>
+          </div>
+        </div>
+      </section>
 
-      </div>
-    </div>
+      <div id="statusMsg" style="display:none;" aria-hidden="true"></div>
+      <input type="hidden" id="nickInput" value="Gość">
+      <input type="hidden" id="joinInput" value="">
+    </main>
 
-    <!-- EKRAN OCZEKIWANIA HOSTA 1 VS 1 -->
+    <!-- PANELE OCZEKIWANIA -->
     <div class="wait-panel hidden" id="waitPanel">
-      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU (KLIKNIJ ABY SKOPIOWAĆ)</div>
+      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">KOD POKOJU</div>
       <div id="roomCodeDisplay" onclick="copyCodeToClipboard()">------</div>
       <div style="font-size:13px; color:#8b949e; margin-bottom:16px;">Wyślij kod znajomemu. Mecz ruszy automatycznie!</div>
       <button type="button" class="action-btn" style="background:#21262d;" onclick="location.reload()">WRÓĆ</button>
     </div>
 
-    <!-- EKRAN LOBBY 2 VS 2 -->
     <div class="lobby-panel hidden" id="lobby2v2Panel">
-      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2 — KOD POKOJU (KLIKNIJ BY SKOPIOWAĆ)</div>
+      <div style="font-family:var(--font-heading); font-size:13px; color:#8b949e; letter-spacing:2px;">LOBBY 2 VS 2</div>
       <div id="lobbyCodeDisplay" onclick="copyCodeToClipboard()">------</div>
-
       <div class="lobby-presets-bar" id="hostPresetsBar">
         <button type="button" class="preset-btn" onclick="applyCoop2v2Preset()">🤝 CO-OP VS BOTY</button>
         <button type="button" class="preset-btn" onclick="fillEmptySlotsWithBots()">🤖 WYPEŁNIJ BOTAMI</button>
       </div>
-
       <div class="lobby-teams-grid">
         <div class="lobby-team-col t1">
           <div class="lobby-team-header p1-color">NIEBIESCY (DRUŻYNA 1)</div>
           <div class="lobby-slot" id="lobbySlot0" onclick="onLobbySlotClick(0)"></div>
           <div class="lobby-slot" id="lobbySlot1" onclick="onLobbySlotClick(1)"></div>
         </div>
-
         <div class="lobby-team-col t2">
           <div class="lobby-team-header p2-color">CZERWONI (DRUŻYNA 2)</div>
           <div class="lobby-slot" id="lobbySlot2" onclick="onLobbySlotClick(2)"></div>
           <div class="lobby-slot" id="lobbySlot3" onclick="onLobbySlotClick(3)"></div>
         </div>
       </div>
-
       <div class="lobby-hint" id="lobbyHintText">Oczekiwanie na graczy...</div>
-
       <div class="lobby-actions">
         <button type="button" class="action-btn btn-host" id="btnStart2v2" onclick="hostStart2v2Match()" disabled>START MECZU</button>
         <button type="button" class="action-btn" style="background:#21262d; width: 42%;" onclick="location.reload()">OPUŚĆ</button>
@@ -4973,8 +5956,129 @@
     </div>
   </div>
 
+  <!-- MODAL SZYBKIEGO WYBORU TRYBU -->
+  <div class="cfc-modal-overlay" id="quickPlayModal" style="display:none;" onclick="if(event.target===this)closeQuickPlayModal()">
+    <div class="cfc-modal-card">
+      <div class="cfc-modal-header">
+        <h3 class="cfc-modal-title"><span>⚡</span> WYBIERZ TRYB GRY</h3>
+        <button type="button" class="cfc-modal-close" onclick="closeQuickPlayModal()">✕</button>
+      </div>
+      <div class="cfc-modal-body">
+        <div class="cfc-mode-grid">
+          <div class="cfc-mode-btn" onclick="closeQuickPlayModal(); startSingleplayer();">
+            <div class="cfc-mode-btn-title"><span>⚽</span> 1 VS 1 SOLO</div>
+            <div class="cfc-mode-btn-desc">Graj swoim klubem przeciwko rywalowi AI na wybranym poziomie.</div>
+          </div>
+          <div class="cfc-mode-btn" onclick="closeQuickPlayModal(); startSolo2v2();">
+            <div class="cfc-mode-btn-title"><span>🤝</span> 2 VS 2 CO-OP</div>
+            <div class="cfc-mode-btn-desc">Mecz 2 na 2 z sojusznikiem i rywalami sterowanymi przez AI.</div>
+          </div>
+          <div class="cfc-mode-btn" onclick="closeQuickPlayModal(); startQuickMatchmaking();">
+            <div class="cfc-mode-btn-title"><span>🌐</span> SZYBKI MECZ ONLINE</div>
+            <div class="cfc-mode-btn-desc">Automatyczne dobieranie gracza przez sieć P2P.</div>
+          </div>
+          <div class="cfc-mode-btn" onclick="closeQuickPlayModal(); switchSidebarTab('MULTIPLAYER');">
+            <div class="cfc-mode-btn-title"><span>👥</span> POKOJE & KOD</div>
+            <div class="cfc-mode-btn-desc">Stwórz prywatny pokój z kodem i zagraj ze znajomym.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="font-family:var(--font-heading); font-size:12px; color:#8e9bb0; margin-bottom:8px;">POZIOM TRUDNOŚCI AI:</div>
+          <div class="ai-tiers" style="display:flex; gap:8px;">
+            <button type="button" class="tier-btn" id="ai-easy" onclick="setMatchAiDifficulty('easy')">AMATOR</button>
+            <button type="button" class="tier-btn active" id="ai-medium" onclick="setMatchAiDifficulty('medium')">ZAWODOWIEC</button>
+            <button type="button" class="tier-btn" id="ai-hard" onclick="setMatchAiDifficulty('hard')">KLASA ŚWIATOWA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="modal-backdrop" id="clubModalBackdrop" style="display:none;">
+  <!-- MODAL KARNETU SEZONOWEGO -->
+  <div class="cfc-modal-overlay" id="seasonPassModal" style="display:none;" onclick="if(event.target===this)closeSeasonPassModal()">
+    <div class="cfc-modal-card purple-theme">
+      <div class="cfc-modal-header">
+        <h3 class="cfc-modal-title"><span>👑</span> KARNET SEZONOWY — SEZON 1</h3>
+        <button type="button" class="cfc-modal-close" onclick="closeSeasonPassModal()">✕</button>
+      </div>
+      <div class="cfc-modal-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,75,255,0.15); padding:12px 16px; border-radius:14px; border:1px solid rgba(138,75,255,0.3);">
+          <div>
+            <div style="font-family:var(--font-heading); font-size:14px; color:#fff; font-weight:800;">Twój Postęp: Poziom 12 / 50</div>
+            <div style="font-size:12px; color:#c4b5fd;">Graj mecze i zdobywaj punkty doświadczenia.</div>
+          </div>
+          <span style="font-family:var(--font-heading); font-size:16px; color:#fbbf24; font-weight:900;">24% UKOŃCZONE</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:10px;">
+            <span style="font-weight:700; color:#fff;">Poziom 1: 500 Monet</span>
+            <span style="color:#10b981; font-weight:800; font-size:12px;">ODEBRANO ✔</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:10px;">
+            <span style="font-weight:700; color:#fff;">Poziom 5: Złota Paczka Kart</span>
+            <span style="color:#10b981; font-weight:800; font-size:12px;">ODEBRANO ✔</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:10px;">
+            <span style="font-weight:700; color:#fff;">Poziom 10: Unikalny Herb FC JDR</span>
+            <span style="color:#10b981; font-weight:800; font-size:12px;">ODEBRANO ✔</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(138,75,255,0.2); border:1px solid #a855f7; border-radius:10px;">
+            <span style="font-weight:800; color:#fbbf24;">Poziom 15: Rzadka Paczka Gwiazd 85+</span>
+            <span style="color:#a855f7; font-weight:800; font-size:12px;">W TRAKCIE (80%)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:10px;">
+            <span style="font-weight:700; color:#8e9bb0;">Poziom 20: Karta Ikony Legendy</span>
+            <span style="color:#64748b; font-weight:800; font-size:12px;">ZABLOKOWANE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL USTAWIEŃ -->
+  <div class="cfc-modal-overlay" id="settingsModal" style="display:none;" onclick="if(event.target===this)closeSettingsModal()">
+    <div class="cfc-modal-card">
+      <div class="cfc-modal-header">
+        <h3 class="cfc-modal-title"><span>⚙️</span> USTAWIENIA GRY</h3>
+        <button type="button" class="cfc-modal-close" onclick="closeSettingsModal()">✕</button>
+      </div>
+      <div class="cfc-modal-body">
+        <div>
+          <div style="font-weight:700; color:#fff; margin-bottom:4px;">Głośność efektów boiskowych (SFX)</div>
+          <input type="range" min="0" max="100" value="80" style="width:100%; accent-color:#00f0ff;">
+        </div>
+        <div>
+          <div style="font-weight:700; color:#fff; margin-bottom:4px;">Klawiszologia i sterowanie</div>
+          <div style="font-size:12px; color:#94a3b8; line-height:1.6; background:rgba(255,255,255,0.04); padding:10px 14px; border-radius:10px;">
+            • <strong>Strzałki / WASD</strong>: Bieg i ruch zawodnikiem<br>
+            • <strong>SPACJA</strong>: Przełączanie zawodnika (w obronie) / Odbiór piłki<br>
+            • <strong>SHIFT</strong>: Sprint i przyspieszenie<br>
+            • <strong>C</strong>: Strzał finezyjny / podkręcony (efekt Magnusa)<br>
+            • <strong>V</strong>: Podanie prostopadłe po ziemi
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SPOŁECZNOŚCI -->
+  <div class="cfc-modal-overlay" id="communityModal" style="display:none;" onclick="if(event.target===this)closeCommunityModal()">
+    <div class="cfc-modal-card">
+      <div class="cfc-modal-header">
+        <h3 class="cfc-modal-title"><span>👑</span> SPOŁECZNOŚĆ CYBERFC</h3>
+        <button type="button" class="cfc-modal-close" onclick="closeCommunityModal()">✕</button>
+      </div>
+      <div class="cfc-modal-body">
+        <p style="color:#e2e8f0; font-size:13px; line-height:1.5;">Dołącz do oficjalnych kanałów JDR Games i rywalizuj z innymi graczami w turniejach!</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <a href="https://jdrgames.pl" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:10px; background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.3); padding:12px; border-radius:12px; color:#fff; font-weight:700;">🌐 Oficjalna strona: jdrgames.pl</a>
+          <a href="https://github.com/lukeprawko/fc8" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); padding:12px; border-radius:12px; color:#fff; font-weight:700;">🐙 Repozytorium GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="modal-backdrop" id="clubModalBackdrop" style="display:none;">
     <div class="club-modal-fullscreen">
       <!-- Pasek Nawigacji Górnej -->
       <div class="club-fs-header">
@@ -8977,61 +10081,126 @@ function updateMenuSquadStrip() {
   const strip = document.getElementById('menuSquadStrip');
   if (!strip) return;
 
-  const roles = ['GK', 'DEF', 'MID', 'FWD'];
-  const rl = { GK: 'BR', DEF: 'ŚO', MID: 'ŚP', FWD: 'N' };
+  const roles = ['FWD', 'MID', 'DEF', 'GK'];
+  const rl = { GK: 'GK', DEF: 'CB', MID: 'CM', FWD: 'ST' };
   const rFull = { GK: 'BRAMKARZ', DEF: 'OBROŃCA', MID: 'POMOCNIK', FWD: 'NAPASTNIK' };
   const squadCards = roles.map((r, i) => getCardById(clubData.lineup?.[r]) || getCardById(STARTER_CARD_IDS[i]));
   const avgOvr = Math.round(squadCards.reduce((acc, c) => acc + (c ? c.ovr : 75), 0) / 4);
 
   const ovrBadge = document.getElementById('menuOvrBadge');
-  if (ovrBadge) ovrBadge.textContent = 'OVR ' + avgOvr;
+  if (ovrBadge) ovrBadge.textContent = 'OGL ' + avgOvr;
 
-  let html = `<div class="squad-cards-row">`;
+  const nameBadge = document.getElementById('menuClubNameDisplay');
+  if (nameBadge) nameBadge.textContent = clubData.name || 'FC JDR';
 
+  let html = '';
   for (let i = 0; i < roles.length; i++) {
     const r = roles[i];
-    const card = squadCards[i] || { ovr: 75, pac: 75, sho: 75, name: 'PIŁKARZ' };
-    const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
-    const isGold = (card.ovr >= 84);
+    const card = squadCards[i] || { ovr: 75, id: 'def_chalobah', name: 'ZAWODNIK' };
     const isIcon = (card.ovr >= 90);
+    const isSpecial = (card.ovr >= 87 && !isIcon);
+    const isGold = (card.ovr >= 84 && !isIcon && !isSpecial);
+    const isCyan = (r === 'GK');
 
-    let stat1 = '', stat2 = '';
-    if (r === 'GK') {
-      stat1 = `PAR ${card.div || card.def || 75}`;
-      stat2 = `REF ${card.ref || card.ovr || 75}`;
-    } else if (r === 'DEF') {
-      stat1 = `OBR ${card.def || 75}`;
-      stat2 = `TEM ${card.pac || 75}`;
-    } else if (r === 'MID') {
-      stat1 = `POD ${card.pas || 75}`;
-      stat2 = `TEM ${card.pac || 75}`;
-    } else {
-      stat1 = `TEM ${card.pac || 75}`;
-      stat2 = `STR ${card.sho || 75}`;
-    }
+    let tierClass = 'is-dark';
+    if (isIcon) tierClass = 'is-icon';
+    else if (isSpecial) tierClass = 'is-special';
+    else if (isGold) tierClass = 'is-gold';
+    else if (isCyan) tierClass = 'is-cyan';
 
     const flagEmoji = PLAYER_NATIONS[card.id] || '⚽';
 
     html += `
-      <div class="ea-squad-card ${isIcon ? 'is-icon' : (isGold ? 'is-gold' : '')}" onclick="switchClubTab('SQUAD'); openClubModal();" title="Kliknij, aby zarządzać kartą (${rFull[r]}): ${card.name}">
-        <div class="ea-card-top">
-          <div class="ea-card-ovr">${card.ovr}</div>
-          <div class="ea-card-pos">${rl[r]}</div>
-          <div class="ea-card-flag" title="${PLAYER_COUNTRIES[card.id] || ''}">${flagEmoji}</div>
+      <div class="cfc-mini-card ${tierClass}" onclick="switchClubTab('SQUAD'); openClubModal();" title="${card.name} (${rFull[r]}) — OVR ${card.ovr}">
+        <div class="mini-card-top">
+          <span class="mini-card-ovr">${card.ovr}</span>
+          <span class="mini-card-pos">${rl[r]}</span>
         </div>
-        <div class="ea-card-photo-wrap">
-          <img src="assets/players/${card.id}.webp" class="ea-card-img" alt="${card.name}" onerror="this.style.opacity='0.2';">
-        </div>
-        <div class="ea-card-bottom">
-          <div class="ea-card-name">${card.name}</div>
-          <div class="ea-card-stats">${stat1} • ${stat2}</div>
-          ${ps ? `<div class="ea-card-ps" title="${ps.name}: ${ps.desc}">⚡ ${ps.name}</div>` : '<div class="ea-card-ps-empty">KLASYK</div>'}
+        <img src="assets/players/${card.id}.webp" class="mini-card-img" alt="${card.name}" onerror="this.style.opacity='0.2';">
+        <div class="mini-card-bottom">
+          <span class="mini-card-crest">🛡️</span>
+          <span class="mini-card-flag">${flagEmoji}</span>
         </div>
       </div>
     `;
   }
-  html += `</div>`;
   strip.innerHTML = html;
+}
+
+// Funkcje pomocnicze dla nowego interfejsu CyberFC 28
+function switchSidebarTab(tab) {
+  const btnHome = document.getElementById('sidebarNavHome');
+  const btnMp = document.getElementById('sidebarNavMultiplayer');
+  const viewHome = document.getElementById('cfcViewHome');
+  const viewMp = document.getElementById('cfcViewMultiplayer');
+
+  if (tab === 'HOME') {
+    if (btnHome) btnHome.classList.add('active');
+    if (btnMp) btnMp.classList.remove('active');
+    if (viewHome) viewHome.style.display = 'block';
+    if (viewMp) viewMp.style.display = 'none';
+  } else if (tab === 'MULTIPLAYER') {
+    if (btnHome) btnHome.classList.remove('active');
+    if (btnMp) btnMp.classList.add('active');
+    if (viewHome) viewHome.style.display = 'none';
+    if (viewMp) viewMp.style.display = 'block';
+  }
+}
+
+function openQuickPlayModal() {
+  const m = document.getElementById('quickPlayModal');
+  if (m) m.style.display = 'flex';
+}
+function closeQuickPlayModal() {
+  const m = document.getElementById('quickPlayModal');
+  if (m) m.style.display = 'none';
+}
+
+function openSeasonPassModal() {
+  const m = document.getElementById('seasonPassModal');
+  if (m) m.style.display = 'flex';
+}
+function closeSeasonPassModal() {
+  const m = document.getElementById('seasonPassModal');
+  if (m) m.style.display = 'none';
+}
+
+function openSettingsModal() {
+  const m = document.getElementById('settingsModal');
+  if (m) m.style.display = 'flex';
+}
+function closeSettingsModal() {
+  const m = document.getElementById('settingsModal');
+  if (m) m.style.display = 'none';
+}
+
+function openCommunityModal() {
+  const m = document.getElementById('communityModal');
+  if (m) m.style.display = 'flex';
+}
+function closeCommunityModal() {
+  const m = document.getElementById('communityModal');
+  if (m) m.style.display = 'none';
+}
+
+function challengeFriend(name) {
+  const ok = confirm(`Czy chcesz rzucić wyzwanie graczowi ${name} na pojedynek 1v1?`);
+  if (ok) {
+    startQuickMatchmaking();
+  }
+}
+
+function handlePowerButtonClick() {
+  if (typeof fcCurrentUser !== 'undefined' && fcCurrentUser) {
+    const ok = confirm('Czy chcesz wylogować się ze swojego konta Cloudflare D1?');
+    if (ok && typeof fcLogout === 'function') {
+      fcLogout();
+    }
+  } else {
+    if (typeof openFcAuth === 'function') {
+      openFcAuth();
+    }
+  }
 }
 
 function updateMenuClubUI() {
@@ -15730,6 +16899,17 @@ updateMenuClubUI();
 fcInitAccounts();
 
 Object.assign(window, {
+  switchSidebarTab,
+  openQuickPlayModal,
+  closeQuickPlayModal,
+  openSeasonPassModal,
+  closeSeasonPassModal,
+  openSettingsModal,
+  closeSettingsModal,
+  openCommunityModal,
+  closeCommunityModal,
+  challengeFriend,
+  handlePowerButtonClick,
   updateMenuSquadStrip,
   updateMenuClubUI,
   openLeaderboardModal,
