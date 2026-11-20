@@ -5726,11 +5726,19 @@
     background: rgba(3, 6, 15, 0.88) !important;
     backdrop-filter: blur(20px) !important;
     z-index: 999999 !important;
-    display: flex !important;
+    display: none;
     align-items: center !important;
     justify-content: center !important;
     padding: 16px !important;
     box-sizing: border-box !important;
+  }
+  .cfc-modal-overlay[style*="display: flex"],
+  .cfc-modal-overlay.active {
+    display: flex !important;
+  }
+  .cfc-modal-overlay[style*="display: none"],
+  .cfc-modal-overlay.hidden {
+    display: none !important;
   }
 
   /* MODAL KARNETU SEZONOWEGO - PROFESJONALNY WYGLĄD BATTLE PASS */
