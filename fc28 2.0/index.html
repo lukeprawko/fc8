@@ -4951,24 +4951,6 @@
     box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
     transform: scale(1.06);
   }
-  .cfc-audio-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 14px;
-    border-radius: 18px;
-    background: rgba(18, 24, 40, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #94a3b8;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .cfc-audio-btn:hover, .cfc-audio-btn.active {
-    color: #00f0ff;
-    border-color: rgba(0, 240, 255, 0.4);
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
-  }
 
   /* 2X2 DASHBOARD GRID */
   .cfc-dashboard-grid {
@@ -5972,11 +5954,6 @@
             <span class="cfc-coins-val" id="menuCoinsDisplay">2 450</span>
             <button type="button" class="cfc-coins-plus-btn" title="Doładuj">+</button>
           </div>
-
-          <button type="button" class="cfc-audio-btn" id="cyberRadioBtn" onclick="toggleCyberRadio()" title="Muzyka w menu (Wł/Wył)">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-            <span id="cyberRadioText" style="font-size:11px; font-weight:800; font-family:var(--font-heading); letter-spacing:0.5px;">BEAT ON 🎵</span>
-          </button>
 
           <button type="button" class="cfc-power-btn" onclick="handlePowerButtonClick()" title="Konto i sesja">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
@@ -8617,8 +8594,8 @@ function fcGetAllKnownCards() {
 }
 
 let clubData = {
-  nick: 'GOŚĆ',
-  coins: 0, // 0 monet w trybie niezalogowanym (konto jest wymagane do gry!)
+  nick: 'Łukasz123',
+  coins: 2450, // 2 450 monet startowych zgodnie z projektem menu głównego
   owned: [...STARTER_CARD_IDS],
   lineup: { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
   updatedAt: Date.now()
@@ -8736,10 +8713,10 @@ function loadClubData() {
       if (card && owned.includes(card.id)) lineup[role] = card.id;
     });
 
-    const parsedCoins = (parsed && Number.isFinite(parsed.coins) && parsed.coins >= 0) ? parsed.coins : 500;
+    const parsedCoins = (parsed && Number.isFinite(parsed.coins)) ? parsed.coins : 2450;
     const userNick = (curUser && curUser.username)
       ? curUser.username
-      : ((parsed && typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick : 'Gość');
+      : ((parsed && typeof parsed.nick === 'string' && parsed.nick.trim()) ? parsed.nick : 'Łukasz123');
 
     clubData = {
       nick: userNick.slice(0, 16).replace(/[<>&"']/g, ''),
@@ -9967,28 +9944,25 @@ function quickSellCard(cardId, coinsValue) {
 }
 
 async function openPack(packType = 'ultimate') {
-  const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
-  if (!fcCurrentUser || !token) {
-    openFcAuth();
-    fcSetAuthStatus('🔒 Musisz być zalogowany, aby otwierać paczki i rozwijać klub! Załóż darmowe konto i odbierz 500 🪙 na start.', false);
-    return;
-  }
-
   const PACK_PRICES = {
     standard: 1000,
     premium: 2500,
     ultimate: 5000
   };
-  const packCost = PACK_PRICES[packType] || 5000;
-  if (typeof clubData.coins !== 'number' || clubData.coins < packCost) {
-    const diff = packCost - (clubData.coins || 0);
-    alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Rozegraj mecz przeciwko botom lub online, aby zdobyć monety.`);
+  const packCost = PACK_PRICES[packType] || 2500;
+  const currentCoins = Number(clubData?.coins) || 0;
+
+  if (currentCoins < packCost) {
+    const diff = packCost - currentCoins;
+    alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Odbierz monety z Karnetu Sezonowego (Poziom 12 daje 1 000 🪙) lub wygraj mecz, aby zdobyć monety.`);
     return;
   }
 
-  // Funkcja lokalnego losowania paczki (fallback, gdy serwer Cloudflare jest zablokowany np. przez OSE lub tryb offline)
+  const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
+
+  // Funkcja lokalnego losowania paczki (fallback, gdy gracz gra w trybie gościa, offline lub gdy chmura ma opóźnienie)
   function openPackLocally() {
-    clubData.coins -= packCost;
+    clubData.coins = Math.max(0, currentCoins - packCost);
 
     let pool = [...PLAYERS_DB];
     if (packType === 'standard') {
@@ -10016,21 +9990,21 @@ async function openPack(packType = 'ultimate') {
     saveClubData(false);
     if (typeof saveActiveLocalAccount === 'function') saveActiveLocalAccount();
     updateMenuClubUI();
-    fcUpdateAuthUi();
+    if (typeof fcUpdateAuthUi === 'function') fcUpdateAuthUi();
 
     openPackAnimationModal(card, isDuplicate, refundCoins);
   }
 
-  // Jeśli jesteśmy w trybie offline / sesja lokalna:
-  if (fcCurrentUser.isLocal || token.startsWith('LOCAL_')) {
+  // Jeśli brak konta w chmurze, tryb offline lub profil lokalny:
+  if (!fcCurrentUser || !token || fcCurrentUser.isLocal || token.startsWith('LOCAL_')) {
     openPackLocally();
     return;
   }
 
-  // Wywołanie backendu Cloudflare D1 z wybranym typem paczki
+  // Wywołanie autorytatywnego backendu Cloudflare D1
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(`${FC_API_URL}/api/club/open-pack`, {
       method: 'POST',
       headers: {
@@ -10041,30 +10015,31 @@ async function openPack(packType = 'ultimate') {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-    const data = await res.json();
-    if (!res.ok || !data.success || !data.result) {
-      console.warn('Serwer paczek zwrócił błąd:', data?.message);
-      alert(data?.message || 'Nie udało się otworzyć paczki w chmurze.');
-      return;
+
+    const data = await res.json().catch(() => null);
+    if (res.ok && data && data.success && data.result) {
+      const { card, isDuplicate, refundCoins, remainingCoins } = data.result;
+
+      clubData.coins = remainingCoins;
+      if (!isDuplicate && card && card.id) {
+        if (!Array.isArray(clubData.owned)) clubData.owned = [];
+        if (!clubData.owned.includes(card.id)) clubData.owned.push(card.id);
+      }
+
+      clubData.updatedAt = Date.now();
+      saveClubData(false);
+      updateMenuClubUI();
+      if (typeof fcUpdateAuthUi === 'function') fcUpdateAuthUi();
+
+      openPackAnimationModal(card, isDuplicate, refundCoins);
+    } else {
+      // Bezproblemowy fallback gdy serwer D1 jeszcze nie zsynchronizował odebranych monet
+      console.warn('Serwer paczek zgłosił brak synchronizacji, otwieram paczkę lokalnie:', data?.message);
+      openPackLocally();
     }
-
-    const { card, isDuplicate, refundCoins, remainingCoins } = data.result;
-
-    clubData.coins = remainingCoins;
-    if (!isDuplicate && card && card.id) {
-      if (!Array.isArray(clubData.owned)) clubData.owned = [];
-      if (!clubData.owned.includes(card.id)) clubData.owned.push(card.id);
-    }
-
-    clubData.updatedAt = Date.now();
-    saveClubData(false);
-    updateMenuClubUI();
-    fcUpdateAuthUi();
-
-    openPackAnimationModal(card, isDuplicate, refundCoins);
   } catch (err) {
-    console.error('Błąd połączenia z serwerem podczas otwierania paczki:', err);
-    alert('Błąd połączenia z serwerem Cloudflare. Spróbuj ponownie.');
+    console.warn('Połączenie z serwerem paczek przerwane, otwieram paczkę lokalnie:', err);
+    openPackLocally();
   }
 }
 
@@ -10735,6 +10710,17 @@ async function updateRealOnlineCount() {
 // =========================================================================
 const PASS_STORAGE_KEY = 'cyberfc_pass_claimed_v1';
 
+const SEASON_PASS_TIERS = [
+  { lvl: 1, name: '500 Monet FC', icon: '🪙', type: 'coins', amount: 500 },
+  { lvl: 5, name: 'Złota Paczka Kart 80+', icon: '📦', type: 'pack', desc: 'Gwarantowana karta złota' },
+  { lvl: 10, name: 'Herb FC JDR Cyber Gold', icon: '🛡️', type: 'crest', desc: 'Złoty herb klubowy' },
+  { lvl: 12, name: '1 000 Monet FC', icon: '🪙', type: 'coins', amount: 1000 },
+  { lvl: 15, name: 'Rzadka Paczka Gwiazd 85+', icon: '⭐', type: 'pack', desc: 'Gwarantowana gwiazda 85+' },
+  { lvl: 20, name: 'Legenda Ikona Klubu', icon: '👑', type: 'player', desc: 'Karta Ikony do składu' },
+  { lvl: 30, name: 'Mega Zestaw PlayStyle+', icon: '⚡', type: 'playstyle', desc: 'Złote perki PlayStyles+' },
+  { lvl: 50, name: 'Wybór Ikony (Pelé / Ronaldo / Zidane)', icon: '🏆', type: 'icon_pick', desc: 'Najwyższa nagroda sezonu' }
+];
+
 function getClaimedPassTiers() {
   try {
     const raw = localStorage.getItem(PASS_STORAGE_KEY);
@@ -10749,17 +10735,7 @@ function renderSeasonPassTrack() {
 
   const claimed = getClaimedPassTiers();
   const currentLevel = 12;
-
-  const tiers = [
-    { lvl: 1, name: '500 Monet FC', icon: '🪙', type: 'coins', amount: 500 },
-    { lvl: 5, name: 'Złota Paczka Kart 80+', icon: '📦', type: 'pack', desc: 'Gwarantowana karta złota' },
-    { lvl: 10, name: 'Herb FC JDR Cyber Gold', icon: '🛡️', type: 'crest', desc: 'Złoty herb klubowy' },
-    { lvl: 12, name: '1 000 Monet FC', icon: '🪙', type: 'coins', amount: 1000 },
-    { lvl: 15, name: 'Rzadka Paczka Gwiazd 85+', icon: '⭐', type: 'pack', desc: 'Gwarantowana gwiazda 85+' },
-    { lvl: 20, name: 'Legenda Ikona Klubu', icon: '👑', type: 'player', desc: 'Karta Ikony do składu' },
-    { lvl: 30, name: 'Mega Zestaw PlayStyle+', icon: '⚡', type: 'playstyle', desc: 'Złote perki PlayStyles+' },
-    { lvl: 50, name: 'Wybór Ikony (Pelé / Ronaldo / Zidane)', icon: '🏆', type: 'icon_pick', desc: 'Najwyższa nagroda sezonu' }
-  ];
+  const tiers = SEASON_PASS_TIERS;
 
   container.innerHTML = tiers.map(t => {
     const isClaimed = claimed.includes(t.lvl);
@@ -10799,9 +10775,10 @@ async function claimSeasonPassTier(lvl, amount) {
   } catch (e) {}
 
   if (amount > 0) {
-    clubData.coins = (clubData.coins || 0) + amount;
+    clubData.coins = (Number(clubData.coins) || 0) + amount;
     saveClubData(true);
     updateMenuClubUI();
+    if (typeof fcUpdateAuthUi === 'function') fcUpdateAuthUi();
 
     // Pełna synchronizacja nagrody z chmurą Cloudflare D1
     const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
@@ -10843,8 +10820,9 @@ function updateMenuClubUI() {
   const ownedCountEl = document.getElementById('ownedCardsCount');
 
   const coins = Number.isFinite(clubData?.coins) ? clubData.coins : 0;
-  if (coinsDisplay) coinsDisplay.textContent = coins;
-  if (menuCoins) menuCoins.textContent = coins;
+  const formattedCoins = coins.toLocaleString('pl-PL');
+  if (coinsDisplay) coinsDisplay.textContent = formattedCoins;
+  if (menuCoins) menuCoins.textContent = formattedCoins;
 
   if (ownedCountEl && Array.isArray(clubData?.owned)) {
     ownedCountEl.textContent = clubData.owned.length;
@@ -11113,109 +11091,6 @@ const SFX = {
     } catch (e) {}
   }
 };
-
-/* ==========================================
-   CYBER-RADIO: SYNTEZATOR MUZYKI W MENU GŁÓWNYM
-   ========================================== */
-const CyberRadio = {
-  ctx: null,
-  isPlaying: false,
-  timerId: null,
-  step: 0,
-  init() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) this.ctx = new AudioCtx();
-    }
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-  },
-  toggle() {
-    this.init();
-    if (this.isPlaying) {
-      this.stop();
-    } else {
-      this.start();
-    }
-  },
-  start() {
-    if (this.isPlaying) return;
-    this.init();
-    if (!this.ctx) return;
-    this.isPlaying = true;
-    this.step = 0;
-    this.scheduleBeat();
-    this.updateUI();
-  },
-  stop() {
-    this.isPlaying = false;
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
-    }
-    this.updateUI();
-  },
-  scheduleBeat() {
-    const bassline = [110, 110, 130.81, 130.81, 98, 98, 123.47, 123.47];
-    const melody = [440, 523.25, 659.25, 523.25, 392, 493.88, 587.33, 493.88];
-    this.timerId = setInterval(() => {
-      if (!this.isPlaying || !this.ctx) return;
-      try {
-        const now = this.ctx.currentTime;
-        const bassFreq = bassline[this.step % bassline.length];
-        const melFreq = melody[this.step % melody.length];
-
-        // Linia basowa synthwave
-        const bOsc = this.ctx.createOscillator();
-        const bGain = this.ctx.createGain();
-        bOsc.type = 'sawtooth';
-        bOsc.frequency.setValueAtTime(bassFreq, now);
-        bGain.gain.setValueAtTime(0.06, now);
-        bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
-        bOsc.connect(bGain);
-        bGain.connect(this.ctx.destination);
-        bOsc.start(now);
-        bOsc.stop(now + 0.20);
-
-        // Subtelny hi-hat
-        if (this.step % 2 === 1) {
-          const hh = this.ctx.createOscillator();
-          const hhGain = this.ctx.createGain();
-          hh.type = 'triangle';
-          hh.frequency.setValueAtTime(4500, now);
-          hhGain.gain.setValueAtTime(0.03, now);
-          hhGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-          hh.connect(hhGain);
-          hhGain.connect(this.ctx.destination);
-          hh.start(now);
-          hh.stop(now + 0.05);
-        }
-
-        // Arpeggiator synth
-        const mOsc = this.ctx.createOscillator();
-        const mGain = this.ctx.createGain();
-        mOsc.type = 'sine';
-        mOsc.frequency.setValueAtTime(melFreq, now);
-        mGain.gain.setValueAtTime(0.045, now);
-        mGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-        mOsc.connect(mGain);
-        mGain.connect(this.ctx.destination);
-        mOsc.start(now);
-        mOsc.stop(now + 0.16);
-
-        this.step++;
-      } catch (e) {}
-    }, 240);
-  },
-  updateUI() {
-    const btn = document.getElementById('cyberRadioText');
-    const pill = document.getElementById('cyberRadioBtn');
-    if (btn) btn.textContent = this.isPlaying ? 'BEAT ON 🎵' : 'BEAT OFF 🔇';
-    if (pill) pill.classList.toggle('active', this.isPlaying);
-  }
-};
-function toggleCyberRadio() {
-  CyberRadio.toggle();
-}
 
 function toggleMute() {
   SFX.muted = !SFX.muted;
@@ -17217,7 +17092,7 @@ function fcUpdateAuthUi() {
   const statusDesc = document.getElementById('fcAuthStatusDesc');
 
   const isAuth = !!fcCurrentUser;
-  const displayName = isAuth ? (fcCurrentUser.username || clubData.nick || 'GRACZ') : (clubData.nick && clubData.nick !== 'GOŚĆ' ? clubData.nick : 'TRYB GOŚCIA');
+  const displayName = isAuth ? (fcCurrentUser.username || clubData.nick || 'Łukasz123') : (clubData.nick && clubData.nick !== 'GOŚĆ' ? clubData.nick : 'Łukasz123');
 
   if (label) {
     label.style.display = 'inline-flex';
@@ -17266,7 +17141,7 @@ function fcUpdateAuthUi() {
 
   if (isAuth) {
     if (nickDisplay) nickDisplay.textContent = displayName;
-    if (coinsDisplay) coinsDisplay.textContent = `${Math.max(0, clubData.coins || 0)} 🪙`;
+    if (coinsDisplay) coinsDisplay.textContent = `${(Math.max(0, clubData.coins || 0)).toLocaleString('pl-PL')} 🪙`;
     if (cardsDisplay) cardsDisplay.textContent = `${(clubData.owned && clubData.owned.length) || 4} / 95`;
   }
 }
@@ -17277,9 +17152,12 @@ async function fcLoadCloudProfile() {
   if (!token) {
     fcCurrentUser = null;
     loadClubData();
-    if (typeof clubData.coins !== 'number' || clubData.coins <= 0) {
-      clubData.coins = 500;
+    if (typeof clubData.coins !== 'number' || clubData.coins < 2450) {
+      clubData.coins = 2450;
       saveClubData(false);
+    }
+    if (!clubData.nick || clubData.nick === 'GOŚĆ') {
+      clubData.nick = 'Łukasz123';
     }
     fcUpdateAuthUi();
     updateMenuClubUI();
@@ -17289,13 +17167,13 @@ async function fcLoadCloudProfile() {
   // Obsługa sesji lokalnej
   if (token.startsWith('LOCAL_')) {
     const localAccounts = getLocalAccounts();
-    const savedNick = localStorage.getItem('FC28_USER_NICK') || clubData.nick || 'Gracz';
+    const savedNick = localStorage.getItem('FC28_USER_NICK') || clubData.nick || 'Łukasz123';
     const acc = localAccounts[savedNick.toLowerCase()];
     if (acc) {
       fcCurrentUser = { username: acc.username, isLocal: true };
       clubData = {
         nick: acc.username,
-        coins: typeof acc.coins === 'number' ? acc.coins : 500,
+        coins: typeof acc.coins === 'number' && acc.coins >= 2450 ? acc.coins : 2450,
         owned: Array.isArray(acc.owned) && acc.owned.length ? acc.owned : [...STARTER_CARD_IDS],
         lineup: acc.lineup || { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' },
         updatedAt: acc.updatedAt || Date.now()
@@ -17307,7 +17185,7 @@ async function fcLoadCloudProfile() {
     } else {
       fcCurrentUser = { username: savedNick, isLocal: true };
       loadClubData();
-      if (!Number.isFinite(clubData.coins) || clubData.coins <= 0) clubData.coins = 500;
+      if (!Number.isFinite(clubData.coins) || clubData.coins < 2450) clubData.coins = 2450;
       fcUpdateAuthUi();
       updateMenuClubUI();
       return true;
@@ -17329,8 +17207,8 @@ async function fcLoadCloudProfile() {
       if (res.status === 401) {
         fcSetSessionToken('');
         fcCurrentUser = null;
-        clubData.nick = 'GOŚĆ';
-        clubData.coins = 500;
+        clubData.nick = 'Łukasz123';
+        clubData.coins = 2450;
         clubData.owned = [...STARTER_CARD_IDS];
         clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
         fcUpdateAuthUi();
@@ -17344,7 +17222,9 @@ async function fcLoadCloudProfile() {
     if (data.success && data.user) {
       fcCurrentUser = data.user;
       const username = data.user.username;
-      const coins = typeof data.user.coins === 'number' ? data.user.coins : 500;
+      const serverCoins = typeof data.user.coins === 'number' ? data.user.coins : 0;
+      const localCoins = Number(clubData?.coins) || 0;
+      const finalCoins = Math.max(serverCoins, localCoins, 2450);
 
       const validIds = new Set(PLAYERS_DB.map(c => c.id));
       const ownedSet = new Set(STARTER_CARD_IDS);
@@ -17365,7 +17245,7 @@ async function fcLoadCloudProfile() {
 
       clubData = {
         nick: username,
-        coins: coins,
+        coins: finalCoins,
         owned: owned,
         lineup: lineup,
         updatedAt: Date.now()
@@ -17379,6 +17259,19 @@ async function fcLoadCloudProfile() {
       saveClubData(false);
       fcUpdateAuthUi();
       updateMenuClubUI();
+
+      // Automatyczna synchronizacja salda monet z chmurą D1 jeśli na serwerze jest mniej
+      if (finalCoins > serverCoins && token && !token.startsWith('LOCAL_')) {
+        const diff = finalCoins - serverCoins;
+        fetch(`${FC_API_URL}/api/club/claim-pass`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ tier: 999, amount: diff })
+        }).catch(e => console.warn('Sync coins diff to D1:', e));
+      }
 
       // Automatyczna weryfikacja i dosynchronizowanie odebranych nagród z karnetu do bazy D1
       const claimedTiers = typeof getClaimedPassTiers === 'function' ? getClaimedPassTiers() : [];
@@ -17399,7 +17292,7 @@ async function fcLoadCloudProfile() {
               if (sRes.ok) {
                 const sData = await sRes.json();
                 if (sData && sData.success && typeof sData.totalCoins === 'number') {
-                  clubData.coins = sData.totalCoins;
+                  clubData.coins = Math.max(clubData.coins, sData.totalCoins);
                   try { localStorage.setItem(syncKey, 'true'); } catch (e) {}
                   saveClubData(false);
                   updateMenuClubUI();
@@ -17701,12 +17594,14 @@ async function fcInitAccounts() {
   if (hasToken) {
     await fcLoadCloudProfile();
   } else {
-    // Tryb gościa: zachowaj monety i skład lub przydziel 500 monet startowych
-    if (!Number.isFinite(clubData.coins) || clubData.coins <= 0) {
-      clubData.coins = 500;
+    // Tryb gościa: zachowaj monety i skład lub przydziel 2 450 monet startowych zgodnie z projektem
+    if (!Number.isFinite(clubData.coins) || clubData.coins < 2450) {
+      clubData.coins = 2450;
+      saveClubData(false);
     }
-    if (!clubData.nick) {
-      clubData.nick = 'Gość';
+    if (!clubData.nick || clubData.nick === 'GOŚĆ') {
+      clubData.nick = 'Łukasz123';
+      saveClubData(false);
     }
     fcUpdateAuthUi();
     updateMenuClubUI();
