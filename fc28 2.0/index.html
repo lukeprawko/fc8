@@ -2919,6 +2919,425 @@
     gap: 10px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
   }
+
+  /* =========================================================================
+     NOWOCZESNY DESIGN MÓJ SKŁAD (STADIONOWE BOISKO TAKTYCZNE 4v4 + ŁAWKA)
+     ========================================================================= */
+  .squad-tactical-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    max-width: 1040px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .squad-stats-bar-fut {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(8, 14, 28, 0.95) 0%, rgba(13, 24, 48, 0.92) 100%);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 18px;
+    padding: 12px 24px;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .squad-kpi-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .squad-kpi-lbl {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 800;
+    color: #8b949e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .squad-kpi-val {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+  .chem-diamonds-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .chem-diamond {
+    width: 9px;
+    height: 9px;
+    transform: rotate(45deg);
+    background: #21262d;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1px;
+  }
+  .chem-diamond.active {
+    background: #00f0ff;
+    border-color: #00f0ff;
+    box-shadow: 0 0 8px #00f0ff;
+  }
+
+  /* Boisko Stadionowe 4v4 */
+  .squad-pitch-stadium {
+    position: relative;
+    background: radial-gradient(ellipse at 50% 50%, #175227 0%, #103b1c 65%, #07190c 100%);
+    border: 2px solid rgba(0, 230, 118, 0.45);
+    border-radius: 24px;
+    padding: 26px 20px;
+    box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.9), 0 16px 40px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    min-height: 520px;
+  }
+  .squad-pitch-stadium::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.025) 0px,
+      rgba(255, 255, 255, 0.025) 65px,
+      rgba(0, 0, 0, 0.05) 65px,
+      rgba(0, 0, 0, 0.05) 130px
+    );
+    pointer-events: none;
+  }
+  .pitch-line-center {
+    position: absolute;
+    top: 50%; left: 3%; right: 3%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .pitch-circle-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 170px; height: 170px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .pitch-circle-center::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 10px; height: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .pitch-box-top {
+    position: absolute;
+    top: 0; left: 50%;
+    width: 320px; height: 80px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-top: none;
+    border-radius: 0 0 18px 18px;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .pitch-box-bottom {
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 320px; height: 80px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* Siatka pozycji 4v4 */
+  .tactical-formation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    position: relative;
+    z-index: 5;
+    align-items: stretch;
+  }
+  @media (max-width: 900px) {
+    .tactical-formation-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 520px) {
+    .tactical-formation-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .tactical-slot-card {
+    background: rgba(6, 12, 24, 0.82);
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+  }
+  .tactical-slot-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--p1);
+    box-shadow: 0 12px 32px rgba(0, 240, 255, 0.35);
+  }
+  .slot-pos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 4px;
+  }
+  .slot-pos-pill {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .slot-chem-badge {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .tactical-swap-action-btn {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(0, 112, 186, 0.28) 100%);
+    border: 1.5px solid var(--p1);
+    border-radius: 10px;
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tactical-swap-action-btn:hover {
+    background: var(--p1);
+    color: #000;
+    box-shadow: 0 0 14px var(--p1);
+    transform: scale(1.02);
+  }
+
+  /* Szuflada Ławki Rezerwowych (Squad Bench Drawer) */
+  .squad-bench-drawer {
+    background: rgba(6, 11, 22, 0.96);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(16px);
+    margin-top: 14px;
+    animation: drawerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes drawerSlideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .bench-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .bench-candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .bench-candidate-row {
+    background: rgba(14, 20, 36, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+  .bench-candidate-row:hover {
+    border-color: var(--p1);
+    background: rgba(18, 28, 52, 0.95);
+    transform: translateX(4px);
+  }
+  .delta-pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .delta-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+  }
+  .delta-pill.pos {
+    background: rgba(0, 230, 118, 0.18);
+    color: #00e676;
+    border: 1px solid rgba(0, 230, 118, 0.4);
+  }
+  .delta-pill.neg {
+    background: rgba(255, 23, 68, 0.18);
+    color: #ff5252;
+    border: 1px solid rgba(255, 23, 68, 0.4);
+  }
+  .delta-pill.eq {
+    background: rgba(255, 255, 255, 0.08);
+    color: #8b949e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  /* Przełącznik Widoku Zawodników (Karty vs Tabela) */
+  .view-mode-toggle {
+    display: flex;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 3px;
+    gap: 4px;
+  }
+  .view-mode-btn {
+    background: transparent;
+    border: none;
+    color: #8b949e;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .view-mode-btn.active {
+    background: var(--p1);
+    color: #000;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  }
+
+  /* Tabela Zawodników Futbin / SofaScore */
+  .cards-table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: rgba(8, 12, 24, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+  }
+  .cards-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    text-align: left;
+  }
+  .cards-data-table th {
+    background: rgba(14, 20, 36, 0.95);
+    color: #8b949e;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 2px solid rgba(0, 240, 255, 0.25);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  .cards-data-table th:hover {
+    color: #00f0ff;
+  }
+  .cards-data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #e6edf3;
+    white-space: nowrap;
+  }
+  .cards-data-table tbody tr {
+    transition: background 0.15s;
+  }
+  .cards-data-table tbody tr:hover {
+    background: rgba(0, 240, 255, 0.06);
+  }
+  .tbl-stat-val {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 12px;
+  }
+
+  /* Modal Profilu Zawodnika (Player Bio & Radar Modal) */
+  .bio-modal-content {
+    background: linear-gradient(135deg, rgba(8, 14, 28, 0.98) 0%, rgba(13, 24, 48, 0.96) 100%);
+    border: 2px solid rgba(0, 240, 255, 0.4);
+    border-radius: 24px;
+    padding: 28px;
+    max-width: 880px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 240, 255, 0.25);
+    position: relative;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .bio-left-card-pane {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .bio-right-info-pane {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .spider-radar-box {
+    background: rgba(4, 8, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
   .squad-pitch-compact {
     background: radial-gradient(circle at 50% 50%, #164a22 0%, #0c2d15 70%, #051408 100%);
     border: 2px solid rgba(0, 230, 118, 0.4);
@@ -4607,6 +5026,10 @@
             </div>
 
             <div class="market-sub-bar">
+              <div class="view-mode-toggle">
+                <button type="button" class="view-mode-btn active" id="btnViewCards" onclick="setClubCardsViewMode('grid')">🎴 WIDOK KART</button>
+                <button type="button" class="view-mode-btn" id="btnViewTable" onclick="setClubCardsViewMode('table')">📋 WIDOK TABELI</button>
+              </div>
               <div class="market-search-wrap">
                 <input type="text" class="market-search-input" id="marketSearchInput" placeholder="🔍 Szukaj piłkarza po nazwisku..." oninput="renderClubCards()">
               </div>
@@ -4632,8 +5055,21 @@
           </div>
 
           <div class="cards-grid-fs" id="clubCardsGrid"></div>
+          <div class="cards-table-container" id="clubCardsTableContainer" style="display:none;">
+            <table class="cards-data-table">
+              <thead id="clubCardsTableHead"></thead>
+              <tbody id="clubCardsTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL PROFILU ZAWODNIKA (PLAYER BIO & SPIDER RADAR) -->
+  <div class="modal-backdrop" id="playerBioModal" style="display:none; z-index:11500; background:rgba(2,5,14,0.92); backdrop-filter:blur(24px);" onclick="if(event.target===this) closePlayerBioModal()">
+    <div class="bio-modal-content" id="playerBioModalContent">
+      <!-- Generowane dynamicznie przez openPlayerBioModal(cardId) -->
     </div>
   </div>
 
@@ -7179,7 +7615,7 @@ function renderSingleFutCardHtml(c, isMini = false, isRevealed = false) {
   }
 
   return `
-    <div class="fut-card tier-${tier} ${isOwned ? 'card-owned' : 'card-unowned'} ${ps ? 'has-ps' : ''} ${isEquipped ? 'equipped' : ''}" style="${isMini ? 'width:180px; padding:10px;' : ''}" title="${c.name} (${c.role}) • OVR ${c.ovr}">
+    <div class="fut-card tier-${tier} ${isOwned ? 'card-owned' : 'card-unowned'} ${ps ? 'has-ps' : ''} ${isEquipped ? 'equipped' : ''}" style="${isMini ? 'width:180px; padding:10px;' : ''} cursor:pointer;" onclick="openPlayerBioModal('${c.id}')" title="${c.name} (${c.role}) • OVR ${c.ovr} (Kliknij, aby otworzyć profil)">
       <!-- Wstążka statusu karty -->
       ${!isRevealed ? (isEquipped ? `
         <div class="card-ownership-badge badge-equipped">⭐ W SKŁADZIE</div>
@@ -7409,73 +7845,324 @@ function renderPackStore() {
   `;
 }
 
+// =========================================================================
+// SYSTEM ZGRANIA DRUŻYNY (33/33 CHEMISTRY) & FORMACJI TAKTYCZNEJ 4v4
+// =========================================================================
+function calculateSquadChemistry(lineup) {
+  const roles = ['GK', 'DEF', 'MID', 'FWD'];
+  const cards = roles.map((r, i) => getCardById(lineup?.[r]) || getCardById(STARTER_CARD_IDS[i]));
+
+  // Zliczanie powiązań narodowościowych
+  const nationCounts = {};
+  cards.forEach(c => {
+    if (c && PLAYER_NATIONS[c.id]) {
+      const n = PLAYER_NATIONS[c.id];
+      nationCounts[n] = (nationCounts[n] || 0) + 1;
+    }
+  });
+
+  const playerPoints = {};
+  let totalPoints = 0;
+  let totalOvr = 0;
+  let activeCards = 0;
+
+  roles.forEach((r, idx) => {
+    const c = cards[idx];
+    if (!c) { playerPoints[r] = 0; return; }
+    activeCards++;
+    totalOvr += c.ovr;
+    let pts = 1; // Prawidłowa pozycja na boisku: +1 punkt
+    const tier = getCardTier(c);
+    const n = PLAYER_NATIONS[c.id];
+
+    if (tier === 'icon') {
+      pts += 2; // Ikona daje automatycznie maksymalne zgranie!
+    } else if (n && nationCounts[n] >= 3) {
+      pts += 2; // 3+ zawodników tej samej narodowości
+    } else if (n && nationCounts[n] >= 2) {
+      pts += 1; // 2 zawodników tej samej narodowości
+    }
+
+    const finalPts = Math.min(3, pts);
+    playerPoints[r] = finalPts;
+    totalPoints += finalPts;
+  });
+
+  const avgOvr = activeCards > 0 ? Math.round(totalOvr / activeCards) : 75;
+  const totalChemistry = Math.min(33, Math.round((totalPoints / 12) * 33));
+
+  return { totalChemistry, maxChemistry: 33, avgOvr, playerPoints, cards };
+}
+
+let activeBenchDrawerRole = null;
+
+function openSquadBenchDrawer(role) {
+  activeBenchDrawerRole = role;
+  renderSquadBuilder();
+  const drawer = document.getElementById('squadBenchDrawer');
+  if (drawer) drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeSquadBenchDrawer() {
+  activeBenchDrawerRole = null;
+  renderSquadBuilder();
+}
+
+function autoBuildBestSquad() {
+  if (!clubData.lineup) clubData.lineup = { GK: 'gk_bazunu', DEF: 'def_disasi', MID: 'mid_soucek', FWD: 'fwd_broja' };
+  const roles = ['GK', 'DEF', 'MID', 'FWD'];
+  const ownedCards = (Array.isArray(clubData.owned) ? clubData.owned : STARTER_CARD_IDS)
+    .map(id => getCardById(id))
+    .filter(Boolean);
+
+  roles.forEach(role => {
+    const candidates = ownedCards.filter(c => c.role === role);
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => b.ovr - a.ovr);
+      clubData.lineup[role] = candidates[0].id;
+    }
+  });
+
+  clubData.updatedAt = Date.now();
+  try { SFX.play('whistle'); } catch (e) {}
+  saveClubData(true);
+  applySquadStatsToTeam(blueTeam, clubData.lineup);
+  renderSquadBuilder();
+  updateMenuSquadStrip();
+  alert('⚡ Automatycznie wystawiono najmocniejszy możliwy skład z Twojego klubu!');
+}
+
 function renderSquadBuilder() {
   const container = document.getElementById('clubSquadView');
   if (!container) return;
 
   const roles = ['GK', 'DEF', 'MID', 'FWD'];
-  const squadCards = roles.map((r, i) => getCardById(clubData.lineup?.[r]) || getCardById(STARTER_CARD_IDS[i]));
-  const avgOvr = Math.round(squadCards.reduce((acc, c) => acc + (c ? c.ovr : 75), 0) / 4);
-  const activeStyles = squadCards.filter(c => c && c.playstyle).map(c => PLAYSTYLES[c.playstyle]?.name).filter(Boolean);
+  const chem = calculateSquadChemistry(clubData.lineup);
+  const activeStyles = chem.cards.filter(c => c && c.playstyle).map(c => PLAYSTYLES[c.playstyle]?.name).filter(Boolean);
+
+  const roleMeta = {
+    FWD: { name: 'NAPASTNIK (N)', icon: '⚡', color: '#ef4444', desc: 'Atak i wykończenie akcji' },
+    MID: { name: 'POMOCNIK (ŚP)', icon: '🎯', color: '#f59e0b', desc: 'Rozegranie i wizja gry' },
+    DEF: { name: 'OBROŃCA (ŚO)', icon: '🛡️', color: '#3b82f6', desc: 'Odbiór i blokowanie strzałów' },
+    GK:  { name: 'BRAMKARZ (BR)', icon: '🧤', color: '#00e5ff', desc: 'Parady i refleks na linii' }
+  };
+
+  // Generowanie slotów taktycznych
+  const slotsHtml = ['FWD', 'MID', 'DEF', 'GK'].map(role => {
+    const card = chem.cards[roles.indexOf(role)];
+    const pts = chem.playerPoints[role] || 1;
+    const meta = roleMeta[role];
+
+    return `
+      <div class="tactical-slot-card" onclick="openSquadBenchDrawer('${role}')" title="Kliknij, aby zarządzać pozycją ${meta.name}">
+        <div class="slot-pos-header">
+          <span class="slot-pos-pill" style="background:${meta.color}22; border:1px solid ${meta.color}; color:${meta.color};">
+            ${meta.icon} ${meta.name}
+          </span>
+          <div class="slot-chem-badge" title="Zgranie zawodnika: ${pts} / 3">
+            <span class="chem-diamond ${pts >= 1 ? 'active' : ''}"></span>
+            <span class="chem-diamond ${pts >= 2 ? 'active' : ''}"></span>
+            <span class="chem-diamond ${pts >= 3 ? 'active' : ''}"></span>
+          </div>
+        </div>
+
+        <div style="margin: 4px 0;">
+          ${renderSingleFutCardHtml(card, true)}
+        </div>
+
+        <button type="button" class="tactical-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
+          🔄 ZMIEŃ ZAWODNIKA
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // Generowanie szuflady ławki rezerwowych
+  let benchDrawerHtml = '';
+  if (activeBenchDrawerRole) {
+    const curRole = activeBenchDrawerRole;
+    const curCard = getCardById(clubData.lineup?.[curRole]) || getCardById(STARTER_CARD_IDS[roles.indexOf(curRole)]);
+    const ownedIds = Array.isArray(clubData.owned) ? clubData.owned : STARTER_CARD_IDS;
+    const candidates = ownedIds
+      .map(id => getCardById(id))
+      .filter(c => c && c.role === curRole && c.id !== curCard?.id)
+      .sort((a, b) => b.ovr - a.ovr);
+
+    benchDrawerHtml = `
+      <div class="squad-bench-drawer" id="squadBenchDrawer">
+        <div class="bench-drawer-header">
+          <div>
+            <span style="font-family:var(--font-heading); font-size:11px; color:#8b949e; letter-spacing:1px; text-transform:uppercase;">
+              ŁAWKA REZERWOWYCH • WYBIERZ ZMIENNIKA
+            </span>
+            <h3 style="font-family:var(--font-heading); font-size:20px; font-weight:900; margin:2px 0 0 0; color:#fff;">
+              ${roleMeta[curRole].icon} POZYCJA: ${roleMeta[curRole].name}
+            </h3>
+            <div style="font-size:12px; color:#8b949e; margin-top:3px;">
+              Aktualnie gra: <strong style="color:var(--gold);">${curCard?.name || 'Brak'}</strong> (OVR ${curCard?.ovr || 75})
+            </div>
+          </div>
+          <button type="button" class="action-btn" onclick="closeSquadBenchDrawer()" style="padding:6px 14px; font-size:12px;">
+            ✕ ZAMKNIJ
+          </button>
+        </div>
+
+        ${candidates.length === 0 ? `
+          <div style="text-align:center; padding:30px 20px; color:#8b949e; font-family:'Outfit';">
+            <div style="font-size:28px; margin-bottom:8px;">📦</div>
+            <div>Brak innych zawodników na pozycję <strong>${roleMeta[curRole].name}</strong> w Twoim klubie.</div>
+            <div style="font-size:12px; margin-top:6px; color:#c9d1d9;">Otwórz paczki FUT w sklepie, aby zdobyć nowe gwiazdy!</div>
+            <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS')" style="margin-top:14px; padding:8px 18px;">
+              🎁 PRZEJDŹ DO SKLEPU PACZEK
+            </button>
+          </div>
+        ` : `
+          <div class="bench-candidates-grid">
+            ${candidates.map(cand => {
+              const ovrDiff = cand.ovr - (curCard?.ovr || 75);
+              const isGk = curRole === 'GK';
+
+              const s1L = isGk ? 'DIV' : 'TEM', s1D = (isGk ? (cand.div || cand.def) : cand.pac) - (isGk ? (curCard?.div || curCard?.def || 75) : (curCard?.pac || 75));
+              const s2L = isGk ? 'HAN' : 'STR', s2D = (isGk ? (cand.han || cand.phy) : cand.sho) - (isGk ? (curCard?.han || curCard?.phy || 75) : (curCard?.sho || 75));
+              const s3L = isGk ? 'KIC' : 'POD', s3D = (isGk ? (cand.kic || cand.sho) : cand.pas) - (isGk ? (curCard?.kic || curCard?.sho || 75) : (curCard?.pas || 75));
+              const s4L = isGk ? 'REF' : 'DRY', s4D = (isGk ? (cand.ref || cand.def) : cand.dri) - (isGk ? (curCard?.ref || curCard?.def || 75) : (curCard?.dri || 75));
+              const s5L = isGk ? 'SZY' : 'OBR', s5D = (isGk ? (cand.spe || cand.pac) : cand.def) - (isGk ? (curCard?.spe || curCard?.pac || 75) : (curCard?.def || 75));
+              const s6L = isGk ? 'UST' : 'FIZ', s6D = (isGk ? (cand.pos || cand.ovr) : cand.phy) - (isGk ? (curCard?.pos || curCard?.ovr || 75) : (curCard?.phy || 75));
+
+              const fmtDelta = (d, lbl) => {
+                const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
+                const sign = d > 0 ? `+${d}` : (d < 0 ? `${d}` : `=`);
+                return `<span class="delta-pill ${cls}">${sign} ${lbl}</span>`;
+              };
+
+              return `
+                <div class="bench-candidate-row">
+                  <div style="flex-shrink:0;">
+                    ${renderSingleFutCardHtml(cand, true)}
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <strong style="font-family:var(--font-heading); font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${cand.name}
+                      </strong>
+                      <span class="delta-pill ${ovrDiff > 0 ? 'pos' : (ovrDiff < 0 ? 'neg' : 'eq')}">
+                        ${ovrDiff > 0 ? `+${ovrDiff}` : (ovrDiff < 0 ? `${ovrDiff}` : '=')} OVR
+                      </span>
+                    </div>
+
+                    <div class="delta-pills-wrap">
+                      ${fmtDelta(s1D, s1L)}
+                      ${fmtDelta(s2D, s2L)}
+                      ${fmtDelta(s3D, s3L)}
+                      ${fmtDelta(s4D, s4L)}
+                      ${fmtDelta(s5D, s5L)}
+                      ${fmtDelta(s6D, s6L)}
+                    </div>
+
+                    <button type="button" class="top-nav-btn gold-btn" style="width:100%; margin-top:8px; padding:6px 12px; font-size:11px;" onclick="equipCard('${cand.id}'); closeSquadBenchDrawer();">
+                      ⚡ WSTAW DO SKŁADU
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  }
 
   container.innerHTML = `
-    <div class="squad-builder-container">
-      <div class="squad-stats-bar">
-        <div>
-          <span style="font-family: var(--font-heading); font-size:10px; color:#8b949e;">ŚREDNIA OCENA</span>
-          <div style="font-family: var(--font-heading); font-size:20px; font-weight:900; color:var(--gold);">⭐ ${avgOvr} OVR</div>
+    <div class="squad-tactical-wrapper">
+      <!-- Pasek podsumowania taktycznego KPI -->
+      <div class="squad-stats-bar-fut">
+        <div class="squad-kpi-item">
+          <span class="squad-kpi-lbl">ŚREDNIA OCENA</span>
+          <div class="squad-kpi-val" style="color:var(--gold);">⭐ ${chem.avgOvr} OVR</div>
         </div>
-        <div>
-          <span style="font-family: var(--font-heading); font-size:10px; color:#8b949e;">FORMACJA</span>
-          <div style="font-family: var(--font-heading); font-size:14px; font-weight:900; color:#fff;">4v4 (BR • ŚO • ŚP • N)</div>
+
+        <div class="squad-kpi-item">
+          <span class="squad-kpi-lbl">ZGRANIE ZESPOŁU</span>
+          <div class="squad-kpi-val" style="color:#00f0ff; display:flex; align-items:center; gap:8px;">
+            💎 ${chem.totalChemistry} <span style="font-size:13px; color:#8b949e;">/ 33</span>
+          </div>
         </div>
-        <div style="flex:1; min-width:200px;">
-          <span style="font-family: var(--font-heading); font-size:10px; color:#8b949e;">AKTYWNE ZŁOTE PLAYSTYLE+</span>
-          <div style="font-size:11px; font-weight:800; color:#00f0ff; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+
+        <div class="squad-kpi-item">
+          <span class="squad-kpi-lbl">FORMACJA</span>
+          <div class="squad-kpi-val" style="font-size:16px; color:#fff;">DIAMENT 4v4</div>
+        </div>
+
+        <div class="squad-kpi-item" style="flex:1; min-width:200px;">
+          <span class="squad-kpi-lbl">AKTYWNE ZŁOTE PLAYSTYLE+</span>
+          <div style="font-size:11px; font-weight:800; color:#00e676; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
             ${activeStyles.length > 0 ? activeStyles.join(' • ') : 'Brak (otwórz paczki FUT!)'}
           </div>
         </div>
-        <button type="button" class="top-nav-btn gold-btn" onclick="closeClubModal()" style="padding:8px 16px; font-size:11px;">
-          ⚽ GRAJ TYM SKŁADEM
-        </button>
-      </div>
 
-      <!-- Kompaktowe, czytelne boisko 4v4: 4 pozycje obok siebie -->
-      <div class="squad-pitch-compact">
-        <!-- Bramkarz: GK -->
-        <div class="squad-slot-compact" onclick="switchClubTab('PLAYERS', 'GK')" title="Kliknij aby zmienić Bramkarza">
-          <span class="squad-pos-label-compact">🧤 BRAMKARZ (BR)</span>
-          ${renderSingleFutCardHtml(squadCards[0], true)}
-          <button type="button" class="squad-swap-btn-compact">🔄 ZMIEŃ</button>
-        </div>
-
-        <!-- Obrońca: DEF -->
-        <div class="squad-slot-compact" onclick="switchClubTab('PLAYERS', 'DEF')" title="Kliknij aby zmienić Obrońcę">
-          <span class="squad-pos-label-compact">🛡️ OBROŃCA (ŚO)</span>
-          ${renderSingleFutCardHtml(squadCards[1], true)}
-          <button type="button" class="squad-swap-btn-compact">🔄 ZMIEŃ</button>
-        </div>
-
-        <!-- Pomocnik: MID -->
-        <div class="squad-slot-compact" onclick="switchClubTab('PLAYERS', 'MID')" title="Kliknij aby zmienić Pomocnika">
-          <span class="squad-pos-label-compact">🎯 POMOCNIK (ŚP)</span>
-          ${renderSingleFutCardHtml(squadCards[2], true)}
-          <button type="button" class="squad-swap-btn-compact">🔄 ZMIEŃ</button>
-        </div>
-
-        <!-- Napastnik: FWD -->
-        <div class="squad-slot-compact" onclick="switchClubTab('PLAYERS', 'FWD')" title="Kliknij aby zmienić Napastnika">
-          <span class="squad-pos-label-compact">⚡ NAPASTNIK (N)</span>
-          ${renderSingleFutCardHtml(squadCards[3], true)}
-          <button type="button" class="squad-swap-btn-compact">🔄 ZMIEŃ</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="action-btn" onclick="autoBuildBestSquad()" style="padding:8px 14px; font-size:11px; background:rgba(0,240,255,0.12); border-color:#00f0ff; color:#00f0ff;">
+            ⚡ AUTO-SKŁAD
+          </button>
+          <button type="button" class="top-nav-btn gold-btn" onclick="closeClubModal()" style="padding:8px 16px; font-size:11px;">
+            ⚽ GRAJ TYM SKŁADEM
+          </button>
         </div>
       </div>
 
-      <div style="text-align:center; font-size:12px; color:#8b949e; font-family: var(--font-heading);">
-        💡 Kliknij <strong style="color:var(--p1);">„ZMIEŃ”</strong> przy dowolnym piłkarzu, aby wybrać zmiennika z kart swojego klubu.
+      <!-- Stadionowe Boisko Taktyczne 4v4 -->
+      <div class="squad-pitch-stadium">
+        <div class="pitch-box-top"></div>
+        <div class="pitch-line-center"></div>
+        <div class="pitch-circle-center"></div>
+        <div class="pitch-box-bottom"></div>
+
+        <div class="tactical-formation-grid">
+          ${slotsHtml}
+        </div>
+      </div>
+
+      <!-- Szuflada Ławki Rezerwowych -->
+      ${benchDrawerHtml}
+
+      <div style="text-align:center; font-size:12px; color:#8b949e; font-family: var(--font-heading); margin-top:4px;">
+        💡 Kliknij <strong style="color:var(--p1);">„ZMIEŃ ZAWODNIKA”</strong> lub w dowolną kartę, aby wysunąć ławkę rezerwowych z analizą różnic statystyk.
       </div>
     </div>
   `;
+}
+
+// =========================================================================
+// ZARZĄDZANIE KLUBEM: PRZEGLĄDARKA KART (FUT GRID & SOFASCORE TABELA)
+// =========================================================================
+let clubCardsViewMode = 'grid'; // 'grid' | 'table'
+let clubCardsTableSortCol = 'ovr';
+let clubCardsTableSortAsc = false;
+
+function setClubCardsViewMode(mode) {
+  clubCardsViewMode = mode;
+  const btnGrid = document.getElementById('btnViewCards');
+  const btnTable = document.getElementById('btnViewTable');
+  const grid = document.getElementById('clubCardsGrid');
+  const tableContainer = document.getElementById('clubCardsTableContainer');
+
+  if (btnGrid) btnGrid.classList.toggle('active', mode === 'grid');
+  if (btnTable) btnTable.classList.toggle('active', mode === 'table');
+
+  if (grid) grid.style.display = (mode === 'grid' ? 'grid' : 'none');
+  if (tableContainer) tableContainer.style.display = (mode === 'table' ? 'block' : 'none');
+
+  renderClubCards();
+}
+
+function sortClubTableBy(colKey) {
+  if (clubCardsTableSortCol === colKey) {
+    clubCardsTableSortAsc = !clubCardsTableSortAsc;
+  } else {
+    clubCardsTableSortCol = colKey;
+    clubCardsTableSortAsc = false;
+  }
+  renderClubCards();
 }
 
 function renderClubCards() {
@@ -7486,12 +8173,12 @@ function renderClubCards() {
 
   let list = [...PLAYERS_DB];
 
-  // 1. Pozycja
+  // 1. Filtr pozycji
   if (activeClubRoleFilter && activeClubRoleFilter !== 'ALL') {
     list = list.filter(c => c.role === activeClubRoleFilter);
   }
 
-  // 2. Szukajka
+  // 2. Szukajka po nazwisku
   if (searchVal) {
     list = list.filter(c => c.name.toLowerCase().includes(searchVal));
   }
@@ -7504,19 +8191,122 @@ function renderClubCards() {
     list = list.filter(c => Array.isArray(clubData.owned) && clubData.owned.includes(c.id));
   }
 
-  // 4. Sortowanie
-  list.sort((a, b) => {
-    if (sortVal === 'ovr_asc') return a.ovr - b.ovr;
-    if (sortVal === 'name_asc') return a.name.localeCompare(b.name);
-    return b.ovr - a.ovr; // domyślnie ovr_desc
-  });
+  // 4. Sortowanie listy
+  if (clubCardsViewMode === 'table') {
+    const col = clubCardsTableSortCol;
+    const asc = clubCardsTableSortAsc;
+    list.sort((a, b) => {
+      let vA = a[col], vB = b[col];
+      if (typeof vA === 'string') return asc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+      return asc ? (vA || 0) - (vB || 0) : (vB || 0) - (vA || 0);
+    });
+  } else {
+    list.sort((a, b) => {
+      if (sortVal === 'ovr_asc') return a.ovr - b.ovr;
+      if (sortVal === 'name_asc') return a.name.localeCompare(b.name);
+      return b.ovr - a.ovr;
+    });
+  }
 
+  // 5. Renderowanie widoku
   const grid = document.getElementById('clubCardsGrid');
-  if (grid) {
-    if (list.length === 0) {
-      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#8b949e; font-family:\'Outfit\';">Brak zawodników spełniających podane kryteria.</div>';
-    } else {
-      grid.innerHTML = list.map(c => renderSingleFutCardHtml(c, false, false)).join('');
+  const thead = document.getElementById('clubCardsTableHead');
+  const tbody = document.getElementById('clubCardsTableBody');
+
+  if (clubCardsViewMode === 'grid') {
+    if (grid) {
+      if (list.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#8b949e; font-family:\'Outfit\';">Brak zawodników spełniających podane kryteria.</div>';
+      } else {
+        grid.innerHTML = list.map(c => renderSingleFutCardHtml(c, false, false)).join('');
+      }
+    }
+  } else {
+    // Widok tabeli SofaScore / Futbin
+    if (thead && tbody) {
+      const sortArrow = (col) => (clubCardsTableSortCol === col ? (clubCardsTableSortAsc ? ' ▲' : ' ▼') : '');
+
+      thead.innerHTML = `
+        <tr>
+          <th style="width:40px;">#</th>
+          <th onclick="sortClubTableBy('name')">ZAWODNIK${sortArrow('name')}</th>
+          <th onclick="sortClubTableBy('role')">POZ${sortArrow('role')}</th>
+          <th onclick="sortClubTableBy('ovr')">OVR${sortArrow('ovr')}</th>
+          <th onclick="sortClubTableBy('pac')">TEM/DIV${sortArrow('pac')}</th>
+          <th onclick="sortClubTableBy('sho')">STR/HAN${sortArrow('sho')}</th>
+          <th onclick="sortClubTableBy('pas')">POD/KIC${sortArrow('pas')}</th>
+          <th onclick="sortClubTableBy('dri')">DRY/REF${sortArrow('dri')}</th>
+          <th onclick="sortClubTableBy('def')">OBR/SZY${sortArrow('def')}</th>
+          <th onclick="sortClubTableBy('phy')">FIZ/UST${sortArrow('phy')}</th>
+          <th>PLAYSTYLE+</th>
+          <th>STATUS</th>
+          <th style="text-align:right;">AKCJA</th>
+        </tr>
+      `;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding:30px; color:#8b949e;">Brak zawodników spełniających podane kryteria.</td></tr>`;
+      } else {
+        const roleColors = { GK: '#00e5ff', DEF: '#3b82f6', MID: '#f59e0b', FWD: '#ef4444' };
+        tbody.innerHTML = list.map((c, idx) => {
+          const isOwned = Array.isArray(clubData.owned) && clubData.owned.includes(c.id);
+          const isEquipped = clubData.lineup && clubData.lineup[c.role] === c.id;
+          const tier = getCardTier(c);
+          const tierLabel = getCardTierLabel(tier);
+          const ps = c.playstyle ? PLAYSTYLES[c.playstyle] : null;
+          const flag = PLAYER_NATIONS[c.id] || '⚽';
+          const isGk = c.role === 'GK';
+
+          const s1 = isGk ? (c.div || c.def) : c.pac;
+          const s2 = isGk ? (c.han || c.phy) : c.sho;
+          const s3 = isGk ? (c.kic || c.sho) : c.pas;
+          const s4 = isGk ? (c.ref || c.def) : c.dri;
+          const s5 = isGk ? (c.spe || c.pac) : c.def;
+          const s6 = isGk ? (c.pos || c.ovr) : c.phy;
+
+          return `
+            <tr onclick="openPlayerBioModal('${c.id}')" style="cursor:pointer;" title="Kliknij, aby otworzyć szczegółowy profil i wykres radarowy">
+              <td>
+                <img src="assets/players/${c.id}.webp" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1.5px solid ${roleColors[c.role] || '#fff'}; vertical-align:middle;" onerror="this.style.opacity='0.2';">
+              </td>
+              <td>
+                <div style="font-weight:900; color:#fff;">${c.name} ${flag}</div>
+                <div style="font-size:10px; color:#8b949e;">${tierLabel}</div>
+              </td>
+              <td>
+                <span class="fut-pos-badge" style="background:${roleColors[c.role]}22; border-color:${roleColors[c.role]}; color:${roleColors[c.role]}; padding:3px 8px; font-size:11px;">
+                  ${c.role}
+                </span>
+              </td>
+              <td><strong style="color:var(--gold); font-size:14px; font-family:var(--font-heading);">⭐ ${c.ovr}</strong></td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s1)};">${s1}</td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s2)};">${s2}</td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s3)};">${s3}</td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s4)};">${s4}</td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s5)};">${s5}</td>
+              <td class="tbl-stat-val" style="color:${getFutStatColor(s6)};">${s6}</td>
+              <td>
+                ${ps ? `<span style="font-size:11px; font-weight:800; color:#00f0ff; background:rgba(0,240,255,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.3);">💎 ${ps.name}</span>` : `<span style="color:#8b949e;">—</span>`}
+              </td>
+              <td>
+                ${isEquipped ? `<span style="color:#00e676; font-weight:800; font-size:11px;">⭐ W SKŁADZIE</span>` : (isOwned ? `<span style="color:#00f0ff; font-weight:800; font-size:11px;">✓ W KLUBIE</span>` : `<span style="color:#8b949e; font-size:11px;">🔒 ZABLOKOWANA</span>`)}
+              </td>
+              <td style="text-align:right;">
+                <div style="display:inline-flex; gap:6px;">
+                  <button type="button" class="action-btn" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); openPlayerBioModal('${c.id}')">
+                    🔍 PROFIL
+                  </button>
+                  ${isOwned && !isEquipped ? `
+                    <button type="button" class="action-btn btn-host" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); equipCard('${c.id}')">
+                      ⚡ WYSTAW
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
   }
 
@@ -7524,6 +8314,222 @@ function renderClubCards() {
   if (ownedBadge) {
     ownedBadge.textContent = Array.isArray(clubData.owned) ? clubData.owned.length : 0;
   }
+}
+
+// =========================================================================
+// WEKTOROWY WYKRES RADAROWY (SPIDER RADAR SVG) & MODAL PROFILU ZAWODNIKA
+// =========================================================================
+function generateSpiderRadarSvg(labels, values) {
+  const cx = 110, cy = 90, R = 68;
+  const total = labels.length;
+
+  // Koncentryczne pierścienie siatki (25, 50, 75, 100)
+  let gridSvg = '';
+  [0.25, 0.5, 0.75, 1.0].forEach(level => {
+    const pts = [];
+    for (let i = 0; i < total; i++) {
+      const a = i * (Math.PI * 2 / total) - Math.PI / 2;
+      const x = cx + Math.cos(a) * (R * level);
+      const y = cy + Math.sin(a) * (R * level);
+      pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    gridSvg += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(255,255,255,${level === 1.0 ? 0.25 : 0.08})" stroke-width="1"/>`;
+  });
+
+  // Osie od środka do wierzchołków
+  let axesSvg = '';
+  for (let i = 0; i < total; i++) {
+    const a = i * (Math.PI * 2 / total) - Math.PI / 2;
+    const x = cx + Math.cos(a) * R;
+    const y = cy + Math.sin(a) * R;
+    axesSvg += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>`;
+  }
+
+  // Polygon danych zawodnika
+  const dataPts = [];
+  let dotsSvg = '';
+  let labelsSvg = '';
+
+  for (let i = 0; i < total; i++) {
+    const a = i * (Math.PI * 2 / total) - Math.PI / 2;
+    const val = Math.max(30, Math.min(99, values[i] || 75));
+    const ratio = (val - 25) / 75; // normalizacja 25-100
+    const x = cx + Math.cos(a) * (R * ratio);
+    const y = cy + Math.sin(a) * (R * ratio);
+    dataPts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+
+    dotsSvg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#00f0ff" stroke="#fff" stroke-width="1.5"/>`;
+
+    // Etykiety na zewnątrz radaru
+    const lx = cx + Math.cos(a) * (R + 18);
+    const ly = cy + Math.sin(a) * (R + 18);
+    labelsSvg += `
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" fill="#c9d1d9" font-size="9" font-family="'Outfit', sans-serif" font-weight="900" text-anchor="middle" dominant-baseline="central">
+        ${labels[i]} ${values[i]}
+      </text>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 220 180" style="width:220px; height:180px; overflow:visible;">
+      ${gridSvg}
+      ${axesSvg}
+      <polygon points="${dataPts.join(' ')}" fill="rgba(0,240,255,0.32)" stroke="#00f0ff" stroke-width="2"/>
+      ${dotsSvg}
+      ${labelsSvg}
+    </svg>
+  `;
+}
+
+function openPlayerBioModal(cardId) {
+  const card = getCardById(cardId);
+  if (!card) return;
+  const modal = document.getElementById('playerBioModal');
+  const content = document.getElementById('playerBioModalContent');
+  if (!modal || !content) return;
+
+  const isOwned = Array.isArray(clubData.owned) && clubData.owned.includes(card.id);
+  const isEquipped = clubData.lineup && clubData.lineup[card.role] === card.id;
+  const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
+  const tier = getCardTier(card);
+  const tierLabel = getCardTierLabel(tier);
+  const nationFlag = PLAYER_NATIONS[card.id] || '⚽';
+  const countryName = PLAYER_COUNTRIES[card.id] || 'Nieznany';
+
+  // Wartość szybkiej sprzedaży na podstawie OVR
+  const quickSellValue = tier === 'icon' ? 650 : (tier === 'toty' ? 500 : (card.ovr >= 85 ? 250 : (card.ovr >= 80 ? 120 : 50)));
+
+  // Dane do wykresu radarowego (6 cech)
+  const isGk = card.role === 'GK';
+  const radarLabels = isGk ? ['DIV', 'HAN', 'KIC', 'REF', 'SZY', 'UST'] : ['TEM', 'STR', 'POD', 'DRY', 'OBR', 'FIZ'];
+  const radarValues = isGk 
+    ? [card.div || card.def || 75, card.han || card.phy || 75, card.kic || card.sho || 75, card.ref || card.def || 75, card.spe || card.pac || 75, card.pos || card.ovr || 75]
+    : [card.pac, card.sho, card.pas, card.dri, card.def, card.phy];
+
+  const radarSvg = generateSpiderRadarSvg(radarLabels, radarValues);
+
+  // Statystyki klubowe gracza
+  const matchesPlayed = isEquipped ? 18 : (isOwned ? 4 : 0);
+  const goalsScored = isEquipped ? (card.role === 'FWD' ? 22 : (card.role === 'MID' ? 8 : (card.role === 'DEF' ? 2 : 0))) : (isOwned ? 1 : 0);
+  const assistsOrClean = isGk ? (isEquipped ? 7 : 0) : (isEquipped ? 11 : 0);
+
+  content.innerHTML = `
+    <button type="button" onclick="closePlayerBioModal()" style="position:absolute; top:18px; right:20px; background:transparent; border:none; color:#8b949e; font-size:24px; cursor:pointer; z-index:10;">✕</button>
+
+    <div class="bio-left-card-pane">
+      <div style="transform:scale(1.05); transform-origin:top center;">
+        ${renderSingleFutCardHtml(card, false, false)}
+      </div>
+      <div style="font-size:11px; color:#8b949e; text-align:center;">
+        Klub: <strong>CYBERFC 28</strong> • ${countryName} ${nationFlag}
+      </div>
+    </div>
+
+    <div class="bio-right-info-pane">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span class="fut-pos-badge" style="padding:4px 10px; font-size:12px;">${card.role}</span>
+          <span style="font-size:13px; font-weight:800; color:var(--gold);">${tierLabel}</span>
+          <span style="font-size:13px;">${nationFlag} ${countryName}</span>
+        </div>
+        <h2 style="font-family:var(--font-heading); font-size:26px; font-weight:900; margin:0; color:#fff; letter-spacing:0.5px;">${card.name}</h2>
+      </div>
+
+      <!-- Wykres pająkowy cech SVG -->
+      <div class="spider-radar-box">
+        <span style="font-family:var(--font-heading); font-size:11px; font-weight:800; color:#8b949e; letter-spacing:1px; margin-bottom:8px;">ANALIZA CECH ZAWODNIKA (RADAR FIFA 3D)</span>
+        ${radarSvg}
+      </div>
+
+      <!-- PlayStyle+ głęboka analiza -->
+      <div style="background:rgba(12,18,34,0.8); border:1px solid rgba(0,240,255,0.2); border-radius:14px; padding:12px 16px;">
+        <div style="font-family:var(--font-heading); font-size:10px; color:#8b949e; letter-spacing:1px; margin-bottom:6px;">UNIKALNY ZŁOTY PLAYSTYLE+</div>
+        ${ps ? `
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img src="assets/playstyles/${card.playstyle}.webp" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none';">
+            <div>
+              <div style="font-family:var(--font-heading); font-size:14px; font-weight:900; color:#00f0ff;">${ps.name}</div>
+              <div style="font-size:12px; color:#c9d1d9; margin-top:2px;">${ps.desc}</div>
+            </div>
+          </div>
+        ` : `
+          <div style="color:#8b949e; font-size:12px;">Ten zawodnik polega na czystych atrybutach fizycznych i technicznych.</div>
+        `}
+      </div>
+
+      <!-- Statystyki klubowe -->
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+        <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:8px 12px; text-align:center;">
+          <div style="font-size:10px; color:#8b949e; font-family:var(--font-heading);">WYSTĘPY</div>
+          <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--font-heading);">${matchesPlayed}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:8px 12px; text-align:center;">
+          <div style="font-size:10px; color:#8b949e; font-family:var(--font-heading);">${isGk ? 'CZYSTE KONTA' : 'BRAMKI'}</div>
+          <div style="font-size:18px; font-weight:900; color:#00e676; font-family:var(--font-heading);">${isGk ? assistsOrClean : goalsScored}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:8px 12px; text-align:center;">
+          <div style="font-size:10px; color:#8b949e; font-family:var(--font-heading);">${isGk ? 'OBRONY' : 'ASYSTY'}</div>
+          <div style="font-size:18px; font-weight:900; color:#00f0ff; font-family:var(--font-heading);">${isGk ? (matchesPlayed * 4) : assistsOrClean}</div>
+        </div>
+      </div>
+
+      <!-- Przyciski akcji -->
+      <div style="display:flex; gap:12px; margin-top:6px; flex-wrap:wrap;">
+        ${isOwned && !isEquipped ? `
+          <button type="button" class="top-nav-btn gold-btn" style="flex:1; padding:10px;" onclick="equipCard('${card.id}'); closePlayerBioModal();">
+            ⚡ WYSTAW DO SKŁADU
+          </button>
+        ` : (isEquipped ? `
+          <button type="button" class="action-btn" style="flex:1; background:#238636; border-color:#00e676; padding:10px;" disabled>
+            ✓ W PODSTAWOWYM SKŁADZIE
+          </button>
+        ` : `
+          <button type="button" class="action-btn" style="flex:1; padding:10px;" onclick="closePlayerBioModal(); switchClubTab('PACKS');">
+            🔒 ODBLOKUJ W PACZKACH FUT
+          </button>
+        `)}
+
+        ${isOwned && !isEquipped && !STARTER_CARD_IDS.includes(card.id) ? `
+          <button type="button" class="action-btn" style="background:rgba(255,23,68,0.15); border-color:#ff1744; color:#ff5252; padding:10px 16px;" onclick="quickSellCard('${card.id}', ${quickSellValue})">
+            💰 Szybka sprzedaż: +${quickSellValue} 🪙
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+}
+
+function closePlayerBioModal() {
+  const modal = document.getElementById('playerBioModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function quickSellCard(cardId, coinsValue) {
+  if (!cardId || !Array.isArray(clubData.owned) || !clubData.owned.includes(cardId)) return;
+  if (STARTER_CARD_IDS.includes(cardId)) {
+    alert('Karty startowe nie mogą zostać sprzedane.');
+    return;
+  }
+  if (clubData.lineup && Object.values(clubData.lineup).includes(cardId)) {
+    alert('Nie możesz sprzedać zawodnika, który gra w wyjściowym składzie!');
+    return;
+  }
+  const card = getCardById(cardId);
+  const name = card ? card.name : cardId;
+  if (!confirm(`Czy na pewno chcesz szybko sprzedać ${name} za ${coinsValue} 🪙 monet?`)) return;
+
+  clubData.owned = clubData.owned.filter(id => id !== cardId);
+  clubData.coins = (Number(clubData.coins) || 0) + coinsValue;
+  clubData.updatedAt = Date.now();
+  try { SFX.play('coins'); } catch (e) {}
+  saveClubData(true);
+  updateMenuClubUI();
+  fcUpdateAuthUi();
+  closePlayerBioModal();
+  renderClubCards();
+  alert(`Sprzedano ${name}! Na Twoje konto wpłynęło +${coinsValue} 🪙.`);
 }
 
 async function openPack(packType = 'ultimate') {
@@ -9688,8 +10694,8 @@ const ball = {
     // Magnusa świdrująca rotacja dla strzałów rogalków (finesse)
     if (this.isFinesseShot) {
       let sideSign = player.y > WORLD.height / 2 ? -1 : 1;
-      this.curveX = -Math.sin(angle) * (power * 0.055) * sideSign;
-      this.curveY = Math.cos(angle) * (power * 0.055) * sideSign;
+      this.curveX = -Math.sin(angle) * (power * 0.075) * sideSign;
+      this.curveY = Math.cos(angle) * (power * 0.075) * sideSign;
     } else {
       this.curveX = 0;
       this.curveY = 0;
@@ -9702,8 +10708,8 @@ const ball = {
 
   update() {
     if (this.kickCooldown > 0) this.kickCooldown--;
-    if (this.netSwayLeft > 0) this.netSwayLeft *= 0.9;
-    if (this.netSwayRight > 0) this.netSwayRight *= 0.9;
+    if (this.netSwayLeft > 0) this.netSwayLeft *= 0.94;
+    if (this.netSwayRight > 0) this.netSwayRight *= 0.94;
 
     if (matchPhase === 'GOAL_PAUSE') {
       this.x += this.vx;
@@ -9720,12 +10726,12 @@ const ball = {
     let speed = Math.hypot(this.vx, this.vy);
     if (speed < 7) this.isPowerShot = false;
 
-    // Świdrujący łuk dla finesse shot
-    if (!this.owner && this.isFinesseShot && speed > 5) {
+    // Świdrujący łuk dla finesse shot (Magnus effect)
+    if (!this.owner && this.isFinesseShot && speed > 3.8) {
       this.vx += this.curveX;
       this.vy += this.curveY;
-      this.curveX *= 0.94;
-      this.curveY *= 0.94;
+      this.curveX *= 0.955;
+      this.curveY *= 0.955;
     }
 
     if (!this.owner && speed > 7.5) {
@@ -9873,7 +10879,7 @@ const ball = {
           if (this.y > goalTop && this.y < goalBottom && this.z < 58) {
             if (this.x < WORLD.marginX - 20) {
               scoreRed++;
-              this.netSwayLeft = 20;
+              this.netSwayLeft = Math.min(38, 16 + speed * 1.15);
               triggerGoal(`GOL DLA CZERWONYCH!`, "#ff0055", 'blue');
               return;
             }
@@ -9892,7 +10898,7 @@ const ball = {
           if (this.y > goalTop && this.y < goalBottom && this.z < 58) {
             if (this.x > WORLD.width - WORLD.marginX + 20) {
               scoreBlue++;
-              this.netSwayRight = 20;
+              this.netSwayRight = Math.min(38, 16 + speed * 1.15);
               triggerGoal(`GOL DLA NIEBIESKICH!`, "#00f0ff", 'red');
               return;
             }
@@ -11034,9 +12040,19 @@ class Player {
       const dGoalBall = Math.hypot(ball.x - ownGoalX, ball.y - cy);
       const looseNear = !ball.owner && dGoalBall < 210 && Math.hypot(ball.vx, ball.vy) < 9.0;
       const gkClosest = looseNear && [...myTeam, ...oppTeam].every(p => p === this || dist(p, ball) > dist(this, ball) * 0.9);
+
+      // Wyjścia 1v1 (Goalkeeper Rush-out): Skracanie kąta przy sytuacji sam na sam
+      const isOneOnOneThreat = ball.owner && ball.owner.team !== this.team && dGoalBall < 300 &&
+        myTeam.every(p => p === this || dist(p, ball.owner) > 85);
+
       let tx, ty;
       if (gkClosest) {
         tx = ball.x; ty = ball.y;
+      } else if (isOneOnOneThreat) {
+        // Skracanie kąta: bramkarz dynamicznie wybiega do 65-160px przed bramkę, aby zamknąć światło bramki
+        const rushDepth = clamp(dGoalBall * 0.48, 65, 160);
+        tx = ownGoalX + dir * rushDepth;
+        ty = cy + clamp((ball.owner.y - cy) * 0.85, -WORLD.goalHeight * 0.52, WORLD.goalHeight * 0.52);
       } else {
         const out = ball.owner && ball.owner.team !== this.team && dGoalBall < 180 ? 92 : clamp(dGoalBall * 0.16, 28, 80);
         tx = ownGoalX + dir * out;
@@ -11044,8 +12060,8 @@ class Player {
         ty = cy + clamp(((predY !== null ? predY : ball.y + ball.vy * 4) - cy) * 0.92, -WORLD.goalHeight * 0.50, WORLD.goalHeight * 0.50);
         if (predY !== null) ty = cy + clamp(predY - cy, -WORLD.goalHeight * 0.49, WORLD.goalHeight * 0.49);
       }
-      tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 155), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 155));
-      this.moveTowards(tx, ty, 1.05 * cfg.speedMult, gkClosest || (predY !== null && Math.abs(predY - this.y) > 28));
+      tx = clamp(tx, Math.min(ownGoalX + dir * 6, ownGoalX + dir * 165), Math.max(ownGoalX + dir * 6, ownGoalX + dir * 165));
+      this.moveTowards(tx, ty, (isOneOnOneThreat ? 1.35 : 1.05) * cfg.speedMult, gkClosest || isOneOnOneThreat || (predY !== null && Math.abs(predY - this.y) > 28));
       if (!this.isMoving) this.angle = Math.atan2(ball.y - this.y, ball.x - this.x);
       return;
     }
@@ -14734,6 +15750,15 @@ Object.assign(window, {
   closeClubModal,
   switchClubTab,
   equipCard,
+  openSquadBenchDrawer,
+  closeSquadBenchDrawer,
+  autoBuildBestSquad,
+  setClubCardsViewMode,
+  sortClubTableBy,
+  openPlayerBioModal,
+  closePlayerBioModal,
+  quickSellCard,
+  calculateSquadChemistry,
   openSaveCodeModal,
   closeSaveCodeModal,
   copySaveCode,
