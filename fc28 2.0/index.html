@@ -6356,7 +6356,7 @@
               ZACHOWAJ W KLUBIE
             </button>
             <button type="button" class="pack-btn pack-btn-next" onclick="reOpenPack()">
-              KOLEJNA PACZKA (500 🪙)
+              KOLEJNA PACZKA (5 000 🪙)
             </button>
           </div>
         </div>
@@ -8974,7 +8974,7 @@ function renderPackStore() {
       tier: 'standard',
       name: 'PACZKA STANDARD',
       sub: 'KARTY 75+ OVR',
-      price: 100,
+      price: 1000,
       desc: '1 gwarantowany zawodnik 75+ OVR z szansą na gwiazdę i PlayStyle.',
       odds: '🥉 75-79: 75% • ⭐ 80-83: 20% • 🌟 84+: 5%',
       badge: '🥉 PODSTAWOWA',
@@ -8985,7 +8985,7 @@ function renderPackStore() {
       tier: 'premium',
       name: 'PACZKA PREMIUM',
       sub: 'KARTY 80+ OVR • PLAYSTYLE+',
-      price: 250,
+      price: 2500,
       desc: '1 gwarantowany zawodnik 80+ OVR z podwyższoną szansą na styl gry.',
       odds: '⭐ 80-83: 65% • 🌟 84-86: 25% • 🔥 87+: 10%',
       badge: '⭐ NAJCZĘŚCIEJ WYBIERANA',
@@ -8996,7 +8996,7 @@ function renderPackStore() {
       tier: 'ultimate',
       name: 'PACZKA ULTIMATE',
       sub: 'ŚWIATOWA KLASA 84+ • IKONY',
-      price: 500,
+      price: 5000,
       desc: 'Gwarantowany gracz 84+ OVR ze stylem gry+! Szansa na Walkout i Ikony!',
       odds: '🌟 84-86: 70% • 🔥 87-89: 24% • 👑 90+ IKONA: 6%',
       badge: '👑 NAJLEPSZY DROP',
@@ -9766,11 +9766,11 @@ async function openPack(packType = 'ultimate') {
   }
 
   const PACK_PRICES = {
-    standard: 100,
-    premium: 250,
-    ultimate: 500
+    standard: 1000,
+    premium: 2500,
+    ultimate: 5000
   };
-  const packCost = PACK_PRICES[packType] || 500;
+  const packCost = PACK_PRICES[packType] || 5000;
   if (typeof clubData.coins !== 'number' || clubData.coins < packCost) {
     const diff = packCost - (clubData.coins || 0);
     alert(`🔒 Brakuje Ci ${diff} 🪙 monet! Rozegraj mecz przeciwko botom lub online, aby zdobyć monety.`);
@@ -10580,7 +10580,7 @@ function renderSeasonPassTrack() {
   }).join('');
 }
 
-function claimSeasonPassTier(lvl, amount) {
+async function claimSeasonPassTier(lvl, amount) {
   const claimed = getClaimedPassTiers();
   if (claimed.includes(lvl)) return;
 
@@ -10593,6 +10593,33 @@ function claimSeasonPassTier(lvl, amount) {
     clubData.coins = (clubData.coins || 0) + amount;
     saveClubData(true);
     updateMenuClubUI();
+
+    // Pełna synchronizacja nagrody z chmurą Cloudflare D1
+    const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
+    if (token && fcCurrentUser && !fcCurrentUser.isLocal && !token.startsWith('LOCAL_')) {
+      try {
+        const res = await fetch(`${FC_API_URL}/api/club/claim-pass`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ tier: lvl, amount: amount })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && typeof data.totalCoins === 'number') {
+            clubData.coins = data.totalCoins;
+            try { localStorage.setItem('PASS_SYNCED_D1_' + lvl, 'true'); } catch (e) {}
+            saveClubData(false);
+            updateMenuClubUI();
+            fcUpdateAuthUi();
+          }
+        }
+      } catch (err) {
+        console.warn('Błąd synchronizacji nagrody z D1 online:', err);
+      }
+    }
   }
 
   try { SFX.play('goal'); } catch (e) {}
@@ -16956,6 +16983,40 @@ async function fcLoadCloudProfile() {
       saveClubData(false);
       fcUpdateAuthUi();
       updateMenuClubUI();
+
+      // Automatyczna weryfikacja i dosynchronizowanie odebranych nagród z karnetu do bazy D1
+      const claimedTiers = typeof getClaimedPassTiers === 'function' ? getClaimedPassTiers() : [];
+      if (claimedTiers.length > 0 && token && !token.startsWith('LOCAL_')) {
+        for (const lvl of claimedTiers) {
+          const tierObj = typeof SEASON_PASS_TIERS !== 'undefined' ? SEASON_PASS_TIERS.find(t => t.lvl === lvl) : null;
+          const syncKey = 'PASS_SYNCED_D1_' + lvl + '_' + (fcCurrentUser.id || username);
+          if (tierObj && tierObj.amount && !localStorage.getItem(syncKey)) {
+            try {
+              const sRes = await fetch(`${FC_API_URL}/api/club/claim-pass`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ tier: lvl, amount: tierObj.amount })
+              });
+              if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData && sData.success && typeof sData.totalCoins === 'number') {
+                  clubData.coins = sData.totalCoins;
+                  try { localStorage.setItem(syncKey, 'true'); } catch (e) {}
+                  saveClubData(false);
+                  updateMenuClubUI();
+                  fcUpdateAuthUi();
+                }
+              }
+            } catch (syncErr) {
+              console.warn('Auto-reconciliation error for pass tier ' + lvl, syncErr);
+            }
+          }
+        }
+      }
+
       return true;
     }
   } catch (err) {
