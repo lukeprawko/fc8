@@ -4951,6 +4951,24 @@
     box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
     transform: scale(1.06);
   }
+  .cfc-audio-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 18px;
+    background: rgba(18, 24, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cfc-audio-btn:hover, .cfc-audio-btn.active {
+    color: #00f0ff;
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+  }
 
   /* 2X2 DASHBOARD GRID */
   .cfc-dashboard-grid {
@@ -5955,6 +5973,11 @@
             <button type="button" class="cfc-coins-plus-btn" title="Doładuj">+</button>
           </div>
 
+          <button type="button" class="cfc-audio-btn" id="cyberRadioBtn" onclick="toggleCyberRadio()" title="Muzyka w menu (Wł/Wył)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <span id="cyberRadioText" style="font-size:11px; font-weight:800; font-family:var(--font-heading); letter-spacing:0.5px;">BEAT ON 🎵</span>
+          </button>
+
           <button type="button" class="cfc-power-btn" onclick="handlePowerButtonClick()" title="Konto i sesja">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
           </button>
@@ -6211,6 +6234,10 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span class="tab-txt">MOI ZAWODNICY</span>
           </button>
+          <button type="button" class="club-nav-tab" id="tab-MARKET" onclick="switchClubTab('MARKET')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+            <span class="tab-txt">RYNEK TRANSFEROWY</span>
+          </button>
         </div>
 
         <div class="club-fs-actions">
@@ -6287,6 +6314,9 @@
             </table>
           </div>
         </div>
+
+        <!-- 4. Widok Rynku Transferowego -->
+        <div id="clubMarketView" class="club-view-pane" style="display:none;"></div>
       </div>
     </div>
   </div>
@@ -8918,7 +8948,7 @@ function switchClubTab(tab, roleFilter = null) {
 
   activeClubTab = tab;
 
-  ['PACKS', 'SQUAD', 'PLAYERS'].forEach(t => {
+  ['PACKS', 'SQUAD', 'PLAYERS', 'MARKET'].forEach(t => {
     const btn = document.getElementById('tab-' + t);
     if (btn) btn.classList.toggle('active', t === tab);
   });
@@ -8926,22 +8956,32 @@ function switchClubTab(tab, roleFilter = null) {
   const packsView = document.getElementById('clubPacksView');
   const squadView = document.getElementById('clubSquadView');
   const cardsView = document.getElementById('clubCardsView');
+  const marketView = document.getElementById('clubMarketView');
 
   if (tab === 'PACKS') {
     if (packsView) packsView.style.display = 'block';
     if (squadView) squadView.style.display = 'none';
     if (cardsView) cardsView.style.display = 'none';
+    if (marketView) marketView.style.display = 'none';
     renderPackStore();
   } else if (tab === 'SQUAD') {
     if (packsView) packsView.style.display = 'none';
     if (squadView) squadView.style.display = 'block';
     if (cardsView) cardsView.style.display = 'none';
+    if (marketView) marketView.style.display = 'none';
     renderSquadBuilder();
+  } else if (tab === 'MARKET') {
+    if (packsView) packsView.style.display = 'none';
+    if (squadView) squadView.style.display = 'none';
+    if (cardsView) cardsView.style.display = 'none';
+    if (marketView) marketView.style.display = 'block';
+    renderTransferMarket();
   } else {
     // PLAYERS
     if (packsView) packsView.style.display = 'none';
     if (squadView) squadView.style.display = 'none';
     if (cardsView) cardsView.style.display = 'block';
+    if (marketView) marketView.style.display = 'none';
     // Aktualizujemy przyciski filtrów pozycji
     ['ALL', 'GK', 'DEF', 'MID', 'FWD'].forEach(r => {
       const chip = document.getElementById('role-chip-' + r);
@@ -9065,6 +9105,175 @@ function renderPackStore() {
 
       <div style="margin-top:24px; font-size:13px; color:#8b949e; font-family: var(--font-heading);">
         KARTY W TWOIM KLUBIE: <span style="color:var(--gold); font-weight:900;">${ownedCount}</span> / ${totalCards} (${Math.round((ownedCount / totalCards) * 100)}%)
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================================
+   RYNEK TRANSFEROWY FUT 28 (ZAKUP KART ZA MONETY & SZYBKA SPRZEDAŻ)
+   ========================================================================= */
+let activeMarketFilter = 'ALL';
+let activeMarketSearch = '';
+
+function getCardMarketPrice(card) {
+  if (!card) return 1000;
+  if (card.ovr >= 92) return 18000;
+  if (card.ovr >= 90) return 12000;
+  if (card.ovr >= 88) return 6500;
+  if (card.ovr >= 86) return 4200;
+  if (card.ovr >= 84) return 2600;
+  if (card.ovr >= 82) return 1600;
+  if (card.ovr >= 80) return 1100;
+  return 700;
+}
+
+function setMarketRoleFilter(role) {
+  activeMarketFilter = role;
+  renderTransferMarket();
+}
+
+function setMarketSearch(val) {
+  activeMarketSearch = (val || '').toLowerCase().trim();
+  renderTransferMarket();
+}
+
+async function buyMarketCard(cardId, price) {
+  const token = typeof fcGetSessionToken === 'function' ? fcGetSessionToken() : '';
+  if (!fcCurrentUser || !token) {
+    openFcAuth();
+    fcSetAuthStatus('🔒 Zaloguj się, aby kupować zawodników na rynku transferowym!', false);
+    return;
+  }
+  const card = getCardById(cardId);
+  if (!card) return;
+  if (clubData.owned && clubData.owned.includes(cardId)) {
+    alert(`Posiadasz już kartę ${card.name} w swoim klubie!`);
+    return;
+  }
+  const coins = Number(clubData.coins) || 0;
+  if (coins < price) {
+    alert(`Niewystarczająca liczba monet! Karta kosztuje ${price} 🪙, a w klubie posiadasz ${coins} 🪙. Rozegraj mecze lub odbierz nagrody z karnetu!`);
+    return;
+  }
+  if (!confirm(`Czy na pewno chcesz kupić kartę ${card.name} (${card.ovr} OVR) za ${price} 🪙 monet?`)) return;
+
+  clubData.coins = coins - price;
+  if (!Array.isArray(clubData.owned)) clubData.owned = [...STARTER_CARD_IDS];
+  clubData.owned.push(cardId);
+  clubData.updatedAt = Date.now();
+
+  try {
+    SFX.play('coins_collect');
+    SFX.play('card_slam');
+  } catch (e) {}
+
+  saveClubData(true);
+  updateMenuClubUI();
+  if (typeof fcUpdateAuthUi === 'function') fcUpdateAuthUi();
+  renderTransferMarket();
+  alert(`🎉 Gratulacje! ${card.name} (${card.ovr} OVR) dołączył do Twojego klubu!`);
+}
+
+function renderTransferMarket() {
+  const view = document.getElementById('clubMarketView');
+  if (!view) return;
+
+  const isAuth = !!fcCurrentUser;
+  const coins = Number(clubData.coins) || 0;
+  const ownedSet = new Set(Array.isArray(clubData.owned) ? clubData.owned : STARTER_CARD_IDS);
+
+  let candidates = PLAYERS_DB.filter(c => {
+    if (activeMarketFilter !== 'ALL' && c.role !== activeMarketFilter) return false;
+    if (activeMarketSearch && !c.name.toLowerCase().includes(activeMarketSearch)) return false;
+    return true;
+  });
+
+  candidates.sort((a, b) => {
+    const aOwned = ownedSet.has(a.id);
+    const bOwned = ownedSet.has(b.id);
+    if (aOwned !== bOwned) return aOwned ? 1 : -1;
+    return b.ovr - a.ovr;
+  });
+
+  const roles = [
+    { id: 'ALL', label: 'WSZYSCY' },
+    { id: 'GK', label: 'BRAMKARZE' },
+    { id: 'DEF', label: 'OBROŃCY' },
+    { id: 'MID', label: 'POMOCNICY' },
+    { id: 'FWD', label: 'NAPASTNICY' }
+  ];
+
+  view.innerHTML = `
+    <div style="padding:10px 14px 40px; max-width:1200px; margin:auto;">
+      <div style="margin-bottom:20px; text-align:center;">
+        <h2 style="font-family: var(--font-heading); font-size:26px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:10px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+          RYNEK TRANSFEROWY FUT 28
+        </h2>
+        <p style="font-size:14px; color:#8b949e; max-width:680px; margin:auto; line-height:1.5;">
+          Kupuj konkretne gwiazdy futbolu bezpośrednio za monety 🪙 lub przeglądaj oferty transferowe z całego świata!
+        </p>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; background:rgba(14,20,36,0.7); padding:12px 18px; border-radius:16px; border:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          ${roles.map(r => `
+            <button type="button" class="role-chip ${activeMarketFilter === r.id ? 'active' : ''}" onclick="setMarketRoleFilter('${r.id}')" style="padding:7px 16px; font-size:11px; font-weight:800;">
+              ${r.label}
+            </button>
+          `).join('')}
+        </div>
+        <div style="flex:1; min-width:240px; max-width:340px;">
+          <input type="text" value="${activeMarketSearch}" placeholder="Szukaj po nazwisku..." oninput="setMarketSearch(this.value)" style="width:100%; padding:9px 16px; background:rgba(6,10,20,0.85); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#fff; font-family:'Outfit', sans-serif; font-size:13px; box-sizing:border-box;">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:18px;">
+        ${candidates.slice(0, 36).map(card => {
+          const price = getCardMarketPrice(card);
+          const isOwned = ownedSet.has(card.id);
+          const canAfford = isAuth && coins >= price;
+
+          return `
+            <div style="background:rgba(11,15,28,0.85); border:1px solid ${isOwned ? 'rgba(0,240,255,0.3)' : 'rgba(255,255,255,0.08)'}; border-radius:18px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:10px; transition:transform 0.2s, border-color 0.2s; position:relative;">
+              ${isOwned ? `
+                <div style="position:absolute; top:10px; right:12px; background:rgba(0,255,136,0.18); border:1px solid #00ff88; color:#00ff88; font-size:10px; font-weight:900; font-family:var(--font-heading); padding:2px 8px; border-radius:8px;">
+                  POSIADANY ✔️
+                </div>
+              ` : ''}
+
+              <div style="cursor:pointer;" onclick="openPlayerBioModal('${card.id}')" title="Kliknij, aby zobaczyć szczegóły: ${card.name}">
+                ${renderSingleFutCardHtml(card, false)}
+              </div>
+
+              <div style="width:100%; text-align:center; margin-top:4px;">
+                <div style="font-family:var(--font-heading); font-size:16px; font-weight:900; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px;">
+                  <span>${price.toLocaleString()}</span>
+                  <span style="font-size:14px;">🪙</span>
+                </div>
+
+                ${isOwned ? `
+                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; background:#1e293b; color:#94a3b8; border-color:#334155;" disabled>
+                    W TWOIM KLUBIE
+                  </button>
+                ` : (!isAuth ? `
+                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; font-weight:800; background:rgba(0,240,255,0.18); border-color:#00f0ff; color:#00f0ff;" onclick="openFcAuth()">
+                    🔒 ZALOGUJ SIĘ
+                  </button>
+                ` : (canAfford ? `
+                  <button type="button" class="action-btn btn-host" style="width:100%; padding:10px; font-size:12px; font-weight:900; background:linear-gradient(135deg, #ffd700 0%, #ff8800 100%); color:#000;" onclick="buyMarketCard('${card.id}', ${price})">
+                    ⚡ KUP TERAZ
+                  </button>
+                ` : `
+                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; background:#181e2e; color:#64748b; border-color:rgba(255,255,255,0.06);" disabled>
+                    BRAKUJE ${(price - coins).toLocaleString()} 🪙
+                  </button>
+                `))}
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
     </div>
   `;
@@ -10037,9 +10246,9 @@ function triggerPackRipping(card = currentDroppedCard, isDuplicate = currentDrop
   setTimeout(() => {
     if (foilStage) foilStage.style.display = 'none';
 
-    // Elitarny Walkout tylko od 87+ OVR lub dla Ikon 90+ (5% szansy łącznie)!
+    // Elitarny Walkout od 84+ OVR lub dla Ikon 90+!
     const isIcon = card && card.ovr >= 90;
-    const isWalkout = card && (card.ovr >= 87 || isIcon);
+    const isWalkout = card && (card.ovr >= 84 || isIcon);
     const hasPs = card && card.playstyle;
 
     let walkoutTimerIds = [];
@@ -10844,10 +11053,169 @@ const SFX = {
         gain.gain.setValueAtTime(0.25, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.28);
         osc.start(now); osc.stop(now + 0.28);
+      } else if (type === 'timed_perfect') {
+        // Zwycięski laserowy dzwonek perfekcyjnego wykończenia (Timed Finishing)
+        const notes = [1046.5, 2093.0];
+        notes.forEach((freq, idx) => {
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + idx * 0.06);
+          g.gain.setValueAtTime(0.32, now + idx * 0.06);
+          g.gain.linearRampToValueAtTime(0.01, now + idx * 0.06 + 0.22);
+          o.connect(g);
+          g.connect(this.ctx.destination);
+          o.start(now + idx * 0.06);
+          o.stop(now + idx * 0.06 + 0.22);
+        });
+      } else if (type === 'post_hit') {
+        // Metaliczny brzdęk słupka / poprzeczki
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(820, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.26);
+        gain.gain.setValueAtTime(0.38, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.26);
+        osc.start(now); osc.stop(now + 0.26);
+      } else if (type === 'crowd_gasp') {
+        // Szum i gwałtowny jęk zawodu trybun
+        const bufLen = Math.floor(this.ctx.sampleRate * 0.45);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufLen) * Math.PI);
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buf;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(650, now);
+        filter.Q.value = 1.8;
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.gain.setValueAtTime(0.24, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+        noise.start(now);
+      } else if (type === 'crowd_roar') {
+        // Narastający szum stadionu przy ataku
+        const bufLen = Math.floor(this.ctx.sampleRate * 0.7);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buf;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(850, now);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.7);
+        noise.start(now);
       }
     } catch (e) {}
   }
 };
+
+/* ==========================================
+   CYBER-RADIO: SYNTEZATOR MUZYKI W MENU GŁÓWNYM
+   ========================================== */
+const CyberRadio = {
+  ctx: null,
+  isPlaying: false,
+  timerId: null,
+  step: 0,
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  toggle() {
+    this.init();
+    if (this.isPlaying) {
+      this.stop();
+    } else {
+      this.start();
+    }
+  },
+  start() {
+    if (this.isPlaying) return;
+    this.init();
+    if (!this.ctx) return;
+    this.isPlaying = true;
+    this.step = 0;
+    this.scheduleBeat();
+    this.updateUI();
+  },
+  stop() {
+    this.isPlaying = false;
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
+    this.updateUI();
+  },
+  scheduleBeat() {
+    const bassline = [110, 110, 130.81, 130.81, 98, 98, 123.47, 123.47];
+    const melody = [440, 523.25, 659.25, 523.25, 392, 493.88, 587.33, 493.88];
+    this.timerId = setInterval(() => {
+      if (!this.isPlaying || !this.ctx) return;
+      try {
+        const now = this.ctx.currentTime;
+        const bassFreq = bassline[this.step % bassline.length];
+        const melFreq = melody[this.step % melody.length];
+
+        // Linia basowa synthwave
+        const bOsc = this.ctx.createOscillator();
+        const bGain = this.ctx.createGain();
+        bOsc.type = 'sawtooth';
+        bOsc.frequency.setValueAtTime(bassFreq, now);
+        bGain.gain.setValueAtTime(0.06, now);
+        bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
+        bOsc.connect(bGain);
+        bGain.connect(this.ctx.destination);
+        bOsc.start(now);
+        bOsc.stop(now + 0.20);
+
+        // Subtelny hi-hat
+        if (this.step % 2 === 1) {
+          const hh = this.ctx.createOscillator();
+          const hhGain = this.ctx.createGain();
+          hh.type = 'triangle';
+          hh.frequency.setValueAtTime(4500, now);
+          hhGain.gain.setValueAtTime(0.03, now);
+          hhGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          hh.connect(hhGain);
+          hhGain.connect(this.ctx.destination);
+          hh.start(now);
+          hh.stop(now + 0.05);
+        }
+
+        // Arpeggiator synth
+        const mOsc = this.ctx.createOscillator();
+        const mGain = this.ctx.createGain();
+        mOsc.type = 'sine';
+        mOsc.frequency.setValueAtTime(melFreq, now);
+        mGain.gain.setValueAtTime(0.045, now);
+        mGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        mOsc.connect(mGain);
+        mGain.connect(this.ctx.destination);
+        mOsc.start(now);
+        mOsc.stop(now + 0.16);
+
+        this.step++;
+      } catch (e) {}
+    }, 240);
+  },
+  updateUI() {
+    const btn = document.getElementById('cyberRadioText');
+    const pill = document.getElementById('cyberRadioBtn');
+    if (btn) btn.textContent = this.isPlaying ? 'BEAT ON 🎵' : 'BEAT OFF 🔇';
+    if (pill) pill.classList.toggle('active', this.isPlaying);
+  }
+};
+function toggleCyberRadio() {
+  CyberRadio.toggle();
+}
 
 function toggleMute() {
   SFX.muted = !SFX.muted;
@@ -12447,9 +12815,10 @@ const ball = {
               this.vx -= 1.75 * vn * nx;
               this.vy -= 1.75 * vn * ny;
               if (speed > 6) {
-                camera.shake = 0.8;
+                camera.shake = 1.0;
+                try { SFX.play('post_hit'); SFX.play('crowd_gasp'); } catch (e) {}
                 playAndBroadcastSFX('kick');
-                spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
+                spawnParticles(this.x, this.y, this.z, 14, '#ffffff', 3.4, 20, 3);
               }
             }
             this.x = px + nx * 13.3;
@@ -12464,9 +12833,10 @@ const ball = {
           this.vx = (leftSide ? 1 : -1) * Math.abs(this.vx) * 0.55;
           this.vz = -Math.abs(this.vz) * 0.35 - 0.8;
           this.x = leftSide ? WORLD.marginX + 2 : WORLD.width - WORLD.marginX - 2;
-          camera.shake = 0.8;
+          camera.shake = 1.1;
+          try { SFX.play('post_hit'); SFX.play('crowd_gasp'); } catch (e) {}
           playAndBroadcastSFX('kick');
-          spawnParticles(this.x, this.y, this.z, 10, '#ffffff', 3.0, 18, 3);
+          spawnParticles(this.x, this.y, this.z, 14, '#ffd700', 3.4, 22, 3);
         }
 
         if (this.x < WORLD.marginX) {
@@ -12474,6 +12844,7 @@ const ball = {
             if (this.x < WORLD.marginX - 20) {
               scoreRed++;
               this.netSwayLeft = Math.min(38, 16 + speed * 1.15);
+              try { SFX.play('crowd_roar'); } catch (e) {}
               triggerGoal(`GOL DLA CZERWONYCH!`, "#ff0055", 'blue');
               return;
             }
@@ -12493,6 +12864,7 @@ const ball = {
             if (this.x > WORLD.width - WORLD.marginX + 20) {
               scoreBlue++;
               this.netSwayRight = Math.min(38, 16 + speed * 1.15);
+              try { SFX.play('crowd_roar'); } catch (e) {}
               triggerGoal(`GOL DLA NIEBIESKICH!`, "#00f0ff", 'red');
               return;
             }
@@ -15182,6 +15554,17 @@ function triggerMatchOver() {
   const myGoals = (myTeam === 'blue' ? scoreBlue : scoreRed) || 0;
   clubData.stats.goals = (clubData.stats.goals || 0) + myGoals;
 
+  // Zapis do historii ostatnich meczów
+  if (!Array.isArray(clubData.matchHistory)) clubData.matchHistory = [];
+  clubData.matchHistory.unshift({
+    date: new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
+    outcome: won ? 'WIN' : (draw ? 'DRAW' : 'LOSS'),
+    score: `${scoreBlue} : ${scoreRed}`,
+    opponent: isSinglePlayer ? `Rywal AI (${enemyAiLevel.toUpperCase()})` : (isHost ? redNick : blueNick),
+    rewardCoins: reward
+  });
+  if (clubData.matchHistory.length > 20) clubData.matchHistory.pop();
+
   saveClubData();
   const matchOutcome = won ? 'win' : (draw ? 'draw' : 'loss');
   if (typeof syncMatchRewardToCloud === 'function') {
@@ -15317,19 +15700,32 @@ function executeChargedAction(player, type, powerPct, aimX = mouse.worldX, aimY 
     if (hasFinesse) player.activatePlayStyle('finesse_shot');
     if (hasDeadBall) player.activatePlayStyle('dead_ball');
 
-    const psMult = hasPowerShot ? 1.25 : (player.playstyle === 'aerial_threat' ? 1.06 : 1.0);
+    // MECHANIKA TIMED FINISHING (ZIELONY SWEET SPOT: 68% - 88%)
+    const isTimedFinishing = powerPct >= 68 && powerPct <= 88;
+    const isLateTimed = powerPct > 92;
+    if (isTimedFinishing) {
+      try { SFX.play('timed_perfect'); } catch (e) {}
+      spawnFloater(player.x, player.y - 18, '🟢 PERFEKT TIMING!', '#00ff88');
+    } else if (isLateTimed) {
+      spawnFloater(player.x, player.y - 18, '🔴 ZA PÓŹNO', '#ff0055');
+    } else if (powerPct < 45) {
+      spawnFloater(player.x, player.y - 18, '🟡 ZA WCZEŚNIE', '#ffbb00');
+    }
+
+    const timedMult = isTimedFinishing ? 1.22 : (isLateTimed ? 0.88 : 1.0);
+    const psMult = (hasPowerShot ? 1.25 : (player.playstyle === 'aerial_threat' ? 1.06 : 1.0)) * timedMult;
     let shotSpeed = (9.8 + ratio * 12.8) * shoScale * psMult;
     let shotLift = 1.4 + ratio * 4.4;
 
-    // Błąd celności dla słabych kart (rozrzut do 12 stopni przy strzale z biegu):
+    // Błąd celności dla słabych kart (przy perfekcyjnym timingu rozrzut = 0! Laserowa celność):
     const deadBallBonus = player.playstyle === 'dead_ball' ? 0.72 : 1.0;
-    const accuracyError = (1 - shoNorm) * 0.24 * deadBallBonus;
+    const accuracyError = isTimedFinishing ? 0 : ((1 - shoNorm) * 0.24 * deadBallBonus * (isLateTimed ? 1.6 : 1.0));
     let spreadAngle = (Math.random() - 0.5) * accuracyError * (player.isMoving ? 1.5 : 0.75);
     aimAngle += spreadAngle;
 
-    ball.kick(player, aimAngle, shotSpeed, shotLift, 16, hasPowerShot, hasFinesse, false);
-    camera.shake = 1.2;
-    spawnParticles(player.x, player.y, 2, hasPowerShot ? 18 : 9, hasPowerShot ? '#ff0055' : (hasFinesse ? '#ffb300' : '#00f0ff'), 3.6, 22, 4);
+    ball.kick(player, aimAngle, shotSpeed, shotLift, 16, hasPowerShot || isTimedFinishing, hasFinesse, false);
+    camera.shake = isTimedFinishing ? 2.0 : 1.2;
+    spawnParticles(player.x, player.y, 2, hasPowerShot || isTimedFinishing ? 22 : 9, isTimedFinishing ? '#00ff88' : (hasPowerShot ? '#ff0055' : (hasFinesse ? '#ffb300' : '#00f0ff')), 4.0, 24, 4);
   } else if (type === 'lowPass') {
     const hasIncisive = player.playstyle === 'incisive_pass';
     const hasTiki = player.playstyle === 'tiki_taka';
@@ -17680,7 +18076,7 @@ function closeLeaderboardModal() {
 
 function switchLeaderboardCategory(cat) {
   activeLbCategory = cat;
-  ['wins', 'goals', 'ovr', 'winrate'].forEach(c => {
+  ['wins', 'goals', 'ovr', 'winrate', 'divisions', 'history'].forEach(c => {
     const btn = document.getElementById('lb-tab-' + c);
     if (btn) btn.classList.toggle('active', c === cat);
   });
@@ -17697,6 +18093,169 @@ function getLeaderboardMetricVal(p, cat) {
   return `OVR ${p.ovr || 75} OVR`;
 }
 
+function getPlayerDivision(wins) {
+  const tiers = [
+    { div: 10, name: 'Dywizja 10 (Początkujący)', minWins: 0, nextWins: 3, reward: '500 🪙', color: '#94a3b8' },
+    { div: 9,  name: 'Dywizja 9 (Amator)',        minWins: 3, nextWins: 6, reward: '800 🪙', color: '#a3e635' },
+    { div: 8,  name: 'Dywizja 8 (Półprofesjonalista)', minWins: 6, nextWins: 10, reward: '1 200 🪙', color: '#38bdf8' },
+    { div: 7,  name: 'Dywizja 7 (Zawodowiec)',    minWins: 10, nextWins: 15, reward: '1 800 🪙', color: '#818cf8' },
+    { div: 6,  name: 'Dywizja 6 (Klasa Światowa)', minWins: 15, nextWins: 22, reward: '2 500 🪙', color: '#c084fc' },
+    { div: 5,  name: 'Dywizja 5 (Mistrz)',        minWins: 22, nextWins: 30, reward: '3 500 🪙', color: '#f472b6' },
+    { div: 4,  name: 'Dywizja 4 (Pretendent)',    minWins: 30, nextWins: 40, reward: '4 800 🪙', color: '#fb923c' },
+    { div: 3,  name: 'Dywizja 3 (Elita Krajowa)', minWins: 40, nextWins: 55, reward: '6 500 🪙', color: '#facc15' },
+    { div: 2,  name: 'Dywizja 2 (Czempion FUT)',  minWins: 55, nextWins: 75, reward: '8 500 🪙', color: '#f59e0b' },
+    { div: 1,  name: 'Dywizja 1 (CYBER ELITA)',   minWins: 75, nextWins: 999, reward: '15 000 🪙 + IKONA', color: '#00f0ff' }
+  ];
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (wins >= tiers[i].minWins) return tiers[i];
+  }
+  return tiers[0];
+}
+
+function renderDivisionsView(content, myRankBadge, myRankNick, myRankText, myRankInsight) {
+  const wins = (clubData && clubData.stats && clubData.stats.wins) || 0;
+  const currentDiv = getPlayerDivision(wins);
+  const currentNick = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser?.username) || (clubData && clubData.nick) || 'TWÓJ KLUB';
+
+  const allDivs = [
+    { div: 10, name: 'Dywizja 10', minWins: 0, nextWins: 3, reward: '500 🪙', badge: '🥉' },
+    { div: 9,  name: 'Dywizja 9', minWins: 3, nextWins: 6, reward: '800 🪙', badge: '🥉' },
+    { div: 8,  name: 'Dywizja 8', minWins: 6, nextWins: 10, reward: '1 200 🪙', badge: '🥈' },
+    { div: 7,  name: 'Dywizja 7', minWins: 10, nextWins: 15, reward: '1 800 🪙', badge: '🥈' },
+    { div: 6,  name: 'Dywizja 6', minWins: 15, nextWins: 22, reward: '2 500 🪙', badge: '🥇' },
+    { div: 5,  name: 'Dywizja 5', minWins: 22, nextWins: 30, reward: '3 500 🪙', badge: '🥇' },
+    { div: 4,  name: 'Dywizja 4', minWins: 30, nextWins: 40, reward: '4 800 🪙', badge: '💎' },
+    { div: 3,  name: 'Dywizja 3', minWins: 40, nextWins: 55, reward: '6 500 🪙', badge: '💎' },
+    { div: 2,  name: 'Dywizja 2', minWins: 55, nextWins: 75, reward: '8 500 🪙', badge: '👑' },
+    { div: 1,  name: 'Dywizja 1 ELITA', minWins: 75, nextWins: 999, reward: '15 000 🪙 + IKONA', badge: '⚡' }
+  ];
+
+  const needed = currentDiv.nextWins === 999 ? 'MAKSYMALNA DYWIZJA' : `${Math.max(0, currentDiv.nextWins - wins)} zwycięstw do awansu`;
+  const pct = currentDiv.nextWins === 999 ? 100 : Math.min(100, Math.round(((wins - currentDiv.minWins) / (currentDiv.nextWins - currentDiv.minWins)) * 100));
+
+  content.innerHTML = `
+    <div style="padding:16px 20px 30px;">
+      <div style="background:linear-gradient(135deg, rgba(14,20,38,0.9) 0%, rgba(20,28,52,0.9) 100%); border:2px solid ${currentDiv.color}; border-radius:18px; padding:20px 24px; margin-bottom:24px; box-shadow:0 0 35px ${currentDiv.color}33;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font-size:12px; font-weight:800; color:${currentDiv.color}; letter-spacing:1px; text-transform:uppercase;">TWOJA AKTUALNA RANGA</div>
+            <div style="font-family:var(--font-heading); font-size:24px; color:#fff; font-weight:900;">${currentDiv.name}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; color:#8b949e;">ŁĄCZNE ZWYCIĘSTWA</div>
+            <div style="font-family:var(--font-heading); font-size:22px; color:var(--gold); font-weight:900;">${wins} WINS</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:#c9d1d9; margin-bottom:6px;">
+            <span>Postęp do wyższej rangi:</span>
+            <span style="font-weight:800; color:${currentDiv.color};">${needed} (${pct}%)</span>
+          </div>
+          <div style="width:100%; height:12px; background:rgba(0,0,0,0.5); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+            <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #00f0ff, ${currentDiv.color}); box-shadow:0 0 14px ${currentDiv.color}; border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-family:var(--font-heading); font-size:16px; color:#fff; font-weight:800; margin-bottom:14px; letter-spacing:1px;">
+        DRABINKA AWANSU DIVISION RIVALS:
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px;">
+        ${allDivs.map(d => {
+          const isCurrent = d.div === currentDiv.div;
+          const isPassed = wins >= d.nextWins;
+          return `
+            <div style="background:${isCurrent ? 'rgba(0,240,255,0.12)' : 'rgba(10,14,24,0.7)'}; border:1px solid ${isCurrent ? '#00f0ff' : (isPassed ? 'rgba(0,255,136,0.3)' : 'rgba(255,255,255,0.08)')}; border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:24px;">${d.badge}</span>
+                <div>
+                  <div style="font-family:var(--font-heading); font-size:14px; font-weight:900; color:${isCurrent ? '#00f0ff' : '#fff'};">${d.name}</div>
+                  <div style="font-size:11px; color:#8b949e;">Wymaga: ${d.minWins}+ wygranych</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:10px; color:#8b949e; text-transform:uppercase;">Nagroda</div>
+                <div style="font-size:12px; font-weight:800; color:var(--gold);">${d.reward}</div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  if (myRankBadge) myRankBadge.textContent = `DIV ${currentDiv.div}`;
+  if (myRankNick) myRankNick.textContent = currentNick;
+  if (myRankText) myRankText.textContent = `${currentDiv.name} • ${wins} zwycięstw`;
+  if (myRankInsight) myRankInsight.textContent = `⭐ ${needed}!`;
+}
+
+function renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, myRankInsight) {
+  const history = (clubData && Array.isArray(clubData.matchHistory)) ? clubData.matchHistory : [];
+  const currentNick = (typeof fcCurrentUser !== 'undefined' && fcCurrentUser?.username) || (clubData && clubData.nick) || 'TWÓJ KLUB';
+  const wins = (clubData && clubData.stats && clubData.stats.wins) || 0;
+  const matches = (clubData && clubData.stats && clubData.stats.matches) || 0;
+
+  if (history.length === 0) {
+    content.innerHTML = `
+      <div style="text-align:center; padding:60px 20px; color:#8b949e; font-family:'Outfit', sans-serif;">
+        <div style="font-size:42px; margin-bottom:12px;">📜</div>
+        <div style="font-size:18px; color:#fff; font-weight:800; margin-bottom:6px;">Brak historii meczów w tej sesji</div>
+        <p style="font-size:13px; max-width:440px; margin:auto; line-height:1.5;">
+          Rozegraj mecz w trybie 1vs1 Solo lub Szybki Mecz Online, a każdy wynik, bramki i zdobyte monety zostaną tutaj zapisane!
+        </p>
+      </div>
+    `;
+  } else {
+    content.innerHTML = `
+      <div style="padding:16px 20px 30px;">
+        <div style="font-family:var(--font-heading); font-size:16px; color:#fff; font-weight:800; margin-bottom:14px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center;">
+          <span>OSTATNIE ROZEGRANE MECZE (${history.length}):</span>
+          <span style="font-size:12px; color:#8b949e;">Zapisane automatycznie</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${history.map(m => {
+            const isWin = m.outcome === 'WIN';
+            const isDraw = m.outcome === 'DRAW';
+            const badgeBg = isWin ? 'rgba(0,255,136,0.18)' : (isDraw ? 'rgba(255,215,0,0.18)' : 'rgba(255,0,85,0.18)');
+            const badgeBorder = isWin ? '#00ff88' : (isDraw ? '#ffd700' : '#ff0055');
+            const badgeColor = isWin ? '#00ff88' : (isDraw ? '#ffd700' : '#ff0055');
+            const badgeTxt = isWin ? '🟢 WYGRANA' : (isDraw ? '🟡 REMIS' : '🔴 PORAŻKA');
+
+            return `
+              <div style="background:rgba(11,15,27,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <span style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor}; font-size:11px; font-weight:900; font-family:var(--font-heading); padding:4px 12px; border-radius:8px; letter-spacing:0.5px;">
+                    ${badgeTxt}
+                  </span>
+                  <div>
+                    <div style="font-family:var(--font-heading); font-size:16px; font-weight:900; color:#fff;">
+                      WYNIK: <span style="color:var(--gold);">${m.score}</span>
+                    </div>
+                    <div style="font-size:12px; color:#8b949e;">vs ${m.opponent} • ${m.date}</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-family:var(--font-heading); font-size:14px; font-weight:900; color:var(--gold);">+${m.rewardCoins} 🪙</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  if (myRankBadge) myRankBadge.textContent = 'MECZE';
+  if (myRankNick) myRankNick.textContent = currentNick;
+  if (myRankText) myRankText.textContent = `${matches} meczów • ${wins} wygranych (${matches ? Math.round(wins/matches*100) : 0}% winrate)`;
+  if (myRankInsight) myRankInsight.textContent = '⭐ Każdy mecz powiększa Twoje zyski i ranking!';
+}
+
 async function renderLeaderboardData() {
   const content = document.getElementById('leaderboardContent');
   const podiumEl = document.getElementById('leaderboardPodium');
@@ -17706,6 +18265,19 @@ async function renderLeaderboardData() {
   const myRankInsight = document.getElementById('leaderboardMyRankInsight');
 
   if (!content) return;
+
+  const currentCat = activeLbCategory || 'wins';
+
+  if (currentCat === 'divisions') {
+    if (podiumEl) podiumEl.innerHTML = '';
+    renderDivisionsView(content, myRankBadge, myRankNick, myRankText, myRankInsight);
+    return;
+  }
+  if (currentCat === 'history') {
+    if (podiumEl) podiumEl.innerHTML = '';
+    renderMatchHistoryView(content, myRankBadge, myRankNick, myRankText, myRankInsight);
+    return;
+  }
 
   content.innerHTML = '<div style="text-align:center; padding:30px; color:#8b949e; font-family:\'Outfit\';">Ładowanie oficjalnego rankingu zarejestrowanych graczy...</div>';
 
@@ -18316,7 +18888,8 @@ function pose(m,dt,tt){
   if(!tk){o.aL.sh.rotation.x=-ab;o.aR.sh.rotation.x=ab;}
   const el=.35+.9*s;o.aL.el.rotation.z=T1(el,.1,up);o.aR.el.rotation.z=T1(el,.1,up);
   m.card.visible=refUp;if(refUp){try{m.card.material.color.set(p.cardColor)}catch(e){}}
-  o.tor.rotation.z=-(.08+.2*Math.min(1,s))-.25*m.sh+tTorZ;
+  const sprintLean = (p.isSprinting ? 0.30 : 0) + (p.isMoving ? 0.08 : 0);
+  o.tor.rotation.z=-(.08+.2*Math.min(1,s))-.25*m.sh+tTorZ - sprintLean;
   o.tor.rotation.y=sn*.22*s+tTorY;
   o.tor.rotation.x=tTorX;
   const jump=tJump+(cel?Math.abs(Math.sin(tt*9))*7:0);
@@ -18347,7 +18920,18 @@ function render3D(){
   sun.target.position.set(camera.x,0,camera.y);sun.position.set(camera.x-360,860,camera.y+400);
   updateAdBoards(tt);
   crowd.position.y=goalCelebrationTimer>0?Math.abs(Math.sin(tt*9))*3.5:0;
-  goals.forEach((g,i)=>{const sw2=i?ball.netSwayRight:ball.netSwayLeft;g.net.position.x=g.dir*(sw2||0)*.5;});
+  goals.forEach((g,i)=>{
+    const sw2=i?ball.netSwayRight:ball.netSwayLeft;
+    const swayVal=(sw2||0);
+    g.net.position.x=g.dir*swayVal*.5;
+    if(swayVal>0.2){
+      g.net.rotation.z=Math.sin(tt*36)*(swayVal*0.003);
+      g.net.scale.y=1+Math.sin(tt*40)*(swayVal*0.004);
+    } else {
+      g.net.rotation.z=0;
+      g.net.scale.y=1;
+    }
+  });
   // piłka
   const bdx=ball.x-bpx,bdy=ball.y-bpy;bpx=ball.x;bpy=ball.y;const dist=Math.hypot(bdx,bdy);
   if(dist>.001&&dist<80){ballMesh.rotateOnWorldAxis(V.set(bdy,0,-bdx).normalize(),dist/BR);}
@@ -18481,6 +19065,61 @@ function drawAim(){
     ctx.fillText(`${Math.round(chargeState.power)}%`,tipX,tagY+15);
   }
 
+  // 6b. Dynamiczny łuk Timed Finishing nad głową zawodnika (Overhead Curved Power Gauge)
+  if (ch && type === 'shot' && typeof G !== 'undefined' && G.proj) {
+    const [hx, hy] = G.proj(me.x, me.y, 76);
+    if (hx >= 0 && hx <= canvas.width && hy >= 0 && hy <= canvas.height) {
+      const arcR = 32;
+      const startA = Math.PI * 0.85;
+      const totalSpan = Math.PI * 1.3;
+      const endA = startA + totalSpan;
+
+      // Szary tor tła
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.75)';
+      ctx.beginPath();
+      ctx.arc(hx, hy, arcR, startA, endA);
+      ctx.stroke();
+
+      // Złoto-zielony sweet spot (68% - 88%)
+      const sweetStart = startA + totalSpan * 0.68;
+      const sweetEnd = startA + totalSpan * 0.88;
+      ctx.strokeStyle = 'rgba(0, 255, 136, 0.9)';
+      ctx.lineWidth = 6.5;
+      ctx.shadowColor = '#00ff88';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(hx, hy, arcR, sweetStart, sweetEnd);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Wypełnienie postępu siły
+      const curAngle = startA + totalSpan * Math.min(1.0, pw);
+      const isPerfect = pw >= 0.68 && pw <= 0.88;
+      const isLate = pw > 0.92;
+      ctx.strokeStyle = isPerfect ? '#00ff88' : (isLate ? '#ff0055' : '#ffc400');
+      ctx.lineWidth = 5.0;
+      ctx.shadowColor = isPerfect ? '#00ff88' : '#ffc400';
+      ctx.shadowBlur = isPerfect ? 14 : 6;
+      ctx.beginPath();
+      ctx.arc(hx, hy, arcR, startA, curAngle);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Badge ze statusem timingu nad głową
+      const badgeTxt = isPerfect ? '🟢 PERFEKT' : (isLate ? '🔴 ZA PÓŹNO' : `${Math.round(chargeState.power)}%`);
+      const badgeCol = isPerfect ? '#00ff88' : (isLate ? '#ff0055' : '#ffffff');
+      ctx.font = '900 12px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = 'rgba(6,10,20,0.95)';
+      ctx.strokeText(badgeTxt, hx, hy - arcR - 8);
+      ctx.fillStyle = badgeCol;
+      ctx.fillText(badgeTxt, hx, hy - arcR - 8);
+    }
+  }
+
   // 7. Luksusowy pasek siły na dole ekranu (HUD Glassmorphism)
   const barW=360,barH=18,bx=canvas.width/2-barW/2,by=canvas.height-44;
   ctx.fillStyle='rgba(6,10,20,0.88)';ctx.strokeStyle='rgba(255,255,255,0.45)';ctx.lineWidth=2;
@@ -18495,6 +19134,17 @@ function drawAim(){
     ctx.shadowColor=pw>0.85?'#ff0055':'rgba(0,230,118,0.7)';ctx.shadowBlur=pw>0.85?16:8;
     ctx.beginPath();ctx.roundRect(bx+2,by+2,(barW-4)*pw,barH-4,6);ctx.fill();
     ctx.shadowBlur=0;
+  }
+
+  // Zaznaczenie strefy Timed Finishing (68% - 88%)
+  if (ch && type === 'shot') {
+    const swX1 = bx + barW * 0.68;
+    const swX2 = bx + barW * 0.88;
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.35)';
+    ctx.fillRect(swX1, by + 2, swX2 - swX1, barH - 4);
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(swX1, by + 2, swX2 - swX1, barH - 4);
   }
 
   // Segmenty 25%, 50%, 75%
@@ -18595,6 +19245,12 @@ window.renderScene=function(){
         </button>
         <button type="button" class="lb-category-btn" id="lb-tab-winrate" onclick="switchLeaderboardCategory('winrate')">
           <span>SKUTECZNOŚĆ %</span>
+        </button>
+        <button type="button" class="lb-category-btn" id="lb-tab-divisions" onclick="switchLeaderboardCategory('divisions')">
+          <span>🏆 DYWIZJE RIVALS</span>
+        </button>
+        <button type="button" class="lb-category-btn" id="lb-tab-history" onclick="switchLeaderboardCategory('history')">
+          <span>📜 HISTORIA MECZÓW</span>
         </button>
       </div>
 
