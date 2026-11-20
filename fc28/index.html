@@ -17337,21 +17337,6 @@ async function fcLoadCloudProfile() {
     return false;
   }
 }
-  } catch (err) {
-    console.warn('FC28 Cloudflare profile load timeout/error (fallback do pamięci lokalnej):', err);
-    loadClubData();
-    if (!Number.isFinite(clubData.coins) || clubData.coins <= 0) {
-      clubData.coins = 500;
-    }
-    const savedNick = localStorage.getItem('FC28_USER_NICK');
-    if (savedNick) {
-      fcCurrentUser = { username: savedNick, isLocal: true };
-    }
-    fcUpdateAuthUi();
-    updateMenuClubUI();
-  }
-  return false;
-}
 
 // Zapis składu do Cloudflare D1
 async function syncLineupToCloud() {
@@ -18266,7 +18251,6 @@ async function renderLeaderboardData() {
   }
 
   // Sortowanie wg aktywnej kategorii
-  const currentCat = activeLbCategory || 'wins';
   if (currentCat === 'wins') {
     players.sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.goals || 0) - (a.goals || 0));
   } else if (currentCat === 'goals') {
