@@ -3076,25 +3076,28 @@
       grid-template-columns: 1fr;
     }
   }
-  .tactical-slot-card {
-    background: rgba(6, 12, 24, 0.82);
-    border: 1.5px solid rgba(255, 255, 255, 0.14);
+  /* Boisko Taktyczne i Karty Zawodników na boisku */
+  .pitch-tactical-slot, .tactical-slot-card {
+    background: rgba(6, 12, 24, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
     border-radius: 18px;
-    padding: 14px 10px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 10px;
     position: relative;
+    backdrop-filter: blur(12px);
     transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     cursor: pointer;
+    box-sizing: border-box;
   }
-  .tactical-slot-card:hover {
+  .pitch-tactical-slot:hover, .tactical-slot-card:hover {
     transform: translateY(-5px);
-    border-color: var(--p1);
-    box-shadow: 0 12px 32px rgba(0, 240, 255, 0.35);
+    border-color: #00f0ff;
+    box-shadow: 0 14px 32px rgba(0, 240, 255, 0.35);
   }
   .slot-pos-header {
     display: flex;
@@ -3102,6 +3105,7 @@
     justify-content: space-between;
     width: 100%;
     padding: 0 4px;
+    box-sizing: border-box;
   }
   .slot-pos-pill {
     font-family: var(--font-heading);
@@ -3111,6 +3115,7 @@
     border-radius: 8px;
     letter-spacing: 0.5px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    border: 1px solid;
   }
   .slot-chem-badge {
     display: flex;
@@ -3121,16 +3126,200 @@
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  .tactical-swap-action-btn {
+  .pitch-fut-card {
     width: 100%;
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(0, 112, 186, 0.28) 100%);
+    border-radius: 14px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    box-sizing: border-box;
+    background: #111520;
+    transition: all 0.2s;
+  }
+  .pitch-fut-card.tier-icon {
+    background: linear-gradient(155deg, #171822 0%, #26221a 60%, #342a17 100%);
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 0 12px rgba(255, 215, 0, 0.1);
+  }
+  .pitch-fut-card.tier-toty {
+    background: linear-gradient(155deg, #091325 0%, #10213d 60%, #152d52 100%);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 0 12px rgba(0, 240, 255, 0.1);
+  }
+  .pitch-fut-card.tier-gold-rare {
+    background: linear-gradient(155deg, #1d1911 0%, #292113 60%, #362a17 100%);
+    border-color: rgba(255, 215, 0, 0.45);
+  }
+  .pitch-fut-card.tier-gold-common {
+    background: linear-gradient(155deg, #15130e 0%, #1f1b13 100%);
+    border-color: rgba(212, 175, 55, 0.35);
+  }
+  .pitch-fut-card.tier-silver {
+    background: linear-gradient(155deg, #13171f 0%, #1c222c 100%);
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+  .pitch-fut-card.tier-bronze {
+    background: linear-gradient(155deg, #17120e 0%, #251b15 100%);
+    border-color: rgba(184, 115, 51, 0.35);
+  }
+  .pitch-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .pitch-ovr-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .pitch-ovr {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+  }
+  .pitch-fut-card.tier-icon .pitch-ovr,
+  .pitch-fut-card.tier-gold-rare .pitch-ovr {
+    color: #ffd700;
+  }
+  .pitch-fut-card.tier-toty .pitch-ovr {
+    color: #00f0ff;
+  }
+  .pitch-pos {
+    font-family: var(--font-heading);
+    font-size: 9.5px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid;
+    letter-spacing: 0.5px;
+  }
+  .pitch-flag {
+    font-size: 15px;
+    margin-top: 1px;
+  }
+  .pitch-photo-frame {
+    width: 75px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border-radius: 10px;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.08) 0%, transparent 80%);
+  }
+  .pitch-player-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    -webkit-mask-image: radial-gradient(circle at 50% 45%, black 65%, transparent 100%);
+    mask-image: radial-gradient(circle at 50% 45%, black 65%, transparent 100%);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+  }
+  .pitch-card-name-ribbon {
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 3px 6px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .pitch-name {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pitch-tier-tag {
+    font-family: var(--font-heading);
+    font-size: 8px;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .pitch-fut-card.tier-icon .pitch-tier-tag,
+  .pitch-fut-card.tier-gold-rare .pitch-tier-tag {
+    color: #ffd700;
+  }
+  .pitch-fut-card.tier-toty .pitch-tier-tag {
+    color: #00f0ff;
+  }
+  .pitch-card-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 3px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .pitch-stat-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-family: var(--font-heading);
+  }
+  .pitch-stat-cell .k {
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .pitch-stat-cell .v {
+    font-size: 10.5px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .pitch-card-ps-bar {
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pitch-ps-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, rgba(245, 176, 65, 0.2) 0%, rgba(10, 14, 26, 0.7) 100%);
+    border: 1px solid rgba(245, 176, 65, 0.6);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: var(--font-heading);
+    font-size: 8.5px;
+    font-weight: 900;
+    color: #ffd700;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pitch-ps-empty {
+    font-size: 10px;
+    color: #64748b;
+  }
+  .pitch-swap-action-btn, .tactical-swap-action-btn {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.16) 0%, rgba(0, 112, 186, 0.24) 100%);
     border: 1.5px solid var(--p1);
     border-radius: 10px;
     color: #fff;
     font-family: var(--font-heading);
     font-size: 11px;
     font-weight: 800;
-    padding: 7px 12px;
+    padding: 8px 12px;
     cursor: pointer;
     transition: all 0.2s;
     letter-spacing: 0.5px;
@@ -3138,15 +3327,472 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    box-sizing: border-box;
   }
-  .tactical-swap-action-btn:hover {
+  .pitch-swap-action-btn:hover, .tactical-swap-action-btn:hover {
     background: var(--p1);
     color: #000;
     box-shadow: 0 0 14px var(--p1);
     transform: scale(1.02);
   }
 
-  /* Szuflada Ławki Rezerwowych (Squad Bench Drawer) */
+  /* =========================================================================
+     RYNEK TRANSFEROWY FUT 28 — CZYSTY & PRZEJRZYSTY INTERFEJS
+     ========================================================================= */
+  .market-hub-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 10px 16px 40px;
+  }
+  .market-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .market-header-title-box {
+    flex: 1;
+    min-width: 280px;
+  }
+  .market-main-title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .market-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.4;
+  }
+  .market-balance-widget {
+    background: linear-gradient(135deg, rgba(20, 26, 46, 0.9) 0%, rgba(10, 16, 30, 0.95) 100%);
+    border: 1.5px solid rgba(255, 215, 0, 0.4);
+    border-radius: 14px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.1);
+  }
+  .market-balance-lbl {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1px;
+  }
+  .market-balance-val {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+  .market-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+    background: rgba(13, 19, 33, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 12px 18px;
+    backdrop-filter: blur(12px);
+  }
+  .market-roles-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .market-role-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #94a3b8;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.8px;
+  }
+  .market-role-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  .market-role-tab.active {
+    background: rgba(0, 240, 255, 0.18);
+    border-color: #00f0ff;
+    color: #00f0ff;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+  }
+  .market-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(6, 10, 18, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 6px 12px;
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+  }
+  .market-search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    width: 100%;
+  }
+  .market-search-clear {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+  .market-search-clear:hover {
+    color: #fff;
+  }
+  .market-counter-pill {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  .market-counter-pill strong {
+    color: #fff;
+    font-size: 13px;
+  }
+  .market-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+    gap: 20px;
+    align-items: stretch;
+  }
+  .market-card-item {
+    background: linear-gradient(160deg, #121724 0%, #0c101a 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transition: transform 0.22s cubic-bezier(0.3, 1.4, 0.5, 1), box-shadow 0.22s, border-color 0.22s;
+    user-select: none;
+    box-sizing: border-box;
+  }
+  .market-card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 255, 0.2);
+    border-color: rgba(0, 240, 255, 0.6);
+    z-index: 5;
+  }
+  .market-card-item.tier-icon {
+    background: linear-gradient(160deg, #181922 0%, #22201b 50%, #2e2617 100%);
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 15px rgba(255, 215, 0, 0.08);
+  }
+  .market-card-item.tier-icon:hover {
+    border-color: #ffd700;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 25px rgba(255, 215, 0, 0.35);
+  }
+  .market-card-item.tier-toty {
+    background: linear-gradient(160deg, #0a1324 0%, #0e1e38 50%, #132a4e 100%);
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 15px rgba(0, 240, 255, 0.08);
+  }
+  .market-card-item.tier-toty:hover {
+    border-color: #00f0ff;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 25px rgba(0, 240, 255, 0.35);
+  }
+  .market-card-item.tier-gold-rare {
+    background: linear-gradient(160deg, #1c1810 0%, #262013 50%, #332917 100%);
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+  .market-card-item.tier-gold-common {
+    background: linear-gradient(160deg, #161410 0%, #1f1b14 100%);
+    border-color: rgba(212, 175, 55, 0.3);
+  }
+  .market-card-item.is-owned {
+    border-color: rgba(0, 230, 118, 0.4);
+  }
+  .market-card-item.is-owned:hover {
+    border-color: #00e676;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.8), 0 0 20px rgba(0, 230, 118, 0.25);
+  }
+  .market-card-badge-owned {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 230, 118, 0.18);
+    border: 1px solid #00e676;
+    color: #00ff88;
+    font-family: var(--font-heading);
+    font-size: 9px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .market-card-content {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .market-card-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .market-card-ovr-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .m-ovr {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+  }
+  .market-card-item.tier-icon .m-ovr,
+  .market-card-item.tier-gold-rare .m-ovr {
+    color: #ffd700;
+  }
+  .market-card-item.tier-toty .m-ovr {
+    color: #00f0ff;
+  }
+  .m-pos {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid;
+    letter-spacing: 0.5px;
+  }
+  .m-flag {
+    font-size: 16px;
+    margin-top: 1px;
+  }
+  .market-card-avatar-box {
+    width: 90px;
+    height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border-radius: 12px;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.06) 0%, transparent 80%);
+  }
+  .m-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    -webkit-mask-image: radial-gradient(circle at 50% 45%, black 65%, transparent 100%);
+    mask-image: radial-gradient(circle at 50% 45%, black 65%, transparent 100%);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+    transition: transform 0.25s ease;
+  }
+  .market-card-item:hover .m-avatar-img {
+    transform: scale(1.08);
+  }
+  .market-card-name-box {
+    background: rgba(0, 0, 0, 0.45);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 4px 6px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .m-name {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-tier {
+    font-family: var(--font-heading);
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .market-card-item.tier-icon .m-tier,
+  .market-card-item.tier-gold-rare .m-tier {
+    color: #ffd700;
+  }
+  .market-card-item.tier-toty .m-tier {
+    color: #00f0ff;
+  }
+  .market-card-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px 4px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .m-stat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: var(--font-heading);
+  }
+  .m-stat-k {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .m-stat-v {
+    font-size: 11.5px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+  .market-card-playstyle-box {
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .m-ps-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(245, 176, 65, 0.2) 0%, rgba(10, 14, 26, 0.7) 100%);
+    border: 1px solid rgba(245, 176, 65, 0.6);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-family: var(--font-heading);
+    font-size: 9.5px;
+    font-weight: 900;
+    color: #ffd700;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .m-ps-star {
+    font-size: 11px;
+    line-height: 1;
+  }
+  .m-ps-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .m-ps-empty {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 800;
+  }
+  .market-card-buy-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 8px;
+    box-sizing: border-box;
+  }
+  .m-price-tag {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .m-price-coin {
+    font-size: 14px;
+  }
+  .market-action-btn {
+    width: 100%;
+    padding: 9px;
+    border-radius: 9px;
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+  }
+  .market-action-btn.btn-buy {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    color: #000;
+    border-color: #ffd700;
+    box-shadow: 0 4px 14px rgba(255, 170, 0, 0.4);
+  }
+  .market-action-btn.btn-buy:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 170, 0, 0.6);
+  }
+  .market-action-btn.btn-owned {
+    background: #182030;
+    border-color: #2b3952;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+  .market-action-btn.btn-auth {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: #00f0ff;
+    color: #00f0ff;
+  }
+  .market-action-btn.btn-auth:hover {
+    background: #00f0ff;
+    color: #000;
+    box-shadow: 0 0 14px #00f0ff;
+  }
+  .market-action-btn.btn-deficit {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    cursor: not-allowed;
+    font-size: 10.5px;
+  }
+
   .squad-bench-drawer {
     background: rgba(6, 11, 22, 0.96);
     border: 1.5px solid rgba(0, 240, 255, 0.35);
@@ -5298,78 +5944,126 @@
     overflow-x: auto;
   }
   .cfc-mini-card {
-    width: 82px;
-    height: 122px;
-    border-radius: 12px;
+    width: 86px;
+    height: 128px;
+    border-radius: 14px;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 6px;
+    padding: 8px 6px;
     box-sizing: border-box;
     cursor: pointer;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     user-select: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    background: #111522;
   }
   .cfc-mini-card:hover {
-    transform: translateY(-5px) scale(1.06);
-    z-index: 5;
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+    z-index: 10;
   }
   .cfc-mini-card.is-gold {
-    background: linear-gradient(145deg, #1c180e 0%, #302611 100%);
-    border: 1.5px solid #eab308;
+    background: linear-gradient(155deg, #1c1810 0%, #292215 100%);
+    border: 1.5px solid #ffd700;
     box-shadow: 0 0 16px rgba(234, 179, 8, 0.28);
   }
   .cfc-mini-card.is-special {
-    background: linear-gradient(145deg, #221230 0%, #3a154c 100%);
-    border: 1.5px solid #d946ef;
-    box-shadow: 0 0 16px rgba(217, 70, 239, 0.28);
+    background: linear-gradient(155deg, #091325 0%, #12223f 100%);
+    border: 1.5px solid #00f0ff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.28);
   }
   .cfc-mini-card.is-dark {
-    background: linear-gradient(145deg, #0e1424 0%, #1a253f 100%);
+    background: linear-gradient(155deg, #0e1424 0%, #1a253f 100%);
     border: 1.5px solid #3b82f6;
     box-shadow: 0 0 16px rgba(59, 130, 246, 0.28);
   }
   .cfc-mini-card.is-cyan {
-    background: linear-gradient(145deg, #091a24 0%, #0d2f3d 100%);
-    border: 1.5px solid #06b6d4;
-    box-shadow: 0 0 16px rgba(6, 182, 212, 0.28);
+    background: linear-gradient(155deg, #071520 0%, #0d2538 100%);
+    border: 1.5px solid #00e5ff;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.28);
   }
   .cfc-mini-card.is-icon {
-    background: linear-gradient(145deg, #262010 0%, #453a1c 100%);
-    border: 1.5px solid #fef08a;
-    box-shadow: 0 0 20px rgba(254, 240, 138, 0.45);
+    background: linear-gradient(155deg, #181922 0%, #242019 100%);
+    border: 1.5px solid #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.45);
   }
   .mini-card-top {
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     line-height: 1;
     z-index: 2;
   }
   .mini-card-ovr {
     font-family: var(--font-heading);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     color: #ffffff;
   }
+  .cfc-mini-card.is-gold .mini-card-ovr,
+  .cfc-mini-card.is-icon .mini-card-ovr {
+    color: #ffd700;
+  }
+  .cfc-mini-card.is-special .mini-card-ovr,
+  .cfc-mini-card.is-cyan .mini-card-ovr {
+    color: #00f0ff;
+  }
   .mini-card-pos {
+    font-family: var(--font-heading);
+    font-size: 9px;
+    font-weight: 800;
+    color: #cbd5e1;
+    letter-spacing: 0.5px;
+  }
+  .mini-card-photo-wrap {
+    width: 50px;
+    height: 50px;
+    margin: 2px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.12) 0%, transparent 80%);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cfc-mini-card.is-icon .mini-card-photo-wrap,
+  .cfc-mini-card.is-gold .mini-card-photo-wrap {
+    border-color: rgba(255, 215, 0, 0.5);
+  }
+  .cfc-mini-card.is-special .mini-card-photo-wrap {
+    border-color: rgba(0, 240, 255, 0.5);
+  }
+  .mini-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    position: static;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  .mini-card-name {
     font-family: var(--font-heading);
     font-size: 10px;
     font-weight: 800;
-    color: #cbd5e1;
-  }
-  .mini-card-img {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    position: absolute;
-    top: 18px;
-    right: -2px;
-    z-index: 1;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    z-index: 2;
+    margin: 1px 0;
   }
   .mini-card-bottom {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -9123,6 +9817,104 @@ async function buyMarketCard(cardId, price) {
   alert(`🎉 Gratulacje! ${card.name} (${card.ovr} OVR) dołączył do Twojego klubu!`);
 }
 
+function renderMarketCardItem(card, isOwned, canAfford, coins, isAuth) {
+  const price = getCardMarketPrice(card);
+  const tier = getCardTier(card);
+  const tierLabel = getCardTierLabel(tier);
+  const nationFlag = PLAYER_NATIONS[card.id] || '⚽';
+  const ps = card.playstyle ? PLAYSTYLES[card.playstyle] : null;
+
+  const isGk = card.role === 'GK';
+  const s1L = isGk ? 'DIV' : 'TEM', s1V = isGk ? (card.div || card.def) : card.pac;
+  const s2L = isGk ? 'HAN' : 'STR', s2V = isGk ? (card.han || card.phy) : card.sho;
+  const s3L = isGk ? 'KIC' : 'POD', s3V = isGk ? (card.kic || card.sho) : card.pas;
+  const s4L = isGk ? 'REF' : 'DRY', s4V = isGk ? (card.ref || card.def) : card.dri;
+  const s5L = isGk ? 'SZY' : 'OBR', s5V = isGk ? (card.spe || card.pac) : card.def;
+  const s6L = isGk ? 'UST' : 'FIZ', s6V = isGk ? (card.pos || card.ovr) : card.phy;
+
+  const roleStyles = {
+    GK: 'border-color:#00e5ff; color:#00e5ff; background:rgba(0,229,255,0.16);',
+    DEF: 'border-color:#3b82f6; color:#93c5fd; background:rgba(59,130,246,0.16);',
+    MID: 'border-color:#f59e0b; color:#fde047; background:rgba(245,158,11,0.16);',
+    FWD: 'border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.16);'
+  };
+  const roleStyle = roleStyles[card.role] || roleStyles.FWD;
+
+  return `
+    <div class="market-card-item tier-${tier} ${isOwned ? 'is-owned' : ''}">
+      ${isOwned ? `
+        <div class="market-card-badge-owned">POSIADANY ✔️</div>
+      ` : ''}
+
+      <div class="market-card-content" onclick="openPlayerBioModal('${card.id}')" title="Kliknij, aby otworzyć profil: ${card.name}">
+        <div class="market-card-topbar">
+          <div class="market-card-ovr-box">
+            <span class="m-ovr">${card.ovr}</span>
+            <span class="m-pos" style="${roleStyle}">${card.role}</span>
+            <span class="m-flag">${nationFlag}</span>
+          </div>
+          <div class="market-card-avatar-box">
+            <img src="assets/players/${card.id}.webp" class="m-avatar-img" alt="${card.name}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';" loading="lazy">
+            <div class="m-avatar-fallback" style="display:none; width:100%; height:100%;">
+              ${renderCardPlayerSvg(card, tier)}
+            </div>
+          </div>
+        </div>
+
+        <div class="market-card-name-box">
+          <div class="m-name">${card.name}</div>
+          <div class="m-tier">${tierLabel}</div>
+        </div>
+
+        <div class="market-card-stats-grid">
+          <div class="m-stat"><span class="m-stat-k">${s1L}</span><span class="m-stat-v" style="color:${getFutStatColor(s1V)};">${s1V}</span></div>
+          <div class="m-stat"><span class="m-stat-k">${s2L}</span><span class="m-stat-v" style="color:${getFutStatColor(s2V)};">${s2V}</span></div>
+          <div class="m-stat"><span class="m-stat-k">${s3L}</span><span class="m-stat-v" style="color:${getFutStatColor(s3V)};">${s3V}</span></div>
+          <div class="m-stat"><span class="m-stat-k">${s4L}</span><span class="m-stat-v" style="color:${getFutStatColor(s4V)};">${s4V}</span></div>
+          <div class="m-stat"><span class="m-stat-k">${s5L}</span><span class="m-stat-v" style="color:${getFutStatColor(s5V)};">${s5V}</span></div>
+          <div class="m-stat"><span class="m-stat-k">${s6L}</span><span class="m-stat-v" style="color:${getFutStatColor(s6V)};">${s6V}</span></div>
+        </div>
+
+        <div class="market-card-playstyle-box">
+          ${ps ? `
+            <div class="m-ps-badge" title="${ps.name}: ${ps.desc}">
+              <span class="m-ps-star">⭐</span>
+              <span class="m-ps-title">${ps.name}</span>
+            </div>
+          ` : `
+            <div class="m-ps-empty">—</div>
+          `}
+        </div>
+      </div>
+
+      <div class="market-card-buy-bar">
+        <div class="m-price-tag">
+          <span class="m-price-val">${price.toLocaleString()}</span>
+          <span class="m-price-coin">🪙</span>
+        </div>
+
+        ${isOwned ? `
+          <button type="button" class="market-action-btn btn-owned" disabled>
+            W TWOIM KLUBIE
+          </button>
+        ` : (!isAuth ? `
+          <button type="button" class="market-action-btn btn-auth" onclick="openFcAuth()">
+            🔒 ZALOGUJ SIĘ
+          </button>
+        ` : (canAfford ? `
+          <button type="button" class="market-action-btn btn-buy" onclick="buyMarketCard('${card.id}', ${price})">
+            ⚡ KUP TERAZ
+          </button>
+        ` : `
+          <button type="button" class="market-action-btn btn-deficit" disabled>
+            BRAKUJE ${(price - coins).toLocaleString()} 🪙
+          </button>
+        `))}
+      </div>
+    </div>
+  `;
+}
+
 function renderTransferMarket() {
   const view = document.getElementById('clubMarketView');
   if (!view) return;
@@ -9153,74 +9945,50 @@ function renderTransferMarket() {
   ];
 
   view.innerHTML = `
-    <div style="padding:10px 14px 40px; max-width:1200px; margin:auto;">
-      <div style="margin-bottom:20px; text-align:center;">
-        <h2 style="font-family: var(--font-heading); font-size:26px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:10px;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-          RYNEK TRANSFEROWY FUT 28
-        </h2>
-        <p style="font-size:14px; color:#8b949e; max-width:680px; margin:auto; line-height:1.5;">
-          Kupuj konkretne gwiazdy futbolu bezpośrednio za monety 🪙 lub przeglądaj oferty transferowe z całego świata!
-        </p>
+    <div class="market-hub-container">
+      <div class="market-header-row">
+        <div class="market-header-title-box">
+          <h2 class="market-main-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+            RYNEK TRANSFEROWY FUT 28
+          </h2>
+          <p class="market-subtitle">
+            Kupuj konkretne gwiazdy futbolu bezpośrednio za monety 🪙 lub przeglądaj oferty transferowe z całego świata!
+          </p>
+        </div>
+
+        <div class="market-balance-widget">
+          <span class="market-balance-lbl">TWOJE MONETY:</span>
+          <span class="market-balance-val">${coins.toLocaleString()} 🪙</span>
+        </div>
       </div>
 
-      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; background:rgba(14,20,36,0.7); padding:12px 18px; border-radius:16px; border:1px solid rgba(255,255,255,0.08);">
-        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <div class="market-toolbar">
+        <div class="market-roles-group">
           ${roles.map(r => `
-            <button type="button" class="role-chip ${activeMarketFilter === r.id ? 'active' : ''}" onclick="setMarketRoleFilter('${r.id}')" style="padding:7px 16px; font-size:11px; font-weight:800;">
+            <button type="button" class="market-role-tab ${activeMarketFilter === r.id ? 'active' : ''}" onclick="setMarketRoleFilter('${r.id}')">
               ${r.label}
             </button>
           `).join('')}
         </div>
-        <div style="flex:1; min-width:240px; max-width:340px;">
-          <input type="text" value="${activeMarketSearch}" placeholder="Szukaj po nazwisku..." oninput="setMarketSearch(this.value)" style="width:100%; padding:9px 16px; background:rgba(6,10,20,0.85); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#fff; font-family:'Outfit', sans-serif; font-size:13px; box-sizing:border-box;">
+
+        <div class="market-search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" value="${activeMarketSearch}" placeholder="Szukaj po nazwisku..." oninput="setMarketSearch(this.value)">
+          ${activeMarketSearch ? `<button type="button" class="market-search-clear" onclick="setMarketSearch('')">✕</button>` : ''}
+        </div>
+
+        <div class="market-counter-pill">
+          Dostępnych: <strong>${candidates.length}</strong>
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:18px;">
+      <div class="market-cards-grid">
         ${candidates.slice(0, 36).map(card => {
-          const price = getCardMarketPrice(card);
           const isOwned = ownedSet.has(card.id);
+          const price = getCardMarketPrice(card);
           const canAfford = isAuth && coins >= price;
-
-          return `
-            <div style="background:rgba(11,15,28,0.85); border:1px solid ${isOwned ? 'rgba(0,240,255,0.3)' : 'rgba(255,255,255,0.08)'}; border-radius:18px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:10px; transition:transform 0.2s, border-color 0.2s; position:relative;">
-              ${isOwned ? `
-                <div style="position:absolute; top:10px; right:12px; background:rgba(0,255,136,0.18); border:1px solid #00ff88; color:#00ff88; font-size:10px; font-weight:900; font-family:var(--font-heading); padding:2px 8px; border-radius:8px;">
-                  POSIADANY ✔️
-                </div>
-              ` : ''}
-
-              <div style="cursor:pointer;" onclick="openPlayerBioModal('${card.id}')" title="Kliknij, aby zobaczyć szczegóły: ${card.name}">
-                ${renderSingleFutCardHtml(card, false)}
-              </div>
-
-              <div style="width:100%; text-align:center; margin-top:4px;">
-                <div style="font-family:var(--font-heading); font-size:16px; font-weight:900; color:var(--gold); display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px;">
-                  <span>${price.toLocaleString()}</span>
-                  <span style="font-size:14px;">🪙</span>
-                </div>
-
-                ${isOwned ? `
-                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; background:#1e293b; color:#94a3b8; border-color:#334155;" disabled>
-                    W TWOIM KLUBIE
-                  </button>
-                ` : (!isAuth ? `
-                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; font-weight:800; background:rgba(0,240,255,0.18); border-color:#00f0ff; color:#00f0ff;" onclick="openFcAuth()">
-                    🔒 ZALOGUJ SIĘ
-                  </button>
-                ` : (canAfford ? `
-                  <button type="button" class="action-btn btn-host" style="width:100%; padding:10px; font-size:12px; font-weight:900; background:linear-gradient(135deg, #ffd700 0%, #ff8800 100%); color:#000;" onclick="buyMarketCard('${card.id}', ${price})">
-                    ⚡ KUP TERAZ
-                  </button>
-                ` : `
-                  <button type="button" class="action-btn" style="width:100%; padding:10px; font-size:11px; background:#181e2e; color:#64748b; border-color:rgba(255,255,255,0.06);" disabled>
-                    BRAKUJE ${(price - coins).toLocaleString()} 🪙
-                  </button>
-                `))}
-              </div>
-            </div>
-          `;
+          return renderMarketCardItem(card, isOwned, canAfford, coins, isAuth);
         }).join('')}
       </div>
     </div>
@@ -9314,6 +10082,100 @@ function autoBuildBestSquad() {
   alert('⚡ Automatycznie wystawiono najmocniejszy możliwy skład z Twojego klubu!');
 }
 
+function renderPitchCardHtml(c, role, pts, meta) {
+  if (!c) {
+    return `
+      <div class="pitch-tactical-slot empty-slot" onclick="openSquadBenchDrawer('${role}')">
+        <div class="slot-pos-header">
+          <span class="slot-pos-pill" style="border-color:${meta.color}; color:${meta.color}; background:${meta.color}22;">
+            ${meta.icon} ${meta.name}
+          </span>
+        </div>
+        <div style="text-align:center; padding:30px 10px; color:#8b949e;">
+          <div style="font-size:32px; margin-bottom:8px;">➕</div>
+          <div style="font-family:var(--font-heading); font-size:12px; font-weight:800; color:#fff;">WYBIERZ ZAWODNIKA</div>
+        </div>
+        <button type="button" class="pitch-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
+          ➕ WYBIERZ ZAWODNIKA
+        </button>
+      </div>
+    `;
+  }
+
+  const ps = c.playstyle ? PLAYSTYLES[c.playstyle] : null;
+  const tier = getCardTier(c);
+  const tierLabel = getCardTierLabel(tier);
+  const nationFlag = PLAYER_NATIONS[c.id] || '⚽';
+
+  const isGk = c.role === 'GK';
+  const s1L = isGk ? 'DIV' : 'TEM', s1V = isGk ? (c.div || c.def) : c.pac;
+  const s2L = isGk ? 'HAN' : 'STR', s2V = isGk ? (c.han || c.phy) : c.sho;
+  const s3L = isGk ? 'KIC' : 'POD', s3V = isGk ? (c.kic || c.sho) : c.pas;
+  const s4L = isGk ? 'REF' : 'DRY', s4V = isGk ? (c.ref || c.def) : c.dri;
+  const s5L = isGk ? 'SZY' : 'OBR', s5V = isGk ? (c.spe || c.pac) : c.def;
+  const s6L = isGk ? 'UST' : 'FIZ', s6V = isGk ? (c.pos || c.ovr) : c.phy;
+
+  return `
+    <div class="pitch-tactical-slot" onclick="openSquadBenchDrawer('${role}')" title="Kliknij, aby zmienić zawodnika na pozycji ${meta.name}">
+      <div class="slot-pos-header">
+        <span class="slot-pos-pill" style="border-color:${meta.color}; color:${meta.color}; background:${meta.color}22;">
+          ${meta.icon} ${meta.name}
+        </span>
+        <div class="slot-chem-badge" title="Zgranie pozycji: ${pts} / 3">
+          <span class="chem-diamond ${pts >= 1 ? 'active' : ''}"></span>
+          <span class="chem-diamond ${pts >= 2 ? 'active' : ''}"></span>
+          <span class="chem-diamond ${pts >= 3 ? 'active' : ''}"></span>
+        </div>
+      </div>
+
+      <div class="pitch-fut-card tier-${tier}">
+        <div class="pitch-card-head">
+          <div class="pitch-ovr-group">
+            <span class="pitch-ovr">${c.ovr}</span>
+            <span class="pitch-pos" style="border-color:${meta.color}; color:${meta.color};">${c.role}</span>
+            <span class="pitch-flag">${nationFlag}</span>
+          </div>
+          <div class="pitch-photo-frame">
+            <img src="assets/players/${c.id}.webp" class="pitch-player-img" alt="${c.name}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
+            <div class="pitch-photo-fallback" style="display:none; width:100%; height:100%;">
+              ${renderCardPlayerSvg(c, tier)}
+            </div>
+          </div>
+        </div>
+
+        <div class="pitch-card-name-ribbon">
+          <div class="pitch-name">${c.name}</div>
+          <div class="pitch-tier-tag">${tierLabel}</div>
+        </div>
+
+        <div class="pitch-card-stats-grid">
+          <div class="pitch-stat-cell"><span class="k">${s1L}</span><span class="v" style="color:${getFutStatColor(s1V)};">${s1V}</span></div>
+          <div class="pitch-stat-cell"><span class="k">${s2L}</span><span class="v" style="color:${getFutStatColor(s2V)};">${s2V}</span></div>
+          <div class="pitch-stat-cell"><span class="k">${s3L}</span><span class="v" style="color:${getFutStatColor(s3V)};">${s3V}</span></div>
+          <div class="pitch-stat-cell"><span class="k">${s4L}</span><span class="v" style="color:${getFutStatColor(s4V)};">${s4V}</span></div>
+          <div class="pitch-stat-cell"><span class="k">${s5L}</span><span class="v" style="color:${getFutStatColor(s5V)};">${s5V}</span></div>
+          <div class="pitch-stat-cell"><span class="k">${s6L}</span><span class="v" style="color:${getFutStatColor(s6V)};">${s6V}</span></div>
+        </div>
+
+        <div class="pitch-card-ps-bar">
+          ${ps ? `
+            <div class="pitch-ps-pill" title="${ps.desc}">
+              <span class="ps-ico">⭐</span>
+              <span class="ps-txt">${ps.name}</span>
+            </div>
+          ` : `
+            <div class="pitch-ps-empty">Brak PlayStyle+</div>
+          `}
+        </div>
+      </div>
+
+      <button type="button" class="pitch-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
+        🔄 ZMIEŃ ZAWODNIKA
+      </button>
+    </div>
+  `;
+}
+
 function renderSquadBuilder() {
   const container = document.getElementById('clubSquadView');
   if (!container) return;
@@ -9334,29 +10196,7 @@ function renderSquadBuilder() {
     const card = chem.cards[roles.indexOf(role)];
     const pts = chem.playerPoints[role] || 1;
     const meta = roleMeta[role];
-
-    return `
-      <div class="tactical-slot-card" onclick="openSquadBenchDrawer('${role}')" title="Kliknij, aby zarządzać pozycją ${meta.name}">
-        <div class="slot-pos-header">
-          <span class="slot-pos-pill" style="background:${meta.color}22; border:1px solid ${meta.color}; color:${meta.color};">
-            ${meta.icon} ${meta.name}
-          </span>
-          <div class="slot-chem-badge" title="Zgranie zawodnika: ${pts} / 3">
-            <span class="chem-diamond ${pts >= 1 ? 'active' : ''}"></span>
-            <span class="chem-diamond ${pts >= 2 ? 'active' : ''}"></span>
-            <span class="chem-diamond ${pts >= 3 ? 'active' : ''}"></span>
-          </div>
-        </div>
-
-        <div style="margin: 4px 0;">
-          ${renderSingleFutCardHtml(card, true)}
-        </div>
-
-        <button type="button" class="tactical-swap-action-btn" onclick="event.stopPropagation(); openSquadBenchDrawer('${role}')">
-          🔄 ZMIEŃ ZAWODNIKA
-        </button>
-      </div>
-    `;
+    return renderPitchCardHtml(card, role, pts, meta);
   }).join('');
 
   // Generowanie szuflady ławki rezerwowych
@@ -9393,10 +10233,15 @@ function renderSquadBuilder() {
           <div style="text-align:center; padding:30px 20px; color:#8b949e; font-family:'Outfit';">
             <div style="font-size:28px; margin-bottom:8px;">📦</div>
             <div>Brak innych zawodników na pozycję <strong>${roleMeta[curRole].name}</strong> w Twoim klubie.</div>
-            <div style="font-size:12px; margin-top:6px; color:#c9d1d9;">Otwórz paczki FUT w sklepie, aby zdobyć nowe gwiazdy!</div>
-            <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS')" style="margin-top:14px; padding:8px 18px;">
-              🎁 PRZEJDŹ DO SKLEPU PACZEK
-            </button>
+            <div style="font-size:12px; margin-top:6px; color:#c9d1d9;">Otwórz paczki FUT lub kup zawodnika na rynku transferowym!</div>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
+              <button type="button" class="top-nav-btn gold-btn" onclick="switchClubTab('PACKS')" style="padding:8px 18px;">
+                🎁 SKLEP PACZEK
+              </button>
+              <button type="button" class="action-btn" onclick="switchClubTab('MARKET')" style="padding:8px 18px; border-color:#00f0ff; color:#00f0ff;">
+                🛒 RYNEK TRANSFEROWY
+              </button>
+            </div>
           </div>
         ` : `
           <div class="bench-candidates-grid">
@@ -9420,7 +10265,7 @@ function renderSquadBuilder() {
               return `
                 <div class="bench-candidate-row">
                   <div style="flex-shrink:0;">
-                    ${renderSingleFutCardHtml(cand, true)}
+                    ${renderSingleFutCardHtml(cand, true, true)}
                   </div>
                   <div style="flex:1; min-width:0;">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -9456,7 +10301,6 @@ function renderSquadBuilder() {
 
   container.innerHTML = `
     <div class="squad-tactical-wrapper">
-      <!-- Pasek podsumowania taktycznego KPI -->
       <div class="squad-stats-bar-fut">
         <div class="squad-kpi-item">
           <span class="squad-kpi-lbl">ŚREDNIA OCENA</span>
@@ -9492,7 +10336,6 @@ function renderSquadBuilder() {
         </div>
       </div>
 
-      <!-- Stadionowe Boisko Taktyczne 4v4 -->
       <div class="squad-pitch-stadium">
         <div class="pitch-box-top"></div>
         <div class="pitch-line-center"></div>
@@ -9504,7 +10347,6 @@ function renderSquadBuilder() {
         </div>
       </div>
 
-      <!-- Szuflada Ławki Rezerwowych -->
       ${benchDrawerHtml}
 
       <div style="text-align:center; font-size:12px; color:#8b949e; font-family: var(--font-heading); margin-top:4px;">
