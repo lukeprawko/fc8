@@ -2,6 +2,9 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>JDR Games</title>
 <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
@@ -1658,7 +1661,8 @@ function launchGame(url, title) {
     }
     activeGameUrl = url;
     const frame = document.getElementById('gameFrame');
-    frame.src = url;
+    const bustUrl = url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now();
+    frame.src = bustUrl;
     const hud = document.getElementById('stageHud');
     if (hud) hud.title = `${title || 'Gra'} • ESC aby wyjść`;
     document.getElementById('stage').classList.add('open');
@@ -1714,7 +1718,8 @@ function reloadGameFrame() {
   AudioFX.play('click');
   const frame = document.getElementById('gameFrame');
   if (activeGameUrl) {
-    frame.src = activeGameUrl;
+    const bustUrl = activeGameUrl + (activeGameUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
+    frame.src = bustUrl;
   }
 }
 

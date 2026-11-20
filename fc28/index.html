@@ -2,6 +2,9 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CYBERFC 28 — ULTIMATE 3D SOCCER</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -5455,19 +5458,6 @@
   }
 
   /* MODALE CYBERFC 28 */
-  .cfc-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(4, 7, 16, 0.85);
-    backdrop-filter: blur(16px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    box-sizing: border-box;
-    animation: cfcFadeIn 0.2s ease;
-  }
   @keyframes cfcFadeIn {
     from { opacity: 0; transform: scale(0.98); }
     to { opacity: 1; transform: scale(1); }
@@ -5726,19 +5716,15 @@
     background: rgba(3, 6, 15, 0.88) !important;
     backdrop-filter: blur(20px) !important;
     z-index: 999999 !important;
-    display: none;
+    display: none !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 16px !important;
     box-sizing: border-box !important;
   }
-  .cfc-modal-overlay[style*="display: flex"],
-  .cfc-modal-overlay.active {
+  .cfc-modal-overlay.active,
+  .cfc-modal-overlay.is-open {
     display: flex !important;
-  }
-  .cfc-modal-overlay[style*="display: none"],
-  .cfc-modal-overlay.hidden {
-    display: none !important;
   }
 
   /* MODAL KARNETU SEZONOWEGO - PROFESJONALNY WYGLĄD BATTLE PASS */
@@ -10292,41 +10278,63 @@ function switchSidebarTab(tab) {
 
 function openQuickPlayModal() {
   const m = document.getElementById('quickPlayModal');
-  if (m) m.style.display = 'flex';
+  if (m) {
+    m.classList.add('active');
+    m.style.setProperty('display', 'flex', 'important');
+  }
 }
 function closeQuickPlayModal() {
   const m = document.getElementById('quickPlayModal');
-  if (m) m.style.display = 'none';
+  if (m) {
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function openSeasonPassModal() {
   const m = document.getElementById('seasonPassModal');
   if (m) {
-    m.style.display = 'flex';
+    m.classList.add('active');
+    m.style.setProperty('display', 'flex', 'important');
     renderSeasonPassTrack();
   }
 }
 function closeSeasonPassModal() {
   const m = document.getElementById('seasonPassModal');
-  if (m) m.style.display = 'none';
+  if (m) {
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function openSettingsModal() {
   const m = document.getElementById('settingsModal');
-  if (m) m.style.display = 'flex';
+  if (m) {
+    m.classList.add('active');
+    m.style.setProperty('display', 'flex', 'important');
+  }
 }
 function closeSettingsModal() {
   const m = document.getElementById('settingsModal');
-  if (m) m.style.display = 'none';
+  if (m) {
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function openCommunityModal() {
   const m = document.getElementById('communityModal');
-  if (m) m.style.display = 'flex';
+  if (m) {
+    m.classList.add('active');
+    m.style.setProperty('display', 'flex', 'important');
+  }
 }
 function closeCommunityModal() {
   const m = document.getElementById('communityModal');
-  if (m) m.style.display = 'none';
+  if (m) {
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function challengeFriend(name) {
@@ -10420,12 +10428,16 @@ function openFriendActionModal(friendId) {
   document.getElementById('faFriendStatus').textContent = f.statusText;
   document.getElementById('faFriendAvatar').src = f.avatar;
 
-  modal.style.display = 'flex';
+  modal.classList.add('active');
+  modal.style.setProperty('display', 'flex', 'important');
 }
 
 function closeFriendActionModal() {
   const modal = document.getElementById('friendActionModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function inviteFriendMatch(mode) {
@@ -18548,7 +18560,7 @@ window.renderScene=function(){
   </div>
 
   <!-- MODAL SZYBKIEGO WYBORU TRYBU GRY (Z-INDEX 999999) -->
-  <div class="cfc-modal-overlay" id="quickPlayModal" style="display:none;" onclick="if(event.target===this)closeQuickPlayModal()">
+  <div class="cfc-modal-overlay" id="quickPlayModal" style="display:none !important;" onclick="if(event.target===this)closeQuickPlayModal()">
     <div class="cfc-modal-card">
       <div class="cfc-modal-header">
         <h3 class="cfc-modal-title">
@@ -18601,7 +18613,7 @@ window.renderScene=function(){
   </div>
 
   <!-- MODAL KARNETU SEZONOWEGO Z PEŁNYM SYSTEMEM ODBIORU NAGRÓD -->
-  <div class="cfc-modal-overlay" id="seasonPassModal" style="display:none;" onclick="if(event.target===this)closeSeasonPassModal()">
+  <div class="cfc-modal-overlay" id="seasonPassModal" style="display:none !important;" onclick="if(event.target===this)closeSeasonPassModal()">
     <div class="cfc-modal-card purple-theme" style="width:680px;">
       <div class="cfc-modal-header">
         <h3 class="cfc-modal-title">
@@ -18628,7 +18640,7 @@ window.renderScene=function(){
   </div>
 
   <!-- MODAL ZARZĄDZANIA ZNAJOMYM (FRIEND ACTION MODAL) -->
-  <div class="cfc-modal-overlay" id="friendActionModal" style="display:none;" onclick="if(event.target===this)closeFriendActionModal()">
+  <div class="cfc-modal-overlay" id="friendActionModal" style="display:none !important;" onclick="if(event.target===this)closeFriendActionModal()">
     <div class="cfc-modal-card" style="width:420px;">
       <div class="cfc-modal-header">
         <h3 class="cfc-modal-title">
@@ -18664,7 +18676,7 @@ window.renderScene=function(){
   </div>
 
   <!-- MODAL USTAWIEŃ GRY -->
-  <div class="cfc-modal-overlay" id="settingsModal" style="display:none;" onclick="if(event.target===this)closeSettingsModal()">
+  <div class="cfc-modal-overlay" id="settingsModal" style="display:none !important;" onclick="if(event.target===this)closeSettingsModal()">
     <div class="cfc-modal-card" style="width:580px;">
       <div class="cfc-modal-header">
         <h3 class="cfc-modal-title">
@@ -18693,7 +18705,7 @@ window.renderScene=function(){
   </div>
 
   <!-- MODAL SPOŁECZNOŚCI -->
-  <div class="cfc-modal-overlay" id="communityModal" style="display:none;" onclick="if(event.target===this)closeCommunityModal()">
+  <div class="cfc-modal-overlay" id="communityModal" style="display:none !important;" onclick="if(event.target===this)closeCommunityModal()">
     <div class="cfc-modal-card" style="width:500px;">
       <div class="cfc-modal-header">
         <h3 class="cfc-modal-title">
@@ -18711,6 +18723,19 @@ window.renderScene=function(){
       </div>
     </div>
   </div>
+
+  <script>
+    // Błyskawiczne i bezpieczne ukrycie wszystkich nakładek modalnych przy uruchomieniu
+    (function ensureModalsClosedOnLoad() {
+      ['quickPlayModal', 'seasonPassModal', 'friendActionModal', 'settingsModal', 'communityModal'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.classList.remove('active');
+          el.style.setProperty('display', 'none', 'important');
+        }
+      });
+    })();
+  </script>
 
 </body>
 </html>
